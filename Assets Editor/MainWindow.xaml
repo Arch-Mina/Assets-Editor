@@ -1,0 +1,44 @@
+﻿<Window x:Class="Assets_Editor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Assets_Editor"
+        mc:Ignorable="d"
+        Title="Assets Editor" Height="350" Width="600"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"        
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}">
+    <Grid>
+        <Label Content="Assets Folder:" HorizontalAlignment="Left" Margin="42,50,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="AssetsPath" HorizontalAlignment="Left" Margin="135,50,0,0" VerticalAlignment="Top" Width="330" IsEnabled="False"/>
+        <Button Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" Margin="468,37,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="55" Width="55" Click="SelectAssetsFolder">
+            <materialDesign:PackIcon  Kind="CardSearch" Height="40" Width="40" />
+        </Button>
+        <StackPanel Margin="159,92,0,0" HorizontalAlignment="Left" >
+            <Label Content="Objects:"/>
+            <Label Content="Outfits:"/>
+            <Label Content="Effects:"/>
+            <Label Content="Missiles:"/>
+        </StackPanel>
+        <StackPanel Margin="219,92,0,0" HorizontalAlignment="Left">
+            <Label x:Name="ObjectsCount"/>
+            <Label x:Name="OutfitsCount"/>
+            <Label x:Name="EffectsCount"/>
+            <Label x:Name="MissilesCount"/>
+        </StackPanel>
+        <Button x:Name="LoadAssets" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,220,0,0" IsEnabled="False" Click="LoadAssets_Click" >
+            <Button.Content>
+                <StackPanel>
+                    <TextBlock Text="Load Assets" HorizontalAlignment="Center"></TextBlock>
+                    <ProgressBar x:Name="LoadProgress" Minimum="0" Maximum="100" Value="0" Width="200" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-10,0,-10,0" Height="8" />
+                </StackPanel>
+            </Button.Content>
+        </Button>
+    </Grid>
+</Window>

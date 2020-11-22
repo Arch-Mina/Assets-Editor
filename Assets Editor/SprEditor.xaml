@@ -1,0 +1,96 @@
+﻿<Window x:Class="Assets_Editor.SprEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Assets_Editor" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="SprEditor" Height="640" Width="700">
+    <Grid >
+        <materialDesign:DialogHost DialogClosing="NewSheetDialogHost_OnDialogClosing">
+            <materialDesign:DialogHost.DialogContent>
+                <StackPanel Margin="16">
+                    <TextBlock Text="Choose New Sheet Size"/>
+                    <ComboBox x:Name="TSpriteType" BorderThickness="1,1,1,1" SelectedIndex="0" Padding="6,1,5,3" Margin="0,10,0,10">
+                        <ComboBoxItem Content="Width: 32 | Height: 32"/>
+                        <ComboBoxItem Content="Width: 32 | Height: 64"/>
+                        <ComboBoxItem Content="Width: 64 | Height: 32"/>
+                        <ComboBoxItem Content="Width: 64 | Height: 64"/>
+                    </ComboBox>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource MaterialDesignFlatButton}" IsDefault="True" Margin="0 8 8 0" Command="materialDesign:DialogHost.CloseDialogCommand">
+                            <Button.CommandParameter>
+                                <system:Boolean xmlns:system="clr-namespace:System;assembly=mscorlib">
+                                    True
+                                </system:Boolean>
+                            </Button.CommandParameter>
+                            ACCEPT
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignFlatButton}" IsCancel="True" Margin="0 8 8 0" Command="materialDesign:DialogHost.CloseDialogCommand">
+                            <Button.CommandParameter>
+                                <system:Boolean xmlns:system="clr-namespace:System;assembly=mscorlib">
+                                    False
+                                </system:Boolean>
+                            </Button.CommandParameter>
+                            CANCEL
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </materialDesign:DialogHost.DialogContent>
+            <DockPanel>
+                <StackPanel>
+                    <GroupBox Header="Current Sheet Viewer" DockPanel.Dock="Left" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,10,0">
+                        <WrapPanel x:Name="SheetWrap" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="#FFEAEAEA" Width="400" Height="400"/>
+                    </GroupBox>
+                    <Border BorderThickness="1" BorderBrush="#FF673AB7" Height="30" Margin="10,10,10,0" >
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button x:Name="ImportSheet" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Save to assets" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ImportSheet_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <materialDesign:PackIcon Kind="PackageDown" Width="25" Height="25"/>
+                            </Button>
+                            <Button x:Name="ExportSheet" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Export Sheet" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ExportSheet_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <materialDesign:PackIcon Kind="ContentSaveMove" Width="25" Height="25"/>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                    <materialDesign:Snackbar x:Name="SprStatusBar" MessageQueue="{materialDesign:MessageQueue}" IsActive="False" HorizontalAlignment="Stretch" Margin="10,10,10,0" VerticalAlignment="Top" Height="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="0,-20,0,0" />
+                </StackPanel>
+                <GroupBox Header="Custom Sheets List" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,0,10,10">
+                    <StackPanel>
+                        <ListView x:Name="SheetsList" Height="500">
+                            <ListView.View>
+                                <GridView AllowsColumnReorder="False">
+                                    <GridView.ColumnHeaderContainerStyle>
+                                        <Style TargetType="{x:Type GridViewColumnHeader}">
+                                            <Setter Property="IsHitTestVisible" Value="False"/>
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </Style>
+                                    </GridView.ColumnHeaderContainerStyle>
+                                    <GridViewColumn Header="Sprite" Width="192">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Id}" HorizontalAlignment="Center"/>
+                                                    <Image Source="{Binding Image}" Stretch="Fill"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                        <Border BorderThickness="1" BorderBrush="#FF673AB7" Height="30" Margin="0,5,0,0" >
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button x:Name="CreateSheet" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Create New Sheet" Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}" materialDesign:RippleAssist.IsDisabled="True" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="ImagePlus" Width="25" Height="25"/>
+                                </Button>
+                                <Button x:Name="EditSheet" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Edit Sheet" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="EditSheet_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="ImageEdit" Width="25" Height="25"/>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </GroupBox>
+            </DockPanel>
+        </materialDesign:DialogHost>
+    </Grid>
+</Window>
