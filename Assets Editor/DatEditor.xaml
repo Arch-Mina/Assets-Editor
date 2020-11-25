@@ -46,470 +46,472 @@
                     </StackPanel>
                 </StackPanel>
             </materialDesign:DialogHost.DialogContent>
-            <DockPanel>
-                <GroupBox Header="Sprite List" DockPanel.Dock="Right" Width="225" HorizontalAlignment="Right" Margin="0,5,10,10" VerticalAlignment="Top">
-                    <GroupBox.HeaderTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="ImageArea" Height="32" Width="32" VerticalAlignment="Center" />
-                                <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text="{Binding}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </GroupBox.HeaderTemplate>
+            <ScrollViewer>
+                <DockPanel>
+                    <GroupBox Header="Sprite List" DockPanel.Dock="Right" Width="225" HorizontalAlignment="Right" Margin="0,5,10,10" VerticalAlignment="Top">
+                        <GroupBox.HeaderTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ImageArea" Height="32" Width="32" VerticalAlignment="Center" />
+                                    <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text="{Binding}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GroupBox.HeaderTemplate>
+                        <StackPanel>
+                            <ListView x:Name="SprListView" Height="650" HorizontalAlignment="Center" VerticalAlignment="Center" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="SprListView_ScrollChanged" MouseMove="SprListView_DragSpr" SelectedIndex="0" Width="207">
+                                <ListView.View>
+                                    <GridView AllowsColumnReorder="False">
+                                        <GridView.ColumnHeaderContainerStyle>
+                                            <Style TargetType="{x:Type GridViewColumnHeader}">
+                                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </Style>
+                                        </GridView.ColumnHeaderContainerStyle>
+                                        <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
+                                        <GridViewColumn Header="Sprite" Width="90">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Image Source="{Binding Image}" Stretch="None"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                            <xctk:IntegerUpDown x:Name="SprListViewSelectedIndex" Height="30" ParsingNumberStyle="Integer" Value="{Binding ElementName=SprListView, Path=SelectedIndex, Mode=TwoWay}" ValueChanged="SprListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False"/>
+                            <Border BorderThickness="1" BorderBrush="#FF673AB7" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,5,0,5">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button x:Name="SpriteExport" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Export Sprite" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="SpriteExport_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="ContentSaveMove" Width="25" Height="25"/>
+                                    </Button>
+                                    <Button x:Name="OpenSpriteManager" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Open Sprite Manager" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="OpenSpriteManager_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="CameraImage" Width="25" Height="25"/>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </GroupBox>
+                    <Border BorderThickness="1" BorderBrush="#FF673AB7" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,5,0,0">
+                        <StackPanel>
+                            <ComboBox x:Name="ObjectMenu" Style="{StaticResource MaterialDesignFilledComboBox}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" SelectionChanged="ObjectMenuChanged" SelectedIndex="0" Width="225" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,-15,0,0" Focusable="False" SnapsToDevicePixels="True" FlowDirection="LeftToRight" Height="50" Background="#FF673AB7" BorderThickness="0,0,0,0" >
+                                <ComboBoxItem Content="Outfits"/>
+                                <ComboBoxItem Content="Items"/>
+                                <ComboBoxItem Content="Effects"/>
+                                <ComboBoxItem Content="Missiles"/>
+                            </ComboBox>
+                            <ListView x:Name="ObjListView" Height="650" HorizontalAlignment="Center" VerticalAlignment="Center" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="ObjListView_ScrollChanged" SelectionChanged="ObjListView_SelectionChanged" SelectedIndex="0" Width="207" Margin="0,10,0,0">
+                                <ListView.View>
+                                    <GridView AllowsColumnReorder="False">
+                                        <GridView.ColumnHeaderContainerStyle>
+                                            <Style TargetType="{x:Type GridViewColumnHeader}">
+                                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </Style>
+                                        </GridView.ColumnHeaderContainerStyle>
+                                        <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
+                                        <GridViewColumn Header="Sprite" Width="90">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Image Source="{Binding Image}" Stretch="None"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                            <xctk:IntegerUpDown x:Name="ObjListViewSelectedIndex" Height="30" ParsingNumberStyle="Integer" ValueChanged="ObjListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="5,5,5,0"/>
+                            <Border BorderThickness="1" BorderBrush="#FF673AB7" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5,5,5,5">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button x:Name="ObjectSave" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Save" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ObjectSave_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="ContentSave" Width="25" Height="25"/>
+                                    </Button>
+                                    <Button x:Name="CopyFlags" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Copy Flags" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="CopyObjectFlags" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="ArrangeBringForward" Width="25" Height="25"/>
+                                    </Button>
+                                    <Button x:Name="PasteFlags" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Paste Flags" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="PasteObjectFlags" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="ArrangeSendBackward" Width="25" Height="25"/>
+                                    </Button>
+                                    <Button x:Name="NewObject" Style="{StaticResource MaterialDesignIconButton}" ToolTip="New Object" Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}" materialDesign:RippleAssist.IsDisabled="True" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="FilePlus" Width="25" Height="25"/>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
                     <StackPanel>
-                        <ListView x:Name="SprListView" Height="650" HorizontalAlignment="Center" VerticalAlignment="Center" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="SprListView_ScrollChanged" MouseMove="SprListView_DragSpr" SelectedIndex="0" Width="207">
-                            <ListView.View>
-                                <GridView AllowsColumnReorder="False">
-                                    <GridView.ColumnHeaderContainerStyle>
-                                        <Style TargetType="{x:Type GridViewColumnHeader}">
-                                            <Setter Property="IsHitTestVisible" Value="False"/>
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </Style>
-                                    </GridView.ColumnHeaderContainerStyle>
-                                    <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
-                                    <GridViewColumn Header="Sprite" Width="90">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Image Source="{Binding Image}" Stretch="None"/>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
-                        <xctk:IntegerUpDown x:Name="SprListViewSelectedIndex" Height="30" ParsingNumberStyle="Integer" Value="{Binding ElementName=SprListView, Path=SelectedIndex, Mode=TwoWay}" ValueChanged="SprListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False"/>
-                        <Border BorderThickness="1" BorderBrush="#FF673AB7" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,5,0,5">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button x:Name="SpriteExport" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Export Sprite" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="SpriteExport_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="ContentSaveMove" Width="25" Height="25"/>
-                                </Button>
-                                <Button x:Name="OpenSpriteManager" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Open Sprite Manager" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="OpenSpriteManager_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="CameraImage" Width="25" Height="25"/>
-                                </Button>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </GroupBox>
-                <Border BorderThickness="1" BorderBrush="#FF673AB7" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,5,0,0">
-                    <StackPanel>
-                        <ComboBox x:Name="ObjectMenu" Style="{StaticResource MaterialDesignFilledComboBox}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" SelectionChanged="ObjectMenuChanged" SelectedIndex="0" Width="225" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,-15,0,0" Focusable="False" SnapsToDevicePixels="True" FlowDirection="LeftToRight" Height="50" Background="#FF673AB7" BorderThickness="0,0,0,0" >
-                            <ComboBoxItem Content="Outfits"/>
-                            <ComboBoxItem Content="Items"/>
-                            <ComboBoxItem Content="Effects"/>
-                            <ComboBoxItem Content="Missiles"/>
-                        </ComboBox>
-                        <ListView x:Name="ObjListView" Height="650" HorizontalAlignment="Center" VerticalAlignment="Center" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="ObjListView_ScrollChanged" SelectionChanged="ObjListView_SelectionChanged" SelectedIndex="0" Width="207" Margin="0,10,0,0">
-                            <ListView.View>
-                                <GridView AllowsColumnReorder="False">
-                                    <GridView.ColumnHeaderContainerStyle>
-                                        <Style TargetType="{x:Type GridViewColumnHeader}">
-                                            <Setter Property="IsHitTestVisible" Value="False"/>
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </Style>
-                                    </GridView.ColumnHeaderContainerStyle>
-                                    <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
-                                    <GridViewColumn Header="Sprite" Width="90">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Image Source="{Binding Image}" Stretch="None"/>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
-                        <xctk:IntegerUpDown x:Name="ObjListViewSelectedIndex" Height="30" ParsingNumberStyle="Integer" ValueChanged="ObjListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="5,5,5,0"/>
-                        <Border BorderThickness="1" BorderBrush="#FF673AB7" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5,5,5,5">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button x:Name="ObjectSave" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Save" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ObjectSave_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="ContentSave" Width="25" Height="25"/>
-                                </Button>
-                                <Button x:Name="CopyFlags" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Copy Flags" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="CopyObjectFlags" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="ArrangeBringForward" Width="25" Height="25"/>
-                                </Button>
-                                <Button x:Name="PasteFlags" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Paste Flags" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="PasteObjectFlags" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="ArrangeSendBackward" Width="25" Height="25"/>
-                                </Button>
-                                <Button x:Name="NewObject" Style="{StaticResource MaterialDesignIconButton}" ToolTip="New Object" Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}" materialDesign:RippleAssist.IsDisabled="True" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="FilePlus" Width="25" Height="25"/>
-                                </Button>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </Border>
-                <StackPanel>
-                    <Menu IsMainMenu="True" DockPanel.Dock="Top">
-                        <MenuItem Header="_File">
-                            <MenuItem Header="Exit" InputGestureText="Ctrl+E" Click="Exit_Click">
-                                <MenuItem.Icon>
-                                    <materialDesign:PackIcon Kind="ExitToApp" />
-                                </MenuItem.Icon>
+                        <Menu IsMainMenu="True" DockPanel.Dock="Top">
+                            <MenuItem Header="_File">
+                                <MenuItem Header="Exit" InputGestureText="Ctrl+E" Click="Exit_Click">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="ExitToApp" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Compile" Click="Compile_Click">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="ContentSaveCogOutline" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
                             </MenuItem>
-                            <MenuItem Header="Compile" Click="Compile_Click">
-                                <MenuItem.Icon>
-                                    <materialDesign:PackIcon Kind="ContentSaveCogOutline" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </MenuItem>
-                    </Menu>
-                    <TabControl x:Name="ViewTabControl" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10,0,10,0">
-                        <TabItem Header="Properties">
-                            <GroupBox Header="AppearanceFlags" Background="#FFEAEAEA" Height="700" VerticalAlignment="Top" x:Name="Tab1">
-                                <ScrollViewer>
-                                    <WrapPanel Orientation="Horizontal">
-                                        <StackPanel Margin="5,0,5,-6">
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
-                                                <CheckBox x:Name="A_FlagGround" Content="Ground" Width="130" Margin="0,0,0,5" Padding="4,0,0,0"/>
-                                                <Label Content="Speed:" Width="100" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagGroundSpeed" Margin="0,0,0,0" Width="80" Minimum="0" Maximum="1000"/>
-                                            </StackPanel>
-                                            <CheckBox x:Name="A_FlagClip" Content="Clip" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagBottom" Content="Bottom" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagTop" Content="Top" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagContainer" Content="Container" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagCumulative" Content="Cumulative" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagUsable" Content="Usable" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagForceuse" Content="Forceuse" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagMultiuse" Content="Multiuse" Margin="0,5,0,0"/>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagWrite" Content="Write" Width="130" Margin="0,0,0,0" Padding="4,0,0,0"/>
-                                                <Label Content="Max Text Length:" Width="100" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagMaxTextLength" Margin="0,0,0,0" Width="80" Minimum="0" Maximum="1024"/>
-                                            </StackPanel>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagWriteOnce" Content="Write Once" Width="130" Margin="0,0,0,0" Padding="4,0,0,0"/>
-                                                <Label Content="Max Text Length:" Width="100" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagMaxTextLengthOnce" Margin="0,0,0,0" Width="80" Minimum="0" Maximum="1024"/>
-                                            </StackPanel>
-                                            <CheckBox x:Name="A_FlagLiquidpool" Content="Liquid Pool" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagUnpass" Content="Unpass" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagUnmove" Content="Unmove" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagUnsight" Content="Unsight" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagAvoid" Content="Avoid" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagNoMoveAnimation" Content="No Move Animation" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagTake" Content="Take" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagLiquidcontainer" Content="Liquid Container" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagHang" Content="Hang" Margin="0,5,0,0"/>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagHook" Content="Hook" Width="130" Margin="0,0,0,5" Padding="4,0,0,0"/>
-                                                <Label Content="Hook Type:" Width="100" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <ComboBox x:Name="A_FlagHookType" Width="80" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
-                                                    <ComboBoxItem Content="Hook South"/>
-                                                    <ComboBoxItem Content="Hook East"/>
-                                                </ComboBox>
-                                            </StackPanel>
-                                            <CheckBox x:Name="A_FlagRotate" Content="Rotate" Margin="0,5,0,0"/>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="22" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagLight" Content="Light" Width="60" Margin="0,0,0,0" Padding="4,-1,0,0"/>
-                                                <Label Content="Brightness:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagLightBrightness" Margin="0,0,0,0" Width="50" Minimum="0" Maximum="10"/>
-                                                <Label Content="Color:" Width="35" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:ColorPicker x:Name="A_FlagLightColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" Width="30" SelectedColorChanged="A_FlagLightColorPickerChanged"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagLightColor" Margin="15,0,0,0" Width="50" Minimum="0" Maximum="215" ValueChanged="A_FlagLightColor_ValueChanged"/>
-                                            </StackPanel>
-                                            <CheckBox x:Name="A_FlagDontHide" Content="Dont Hide" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagTranslucent" Content="Translucent" Margin="0,5,0,5"/>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
-                                                <CheckBox x:Name="A_FlagShift" Content="Shift" Width="160" Margin="0,0,0,0" Padding="4,0,0,0"/>
-                                                <Label Content="X:" Width="15" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagShiftX" Margin="0,0,0,0" Width="50" Minimum="0" Maximum="32"/>
-                                                <Label Content="Y:" Width="15" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagShiftY" Margin="0,0,0,0" Width="60" Minimum="0" Maximum="32"/>
-                                            </StackPanel>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagHeight" Content="Height" Width="160" Margin="0,-1,0,0" Padding="4,0,0,0"/>
-                                                <Label Content="Elevation:" Width="90" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagElevation" Margin="0,0,0,0" Width="60" Minimum="0" Maximum="32"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                        <StackPanel Margin="5,0,5,0" >
-                                            <CheckBox x:Name="A_FlagLyingObject" Content="Lying Object"/>
-                                            <CheckBox x:Name="A_FlagAnimateAlways" Content="Animate Always" Margin="0,5,0,0"/>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="22" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagAutomap" Content="Auto Map" Width="160" Margin="0,-1,0,5" Padding="4,0,0,0"/>
-                                                <Label Content="Color:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:ColorPicker x:Name="A_FlagAutomapColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" Width="30" SelectedColorChanged="A_FlagAutomapColorPickerChanged"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagAutomapColor" Margin="10,0,0,0" Width="50" Minimum="0" Maximum="215" ValueChanged="A_FlagAutomapColor_ValueChanged"/>
-                                            </StackPanel>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagLenshelp" Content="Lens help" Width="160" Margin="0,-1,0,5" Padding="4,0,0,0"/>
-                                                <Label Content="Type:" Width="40" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <ComboBox x:Name="A_FlagLenshelpId" Width="110" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
-                                                    <ComboBoxItem Content="Ladders"/>
-                                                    <ComboBoxItem Content="Sewer Grates"/>
-                                                    <ComboBoxItem Content="Dungeon Floor"/>
-                                                    <ComboBoxItem Content="Levers"/>
-                                                    <ComboBoxItem Content="Doors"/>
-                                                    <ComboBoxItem Content="Special Doors"/>
-                                                    <ComboBoxItem Content="Stairs"/>
-                                                    <ComboBoxItem Content="Mailboxes"/>
-                                                    <ComboBoxItem Content="Depot Boxes"/>
-                                                    <ComboBoxItem Content="Dustbins"/>
-                                                    <ComboBoxItem Content="Stone Piles"/>
-                                                    <ComboBoxItem Content="Signs"/>
-                                                    <ComboBoxItem Content="Books and Scrolls"/>
-                                                </ComboBox>
-                                            </StackPanel>
-                                            <CheckBox x:Name="A_FlagFullGround" Content="Full Ground" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagIgnoreLook" Content="Ignore Look" Margin="0,5,0,0"/>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagClothes" Content="Clothes" Width="160" Margin="0,-1,0,5" Padding="4,0,0,0"/>
-                                                <Label Content="Slot:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <ComboBox x:Name="A_FlagClothesSlot" Width="90" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
-                                                    <ComboBoxItem Content="None"/>
-                                                    <ComboBoxItem Content="Helmet"/>
-                                                    <ComboBoxItem Content="Amulet"/>
-                                                    <ComboBoxItem Content="Backpack"/>
-                                                    <ComboBoxItem Content="Armor"/>
-                                                    <ComboBoxItem Content="Shield"/>
-                                                    <ComboBoxItem Content="Weapon"/>
-                                                    <ComboBoxItem Content="Legs"/>
-                                                    <ComboBoxItem Content="Boots"/>
-                                                    <ComboBoxItem Content="Ring"/>
-                                                    <ComboBoxItem Content="Arrow"/>
-                                                </ComboBox>
-                                            </StackPanel>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagDefaultAction" Content="Default Action" Width="160" Margin="0,0,0,5" Padding="4,0,0,0"/>
-                                                <Label Content="Action:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <ComboBox x:Name="A_FlagDefaultActionType" Width="90" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
-                                                    <ComboBoxItem Content="None"/>
-                                                    <ComboBoxItem Content="Look"/>
-                                                    <ComboBoxItem Content="Use"/>
-                                                    <ComboBoxItem Content="Open"/>
-                                                    <ComboBoxItem Content="Highlight"/>
-                                                </ComboBox>
-                                            </StackPanel>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagMarket" Content="Market" Width="160" Margin="0,0,0,5" Padding="4,0,0,0"/>
-                                                <Label Content="Category:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <ComboBox x:Name="A_FlagMarketCategory" Width="90" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
-                                                    <ComboBoxItem Content="Armors"/>
-                                                    <ComboBoxItem Content="Amulets"/>
-                                                    <ComboBoxItem Content="Boots"/>
-                                                    <ComboBoxItem Content="Containers"/>
-                                                    <ComboBoxItem Content="Decoration"/>
-                                                    <ComboBoxItem Content="Food"/>
-                                                    <ComboBoxItem Content="Helmets Hats"/>
-                                                    <ComboBoxItem Content="Legs"/>
-                                                    <ComboBoxItem Content="Others"/>
-                                                    <ComboBoxItem Content="Potions"/>
-                                                    <ComboBoxItem Content="Rings"/>
-                                                    <ComboBoxItem Content="Runes"/>
-                                                    <ComboBoxItem Content="Shields"/>
-                                                    <ComboBoxItem Content="Tools"/>
-                                                    <ComboBoxItem Content="Valuables"/>
-                                                    <ComboBoxItem Content="Ammunition"/>
-                                                    <ComboBoxItem Content="Axes"/>
-                                                    <ComboBoxItem Content="Clubs"/>
-                                                    <ComboBoxItem Content="Distance Weapons"/>
-                                                    <ComboBoxItem Content="Swords"/>
-                                                    <ComboBoxItem Content="Wands Rods"/>
-                                                    <ComboBoxItem Content="Premium Scrolls"/>
-                                                    <ComboBoxItem Content="Tibia Coins"/>
-                                                    <ComboBoxItem Content="Creature Products"/>
-                                                </ComboBox>
-                                            </StackPanel>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
-                                                <Label Content="Trade As:" Width="60" Padding="0,0,0,0" Margin="20,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagMarketTrade" Margin="0,0,0,0" Width="80" Minimum="0"/>
-                                                <Label Content="Show As:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagMarketShow" Margin="0,0,0,0" Width="90" Minimum="0"/>
-                                            </StackPanel>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
-                                                <Label Content="Profession:" Width="60" Padding="0,0,0,0" Margin="20,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <ComboBox x:Name="A_FlagMarketProfession" Width="80" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3" IsReadOnly="True" SelectionChanged="A_FlagMarketProfession_SelectionChanged">
-                                                    <CheckBox x:Name="A_FlagProfessionAny" Content="Any"/>
-                                                    <CheckBox x:Name="A_FlagProfessionNone" Content="None"/>
-                                                    <CheckBox x:Name="A_FlagProfessionKnight" Content="Knight"/>
-                                                    <CheckBox x:Name="A_FlagProfessionPaladin" Content="Paladin"/>
-                                                    <CheckBox x:Name="A_FlagProfessionSorcerer" Content="Sorcerer"/>
-                                                    <CheckBox x:Name="A_FlagProfessionDruid" Content="Druid"/>
-                                                    <CheckBox x:Name="A_FlagProfessionPromoted" Content="Promoted"/>
-                                                </ComboBox>
-                                                <Label Content="Min level:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagMarketlevel" Margin="0,0,0,0" Width="90" Minimum="0"/>
-                                            </StackPanel>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
-                                                <Label Content="Name:" Width="65" Padding="0,0,0,0" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <TextBox x:Name="A_FlagName" Width="240" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" FontWeight="Medium" VerticalAlignment="Center" Height="20"/>
-                                            </StackPanel>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
-                                                <Label Content="Desctiption:" Width="65" Padding="0,0,0,0" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <TextBox x:Name="A_FlagDescription" Width="240" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" FontWeight="Medium" VerticalAlignment="Center" Height="20"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagWrap" Content="Wrap" Width="150"/>
-                                                <CheckBox x:Name="A_FlagUnwrap" Content="Unwrap"/>
-                                            </StackPanel>
-                                            <CheckBox x:Name="A_FlagTopeffect" Content="Top Effect" Margin="0,5,0,0"/>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagChangedToExpire" Content="Changed To Expire" Width="180" Margin="0,-1,0,0" Padding="4,0,0,0"/>
-                                                <Label Content="Former Id:" Width="60" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagChangedToExpireId" Margin="0,0,0,0" Width="80" Minimum="0"/>
-                                            </StackPanel>
-                                            <CheckBox x:Name="A_FlagCorpse" Content="Corpse" Margin="0,5,0,0"/>
-                                            <CheckBox x:Name="A_FlagPlayerCorpse" Content="Player Corpse" Margin="0,5,0,0"/>
-                                            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <CheckBox x:Name="A_FlagCyclopedia" Content="Cyclopedia" Width="180" Margin="0,-1,0,0" Padding="4,0,0,0"/>
-                                                <Label Content="Type:" Width="60" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <xctk:IntegerUpDown x:Name="A_FlagCyclopediaItem" Margin="0,0,0,0" Width="80"/>
-                                            </StackPanel>
-                                            <CheckBox x:Name="A_FlagNPC" Content="Npc Sale Data" Margin="0,5,0,0"/>
-                                            <DataGrid x:Name="A_FlagNPCData" Height="153" HorizontalAlignment="Left" Margin="0,5,0,0" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="true" CanUserResizeRows="False" FontSize="11">
-                                                <DataGrid.ColumnHeaderStyle>
-                                                    <Style TargetType="{x:Type DataGridColumnHeader}">
-                                                        <Setter Property="FontSize" Value="10"/>
-                                                    </Style>
-                                                </DataGrid.ColumnHeaderStyle>
-                                                <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                                                    <DataGridTextColumn Header="Location" Binding="{Binding Location}"/>
-                                                    <DataGridTextColumn Header="Buy Price" Binding="{Binding BuyPrice}"/>
-                                                    <DataGridTextColumn Header="Sale Price" Binding="{Binding SalePrice}"/>
-                                                    <DataGridTextColumn Header="CurrencyId" Binding="{Binding CurrencyObjectTypeId}"/>
-                                                    <DataGridTextColumn Header="CurrencyName" Binding="{Binding CurrencyQuestFlagDisplayName}"/>
-                                                </DataGrid.Columns>
-                                            </DataGrid>
-                                        </StackPanel>
-                                    </WrapPanel>
-                                </ScrollViewer>
-                            </GroupBox>
-                        </TabItem>
-                        <TabItem Header="Texture" UseLayoutRounding="True" RenderOptions.BitmapScalingMode="Fant">
-                            <GroupBox Header="Sprites" Background="#FFEAEAEA" VerticalAlignment="Top" HorizontalAlignment="Center" Height="700" >
-                                <ScrollViewer>
-                                    <WrapPanel Orientation="Horizontal" MaxWidth="700">
-                                        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="321" Margin="5,0,5,0">
-                                            <Grid Margin="20,20,0,0" Width="265" Height="265" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                                <Border Background="GhostWhite" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#FF4F4F4F" >
-                                                    <WrapPanel x:Name="ObjectSprImgPanel" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <Button x:Name="SprUpArrow" x:Uid="0" Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ChangeDirection" Margin="108,-10,109,228" >
-                                                    <materialDesign:PackIcon Kind="ArrowUpDropCircle" Width="30" Height="30" HorizontalAlignment="Center" ToolTip="Modify"/>
-                                                </Button>
-                                                <Button x:Name="SprRightArrow" x:Uid="1" Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ChangeDirection" Margin="227,108,-10,109">
-                                                    <materialDesign:PackIcon Kind="ArrowRightDropCircle" Width="30" Height="30" HorizontalAlignment="Center" ToolTip="Modify"/>
-                                                </Button>
-                                                <Button x:Name="SprDownArrow" x:Uid="2" Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ChangeDirection" Margin="109,227,108,-10">
-                                                    <materialDesign:PackIcon Kind="ArrowDownDropCircle" Width="30" Height="30" HorizontalAlignment="Center" ToolTip="Modify"/>
-                                                </Button>
-                                                <Button x:Name="SprLeftArrow" x:Uid="3" Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ChangeDirection" Margin="-10,108,217,109">
-                                                    <materialDesign:PackIcon Kind="ArrowLeftDropCircle" Width="30" Height="30" HorizontalAlignment="Center" ToolTip="Modify"/>
-                                                </Button>
-                                            </Grid>
-                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                                <Label x:Name="SprFramesSliderCounter" Content="0" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Left"/>
-                                                <Slider x:Name="SprFramesSlider" Width="170" IsSnapToTickEnabled="True" TickFrequency="2" ValueChanged="SprFramesSlider_ValueChanged" Margin="35,5,0,0" SmallChange="1" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                        <StackPanel Width="320" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                            <GroupBox x:Name="SpriteAnimationGroup" Header="Sprite Animation" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320">
-                                                <StackPanel Orientation="Vertical" x:Name="AnimationTab" HorizontalAlignment="Center" VerticalAlignment="Stretch">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Content="Default start Phase:" Width="120"/>
-                                                        <xctk:IntegerUpDown x:Name="SprDefaultPhase" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110"/>
-                                                    </StackPanel>
-                                                    <CheckBox x:Name="SprRandomPhase" Content="Random Start Phase"/>
-                                                    <CheckBox x:Name="SprSynchronized" Content="Synchronized"/>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Content="Loop Type:" Width="120" />
-                                                        <ComboBox x:Name="SprLoopType" BorderThickness="1,1,1,1" SelectedIndex="-1" HorizontalAlignment="Left" Width="110" >
-                                                            <ComboBoxItem Content="Ping Pong"/>
-                                                            <ComboBoxItem Content="Infinite"/>
-                                                            <ComboBoxItem Content="Counted"/>
-                                                        </ComboBox>
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Content="Loop Count:" Width="120"/>
-                                                        <xctk:IntegerUpDown x:Name="SprLoopCount" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110"/>
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Content="Min Duration:" Width="120"/>
-                                                        <xctk:IntegerUpDown x:Name="SprPhaseMin" Width="110" Minimum="0" Maximum="1000" ValueChanged="SprPhaseMin_ValueChanged"/>
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Content="Max Duration:" Width="120"/>
-                                                        <xctk:IntegerUpDown x:Name="SprPhaseMax" Width="110" Minimum="0" Maximum="1000" ValueChanged="SprPhaseMax_ValueChanged"/>
-                                                    </StackPanel>
+                        </Menu>
+                        <TabControl x:Name="ViewTabControl" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10,0,10,0">
+                            <TabItem Header="Properties">
+                                <GroupBox Header="AppearanceFlags" Background="#FFEAEAEA" Height="700" VerticalAlignment="Top" x:Name="Tab1">
+                                    <ScrollViewer>
+                                        <WrapPanel Orientation="Horizontal">
+                                            <StackPanel Margin="5,0,5,-6">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
+                                                    <CheckBox x:Name="A_FlagGround" Content="Ground" Width="130" Margin="0,0,0,5" Padding="4,0,0,0"/>
+                                                    <Label Content="Speed:" Width="100" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagGroundSpeed" Margin="0,0,0,0" Width="80" Minimum="0" Maximum="1000"/>
                                                 </StackPanel>
-                                            </GroupBox>
-                                            <StackPanel>
+                                                <CheckBox x:Name="A_FlagClip" Content="Clip" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagBottom" Content="Bottom" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagTop" Content="Top" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagContainer" Content="Container" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagCumulative" Content="Cumulative" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagUsable" Content="Usable" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagForceuse" Content="Forceuse" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagMultiuse" Content="Multiuse" Margin="0,5,0,0"/>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagWrite" Content="Write" Width="130" Margin="0,0,0,0" Padding="4,0,0,0"/>
+                                                    <Label Content="Max Text Length:" Width="100" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagMaxTextLength" Margin="0,0,0,0" Width="80" Minimum="0" Maximum="1024"/>
+                                                </StackPanel>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagWriteOnce" Content="Write Once" Width="130" Margin="0,0,0,0" Padding="4,0,0,0"/>
+                                                    <Label Content="Max Text Length:" Width="100" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagMaxTextLengthOnce" Margin="0,0,0,0" Width="80" Minimum="0" Maximum="1024"/>
+                                                </StackPanel>
+                                                <CheckBox x:Name="A_FlagLiquidpool" Content="Liquid Pool" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagUnpass" Content="Unpass" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagUnmove" Content="Unmove" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagUnsight" Content="Unsight" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagAvoid" Content="Avoid" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagNoMoveAnimation" Content="No Move Animation" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagTake" Content="Take" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagLiquidcontainer" Content="Liquid Container" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagHang" Content="Hang" Margin="0,5,0,0"/>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagHook" Content="Hook" Width="130" Margin="0,0,0,5" Padding="4,0,0,0"/>
+                                                    <Label Content="Hook Type:" Width="100" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <ComboBox x:Name="A_FlagHookType" Width="80" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
+                                                        <ComboBoxItem Content="Hook South"/>
+                                                        <ComboBoxItem Content="Hook East"/>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                                <CheckBox x:Name="A_FlagRotate" Content="Rotate" Margin="0,5,0,0"/>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="22" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagLight" Content="Light" Width="60" Margin="0,0,0,0" Padding="4,-1,0,0"/>
+                                                    <Label Content="Brightness:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagLightBrightness" Margin="0,0,0,0" Width="50" Minimum="0" Maximum="10"/>
+                                                    <Label Content="Color:" Width="35" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:ColorPicker x:Name="A_FlagLightColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" Width="30" SelectedColorChanged="A_FlagLightColorPickerChanged"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagLightColor" Margin="15,0,0,0" Width="50" Minimum="0" Maximum="215" ValueChanged="A_FlagLightColor_ValueChanged"/>
+                                                </StackPanel>
+                                                <CheckBox x:Name="A_FlagDontHide" Content="Dont Hide" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagTranslucent" Content="Translucent" Margin="0,5,0,5"/>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
+                                                    <CheckBox x:Name="A_FlagShift" Content="Shift" Width="160" Margin="0,0,0,0" Padding="4,0,0,0"/>
+                                                    <Label Content="X:" Width="15" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagShiftX" Margin="0,0,0,0" Width="50" Minimum="0" Maximum="32"/>
+                                                    <Label Content="Y:" Width="15" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagShiftY" Margin="0,0,0,0" Width="60" Minimum="0" Maximum="32"/>
+                                                </StackPanel>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagHeight" Content="Height" Width="160" Margin="0,-1,0,0" Padding="4,0,0,0"/>
+                                                    <Label Content="Elevation:" Width="90" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagElevation" Margin="0,0,0,0" Width="60" Minimum="0" Maximum="32"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Margin="5,0,5,0" >
+                                                <CheckBox x:Name="A_FlagLyingObject" Content="Lying Object"/>
+                                                <CheckBox x:Name="A_FlagAnimateAlways" Content="Animate Always" Margin="0,5,0,0"/>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="22" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagAutomap" Content="Auto Map" Width="160" Margin="0,-1,0,5" Padding="4,0,0,0"/>
+                                                    <Label Content="Color:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:ColorPicker x:Name="A_FlagAutomapColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" Width="30" SelectedColorChanged="A_FlagAutomapColorPickerChanged"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagAutomapColor" Margin="10,0,0,0" Width="50" Minimum="0" Maximum="215" ValueChanged="A_FlagAutomapColor_ValueChanged"/>
+                                                </StackPanel>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagLenshelp" Content="Lens help" Width="160" Margin="0,-1,0,5" Padding="4,0,0,0"/>
+                                                    <Label Content="Type:" Width="40" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <ComboBox x:Name="A_FlagLenshelpId" Width="110" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
+                                                        <ComboBoxItem Content="Ladders"/>
+                                                        <ComboBoxItem Content="Sewer Grates"/>
+                                                        <ComboBoxItem Content="Dungeon Floor"/>
+                                                        <ComboBoxItem Content="Levers"/>
+                                                        <ComboBoxItem Content="Doors"/>
+                                                        <ComboBoxItem Content="Special Doors"/>
+                                                        <ComboBoxItem Content="Stairs"/>
+                                                        <ComboBoxItem Content="Mailboxes"/>
+                                                        <ComboBoxItem Content="Depot Boxes"/>
+                                                        <ComboBoxItem Content="Dustbins"/>
+                                                        <ComboBoxItem Content="Stone Piles"/>
+                                                        <ComboBoxItem Content="Signs"/>
+                                                        <ComboBoxItem Content="Books and Scrolls"/>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                                <CheckBox x:Name="A_FlagFullGround" Content="Full Ground" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagIgnoreLook" Content="Ignore Look" Margin="0,5,0,0"/>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagClothes" Content="Clothes" Width="160" Margin="0,-1,0,5" Padding="4,0,0,0"/>
+                                                    <Label Content="Slot:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <ComboBox x:Name="A_FlagClothesSlot" Width="90" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
+                                                        <ComboBoxItem Content="None"/>
+                                                        <ComboBoxItem Content="Helmet"/>
+                                                        <ComboBoxItem Content="Amulet"/>
+                                                        <ComboBoxItem Content="Backpack"/>
+                                                        <ComboBoxItem Content="Armor"/>
+                                                        <ComboBoxItem Content="Shield"/>
+                                                        <ComboBoxItem Content="Weapon"/>
+                                                        <ComboBoxItem Content="Legs"/>
+                                                        <ComboBoxItem Content="Boots"/>
+                                                        <ComboBoxItem Content="Ring"/>
+                                                        <ComboBoxItem Content="Arrow"/>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagDefaultAction" Content="Default Action" Width="160" Margin="0,0,0,5" Padding="4,0,0,0"/>
+                                                    <Label Content="Action:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <ComboBox x:Name="A_FlagDefaultActionType" Width="90" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
+                                                        <ComboBoxItem Content="None"/>
+                                                        <ComboBoxItem Content="Look"/>
+                                                        <ComboBoxItem Content="Use"/>
+                                                        <ComboBoxItem Content="Open"/>
+                                                        <ComboBoxItem Content="Highlight"/>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagMarket" Content="Market" Width="160" Margin="0,0,0,5" Padding="4,0,0,0"/>
+                                                    <Label Content="Category:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <ComboBox x:Name="A_FlagMarketCategory" Width="90" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
+                                                        <ComboBoxItem Content="Armors"/>
+                                                        <ComboBoxItem Content="Amulets"/>
+                                                        <ComboBoxItem Content="Boots"/>
+                                                        <ComboBoxItem Content="Containers"/>
+                                                        <ComboBoxItem Content="Decoration"/>
+                                                        <ComboBoxItem Content="Food"/>
+                                                        <ComboBoxItem Content="Helmets Hats"/>
+                                                        <ComboBoxItem Content="Legs"/>
+                                                        <ComboBoxItem Content="Others"/>
+                                                        <ComboBoxItem Content="Potions"/>
+                                                        <ComboBoxItem Content="Rings"/>
+                                                        <ComboBoxItem Content="Runes"/>
+                                                        <ComboBoxItem Content="Shields"/>
+                                                        <ComboBoxItem Content="Tools"/>
+                                                        <ComboBoxItem Content="Valuables"/>
+                                                        <ComboBoxItem Content="Ammunition"/>
+                                                        <ComboBoxItem Content="Axes"/>
+                                                        <ComboBoxItem Content="Clubs"/>
+                                                        <ComboBoxItem Content="Distance Weapons"/>
+                                                        <ComboBoxItem Content="Swords"/>
+                                                        <ComboBoxItem Content="Wands Rods"/>
+                                                        <ComboBoxItem Content="Premium Scrolls"/>
+                                                        <ComboBoxItem Content="Tibia Coins"/>
+                                                        <ComboBoxItem Content="Creature Products"/>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
+                                                    <Label Content="Trade As:" Width="60" Padding="0,0,0,0" Margin="20,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagMarketTrade" Margin="0,0,0,0" Width="80" Minimum="0"/>
+                                                    <Label Content="Show As:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagMarketShow" Margin="0,0,0,0" Width="90" Minimum="0"/>
+                                                </StackPanel>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
+                                                    <Label Content="Profession:" Width="60" Padding="0,0,0,0" Margin="20,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <ComboBox x:Name="A_FlagMarketProfession" Width="80" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3" IsReadOnly="True" SelectionChanged="A_FlagMarketProfession_SelectionChanged">
+                                                        <CheckBox x:Name="A_FlagProfessionAny" Content="Any"/>
+                                                        <CheckBox x:Name="A_FlagProfessionNone" Content="None"/>
+                                                        <CheckBox x:Name="A_FlagProfessionKnight" Content="Knight"/>
+                                                        <CheckBox x:Name="A_FlagProfessionPaladin" Content="Paladin"/>
+                                                        <CheckBox x:Name="A_FlagProfessionSorcerer" Content="Sorcerer"/>
+                                                        <CheckBox x:Name="A_FlagProfessionDruid" Content="Druid"/>
+                                                        <CheckBox x:Name="A_FlagProfessionPromoted" Content="Promoted"/>
+                                                    </ComboBox>
+                                                    <Label Content="Min level:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagMarketlevel" Margin="0,0,0,0" Width="90" Minimum="0"/>
+                                                </StackPanel>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
+                                                    <Label Content="Name:" Width="65" Padding="0,0,0,0" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <TextBox x:Name="A_FlagName" Width="240" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" FontWeight="Medium" VerticalAlignment="Center" Height="20"/>
+                                                </StackPanel>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
+                                                    <Label Content="Desctiption:" Width="65" Padding="0,0,0,0" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <TextBox x:Name="A_FlagDescription" Width="240" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" FontWeight="Medium" VerticalAlignment="Center" Height="20"/>
+                                                </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                                    <Label Content="Group:" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                                    <Slider x:Name="SprGroupSlider" Width="50" IsSnapToTickEnabled="True" TickFrequency="1" ValueChanged="SprGroupSlider_ValueChanged" Minimum="0" Maximum="1" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,5,0,0"/>
-                                                    <Label x:Name="SprGroupType" Content="Idle" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,0,0,0"/>
+                                                    <CheckBox x:Name="A_FlagWrap" Content="Wrap" Width="150"/>
+                                                    <CheckBox x:Name="A_FlagUnwrap" Content="Unwrap"/>
                                                 </StackPanel>
-                                                <CheckBox x:Name="SprBlendLayer" Content="Blend Layer" Height="20" Width="100" Click="SprBlendLayer_Click" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0" />
-                                                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                                    <Label Content="Addon" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                                    <Slider x:Name="SprAddonSlider" Width="50" IsSnapToTickEnabled="True" TickFrequency="1" Maximum="2" ValueChanged="SprAddonSlider_ValueChanged" SmallChange="1" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,5,0,0" />
+                                                <CheckBox x:Name="A_FlagTopeffect" Content="Top Effect" Margin="0,5,0,0"/>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagChangedToExpire" Content="Changed To Expire" Width="180" Margin="0,-1,0,0" Padding="4,0,0,0"/>
+                                                    <Label Content="Former Id:" Width="60" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagChangedToExpireId" Margin="0,0,0,0" Width="80" Minimum="0"/>
                                                 </StackPanel>
-                                                <CheckBox x:Name="SprMount" Content="Mount" Height="20" Width="100" Click="SprMount_Click" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0" />
+                                                <CheckBox x:Name="A_FlagCorpse" Content="Corpse" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagPlayerCorpse" Content="Player Corpse" Margin="0,5,0,0"/>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagCyclopedia" Content="Cyclopedia" Width="180" Margin="0,-1,0,0" Padding="4,0,0,0"/>
+                                                    <Label Content="Type:" Width="60" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagCyclopediaItem" Margin="0,0,0,0" Width="80"/>
+                                                </StackPanel>
+                                                <CheckBox x:Name="A_FlagNPC" Content="Npc Sale Data" Margin="0,5,0,0"/>
+                                                <DataGrid x:Name="A_FlagNPCData" Height="153" HorizontalAlignment="Left" Margin="0,5,0,0" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="true" CanUserResizeRows="False" FontSize="11">
+                                                    <DataGrid.ColumnHeaderStyle>
+                                                        <Style TargetType="{x:Type DataGridColumnHeader}">
+                                                            <Setter Property="FontSize" Value="10"/>
+                                                        </Style>
+                                                    </DataGrid.ColumnHeaderStyle>
+                                                    <DataGrid.Columns>
+                                                        <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                                                        <DataGridTextColumn Header="Location" Binding="{Binding Location}"/>
+                                                        <DataGridTextColumn Header="Buy Price" Binding="{Binding BuyPrice}"/>
+                                                        <DataGridTextColumn Header="Sale Price" Binding="{Binding SalePrice}"/>
+                                                        <DataGridTextColumn Header="CurrencyId" Binding="{Binding CurrencyObjectTypeId}"/>
+                                                        <DataGridTextColumn Header="CurrencyName" Binding="{Binding CurrencyQuestFlagDisplayName}"/>
+                                                    </DataGrid.Columns>
+                                                </DataGrid>
                                             </StackPanel>
-                                        </StackPanel>
-                                        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,30,5,0" Width="320">
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                                <Label Content="Groups:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
-                                                <xctk:IntegerUpDown x:Name="A_SprGroups" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="2" IsEnabled="False" ValueChanged="A_SprGroups_ValueChanged" />
+                                        </WrapPanel>
+                                    </ScrollViewer>
+                                </GroupBox>
+                            </TabItem>
+                            <TabItem Header="Texture" UseLayoutRounding="True" RenderOptions.BitmapScalingMode="Fant">
+                                <GroupBox Header="Sprites" Background="#FFEAEAEA" VerticalAlignment="Top" HorizontalAlignment="Center" Height="700" >
+                                    <ScrollViewer>
+                                        <WrapPanel Orientation="Horizontal" MaxWidth="700">
+                                            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="321" Margin="5,0,5,0">
+                                                <Grid Margin="20,20,0,0" Width="265" Height="265" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                    <Border Background="GhostWhite" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#FF4F4F4F" >
+                                                        <WrapPanel x:Name="ObjectSprImgPanel" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <Button x:Name="SprUpArrow" x:Uid="0" Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ChangeDirection" Margin="108,-10,109,228" >
+                                                        <materialDesign:PackIcon Kind="ArrowUpDropCircle" Width="30" Height="30" HorizontalAlignment="Center" ToolTip="Modify"/>
+                                                    </Button>
+                                                    <Button x:Name="SprRightArrow" x:Uid="1" Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ChangeDirection" Margin="227,108,-10,109">
+                                                        <materialDesign:PackIcon Kind="ArrowRightDropCircle" Width="30" Height="30" HorizontalAlignment="Center" ToolTip="Modify"/>
+                                                    </Button>
+                                                    <Button x:Name="SprDownArrow" x:Uid="2" Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ChangeDirection" Margin="109,227,108,-10">
+                                                        <materialDesign:PackIcon Kind="ArrowDownDropCircle" Width="30" Height="30" HorizontalAlignment="Center" ToolTip="Modify"/>
+                                                    </Button>
+                                                    <Button x:Name="SprLeftArrow" x:Uid="3" Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ChangeDirection" Margin="-10,108,217,109">
+                                                        <materialDesign:PackIcon Kind="ArrowLeftDropCircle" Width="30" Height="30" HorizontalAlignment="Center" ToolTip="Modify"/>
+                                                    </Button>
+                                                </Grid>
+                                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                    <Label x:Name="SprFramesSliderCounter" Content="0" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Left"/>
+                                                    <Slider x:Name="SprFramesSlider" Width="170" IsSnapToTickEnabled="True" TickFrequency="2" ValueChanged="SprFramesSlider_ValueChanged" Margin="35,5,0,0" SmallChange="1" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                                </StackPanel>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
-                                                <Label Content="Layers:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
-                                                <xctk:IntegerUpDown x:Name="A_SprLayers" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="2" IsEnabled="False" ValueChanged="A_SprLayers_ValueChanged" />
+                                            <StackPanel Width="320" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                <GroupBox x:Name="SpriteAnimationGroup" Header="Sprite Animation" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320">
+                                                    <StackPanel Orientation="Vertical" x:Name="AnimationTab" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Label Content="Default start Phase:" Width="120"/>
+                                                            <xctk:IntegerUpDown x:Name="SprDefaultPhase" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110"/>
+                                                        </StackPanel>
+                                                        <CheckBox x:Name="SprRandomPhase" Content="Random Start Phase"/>
+                                                        <CheckBox x:Name="SprSynchronized" Content="Synchronized"/>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Label Content="Loop Type:" Width="120" />
+                                                            <ComboBox x:Name="SprLoopType" BorderThickness="1,1,1,1" SelectedIndex="-1" HorizontalAlignment="Left" Width="110" >
+                                                                <ComboBoxItem Content="Ping Pong"/>
+                                                                <ComboBoxItem Content="Infinite"/>
+                                                                <ComboBoxItem Content="Counted"/>
+                                                            </ComboBox>
+                                                        </StackPanel>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Label Content="Loop Count:" Width="120"/>
+                                                            <xctk:IntegerUpDown x:Name="SprLoopCount" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110"/>
+                                                        </StackPanel>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Label Content="Min Duration:" Width="120"/>
+                                                            <xctk:IntegerUpDown x:Name="SprPhaseMin" Width="110" Minimum="0" Maximum="1000" ValueChanged="SprPhaseMin_ValueChanged"/>
+                                                        </StackPanel>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Label Content="Max Duration:" Width="120"/>
+                                                            <xctk:IntegerUpDown x:Name="SprPhaseMax" Width="110" Minimum="0" Maximum="1000" ValueChanged="SprPhaseMax_ValueChanged"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </GroupBox>
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                        <Label Content="Group:" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                        <Slider x:Name="SprGroupSlider" Width="50" IsSnapToTickEnabled="True" TickFrequency="1" ValueChanged="SprGroupSlider_ValueChanged" Minimum="0" Maximum="1" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,5,0,0"/>
+                                                        <Label x:Name="SprGroupType" Content="Idle" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,0,0,0"/>
+                                                    </StackPanel>
+                                                    <CheckBox x:Name="SprBlendLayer" Content="Blend Layer" Height="20" Width="100" Click="SprBlendLayer_Click" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0" />
+                                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                        <Label Content="Addon" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                        <Slider x:Name="SprAddonSlider" Width="50" IsSnapToTickEnabled="True" TickFrequency="1" Maximum="2" ValueChanged="SprAddonSlider_ValueChanged" SmallChange="1" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,5,0,0" />
+                                                    </StackPanel>
+                                                    <CheckBox x:Name="SprMount" Content="Mount" Height="20" Width="100" Click="SprMount_Click" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0" />
+                                                </StackPanel>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
-                                                <Label Content="Patern Width:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
-                                                <xctk:IntegerUpDown x:Name="A_SprPaternX" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="10" IsEnabled="False" />
+                                            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,30,5,0" Width="320">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <Label Content="Groups:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
+                                                    <xctk:IntegerUpDown x:Name="A_SprGroups" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="2" IsEnabled="False" ValueChanged="A_SprGroups_ValueChanged" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
+                                                    <Label Content="Layers:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
+                                                    <xctk:IntegerUpDown x:Name="A_SprLayers" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="2" IsEnabled="False" ValueChanged="A_SprLayers_ValueChanged" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
+                                                    <Label Content="Patern Width:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
+                                                    <xctk:IntegerUpDown x:Name="A_SprPaternX" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="10" IsEnabled="False" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
+                                                    <Label Content="Patern Height:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
+                                                    <xctk:IntegerUpDown x:Name="A_SprPaternY" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="10" IsEnabled="False"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
+                                                    <Label Content="Patern Depth:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
+                                                    <xctk:IntegerUpDown x:Name="A_SprPaternZ" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="10" IsEnabled="False" ValueChanged="A_SprPaternZ_ValueChanged"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
+                                                    <Label Content="Animation:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
+                                                    <xctk:IntegerUpDown x:Name="A_SprAnimation" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="64" IsEnabled="False"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
+                                                    <Label Content="Bounding Square:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
+                                                    <xctk:IntegerUpDown x:Name="A_SprBounding" Margin="0,0,0,0" Width="110" Minimum="0" Maximum="64"/>
+                                                </StackPanel>
+                                                <CheckBox x:Name="A_SprOpaque" Content="Is Opaque" HorizontalAlignment="Left" Margin="5,5,0,0"/>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
-                                                <Label Content="Patern Height:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
-                                                <xctk:IntegerUpDown x:Name="A_SprPaternY" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="10" IsEnabled="False"/>
+                                            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Margin="5,25,5,0">
+                                                <Label Content="Bounding box per direction">
+                                                    <Label.Background>
+                                                        <SolidColorBrush Color="#FF673AB7"/>
+                                                    </Label.Background>
+                                                    <Label.Foreground>
+                                                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
+                                                    </Label.Foreground>
+                                                </Label>
+                                                <DataGrid x:Name="BoxPerDirection" Height="200" HorizontalAlignment="Left" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" RowEditEnding="BoxPerDirection_RowEditEnding" CanUserSortColumns="False">
+                                                    <DataGrid.ColumnHeaderStyle>
+                                                        <Style TargetType="DataGridColumnHeader">
+                                                            <Setter Property="FontSize" Value="10"/>
+                                                        </Style>
+                                                    </DataGrid.ColumnHeaderStyle>
+                                                    <DataGrid.Columns>
+                                                        <DataGridTextColumn Header="X" Binding="{Binding Path = X}" Width="80"/>
+                                                        <DataGridTextColumn Header="Y" Binding="{Binding Path = Y}" Width="80"/>
+                                                        <DataGridTextColumn Header="Width" Binding="{Binding Path = Width}" Width="80"/>
+                                                        <DataGridTextColumn Header="Height" Binding="{Binding Path = Height}" Width="80"/>
+                                                    </DataGrid.Columns>
+                                                </DataGrid>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
-                                                <Label Content="Patern Depth:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
-                                                <xctk:IntegerUpDown x:Name="A_SprPaternZ" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="10" IsEnabled="False" ValueChanged="A_SprPaternZ_ValueChanged"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
-                                                <Label Content="Animation:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
-                                                <xctk:IntegerUpDown x:Name="A_SprAnimation" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="64" IsEnabled="False"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
-                                                <Label Content="Bounding Square:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
-                                                <xctk:IntegerUpDown x:Name="A_SprBounding" Margin="0,0,0,0" Width="110" Minimum="0" Maximum="64"/>
-                                            </StackPanel>
-                                            <CheckBox x:Name="A_SprOpaque" Content="Is Opaque" HorizontalAlignment="Left" Margin="5,5,0,0"/>
-                                        </StackPanel>
-                                        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Margin="5,25,5,0">
-                                            <Label Content="Bounding box per direction">
-                                                <Label.Background>
-                                                    <SolidColorBrush Color="#FF673AB7"/>
-                                                </Label.Background>
-                                                <Label.Foreground>
-                                                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
-                                                </Label.Foreground>
-                                            </Label>
-                                            <DataGrid x:Name="BoxPerDirection" Height="200" HorizontalAlignment="Left" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" RowEditEnding="BoxPerDirection_RowEditEnding" CanUserSortColumns="False">
-                                                <DataGrid.ColumnHeaderStyle>
-                                                    <Style TargetType="DataGridColumnHeader">
-                                                        <Setter Property="FontSize" Value="10"/>
-                                                    </Style>
-                                                </DataGrid.ColumnHeaderStyle>
-                                                <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="X" Binding="{Binding Path = X}" Width="80"/>
-                                                    <DataGridTextColumn Header="Y" Binding="{Binding Path = Y}" Width="80"/>
-                                                    <DataGridTextColumn Header="Width" Binding="{Binding Path = Width}" Width="80"/>
-                                                    <DataGridTextColumn Header="Height" Binding="{Binding Path = Height}" Width="80"/>
-                                                </DataGrid.Columns>
-                                            </DataGrid>
-                                        </StackPanel>
-                                    </WrapPanel>
-                                </ScrollViewer>
-                            </GroupBox>
-                        </TabItem>
-                    </TabControl>
-                    <materialDesign:Snackbar x:Name="StatusBar" MessageQueue="{materialDesign:MessageQueue}" IsActive="False" HorizontalAlignment="Stretch" Margin="20,0,20,0" VerticalAlignment="Top" Height="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="0,-20,0,0" />
-                </StackPanel>
-            </DockPanel>
+                                        </WrapPanel>
+                                    </ScrollViewer>
+                                </GroupBox>
+                            </TabItem>
+                        </TabControl>
+                        <materialDesign:Snackbar x:Name="StatusBar" MessageQueue="{materialDesign:MessageQueue}" IsActive="False" HorizontalAlignment="Stretch" Margin="20,0,20,0" VerticalAlignment="Top" Height="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="0,-20,0,0" />
+                    </StackPanel>
+                </DockPanel>
+            </ScrollViewer>
         </materialDesign:DialogHost>
     </Grid>
 </Window>

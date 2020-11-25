@@ -741,47 +741,129 @@ namespace Assets_Editor
                 {
                     Waypoints = (uint)A_FlagGroundSpeed.Value
                 };
-            };
+            }
+            else
+                CurrentObjectAppearance.Flags.Bank = null;
 
-            CurrentObjectAppearance.Flags.Clip = (bool)A_FlagClip.IsChecked;           
-            CurrentObjectAppearance.Flags.Bottom = (bool)A_FlagBottom.IsChecked;
-            CurrentObjectAppearance.Flags.Top = (bool)A_FlagTop.IsChecked;
-            CurrentObjectAppearance.Flags.Container = (bool)A_FlagContainer.IsChecked;
-            CurrentObjectAppearance.Flags.Cumulative = (bool)A_FlagCumulative.IsChecked;
-            CurrentObjectAppearance.Flags.Usable = (bool)A_FlagUsable.IsChecked;
-            CurrentObjectAppearance.Flags.Forceuse = (bool)A_FlagForceuse.IsChecked;
-            CurrentObjectAppearance.Flags.Multiuse = (bool)A_FlagMultiuse.IsChecked;
+            if ((bool)A_FlagClip.IsChecked)
+                CurrentObjectAppearance.Flags.Clip = true;
+            else if(CurrentObjectAppearance.Flags.HasClip)
+                CurrentObjectAppearance.Flags.ClearClip();
+
+            if ((bool)A_FlagBottom.IsChecked)
+                CurrentObjectAppearance.Flags.Bottom = true;
+            else if(CurrentObjectAppearance.Flags.HasBottom)
+                CurrentObjectAppearance.Flags.ClearBottom();
+
+            if ((bool)A_FlagTop.IsChecked)
+                CurrentObjectAppearance.Flags.Top = true;
+            else if(CurrentObjectAppearance.Flags.HasTop)
+                CurrentObjectAppearance.Flags.ClearTop();
+
+            if ((bool)A_FlagContainer.IsChecked)
+                CurrentObjectAppearance.Flags.Container = true;
+            else if(CurrentObjectAppearance.Flags.HasContainer)
+                CurrentObjectAppearance.Flags.ClearContainer();
+
+            if ((bool)A_FlagCumulative.IsChecked)
+                CurrentObjectAppearance.Flags.Cumulative = true;
+            else if (CurrentObjectAppearance.Flags.HasCumulative)
+                CurrentObjectAppearance.Flags.ClearCumulative();
+
+            if ((bool)A_FlagUsable.IsChecked)
+                CurrentObjectAppearance.Flags.Usable = true;
+            else if (CurrentObjectAppearance.Flags.HasUsable)
+                CurrentObjectAppearance.Flags.ClearUsable();
+
+            if ((bool)A_FlagForceuse.IsChecked)
+                CurrentObjectAppearance.Flags.Forceuse = true;
+            else if (CurrentObjectAppearance.Flags.HasForceuse)
+                CurrentObjectAppearance.Flags.ClearForceuse();
+
+            if ((bool)A_FlagMultiuse.IsChecked)
+                CurrentObjectAppearance.Flags.Multiuse = true;
+            else if (CurrentObjectAppearance.Flags.HasMultiuse)
+                CurrentObjectAppearance.Flags.ClearMultiuse();
+
             if ((bool)A_FlagWrite.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Write = new AppearanceFlagWrite
                 {
                     MaxTextLength = (uint)A_FlagMaxTextLength.Value
                 };
-            };
+            }
+            else
+                CurrentObjectAppearance.Flags.Write = null;
+
             if ((bool)A_FlagWriteOnce.IsChecked)
             {
                 CurrentObjectAppearance.Flags.WriteOnce = new AppearanceFlagWriteOnce
                 {
                     MaxTextLengthOnce = (uint)A_FlagMaxTextLengthOnce.Value
                 };
-            };
-            CurrentObjectAppearance.Flags.Liquidpool = (bool)A_FlagLiquidpool.IsChecked;
-            CurrentObjectAppearance.Flags.Unpass = (bool)A_FlagUnpass.IsChecked;
-            CurrentObjectAppearance.Flags.Unmove = (bool)A_FlagUnmove.IsChecked;
-            CurrentObjectAppearance.Flags.Unsight = (bool)A_FlagUnsight.IsChecked;
-            CurrentObjectAppearance.Flags.Avoid = (bool)A_FlagAvoid.IsChecked;
-            CurrentObjectAppearance.Flags.NoMovementAnimation = (bool)A_FlagNoMoveAnimation.IsChecked;
-            CurrentObjectAppearance.Flags.Take = (bool)A_FlagTake.IsChecked;
-            CurrentObjectAppearance.Flags.Liquidcontainer = (bool)A_FlagLiquidcontainer.IsChecked;
-            CurrentObjectAppearance.Flags.Hang = (bool)A_FlagHang.IsChecked;
+            }
+            else CurrentObjectAppearance.Flags.WriteOnce = null;
+
+            if ((bool)A_FlagLiquidpool.IsChecked)
+                CurrentObjectAppearance.Flags.Liquidpool = true;
+            else if (CurrentObjectAppearance.Flags.HasLiquidpool)
+                CurrentObjectAppearance.Flags.ClearLiquidpool();
+
+            if ((bool)A_FlagUnpass.IsChecked)
+                CurrentObjectAppearance.Flags.Unpass = true;
+            else if (CurrentObjectAppearance.Flags.HasUnpass)
+                CurrentObjectAppearance.Flags.ClearUnpass();
+
+            if ((bool)A_FlagUnmove.IsChecked)
+                CurrentObjectAppearance.Flags.Unmove = true;
+            else if (CurrentObjectAppearance.Flags.HasUnmove)
+                CurrentObjectAppearance.Flags.ClearUnmove();
+
+            if ((bool)A_FlagUnsight.IsChecked)
+                CurrentObjectAppearance.Flags.Unsight = true;
+            else if (CurrentObjectAppearance.Flags.HasUnsight)
+                CurrentObjectAppearance.Flags.ClearUnsight();
+
+            if ((bool)A_FlagAvoid.IsChecked)
+                CurrentObjectAppearance.Flags.Avoid = true;
+            else if (CurrentObjectAppearance.Flags.HasAvoid)
+                CurrentObjectAppearance.Flags.ClearAvoid();
+
+            if ((bool)A_FlagNoMoveAnimation.IsChecked)
+                CurrentObjectAppearance.Flags.NoMovementAnimation = true;
+
+            else if (CurrentObjectAppearance.Flags.HasNoMovementAnimation)
+                CurrentObjectAppearance.Flags.ClearNoMovementAnimation();
+
+            if ((bool)A_FlagTake.IsChecked)
+                CurrentObjectAppearance.Flags.Take = true;
+            else if (CurrentObjectAppearance.Flags.HasTake)
+                CurrentObjectAppearance.Flags.ClearTake();
+
+            if ((bool)A_FlagLiquidcontainer.IsChecked)
+                CurrentObjectAppearance.Flags.Liquidcontainer = true;
+            else if (CurrentObjectAppearance.Flags.HasLiquidcontainer)
+                CurrentObjectAppearance.Flags.ClearLiquidcontainer();
+
+            if ((bool)A_FlagHang.IsChecked)
+                CurrentObjectAppearance.Flags.Hang = true;
+            else if (CurrentObjectAppearance.Flags.HasHang)
+                CurrentObjectAppearance.Flags.ClearHang();
+
             if ((bool)A_FlagHook.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Hook = new AppearanceFlagHook
                 {
                     Direction = (HOOK_TYPE)(A_FlagHookType.SelectedIndex + 1)
                 };
-            };
-            CurrentObjectAppearance.Flags.Rotate = (bool)A_FlagRotate.IsChecked;
+            }
+            else CurrentObjectAppearance.Flags.Hook = null;
+
+            if ((bool)A_FlagRotate.IsChecked)
+                CurrentObjectAppearance.Flags.Rotate = true;
+            else if (CurrentObjectAppearance.Flags.HasRotate)
+                CurrentObjectAppearance.Flags.ClearRotate();
+
             if ((bool)A_FlagLight.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Light = new AppearanceFlagLight
@@ -789,9 +871,21 @@ namespace Assets_Editor
                     Brightness = (uint)A_FlagLightBrightness.Value,
                     Color = (uint)A_FlagLightColor.Value
                 };
-            };
-            CurrentObjectAppearance.Flags.DontHide = (bool)A_FlagDontHide.IsChecked;
-            CurrentObjectAppearance.Flags.Translucent = (bool)A_FlagTranslucent.IsChecked;
+            }
+            else 
+                CurrentObjectAppearance.Flags.Light = null;
+
+
+            if ((bool)A_FlagDontHide.IsChecked)
+                CurrentObjectAppearance.Flags.DontHide = true;
+            else if (CurrentObjectAppearance.Flags.HasDontHide)
+                CurrentObjectAppearance.Flags.ClearDontHide();
+
+            if ((bool)A_FlagTranslucent.IsChecked)
+                CurrentObjectAppearance.Flags.Translucent = true;
+            else if (CurrentObjectAppearance.Flags.HasTranslucent)
+                CurrentObjectAppearance.Flags.ClearTranslucent();
+
             if ((bool)A_FlagShift.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Shift = new AppearanceFlagShift
@@ -799,46 +893,75 @@ namespace Assets_Editor
                     X = (uint)A_FlagShiftX.Value,
                     Y = (uint)A_FlagShiftY.Value
                 };
-            };
+            }
+            else 
+                CurrentObjectAppearance.Flags.Shift = null;
+
             if ((bool)A_FlagHeight.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Height = new AppearanceFlagHeight
                 {
                     Elevation = (uint)A_FlagElevation.Value,
                 };
-            };
-            CurrentObjectAppearance.Flags.LyingObject = (bool)A_FlagLyingObject.IsChecked;
-            CurrentObjectAppearance.Flags.AnimateAlways = (bool)A_FlagAnimateAlways.IsChecked;
+            }
+            else CurrentObjectAppearance.Flags.Height = null;
+
+            if ((bool)A_FlagLyingObject.IsChecked)
+                CurrentObjectAppearance.Flags.LyingObject = true;
+            else if (CurrentObjectAppearance.Flags.HasLyingObject)
+                CurrentObjectAppearance.Flags.ClearLyingObject();
+
+            if ((bool)A_FlagAnimateAlways.IsChecked)
+                CurrentObjectAppearance.Flags.AnimateAlways = true;
+            else if (CurrentObjectAppearance.Flags.HasAnimateAlways)
+                CurrentObjectAppearance.Flags.ClearAnimateAlways();
+
             if ((bool)A_FlagAutomap.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Automap = new AppearanceFlagAutomap
                 {
                     Color = (uint)A_FlagAutomapColor.Value,
                 };
-            };
+            }
+            else CurrentObjectAppearance.Flags.Automap = null;
+
             if ((bool)A_FlagLenshelp.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Lenshelp = new AppearanceFlagLenshelp
                 {
                     Id = (uint)A_FlagLenshelpId.SelectedIndex + 1100
                 };
-            };
-            CurrentObjectAppearance.Flags.Fullbank = (bool)A_FlagFullGround.IsChecked;
-            CurrentObjectAppearance.Flags.IgnoreLook = (bool)A_FlagIgnoreLook.IsChecked;
+            }
+            else CurrentObjectAppearance.Flags.Lenshelp = null;
+
+            if ((bool)A_FlagFullGround.IsChecked)
+                CurrentObjectAppearance.Flags.Fullbank = true;
+            else if (CurrentObjectAppearance.Flags.HasFullbank)
+                CurrentObjectAppearance.Flags.ClearFullbank();
+
+            if ((bool)A_FlagIgnoreLook.IsChecked)
+                CurrentObjectAppearance.Flags.IgnoreLook = true;
+            else if (CurrentObjectAppearance.Flags.HasIgnoreLook)
+                CurrentObjectAppearance.Flags.ClearIgnoreLook();
+
             if ((bool)A_FlagClothes.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Clothes = new AppearanceFlagClothes
                 {
                     Slot = (uint)A_FlagClothesSlot.SelectedIndex
                 };
-            };
+            }
+            else CurrentObjectAppearance.Flags.Clothes = null;
+
             if ((bool)A_FlagDefaultAction.IsChecked)
             {
                 CurrentObjectAppearance.Flags.DefaultAction = new AppearanceFlagDefaultAction
                 {
                     Action = (PLAYER_ACTION)A_FlagDefaultActionType.SelectedIndex
                 };
-            };
+            }
+            else CurrentObjectAppearance.Flags.DefaultAction = null;
+
             if ((bool)A_FlagMarket.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Market = new AppearanceFlagMarket
@@ -856,25 +979,53 @@ namespace Assets_Editor
                 if ((bool)A_FlagProfessionSorcerer.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToProfession.Add(PLAYER_PROFESSION.Sorcerer);
                 if ((bool)A_FlagProfessionDruid.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToProfession.Add(PLAYER_PROFESSION.Druid);
                 if ((bool)A_FlagProfessionPromoted.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToProfession.Add(PLAYER_PROFESSION.Promoted);
-            };
-            CurrentObjectAppearance.Flags.Wrap = (bool)A_FlagWrap.IsChecked;
-            CurrentObjectAppearance.Flags.Unwrap = (bool)A_FlagUnwrap.IsChecked;
-            CurrentObjectAppearance.Flags.Top = (bool)A_FlagTopeffect.IsChecked;
+            }
+            else
+                CurrentObjectAppearance.Flags.Market = null;
+
+            if ((bool)A_FlagWrap.IsChecked)
+                CurrentObjectAppearance.Flags.Wrap = true;
+            else if (CurrentObjectAppearance.Flags.HasWrap)
+                CurrentObjectAppearance.Flags.ClearWrap();
+
+            if ((bool)A_FlagUnwrap.IsChecked)
+                CurrentObjectAppearance.Flags.Unwrap = true;
+            else if (CurrentObjectAppearance.Flags.HasUnwrap)
+                CurrentObjectAppearance.Flags.ClearUnwrap();
+
+            if ((bool)A_FlagTopeffect.IsChecked)
+                CurrentObjectAppearance.Flags.Topeffect = true;
+            else if (CurrentObjectAppearance.Flags.HasTopeffect)
+                CurrentObjectAppearance.Flags.ClearTopeffect();
+
             if ((bool)A_FlagChangedToExpire.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Changedtoexpire = new AppearanceFlagChangedToExpire
                 {
                     FormerObjectTypeid = (uint)A_FlagChangedToExpireId.Value
                 };
-            };
-            CurrentObjectAppearance.Flags.Corpse = (bool)A_FlagCorpse.IsChecked;
+            }
+            else CurrentObjectAppearance.Flags.Changedtoexpire = null;
+
+            if ((bool)A_FlagCorpse.IsChecked)
+                CurrentObjectAppearance.Flags.Corpse = true;
+            else if (CurrentObjectAppearance.Flags.HasCorpse)
+                CurrentObjectAppearance.Flags.ClearCorpse();
+
+            if ((bool)A_FlagPlayerCorpse.IsChecked)
+                CurrentObjectAppearance.Flags.PlayerCorpse = true;
+            else if (CurrentObjectAppearance.Flags.HasPlayerCorpse)
+                CurrentObjectAppearance.Flags.ClearPlayerCorpse();
+
             if ((bool)A_FlagCyclopedia.IsChecked)
             {
                 CurrentObjectAppearance.Flags.Cyclopediaitem = new AppearanceFlagCyclopedia
                 {
                     CyclopediaType = (uint)A_FlagCyclopediaItem.Value
                 };
-            };
+            }
+            else CurrentObjectAppearance.Flags.Cyclopediaitem = null;
+
             CurrentObjectAppearance.Flags.Npcsaledata.Clear();
             if ((bool)A_FlagNPC.IsChecked)
             {
@@ -882,8 +1033,8 @@ namespace Assets_Editor
                 {
                     CurrentObjectAppearance.Flags.Npcsaledata.Add(npcdata);
                 }
-
             }
+
             SaveSprPatterns((int)SprGroupSlider.Value);
             StorePreviousGroup((int)SprGroupSlider.Value);
             if (ObjectMenu.SelectedIndex == 0)
@@ -962,7 +1113,7 @@ namespace Assets_Editor
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
             base.OnClosed(e);
-            Application.Current.MainWindow.Show();
+            Application.Current.Shutdown();
         }
         public class LowercaseContractResolver : DefaultContractResolver
         {
