@@ -55,7 +55,7 @@ namespace Tibia.Protobuf.Appearances {
             "cm91cBgCIAMoCzImLnRpYmlhLnByb3RvYnVmLmFwcGVhcmFuY2VzLkZyYW1l",
             "R3JvdXASOgoFZmxhZ3MYAyABKAsyKy50aWJpYS5wcm90b2J1Zi5hcHBlYXJh",
             "bmNlcy5BcHBlYXJhbmNlRmxhZ3MSDAoEbmFtZRgEIAEoCRITCgtkZXNjcmlw",
-            "dGlvbhgFIAEoCSKyDAoPQXBwZWFyYW5jZUZsYWdzEjwKBGJhbmsYASABKAsy",
+            "dGlvbhgFIAEoCSLADAoPQXBwZWFyYW5jZUZsYWdzEjwKBGJhbmsYASABKAsy",
             "Li50aWJpYS5wcm90b2J1Zi5hcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ0Jh",
             "bmsSDAoEY2xpcBgCIAEoCBIOCgZib3R0b20YAyABKAgSCwoDdG9wGAQgASgI",
             "EhEKCWNvbnRhaW5lchgFIAEoCBISCgpjdW11bGF0aXZlGAYgASgIEg4KBnVz",
@@ -90,38 +90,38 @@ namespace Tibia.Protobuf.Appearances {
             "LmFwcGVhcmFuY2VzLkFwcGVhcmFuY2VGbGFnQ2hhbmdlZFRvRXhwaXJlEg4K",
             "BmNvcnBzZRgqIAEoCBIVCg1wbGF5ZXJfY29ycHNlGCsgASgIEkwKDmN5Y2xv",
             "cGVkaWFpdGVtGCwgASgLMjQudGliaWEucHJvdG9idWYuYXBwZWFyYW5jZXMu",
-            "QXBwZWFyYW5jZUZsYWdDeWNsb3BlZGlhIicKEkFwcGVhcmFuY2VGbGFnQmFu",
-            "axIRCgl3YXlwb2ludHMYASABKA0iLgoTQXBwZWFyYW5jZUZsYWdXcml0ZRIX",
-            "Cg9tYXhfdGV4dF9sZW5ndGgYASABKA0iNwoXQXBwZWFyYW5jZUZsYWdXcml0",
-            "ZU9uY2USHAoUbWF4X3RleHRfbGVuZ3RoX29uY2UYASABKA0iOAoTQXBwZWFy",
-            "YW5jZUZsYWdMaWdodBISCgpicmlnaHRuZXNzGAEgASgNEg0KBWNvbG9yGAIg",
-            "ASgNIikKFEFwcGVhcmFuY2VGbGFnSGVpZ2h0EhEKCWVsZXZhdGlvbhgBIAEo",
-            "DSIrChNBcHBlYXJhbmNlRmxhZ1NoaWZ0EgkKAXgYASABKA0SCQoBeRgCIAEo",
-            "DSIlChVBcHBlYXJhbmNlRmxhZ0Nsb3RoZXMSDAoEc2xvdBgBIAEoDSJTChtB",
-            "cHBlYXJhbmNlRmxhZ0RlZmF1bHRBY3Rpb24SNAoGYWN0aW9uGAEgASgOMiQu",
-            "dGliaWEucHJvdG9idWYuc2hhcmVkLlBMQVlFUl9BQ1RJT04i5gEKFEFwcGVh",
-            "cmFuY2VGbGFnTWFya2V0EjYKCGNhdGVnb3J5GAEgASgOMiQudGliaWEucHJv",
-            "dG9idWYuc2hhcmVkLklURU1fQ0FURUdPUlkSGgoSdHJhZGVfYXNfb2JqZWN0",
-            "X2lkGAIgASgNEhkKEXNob3dfYXNfb2JqZWN0X2lkGAMgASgNEkgKFnJlc3Ry",
-            "aWN0X3RvX3Byb2Zlc3Npb24YBSADKA4yKC50aWJpYS5wcm90b2J1Zi5zaGFy",
-            "ZWQuUExBWUVSX1BST0ZFU1NJT04SFQoNbWluaW11bV9sZXZlbBgGIAEoDSKl",
-            "AQoRQXBwZWFyYW5jZUZsYWdOUEMSDAoEbmFtZRgBIAEoCRIQCghsb2NhdGlv",
-            "bhgCIAEoCRISCgpzYWxlX3ByaWNlGAMgASgNEhEKCWJ1eV9wcmljZRgEIAEo",
-            "DRIfChdjdXJyZW5jeV9vYmplY3RfdHlwZV9pZBgFIAEoDRIoCiBjdXJyZW5j",
-            "eV9xdWVzdF9mbGFnX2Rpc3BsYXlfbmFtZRgGIAEoCSImChVBcHBlYXJhbmNl",
-            "RmxhZ0F1dG9tYXASDQoFY29sb3IYASABKA0iSQoSQXBwZWFyYW5jZUZsYWdI",
-            "b29rEjMKCWRpcmVjdGlvbhgBIAEoDjIgLnRpYmlhLnByb3RvYnVmLnNoYXJl",
-            "ZC5IT09LX1RZUEUiJAoWQXBwZWFyYW5jZUZsYWdMZW5zaGVscBIKCgJpZBgB",
-            "IAEoDSI9Ch1BcHBlYXJhbmNlRmxhZ0NoYW5nZWRUb0V4cGlyZRIcChRmb3Jt",
-            "ZXJfb2JqZWN0X3R5cGVpZBgBIAEoDSIzChhBcHBlYXJhbmNlRmxhZ0N5Y2xv",
-            "cGVkaWESFwoPY3ljbG9wZWRpYV90eXBlGAEgASgNIrEBChtTcGVjaWFsTWVh",
-            "bmluZ0FwcGVhcmFuY2VJZHMSFAoMZ29sZF9jb2luX2lkGAEgASgNEhgKEHBs",
-            "YXRpbnVtX2NvaW5faWQYAiABKA0SFwoPY3J5c3RhbF9jb2luX2lkGAMgASgN",
-            "EhUKDXRpYmlhX2NvaW5faWQYBCABKA0SGQoRc3RhbXBlZF9sZXR0ZXJfaWQY",
-            "BSABKA0SFwoPc3VwcGx5X3N0YXNoX2lkGAYgASgNKoEBChFGSVhFRF9GUkFN",
-            "RV9HUk9VUBIhCh1GSVhFRF9GUkFNRV9HUk9VUF9PVVRGSVRfSURMRRAAEiMK",
-            "H0ZJWEVEX0ZSQU1FX0dST1VQX09VVEZJVF9NT1ZJTkcQARIkCiBGSVhFRF9G",
-            "UkFNRV9HUk9VUF9PQkpFQ1RfSU5JVElBTBAC"));
+            "QXBwZWFyYW5jZUZsYWdDeWNsb3BlZGlhEgwKBGFtbW8YLSABKAgiJwoSQXBw",
+            "ZWFyYW5jZUZsYWdCYW5rEhEKCXdheXBvaW50cxgBIAEoDSIuChNBcHBlYXJh",
+            "bmNlRmxhZ1dyaXRlEhcKD21heF90ZXh0X2xlbmd0aBgBIAEoDSI3ChdBcHBl",
+            "YXJhbmNlRmxhZ1dyaXRlT25jZRIcChRtYXhfdGV4dF9sZW5ndGhfb25jZRgB",
+            "IAEoDSI4ChNBcHBlYXJhbmNlRmxhZ0xpZ2h0EhIKCmJyaWdodG5lc3MYASAB",
+            "KA0SDQoFY29sb3IYAiABKA0iKQoUQXBwZWFyYW5jZUZsYWdIZWlnaHQSEQoJ",
+            "ZWxldmF0aW9uGAEgASgNIisKE0FwcGVhcmFuY2VGbGFnU2hpZnQSCQoBeBgB",
+            "IAEoDRIJCgF5GAIgASgNIiUKFUFwcGVhcmFuY2VGbGFnQ2xvdGhlcxIMCgRz",
+            "bG90GAEgASgNIlMKG0FwcGVhcmFuY2VGbGFnRGVmYXVsdEFjdGlvbhI0CgZh",
+            "Y3Rpb24YASABKA4yJC50aWJpYS5wcm90b2J1Zi5zaGFyZWQuUExBWUVSX0FD",
+            "VElPTiLmAQoUQXBwZWFyYW5jZUZsYWdNYXJrZXQSNgoIY2F0ZWdvcnkYASAB",
+            "KA4yJC50aWJpYS5wcm90b2J1Zi5zaGFyZWQuSVRFTV9DQVRFR09SWRIaChJ0",
+            "cmFkZV9hc19vYmplY3RfaWQYAiABKA0SGQoRc2hvd19hc19vYmplY3RfaWQY",
+            "AyABKA0SSAoWcmVzdHJpY3RfdG9fcHJvZmVzc2lvbhgFIAMoDjIoLnRpYmlh",
+            "LnByb3RvYnVmLnNoYXJlZC5QTEFZRVJfUFJPRkVTU0lPThIVCg1taW5pbXVt",
+            "X2xldmVsGAYgASgNIqUBChFBcHBlYXJhbmNlRmxhZ05QQxIMCgRuYW1lGAEg",
+            "ASgJEhAKCGxvY2F0aW9uGAIgASgJEhIKCnNhbGVfcHJpY2UYAyABKA0SEQoJ",
+            "YnV5X3ByaWNlGAQgASgNEh8KF2N1cnJlbmN5X29iamVjdF90eXBlX2lkGAUg",
+            "ASgNEigKIGN1cnJlbmN5X3F1ZXN0X2ZsYWdfZGlzcGxheV9uYW1lGAYgASgJ",
+            "IiYKFUFwcGVhcmFuY2VGbGFnQXV0b21hcBINCgVjb2xvchgBIAEoDSJJChJB",
+            "cHBlYXJhbmNlRmxhZ0hvb2sSMwoJZGlyZWN0aW9uGAEgASgOMiAudGliaWEu",
+            "cHJvdG9idWYuc2hhcmVkLkhPT0tfVFlQRSIkChZBcHBlYXJhbmNlRmxhZ0xl",
+            "bnNoZWxwEgoKAmlkGAEgASgNIj0KHUFwcGVhcmFuY2VGbGFnQ2hhbmdlZFRv",
+            "RXhwaXJlEhwKFGZvcm1lcl9vYmplY3RfdHlwZWlkGAEgASgNIjMKGEFwcGVh",
+            "cmFuY2VGbGFnQ3ljbG9wZWRpYRIXCg9jeWNsb3BlZGlhX3R5cGUYASABKA0i",
+            "sQEKG1NwZWNpYWxNZWFuaW5nQXBwZWFyYW5jZUlkcxIUCgxnb2xkX2NvaW5f",
+            "aWQYASABKA0SGAoQcGxhdGludW1fY29pbl9pZBgCIAEoDRIXCg9jcnlzdGFs",
+            "X2NvaW5faWQYAyABKA0SFQoNdGliaWFfY29pbl9pZBgEIAEoDRIZChFzdGFt",
+            "cGVkX2xldHRlcl9pZBgFIAEoDRIXCg9zdXBwbHlfc3Rhc2hfaWQYBiABKA0q",
+            "gQEKEUZJWEVEX0ZSQU1FX0dST1VQEiEKHUZJWEVEX0ZSQU1FX0dST1VQX09V",
+            "VEZJVF9JRExFEAASIwofRklYRURfRlJBTUVfR1JPVVBfT1VURklUX01PVklO",
+            "RxABEiQKIEZJWEVEX0ZSQU1FX0dST1VQX09CSkVDVF9JTklUSUFMEAI="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Tibia.Protobuf.Shared.SharedReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Tibia.Protobuf.Appearances.FIXED_FRAME_GROUP), }, null, new pbr::GeneratedClrTypeInfo[] {
@@ -132,7 +132,7 @@ namespace Tibia.Protobuf.Appearances {
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.SpriteInfo), global::Tibia.Protobuf.Appearances.SpriteInfo.Parser, new[]{ "PatternWidth", "PatternHeight", "PatternDepth", "Layers", "SpriteId", "BoundingSquare", "Animation", "IsOpaque", "BoundingBoxPerDirection" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.FrameGroup), global::Tibia.Protobuf.Appearances.FrameGroup.Parser, new[]{ "FixedFrameGroup", "Id", "SpriteInfo" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.Appearance), global::Tibia.Protobuf.Appearances.Appearance.Parser, new[]{ "Id", "FrameGroup", "Flags", "Name", "Description" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlags), global::Tibia.Protobuf.Appearances.AppearanceFlags.Parser, new[]{ "Bank", "Clip", "Bottom", "Top", "Container", "Cumulative", "Usable", "Forceuse", "Multiuse", "Write", "WriteOnce", "Liquidpool", "Unpass", "Unmove", "Unsight", "Avoid", "NoMovementAnimation", "Take", "Liquidcontainer", "Hang", "Hook", "Rotate", "Light", "DontHide", "Translucent", "Shift", "Height", "LyingObject", "AnimateAlways", "Automap", "Lenshelp", "Fullbank", "IgnoreLook", "Clothes", "DefaultAction", "Market", "Wrap", "Unwrap", "Topeffect", "Npcsaledata", "Changedtoexpire", "Corpse", "PlayerCorpse", "Cyclopediaitem" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlags), global::Tibia.Protobuf.Appearances.AppearanceFlags.Parser, new[]{ "Bank", "Clip", "Bottom", "Top", "Container", "Cumulative", "Usable", "Forceuse", "Multiuse", "Write", "WriteOnce", "Liquidpool", "Unpass", "Unmove", "Unsight", "Avoid", "NoMovementAnimation", "Take", "Liquidcontainer", "Hang", "Hook", "Rotate", "Light", "DontHide", "Translucent", "Shift", "Height", "LyingObject", "AnimateAlways", "Automap", "Lenshelp", "Fullbank", "IgnoreLook", "Clothes", "DefaultAction", "Market", "Wrap", "Unwrap", "Topeffect", "Npcsaledata", "Changedtoexpire", "Corpse", "PlayerCorpse", "Cyclopediaitem", "Ammo" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagBank), global::Tibia.Protobuf.Appearances.AppearanceFlagBank.Parser, new[]{ "Waypoints" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagWrite), global::Tibia.Protobuf.Appearances.AppearanceFlagWrite.Parser, new[]{ "MaxTextLength" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagWriteOnce), global::Tibia.Protobuf.Appearances.AppearanceFlagWriteOnce.Parser, new[]{ "MaxTextLengthOnce" }, null, null, null, null),
@@ -2661,6 +2661,7 @@ namespace Tibia.Protobuf.Appearances {
       corpse_ = other.corpse_;
       playerCorpse_ = other.playerCorpse_;
       cyclopediaitem_ = other.cyclopediaitem_ != null ? other.cyclopediaitem_.Clone() : null;
+      ammo_ = other.ammo_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3529,6 +3530,30 @@ namespace Tibia.Protobuf.Appearances {
       }
     }
 
+    /// <summary>Field number for the "ammo" field.</summary>
+    public const int AmmoFieldNumber = 45;
+    private readonly static bool AmmoDefaultValue = false;
+
+    private bool ammo_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Ammo {
+      get { if ((_hasBits0 & 536870912) != 0) { return ammo_; } else { return AmmoDefaultValue; } }
+      set {
+        _hasBits0 |= 536870912;
+        ammo_ = value;
+      }
+    }
+    /// <summary>Gets whether the "ammo" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasAmmo {
+      get { return (_hasBits0 & 536870912) != 0; }
+    }
+    /// <summary>Clears the value of the "ammo" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearAmmo() {
+      _hasBits0 &= ~536870912;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as AppearanceFlags);
@@ -3586,6 +3611,7 @@ namespace Tibia.Protobuf.Appearances {
       if (Corpse != other.Corpse) return false;
       if (PlayerCorpse != other.PlayerCorpse) return false;
       if (!object.Equals(Cyclopediaitem, other.Cyclopediaitem)) return false;
+      if (Ammo != other.Ammo) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3636,6 +3662,7 @@ namespace Tibia.Protobuf.Appearances {
       if (HasCorpse) hash ^= Corpse.GetHashCode();
       if (HasPlayerCorpse) hash ^= PlayerCorpse.GetHashCode();
       if (cyclopediaitem_ != null) hash ^= Cyclopediaitem.GetHashCode();
+      if (HasAmmo) hash ^= Ammo.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3825,6 +3852,10 @@ namespace Tibia.Protobuf.Appearances {
         output.WriteRawTag(226, 2);
         output.WriteMessage(Cyclopediaitem);
       }
+      if (HasAmmo) {
+        output.WriteRawTag(232, 2);
+        output.WriteBool(Ammo);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -4007,6 +4038,10 @@ namespace Tibia.Protobuf.Appearances {
         output.WriteRawTag(226, 2);
         output.WriteMessage(Cyclopediaitem);
       }
+      if (HasAmmo) {
+        output.WriteRawTag(232, 2);
+        output.WriteBool(Ammo);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -4145,6 +4180,9 @@ namespace Tibia.Protobuf.Appearances {
       }
       if (cyclopediaitem_ != null) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(Cyclopediaitem);
+      }
+      if (HasAmmo) {
+        size += 2 + 1;
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -4328,6 +4366,9 @@ namespace Tibia.Protobuf.Appearances {
           Cyclopediaitem = new global::Tibia.Protobuf.Appearances.AppearanceFlagCyclopedia();
         }
         Cyclopediaitem.MergeFrom(other.Cyclopediaitem);
+      }
+      if (other.HasAmmo) {
+        Ammo = other.Ammo;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -4561,6 +4602,10 @@ namespace Tibia.Protobuf.Appearances {
             input.ReadMessage(Cyclopediaitem);
             break;
           }
+          case 360: {
+            Ammo = input.ReadBool();
+            break;
+          }
         }
       }
     #endif
@@ -4791,6 +4836,10 @@ namespace Tibia.Protobuf.Appearances {
               Cyclopediaitem = new global::Tibia.Protobuf.Appearances.AppearanceFlagCyclopedia();
             }
             input.ReadMessage(Cyclopediaitem);
+            break;
+          }
+          case 360: {
+            Ammo = input.ReadBool();
             break;
           }
         }

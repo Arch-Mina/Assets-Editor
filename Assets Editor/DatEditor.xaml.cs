@@ -7,6 +7,7 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -214,7 +215,11 @@ namespace Assets_Editor
                 if (ObjectMenu.SelectedIndex == 0)
                     LoadSelectedObjectAppearances(MainWindow.appearances.Outfit[ObjListView.SelectedIndex]);
                 else if (ObjectMenu.SelectedIndex == 1)
+                {
                     LoadSelectedObjectAppearances(MainWindow.appearances.Object[ObjListView.SelectedIndex]);
+                    Debug.WriteLine(MainWindow.appearances.Object[ObjListView.SelectedIndex]);
+                    Byte[] test = OTB.GenerateItemSpriteHash(MainWindow.appearances.Object[ObjListView.SelectedIndex]);
+                }
                 else if (ObjectMenu.SelectedIndex == 2)
                     LoadSelectedObjectAppearances(MainWindow.appearances.Effect[ObjListView.SelectedIndex]);
                 else if (ObjectMenu.SelectedIndex == 3)
@@ -352,14 +357,14 @@ namespace Assets_Editor
             A_FlagCorpse.IsChecked = CurrentObjectAppearance.Flags.Corpse;
             A_FlagCyclopedia.IsChecked = CurrentObjectAppearance.Flags.Cyclopediaitem != null;
             A_FlagCyclopediaItem.Value = (CurrentObjectAppearance.Flags.Cyclopediaitem != null && CurrentObjectAppearance.Flags.Cyclopediaitem.HasCyclopediaType) ? (int)CurrentObjectAppearance.Flags.Cyclopediaitem.CyclopediaType : 0;
-
+            A_FlagAmmo.IsChecked = CurrentObjectAppearance.Flags.HasAmmo;
             NpcDataList.Clear();
 
             if (CurrentObjectAppearance.Flags.Npcsaledata.Count > 0)
             {
                 A_FlagNPC.IsChecked = true;
                 foreach (var npcdata in CurrentObjectAppearance.Flags.Npcsaledata)
-                    NpcDataList.Add(new AppearanceFlagNPC() { Name = npcdata.Name, Location = npcdata.Location, BuyPrice = npcdata.BuyPrice, SalePrice = npcdata.SalePrice, CurrencyObjectTypeId = npcdata.CurrencyObjectTypeId, CurrencyQuestFlagDisplayName = npcdata.CurrencyQuestFlagDisplayName });
+                    NpcDataList.Add(npcdata);
             }
             else
                 A_FlagNPC.IsChecked = false;
@@ -591,6 +596,7 @@ namespace Assets_Editor
 
             int ObjectSprImgCount = ObjectMenu.SelectedIndex == 0 ? 1 : (int)(patternWidth * patternHeight);
             int ImgPanelWidth = 32;
+            int ImgPanelHeight = 32;
 
             if (ObjectSprList.Count == 1)
             {
@@ -616,10 +622,12 @@ namespace Assets_Editor
                 ObjectSprImgPanel.Children.Add(img);
                 if (ObjectSprList[i].Image.Width > ImgPanelWidth)
                     ImgPanelWidth = (int)ObjectSprList[i].Image.Width;
+                if (ObjectSprList[i].Image.Height > ImgPanelHeight)
+                    ImgPanelHeight = (int)ObjectSprList[i].Image.Height;
 
             }
             ObjectSprImgPanel.Width = ObjectMenu.SelectedIndex == 0 ? ImgPanelWidth : ImgPanelWidth * patternWidth;
-            ObjectSprImgPanel.Height = ObjectMenu.SelectedIndex == 0 ? ImgPanelWidth : ImgPanelWidth * patternHeight;
+            ObjectSprImgPanel.Height = ObjectMenu.SelectedIndex == 0 ? ImgPanelHeight : ImgPanelHeight * patternHeight;
         }
 
         private void Img_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -1025,6 +1033,11 @@ namespace Assets_Editor
                 };
             }
             else CurrentObjectAppearance.Flags.Cyclopediaitem = null;
+
+            if ((bool)A_FlagAmmo.IsChecked)
+                CurrentObjectAppearance.Flags.Ammo = true;
+            else if (CurrentObjectAppearance.Flags.HasAmmo)
+                CurrentObjectAppearance.Flags.ClearAmmo();
 
             CurrentObjectAppearance.Flags.Npcsaledata.Clear();
             if ((bool)A_FlagNPC.IsChecked)

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Assets_Editor" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="DatEditor" Height="860" Width="1220" >
+        Title="DatEditor" Height="860" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}">
     <Grid >
         <materialDesign:DialogHost DialogClosing="NewObjectDialogHost_OnDialogClosing">
             <materialDesign:DialogHost.DialogContent>
@@ -79,7 +79,7 @@
                                 </ListView.View>
                             </ListView>
                             <xctk:IntegerUpDown x:Name="SprListViewSelectedIndex" Height="30" ParsingNumberStyle="Integer" Value="{Binding ElementName=SprListView, Path=SelectedIndex, Mode=TwoWay}" ValueChanged="SprListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False"/>
-                            <Border BorderThickness="1" BorderBrush="#FF673AB7" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,5,0,5">
+                            <Border BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,5,0,5">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <Button x:Name="SpriteExport" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Export Sprite" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="SpriteExport_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
                                         <materialDesign:PackIcon Kind="ContentSaveMove" Width="25" Height="25"/>
@@ -91,9 +91,9 @@
                             </Border>
                         </StackPanel>
                     </GroupBox>
-                    <Border BorderThickness="1" BorderBrush="#FF673AB7" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,5,0,0">
+                    <Border BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,5,0,0">
                         <StackPanel>
-                            <ComboBox x:Name="ObjectMenu" Style="{StaticResource MaterialDesignFilledComboBox}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" SelectionChanged="ObjectMenuChanged" SelectedIndex="0" Width="225" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,-15,0,0" Focusable="False" SnapsToDevicePixels="True" FlowDirection="LeftToRight" Height="50" Background="#FF673AB7" BorderThickness="0,0,0,0" >
+                            <ComboBox x:Name="ObjectMenu" Style="{StaticResource MaterialDesignFilledComboBox}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" SelectionChanged="ObjectMenuChanged" SelectedIndex="0" Width="225" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,-15,0,0" Focusable="False" SnapsToDevicePixels="True" FlowDirection="LeftToRight" Height="50" Background="{DynamicResource PrimaryHueMidBrush}" BorderThickness="0,0,0,0" >
                                 <ComboBoxItem Content="Outfits"/>
                                 <ComboBoxItem Content="Items"/>
                                 <ComboBoxItem Content="Effects"/>
@@ -120,7 +120,7 @@
                                 </ListView.View>
                             </ListView>
                             <xctk:IntegerUpDown x:Name="ObjListViewSelectedIndex" Height="30" ParsingNumberStyle="Integer" ValueChanged="ObjListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="5,5,5,0"/>
-                            <Border BorderThickness="1" BorderBrush="#FF673AB7" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5,5,5,5">
+                            <Border BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5,5,5,5">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <Button x:Name="ObjectSave" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Save" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ObjectSave_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
                                         <materialDesign:PackIcon Kind="ContentSave" Width="25" Height="25"/>
@@ -309,6 +309,7 @@
                                                         <ComboBoxItem Content="Premium Scrolls"/>
                                                         <ComboBoxItem Content="Tibia Coins"/>
                                                         <ComboBoxItem Content="Creature Products"/>
+                                                        <ComboBoxItem Content="Quiver"/>
                                                     </ComboBox>
                                                 </StackPanel>
                                                 <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
@@ -356,7 +357,10 @@
                                                     <Label Content="Type:" Width="60" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                                     <xctk:IntegerUpDown x:Name="A_FlagCyclopediaItem" Margin="0,0,0,0" Width="80"/>
                                                 </StackPanel>
-                                                <CheckBox x:Name="A_FlagNPC" Content="Npc Sale Data" Margin="0,5,0,0"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagNPC" Content="Npc Sale Data" Margin="0,5,0,0" Width="150"/>
+                                                    <CheckBox x:Name="A_FlagAmmo" Content="Ammo" Margin="0,5,0,0" Width="150"/>
+                                                </StackPanel>
                                                 <DataGrid x:Name="A_FlagNPCData" Height="153" HorizontalAlignment="Left" Margin="0,5,0,0" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="true" CanUserResizeRows="False" FontSize="11">
                                                     <DataGrid.ColumnHeaderStyle>
                                                         <Style TargetType="{x:Type DataGridColumnHeader}">
@@ -483,7 +487,7 @@
                                             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Margin="5,25,5,0">
                                                 <Label Content="Bounding box per direction">
                                                     <Label.Background>
-                                                        <SolidColorBrush Color="#FF673AB7"/>
+                                                        <SolidColorBrush Color="{DynamicResource PrimaryHueMid}"/>
                                                     </Label.Background>
                                                     <Label.Foreground>
                                                         <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
