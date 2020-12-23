@@ -217,8 +217,6 @@ namespace Assets_Editor
                 else if (ObjectMenu.SelectedIndex == 1)
                 {
                     LoadSelectedObjectAppearances(MainWindow.appearances.Object[ObjListView.SelectedIndex]);
-                    Debug.WriteLine(MainWindow.appearances.Object[ObjListView.SelectedIndex]);
-                    Byte[] test = OTB.GenerateItemSpriteHash(MainWindow.appearances.Object[ObjListView.SelectedIndex]);
                 }
                 else if (ObjectMenu.SelectedIndex == 2)
                     LoadSelectedObjectAppearances(MainWindow.appearances.Effect[ObjListView.SelectedIndex]);
@@ -1188,7 +1186,7 @@ namespace Assets_Editor
                 }
                 int spritecount = (int)(frameIdleGroup.SpriteInfo.Layers * frameIdleGroup.SpriteInfo.PatternWidth * frameIdleGroup.SpriteInfo.PatternHeight * frameIdleGroup.SpriteInfo.PatternDepth * int.Parse(NIdleGroupCount.Text));
                 for (int i = 0; i < spritecount; i++)
-                    frameIdleGroup.SpriteInfo.SpriteId.Add(118489);
+                    frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
                 newObject.Id = (uint)(MainWindow.appearances.Outfit[^1].Id + 1);
                 newObject.FrameGroup.Add(frameIdleGroup);
@@ -1207,7 +1205,7 @@ namespace Assets_Editor
                     frameMoveGroup.SpriteInfo.Animation = spriteMoveAnimation;
                     spritecount = (int)(frameMoveGroup.SpriteInfo.Layers * frameMoveGroup.SpriteInfo.PatternWidth * frameMoveGroup.SpriteInfo.PatternHeight * frameMoveGroup.SpriteInfo.PatternDepth * int.Parse(NMoveGroupCount.Text));
                     for (int i = 0; i < spritecount; i++)
-                        frameMoveGroup.SpriteInfo.SpriteId.Add(118489);
+                        frameMoveGroup.SpriteInfo.SpriteId.Add(0);
                     newObject.FrameGroup.Add(frameMoveGroup);
                 }
                 MainWindow.appearances.Outfit.Add(newObject);
@@ -1226,7 +1224,7 @@ namespace Assets_Editor
                 }
                 int spritecount = (int)(frameIdleGroup.SpriteInfo.Layers * frameIdleGroup.SpriteInfo.PatternWidth * frameIdleGroup.SpriteInfo.PatternHeight * frameIdleGroup.SpriteInfo.PatternDepth * int.Parse(NIdleGroupCount.Text));
                 for (int i = 0; i < spritecount; i++)
-                    frameIdleGroup.SpriteInfo.SpriteId.Add(118489);
+                    frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
                 newObject.Id = (uint)(MainWindow.appearances.Object[^1].Id + 1);
                 newObject.FrameGroup.Add(frameIdleGroup);
@@ -1246,7 +1244,7 @@ namespace Assets_Editor
                 }
                 int spritecount = (int)(frameIdleGroup.SpriteInfo.Layers * frameIdleGroup.SpriteInfo.PatternWidth * frameIdleGroup.SpriteInfo.PatternHeight * frameIdleGroup.SpriteInfo.PatternDepth * int.Parse(NIdleGroupCount.Text));
                 for (int i = 0; i < spritecount; i++)
-                    frameIdleGroup.SpriteInfo.SpriteId.Add(118489);
+                    frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
                 newObject.Id = (uint)(MainWindow.appearances.Effect[^1].Id + 1);
                 newObject.FrameGroup.Add(frameIdleGroup);
@@ -1266,7 +1264,7 @@ namespace Assets_Editor
                 }
                 int spritecount = (int)(frameIdleGroup.SpriteInfo.Layers * frameIdleGroup.SpriteInfo.PatternWidth * frameIdleGroup.SpriteInfo.PatternHeight * frameIdleGroup.SpriteInfo.PatternDepth * int.Parse(NIdleGroupCount.Text));
                 for (int i = 0; i < spritecount; i++)
-                    frameIdleGroup.SpriteInfo.SpriteId.Add(118489);
+                    frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
                 newObject.Id = (uint)(MainWindow.appearances.Missile[^1].Id + 1);
                 newObject.FrameGroup.Add(frameIdleGroup);
