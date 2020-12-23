@@ -1176,6 +1176,7 @@ namespace Assets_Editor
 
             if (NObjectType.SelectedIndex == 0)
             {
+                frameIdleGroup.Id = 0;
                 frameIdleGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
                 if (int.Parse(NIdleGroupCount.Text) > 1)
                 {
@@ -1193,7 +1194,8 @@ namespace Assets_Editor
                 if (NMoveGroup.IsChecked == true)
                 {
                     FrameGroup frameMoveGroup = new FrameGroup();
-                    frameMoveGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
+                    frameMoveGroup.Id = 1;
+                    frameMoveGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitMoving;
                     frameMoveGroup.SpriteInfo = new SpriteInfo();
                     frameMoveGroup.SpriteInfo.Layers = uint.Parse(NLayers.Text);
                     frameMoveGroup.SpriteInfo.PatternWidth = uint.Parse(NPatternX.Text);
@@ -1324,6 +1326,5 @@ namespace Assets_Editor
 
             }
         }
-
     }
 }
