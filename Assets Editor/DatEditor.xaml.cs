@@ -366,6 +366,7 @@ namespace Assets_Editor
             A_FlagClockExpire.IsChecked = CurrentObjectAppearance.Flags.Clockexpire;
             A_FlagExpire.IsChecked = CurrentObjectAppearance.Flags.Expire;
             A_FlagExpireStop.IsChecked = CurrentObjectAppearance.Flags.Expirestop;
+            A_FlagUpgradeClassification.IsChecked = CurrentObjectAppearance.Flags.Upgradeclassification != null;
             A_FlagUpgradeClassificationAmount.Value = (CurrentObjectAppearance.Flags.Upgradeclassification != null && CurrentObjectAppearance.Flags.Upgradeclassification.HasUpgradeClassification) ? (int)CurrentObjectAppearance.Flags.Upgradeclassification.UpgradeClassification : 0;
 
             NpcDataList.Clear();
