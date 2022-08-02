@@ -356,6 +356,19 @@ namespace Assets_Editor
             A_FlagCyclopedia.IsChecked = CurrentObjectAppearance.Flags.Cyclopediaitem != null;
             A_FlagCyclopediaItem.Value = (CurrentObjectAppearance.Flags.Cyclopediaitem != null && CurrentObjectAppearance.Flags.Cyclopediaitem.HasCyclopediaType) ? (int)CurrentObjectAppearance.Flags.Cyclopediaitem.CyclopediaType : 0;
             A_FlagAmmo.IsChecked = CurrentObjectAppearance.Flags.HasAmmo;
+            A_FlagShowOffSocket.IsChecked = CurrentObjectAppearance.Flags.ShowOffSocket;
+            A_FlagReportable.IsChecked = CurrentObjectAppearance.Flags.Reportable;
+            A_FlagReverseAddonEast.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsEast;
+            A_FlagReverseAddonWest.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsWest;
+            A_FlagReverseAddonNorth.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsNorth;
+            A_FlagReverseAddonSouth.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsSouth;
+            A_FlagWearOut.IsChecked = CurrentObjectAppearance.Flags.Wearout;
+            A_FlagClockExpire.IsChecked = CurrentObjectAppearance.Flags.Clockexpire;
+            A_FlagExpire.IsChecked = CurrentObjectAppearance.Flags.Expire;
+            A_FlagExpireStop.IsChecked = CurrentObjectAppearance.Flags.Expirestop;
+            A_FlagUpgradeClassification.IsChecked = CurrentObjectAppearance.Flags.Upgradeclassification != null;
+            A_FlagUpgradeClassificationAmount.Value = (CurrentObjectAppearance.Flags.Upgradeclassification != null && CurrentObjectAppearance.Flags.Upgradeclassification.HasUpgradeClassification) ? (int)CurrentObjectAppearance.Flags.Upgradeclassification.UpgradeClassification : 0;
+
             NpcDataList.Clear();
 
             if (CurrentObjectAppearance.Flags.Npcsaledata.Count > 0)
@@ -809,6 +822,66 @@ namespace Assets_Editor
                 };
             }
             else CurrentObjectAppearance.Flags.WriteOnce = null;
+
+            if ((bool)A_FlagShowOffSocket.IsChecked)
+                CurrentObjectAppearance.Flags.ShowOffSocket = true;
+            else
+                CurrentObjectAppearance.Flags.ClearShowOffSocket();
+
+            if ((bool)A_FlagReportable.IsChecked)
+                CurrentObjectAppearance.Flags.Reportable = true;
+            else
+                CurrentObjectAppearance.Flags.ClearReportable();
+
+            if ((bool)A_FlagReverseAddonEast.IsChecked)
+                CurrentObjectAppearance.Flags.ReverseAddonsEast = true;
+            else
+                CurrentObjectAppearance.Flags.ClearReverseAddonsEast();
+
+            if ((bool)A_FlagReverseAddonWest.IsChecked)
+                CurrentObjectAppearance.Flags.ReverseAddonsWest = true;
+            else
+                CurrentObjectAppearance.Flags.ClearReverseAddonsWest();
+
+            if ((bool)A_FlagReverseAddonNorth.IsChecked)
+                CurrentObjectAppearance.Flags.ReverseAddonsNorth = true;
+            else
+                CurrentObjectAppearance.Flags.ClearReverseAddonsNorth();
+
+            if ((bool)A_FlagReverseAddonSouth.IsChecked)
+                CurrentObjectAppearance.Flags.ReverseAddonsSouth = true;
+            else
+                CurrentObjectAppearance.Flags.ClearReverseAddonsSouth();
+
+            if ((bool)A_FlagWearOut.IsChecked)
+                CurrentObjectAppearance.Flags.Wearout = true;
+            else
+                CurrentObjectAppearance.Flags.ClearWearout();
+
+            if ((bool)A_FlagClockExpire.IsChecked)
+                CurrentObjectAppearance.Flags.Clockexpire = true;
+            else
+                CurrentObjectAppearance.Flags.ClearClockexpire();
+
+            if ((bool)A_FlagExpire.IsChecked)
+                CurrentObjectAppearance.Flags.Expire = true;
+            else
+                CurrentObjectAppearance.Flags.ClearExpire();
+
+            if ((bool)A_FlagExpireStop.IsChecked)
+                CurrentObjectAppearance.Flags.Expirestop = true;
+            else
+                CurrentObjectAppearance.Flags.ClearExpirestop();
+
+            if ((bool)A_FlagUpgradeClassification.IsChecked)
+            {
+                CurrentObjectAppearance.Flags.Upgradeclassification = new AppearanceFlagUpgradeClassification
+                {
+                    UpgradeClassification = (uint)A_FlagUpgradeClassificationAmount.Value
+                };
+            }
+
+            else CurrentObjectAppearance.Flags.Upgradeclassification = null;
 
             if ((bool)A_FlagLiquidpool.IsChecked)
                 CurrentObjectAppearance.Flags.Liquidpool = true;

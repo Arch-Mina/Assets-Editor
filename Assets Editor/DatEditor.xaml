@@ -222,6 +222,10 @@
                                                     <Label Content="Elevation:" Width="90" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                                     <xctk:IntegerUpDown x:Name="A_FlagElevation" Margin="0,0,0,0" Width="60" Minimum="0" Maximum="32"/>
                                                 </StackPanel>
+                                                <CheckBox x:Name="A_FlagReverseAddonEast" Content="Reverse addon east" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagReverseAddonWest" Content="Reverse addon west" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagReverseAddonSouth" Content="Reverse addon south" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagReverseAddonNorth" Content="Reverse addon north" Margin="0,5,0,0"/>
                                             </StackPanel>
                                             <StackPanel Margin="5,0,5,0" >
                                                 <CheckBox x:Name="A_FlagLyingObject" Content="Lying Object"/>
@@ -352,6 +356,17 @@
                                                 </StackPanel>
                                                 <CheckBox x:Name="A_FlagCorpse" Content="Corpse" Margin="0,5,0,0"/>
                                                 <CheckBox x:Name="A_FlagPlayerCorpse" Content="Player Corpse" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagShowOffSocket" Content="Podium" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagReportable" Content="Reportable" Margin="0,5,0,0"/>
+                                                <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                                    <CheckBox x:Name="A_FlagUpgradeClassification" Content="Upgrade classification" Width="165" Margin="0,-1,0,0" Padding="4,0,0,0"/>
+                                                    <Label Content="Classification:" Width="75" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagUpgradeClassificationAmount" Margin="0,0,0,0" Width="80"/>
+                                                </StackPanel>
+                                                <CheckBox x:Name="A_FlagWearOut" Content="Wearout" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagClockExpire" Content="Clock expire" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagExpire" Content="Expire" Margin="0,5,0,0"/>
+                                                <CheckBox x:Name="A_FlagExpireStop" Content="Expire stop" Margin="0,5,0,0"/>
                                                 <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
                                                     <CheckBox x:Name="A_FlagCyclopedia" Content="Cyclopedia" Width="180" Margin="0,-1,0,0" Padding="4,0,0,0"/>
                                                     <Label Content="Type:" Width="60" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
