@@ -25,6 +25,7 @@
                     <TextBox x:Name="NPatternX" materialDesign:HintAssist.Hint="Pattern X" PreviewTextInput="NumberValidationTextBox" materialDesign:HintAssist.HelperText="Pattern X" Margin="0,15,0,0" />
                     <TextBox x:Name="NPatternY" materialDesign:HintAssist.Hint="Pattern Y" PreviewTextInput="NumberValidationTextBox" materialDesign:HintAssist.HelperText="Pattern Y" Margin="0,15,0,0" />
                     <TextBox x:Name="NPatternZ" materialDesign:HintAssist.Hint="Pattern Z" PreviewTextInput="NumberValidationTextBox" materialDesign:HintAssist.HelperText="Pattern Z" Margin="0,15,0,0" />
+                    <TextBox x:Name="ID" materialDesign:HintAssist.Hint="ID" PreviewTextInput="NumberValidationTextBox" materialDesign:HintAssist.HelperText="ID" Margin="0,15,0,0" />
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
                         <Button Style="{StaticResource MaterialDesignFlatButton}" IsDefault="True" Margin="0 8 8 0" Command="materialDesign:DialogHost.CloseDialogCommand">

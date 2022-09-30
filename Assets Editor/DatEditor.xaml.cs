@@ -56,23 +56,23 @@ namespace Assets_Editor
             }
         }
         public DatEditor(Appearances appearances)
-            :this()
+            : this()
         {
             foreach (var outfit in appearances.Outfit)
             {
-                ThingsOutfit.Add(new ShowList() { Id = outfit.Id});
+                ThingsOutfit.Add(new ShowList() { Id = outfit.Id });
             }
             foreach (var item in appearances.Object)
             {
-                ThingsItem.Add(new ShowList() { Id = item.Id});
+                ThingsItem.Add(new ShowList() { Id = item.Id });
             }
             foreach (var effect in appearances.Effect)
             {
-                ThingsEffect.Add(new ShowList() { Id = effect.Id});
+                ThingsEffect.Add(new ShowList() { Id = effect.Id });
             }
             foreach (var missile in appearances.Missile)
             {
-                ThingsMissile.Add(new ShowList() { Id = missile.Id});
+                ThingsMissile.Add(new ShowList() { Id = missile.Id });
             }
             SprListView.ItemsSource = MainWindow.AllSprList;
             UpdateShowList(ObjectMenu.SelectedIndex);
@@ -115,9 +115,9 @@ namespace Assets_Editor
                 VirtualizingStackPanel panel = Utils.FindVisualChild<VirtualizingStackPanel>(SprListView);
                 int offset = (int)panel.VerticalOffset;
                 int maxOffset = (int)panel.ViewportHeight;
-                if(nIndex - maxOffset == offset)
-                    scrollViewer.ScrollToVerticalOffset(offset+1);
-                else if(nIndex + 1 == offset)
+                if (nIndex - maxOffset == offset)
+                    scrollViewer.ScrollToVerticalOffset(offset + 1);
+                else if (nIndex + 1 == offset)
                     scrollViewer.ScrollToVerticalOffset(offset - 1);
                 else if (nIndex >= offset + maxOffset || nIndex < offset)
                     scrollViewer.ScrollToVerticalOffset(SprListView.SelectedIndex);
@@ -261,7 +261,7 @@ namespace Assets_Editor
             SprMount.IsChecked = false;
             SprFramesSliderCounter.Content = 1;
             ChangeObjectSprImg(CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value], true);
-            
+
         }
         private void LoadCurrentObjectAppearances()
         {
@@ -755,7 +755,8 @@ namespace Assets_Editor
             if (!string.IsNullOrWhiteSpace(A_FlagDescription.Text))
                 CurrentObjectAppearance.Description = A_FlagDescription.Text;
 
-            if ((bool)A_FlagGround.IsChecked) {
+            if ((bool)A_FlagGround.IsChecked)
+            {
                 CurrentObjectAppearance.Flags.Bank = new AppearanceFlagBank
                 {
                     Waypoints = (uint)A_FlagGroundSpeed.Value
@@ -766,22 +767,22 @@ namespace Assets_Editor
 
             if ((bool)A_FlagClip.IsChecked)
                 CurrentObjectAppearance.Flags.Clip = true;
-            else if(CurrentObjectAppearance.Flags.HasClip)
+            else if (CurrentObjectAppearance.Flags.HasClip)
                 CurrentObjectAppearance.Flags.ClearClip();
 
             if ((bool)A_FlagBottom.IsChecked)
                 CurrentObjectAppearance.Flags.Bottom = true;
-            else if(CurrentObjectAppearance.Flags.HasBottom)
+            else if (CurrentObjectAppearance.Flags.HasBottom)
                 CurrentObjectAppearance.Flags.ClearBottom();
 
             if ((bool)A_FlagTop.IsChecked)
                 CurrentObjectAppearance.Flags.Top = true;
-            else if(CurrentObjectAppearance.Flags.HasTop)
+            else if (CurrentObjectAppearance.Flags.HasTop)
                 CurrentObjectAppearance.Flags.ClearTop();
 
             if ((bool)A_FlagContainer.IsChecked)
                 CurrentObjectAppearance.Flags.Container = true;
-            else if(CurrentObjectAppearance.Flags.HasContainer)
+            else if (CurrentObjectAppearance.Flags.HasContainer)
                 CurrentObjectAppearance.Flags.ClearContainer();
 
             if ((bool)A_FlagCumulative.IsChecked)
@@ -951,7 +952,7 @@ namespace Assets_Editor
                     Color = (uint)A_FlagLightColor.Value
                 };
             }
-            else 
+            else
                 CurrentObjectAppearance.Flags.Light = null;
 
 
@@ -973,7 +974,7 @@ namespace Assets_Editor
                     Y = (uint)A_FlagShiftY.Value
                 };
             }
-            else 
+            else
                 CurrentObjectAppearance.Flags.Shift = null;
 
             if ((bool)A_FlagHeight.IsChecked)
@@ -1155,7 +1156,8 @@ namespace Assets_Editor
                 CurrentObjectAppearance.Flags = CurrentFlags.Clone();
                 LoadCurrentObjectAppearances();
                 StatusBar.MessageQueue.Enqueue($"Pasted Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
-            }else
+            }
+            else
                 StatusBar.MessageQueue.Enqueue($"Copy Flags First.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
@@ -1209,7 +1211,7 @@ namespace Assets_Editor
 
         private void Compile_Click(object sender, RoutedEventArgs e)
         {
-            File.Copy(System.IO.Path.Combine(MainWindow._assetsPath , "catalog-content.json"), System.IO.Path.Combine(MainWindow._assetsPath, "catalog-content.json-bak"), true);
+            File.Copy(System.IO.Path.Combine(MainWindow._assetsPath, "catalog-content.json"), System.IO.Path.Combine(MainWindow._assetsPath, "catalog-content.json-bak"), true);
             File.Copy(MainWindow._datPath, MainWindow._datPath + "-bak", true);
 
             using (StreamWriter file = File.CreateText(MainWindow._assetsPath + "\\catalog-content.json"))
@@ -1262,7 +1264,7 @@ namespace Assets_Editor
                 for (int i = 0; i < spritecount; i++)
                     frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
-                newObject.Id = (uint)(MainWindow.appearances.Outfit[^1].Id + 1);
+
                 newObject.FrameGroup.Add(frameIdleGroup);
                 if (NMoveGroup.IsChecked == true)
                 {
@@ -1281,10 +1283,11 @@ namespace Assets_Editor
                     spritecount = (int)(frameMoveGroup.SpriteInfo.Layers * frameMoveGroup.SpriteInfo.PatternWidth * frameMoveGroup.SpriteInfo.PatternHeight * frameMoveGroup.SpriteInfo.PatternDepth * int.Parse(NMoveGroupCount.Text));
                     for (int i = 0; i < spritecount; i++)
                         frameMoveGroup.SpriteInfo.SpriteId.Add(0);
+                    newObject.Id = uint.Parse(ID.Text);
                     newObject.FrameGroup.Add(frameMoveGroup);
                 }
                 MainWindow.appearances.Outfit.Add(newObject);
-                ThingsOutfit.Add(new ShowList() { Id = newObject.Id});
+                ThingsOutfit.Add(new ShowList() { Id = newObject.Id });
 
             }
             else if (NObjectType.SelectedIndex == 1)
@@ -1301,10 +1304,10 @@ namespace Assets_Editor
                 for (int i = 0; i < spritecount; i++)
                     frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
-                newObject.Id = (uint)(MainWindow.appearances.Object[^1].Id + 1);
+                newObject.Id = uint.Parse(ID.Text);
                 newObject.FrameGroup.Add(frameIdleGroup);
                 MainWindow.appearances.Object.Add(newObject);
-                ThingsItem.Add(new ShowList() { Id = newObject.Id});
+                ThingsItem.Add(new ShowList() { Id = newObject.Id });
 
             }
             else if (NObjectType.SelectedIndex == 2)
@@ -1321,10 +1324,10 @@ namespace Assets_Editor
                 for (int i = 0; i < spritecount; i++)
                     frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
-                newObject.Id = (uint)(MainWindow.appearances.Effect[^1].Id + 1);
+                newObject.Id = uint.Parse(ID.Text);
                 newObject.FrameGroup.Add(frameIdleGroup);
                 MainWindow.appearances.Effect.Add(newObject);
-                ThingsEffect.Add(new ShowList() { Id = newObject.Id});
+                ThingsEffect.Add(new ShowList() { Id = newObject.Id });
 
             }
             else if (NObjectType.SelectedIndex == 3)
@@ -1341,10 +1344,10 @@ namespace Assets_Editor
                 for (int i = 0; i < spritecount; i++)
                     frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
-                newObject.Id = (uint)(MainWindow.appearances.Missile[^1].Id + 1);
+                newObject.Id = uint.Parse(ID.Text);
                 newObject.FrameGroup.Add(frameIdleGroup);
                 MainWindow.appearances.Missile.Add(newObject);
-                ThingsMissile.Add(new ShowList() { Id = newObject.Id});
+                ThingsMissile.Add(new ShowList() { Id = newObject.Id });
 
             }
         }
