@@ -1262,7 +1262,14 @@ namespace Assets_Editor
                 for (int i = 0; i < spritecount; i++)
                     frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
-                newObject.Id = (uint)(MainWindow.appearances.Outfit[^1].Id + 1);
+                if (String.IsNullOrEmpty(ID.Text))
+                {
+                    newObject.Id = (uint)(MainWindow.appearances.Outfit[^1].Id + 1);
+                }
+                else
+                {
+                    newObject.Id = uint.Parse(ID.Text);
+                }
                 newObject.FrameGroup.Add(frameIdleGroup);
                 if (NMoveGroup.IsChecked == true)
                 {
@@ -1301,7 +1308,14 @@ namespace Assets_Editor
                 for (int i = 0; i < spritecount; i++)
                     frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
-                newObject.Id = (uint)(MainWindow.appearances.Object[^1].Id + 1);
+                if (String.IsNullOrEmpty(ID.Text))
+                {
+                    newObject.Id = (uint)(MainWindow.appearances.Object[^1].Id + 1);
+                }
+                else
+                {
+                    newObject.Id = uint.Parse(ID.Text);
+                }
                 newObject.FrameGroup.Add(frameIdleGroup);
                 MainWindow.appearances.Object.Add(newObject);
                 ThingsItem.Add(new ShowList() { Id = newObject.Id});
@@ -1321,7 +1335,14 @@ namespace Assets_Editor
                 for (int i = 0; i < spritecount; i++)
                     frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
-                newObject.Id = (uint)(MainWindow.appearances.Effect[^1].Id + 1);
+                if (String.IsNullOrEmpty(ID.Text))
+                {
+                    newObject.Id = (uint)(MainWindow.appearances.Effect[^1].Id + 1);
+                }
+                else
+                {
+                    newObject.Id = uint.Parse(ID.Text);
+                }
                 newObject.FrameGroup.Add(frameIdleGroup);
                 MainWindow.appearances.Effect.Add(newObject);
                 ThingsEffect.Add(new ShowList() { Id = newObject.Id});
@@ -1341,7 +1362,14 @@ namespace Assets_Editor
                 for (int i = 0; i < spritecount; i++)
                     frameIdleGroup.SpriteInfo.SpriteId.Add(0);
 
-                newObject.Id = (uint)(MainWindow.appearances.Missile[^1].Id + 1);
+                if (String.IsNullOrEmpty(ID.Text))
+                {
+                    newObject.Id = (uint)(MainWindow.appearances.Missile[^1].Id + 1);
+                }
+                else
+                {
+                    newObject.Id = uint.Parse(ID.Text);
+                }
                 newObject.FrameGroup.Add(frameIdleGroup);
                 MainWindow.appearances.Missile.Add(newObject);
                 ThingsMissile.Add(new ShowList() { Id = newObject.Id});
