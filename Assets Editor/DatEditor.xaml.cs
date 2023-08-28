@@ -9,13 +9,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Tibia.Protobuf.Appearances;
-using Tibia.Protobuf.Shared;
 
 namespace Assets_Editor
 {
@@ -345,10 +345,11 @@ namespace Assets_Editor
                 }
             }
             A_FlagMarketlevel.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasMinimumLevel) ? (int)CurrentObjectAppearance.Flags.Market.MinimumLevel : 0;
-            A_FlagName.Text = CurrentObjectAppearance.HasName ? CurrentObjectAppearance.Name : null;
-            A_FlagDescription.Text = CurrentObjectAppearance.HasDescription ? CurrentObjectAppearance.Description : null;
+            A_FlagName.Text = CurrentObjectAppearance.HasName ? CurrentObjectAppearance.Name.ToString() : null;
+            A_FlagDescription.Text = CurrentObjectAppearance.HasDescription ? CurrentObjectAppearance.Description.ToString() : null;
             A_FlagWrap.IsChecked = CurrentObjectAppearance.Flags.HasWrap;
             A_FlagUnwrap.IsChecked = CurrentObjectAppearance.Flags.HasUnwrap;
+            A_FlagWrapkit.IsChecked = CurrentObjectAppearance.Flags.HasWrapkit;
             A_FlagTopeffect.IsChecked = CurrentObjectAppearance.Flags.HasTop;
             A_FlagChangedToExpire.IsChecked = CurrentObjectAppearance.Flags.Changedtoexpire != null;
             A_FlagChangedToExpireId.Value = (CurrentObjectAppearance.Flags.Changedtoexpire != null && CurrentObjectAppearance.Flags.Changedtoexpire.HasFormerObjectTypeid) ? (int)CurrentObjectAppearance.Flags.Changedtoexpire.FormerObjectTypeid : 0;
@@ -750,10 +751,10 @@ namespace Assets_Editor
         private void ObjectSave_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(A_FlagName.Text))
-                CurrentObjectAppearance.Name = A_FlagName.Text;
+                CurrentObjectAppearance.Name = ByteString.CopyFrom(A_FlagName.Text, Encoding.UTF8);
 
             if (!string.IsNullOrWhiteSpace(A_FlagDescription.Text))
-                CurrentObjectAppearance.Description = A_FlagDescription.Text;
+                CurrentObjectAppearance.Description = ByteString.CopyFrom(A_FlagDescription.Text, Encoding.UTF8);
 
             if ((bool)A_FlagGround.IsChecked) {
                 CurrentObjectAppearance.Flags.Bank = new AppearanceFlagBank
@@ -1071,6 +1072,11 @@ namespace Assets_Editor
                 CurrentObjectAppearance.Flags.Unwrap = true;
             else if (CurrentObjectAppearance.Flags.HasUnwrap)
                 CurrentObjectAppearance.Flags.ClearUnwrap();
+
+            if ((bool)A_FlagWrapkit.IsChecked)
+                CurrentObjectAppearance.Flags.Wrapkit = true;
+            else if (CurrentObjectAppearance.Flags.HasWrapkit)
+                CurrentObjectAppearance.Flags.ClearWrapkit();
 
             if ((bool)A_FlagTopeffect.IsChecked)
                 CurrentObjectAppearance.Flags.Topeffect = true;
