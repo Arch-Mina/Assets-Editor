@@ -346,8 +346,9 @@
                                                     <TextBox x:Name="A_FlagDescription" Width="240" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" FontWeight="Medium" VerticalAlignment="Center" Height="20"/>
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                                    <CheckBox x:Name="A_FlagWrap" Content="Wrap" Width="150"/>
-                                                    <CheckBox x:Name="A_FlagUnwrap" Content="Unwrap"/>
+                                                    <CheckBox x:Name="A_FlagWrap" Content="Wrap" Width="120"/>
+                                                    <CheckBox x:Name="A_FlagUnwrap" Content="Unwrap" Width="120"/>
+                                                    <CheckBox x:Name="A_FlagWrapkit" Content="Wrap Kit" />
                                                 </StackPanel>
                                                 <CheckBox x:Name="A_FlagTopeffect" Content="Top Effect" Margin="0,5,0,0"/>
                                                 <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
