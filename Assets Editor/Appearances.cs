@@ -9843,26 +9843,29 @@ namespace Tibia.Protobuf.Appearances
 
         /// <summary>Field number for the "name" field.</summary>
         public const int NameFieldNumber = 1;
-        private readonly static pb::ByteString NameDefaultValue = pb::ByteString.Empty;
+        private readonly static string NameDefaultValue = string.Empty;
 
-        private pb::ByteString name_;
+        private string name_;
+
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public pb::ByteString Name
-        {
+        public string Name
+            {
             get { return name_ ?? NameDefaultValue; }
             set
-            {
-                name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+                {
+                    name_ = value;
+                }
             }
-        }
+
         /// <summary>Gets whether the "name" field is set</summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
         public bool HasName
-        {
-            get { return name_ != null; }
-        }
+            {
+                get { return !string.IsNullOrEmpty(name_); }
+            }
+
         /// <summary>Clears the value of the "name" field</summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -9873,17 +9876,17 @@ namespace Tibia.Protobuf.Appearances
 
         /// <summary>Field number for the "location" field.</summary>
         public const int LocationFieldNumber = 2;
-        private readonly static pb::ByteString LocationDefaultValue = pb::ByteString.Empty;
-
-        private pb::ByteString location_;
+        private readonly static string LocationDefaultValue = string.Empty;
+        
+        private string location_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public pb::ByteString Location
+        public string Location
         {
             get { return location_ ?? LocationDefaultValue; }
             set
             {
-                location_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+                location_ = value;
             }
         }
         /// <summary>Gets whether the "location" field is set</summary>
@@ -9891,7 +9894,7 @@ namespace Tibia.Protobuf.Appearances
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
         public bool HasLocation
         {
-            get { return location_ != null; }
+            get { return !string.IsNullOrEmpty(location_); }
         }
         /// <summary>Clears the value of the "location" field</summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -9996,26 +9999,29 @@ namespace Tibia.Protobuf.Appearances
 
         /// <summary>Field number for the "currency_quest_flag_display_name" field.</summary>
         public const int CurrencyQuestFlagDisplayNameFieldNumber = 6;
-        private readonly static pb::ByteString CurrencyQuestFlagDisplayNameDefaultValue = pb::ByteString.Empty;
+        private readonly static string CurrencyQuestFlagDisplayNameDefaultValue = string.Empty;
 
-        private pb::ByteString currencyQuestFlagDisplayName_;
+        private string currencyQuestFlagDisplayName_;
+
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public pb::ByteString CurrencyQuestFlagDisplayName
+        public string CurrencyQuestFlagDisplayName
         {
             get { return currencyQuestFlagDisplayName_ ?? CurrencyQuestFlagDisplayNameDefaultValue; }
             set
             {
-                currencyQuestFlagDisplayName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+                currencyQuestFlagDisplayName_ = value;
             }
         }
+
         /// <summary>Gets whether the "currency_quest_flag_display_name" field is set</summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
         public bool HasCurrencyQuestFlagDisplayName
         {
-            get { return currencyQuestFlagDisplayName_ != null; }
+            get { return !string.IsNullOrEmpty(currencyQuestFlagDisplayName_); }
         }
+
         /// <summary>Clears the value of the "currency_quest_flag_display_name" field</summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -10122,13 +10128,14 @@ namespace Tibia.Protobuf.Appearances
             if (HasName)
             {
                 output.WriteRawTag(10);
-                output.WriteBytes(Name);
+                output.WriteString(Name);
             }
             if (HasLocation)
             {
                 output.WriteRawTag(18);
-                output.WriteBytes(Location);
+                output.WriteString(Location);
             }
+
             if (HasSalePrice)
             {
                 output.WriteRawTag(24);
@@ -10147,7 +10154,7 @@ namespace Tibia.Protobuf.Appearances
             if (HasCurrencyQuestFlagDisplayName)
             {
                 output.WriteRawTag(50);
-                output.WriteBytes(CurrencyQuestFlagDisplayName);
+                output.WriteString(CurrencyQuestFlagDisplayName);
             }
             if (_unknownFields != null)
             {
@@ -10163,12 +10170,12 @@ namespace Tibia.Protobuf.Appearances
             int size = 0;
             if (HasName)
             {
-                size += 1 + pb::CodedOutputStream.ComputeBytesSize(Name);
+                size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
             }
             if (HasLocation)
             {
-                size += 1 + pb::CodedOutputStream.ComputeBytesSize(Location);
-            }
+                size += 1 + pb::CodedOutputStream.ComputeStringSize(Location);
+                }
             if (HasSalePrice)
             {
                 size += 1 + pb::CodedOutputStream.ComputeUInt32Size(SalePrice);
@@ -10183,7 +10190,7 @@ namespace Tibia.Protobuf.Appearances
             }
             if (HasCurrencyQuestFlagDisplayName)
             {
-                size += 1 + pb::CodedOutputStream.ComputeBytesSize(CurrencyQuestFlagDisplayName);
+                size += 1 + pb::CodedOutputStream.ComputeStringSize(CurrencyQuestFlagDisplayName);
             }
             if (_unknownFields != null)
             {
@@ -10284,14 +10291,14 @@ namespace Tibia.Protobuf.Appearances
                         break;
                     case 10:
                         {
-                            Name = input.ReadBytes();
+                            Name = input.ReadString();
                             break;
                         }
                     case 18:
                         {
-                            Location = input.ReadBytes();
+                            Location = input.ReadString();
                             break;
-                        }
+                            }
                     case 24:
                         {
                             SalePrice = input.ReadUInt32();
@@ -10309,7 +10316,7 @@ namespace Tibia.Protobuf.Appearances
                         }
                     case 50:
                         {
-                            CurrencyQuestFlagDisplayName = input.ReadBytes();
+                            CurrencyQuestFlagDisplayName = input.ReadString();
                             break;
                         }
                 }
