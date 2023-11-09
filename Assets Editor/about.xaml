@@ -1,0 +1,30 @@
+﻿<Window x:Class="Assets_Editor.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+
+        xmlns:local="clr-namespace:Assets_Editor"
+        mc:Ignorable="d"
+        Title="About" Height="250" Width="470" ScrollViewer.VerticalScrollBarVisibility="Disabled" ResizeMode="NoResize">
+    <Grid>
+        <Image Source="pack://application:,,,/Resources/Walking_000.png" Margin="0,10,280,0" Stretch="Fill" Width="160" Height="128"/>
+        <Label Content="Assets Editor V2.0" HorizontalAlignment="Center" Margin="0,5,0,0" FontFamily="Algerian" FontSize="28"/>
+        <StackPanel Margin="154,53,10,5">
+            <TextBlock Text="Assets Editor is an open-source tool designed for modifying and managing client assets for both Tibia 12+ and Tibia 1098." TextWrapping="Wrap" Margin="10,0,10,0"/>
+            <TextBlock TextWrapping="Wrap" Margin="10">
+            <Run Text="For suggestions and reporting bugs, please use the project's GitHub repository: "/>
+            <Hyperlink NavigateUri="https://github.com/Arch-Mina/Assets-Editor" RequestNavigate="Hyperlink_OnRequestNavigate">
+                <Run Text="AssetsEditor" />
+            </Hyperlink>
+            </TextBlock>
+            <TextBlock TextWrapping="Wrap" Margin="10,0,10,0">
+            <Run Text="Developed by "/>
+            <Hyperlink NavigateUri="https://otland.net/members/spiderot.16412/" RequestNavigate="Hyperlink_OnRequestNavigate">
+                <Run Text="SpiderOT" />
+            </Hyperlink>
+            </TextBlock>
+            <TextBlock Text="{Binding ApplicationVersion}" FontStyle="Italic" Margin="10"/>
+        </StackPanel>
+    </Grid>
+</Window>

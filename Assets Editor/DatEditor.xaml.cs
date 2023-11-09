@@ -9,12 +9,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using Tibia.Protobuf.Appearances;
 
 namespace Assets_Editor
@@ -32,18 +34,29 @@ namespace Assets_Editor
         public AppearanceFlags CurrentFlags = null;
         List<AppearanceFlagNPC> NpcDataList = new List<AppearanceFlagNPC>();
         public ObservableCollection<Box> BoundingBoxList = new ObservableCollection<Box>();
-        private int CurrentSprDir = 1;
-        private ObservableCollection<ShowList> ObjectSprList = new ObservableCollection<ShowList>();
-
-        private ObservableCollection<ShowList> ObjectOutfitSprList = new ObservableCollection<ShowList>();
-        private ObservableCollection<ShowList> ObjectAddonSprList = new ObservableCollection<ShowList>();
-        private ObservableCollection<ShowList> ObjectMountSprList = new ObservableCollection<ShowList>();
-        private ObservableCollection<ShowList> ObjectAddonMountSprList = new ObservableCollection<ShowList>();
+        private int CurrentSprDir = 0;
+        private bool isPageLoaded = false;
+        private uint blankSpr = 158019;
+        private bool isObjectLoaded = false;
+        private Appearances exportObjects = new Appearances();
+        private uint exportSprCounter = 0;
+        private int importSprCounter = 0;
+        private Dictionary<uint, uint> importSprIdList = new Dictionary<uint, uint>();
+        private class ImportSpriteInfo
+        {
+            public MemoryStream Stream { get; set; }
+            public int OriginalIndex { get; set; }
+            public System.Drawing.Size Size { get; set; }
+        }
 
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
             Application.Current.Shutdown();
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            isPageLoaded = true;
         }
         public DatEditor()
         {
@@ -77,6 +90,26 @@ namespace Assets_Editor
             SprListView.ItemsSource = MainWindow.AllSprList;
             UpdateShowList(ObjectMenu.SelectedIndex);
         }
+        private void UpdateShowList(int selection)
+        {
+            if (ObjListView != null)
+            {
+                ObjListViewSelectedIndex.Minimum = 1;
+                if (selection == 0)
+                    ObjListView.ItemsSource = ThingsOutfit;
+                else if (selection == 1)
+                {
+                    ObjListView.ItemsSource = ThingsItem;
+                    ObjListViewSelectedIndex.Minimum = 100;
+                }
+                else if (selection == 2)
+                    ObjListView.ItemsSource = ThingsEffect;
+                else if (selection == 3)
+                    ObjListView.ItemsSource = ThingsMissile;
+
+                ObjListView.SelectedIndex = 0;
+            }
+        }
         private void SprListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             VirtualizingStackPanel panel = Utils.FindVisualChild<VirtualizingStackPanel>(SprListView);
@@ -86,7 +119,7 @@ namespace Assets_Editor
                 //int maxOffset = (int)panel.ViewportHeight;
                 for (int i = 0; i < SprListView.Items.Count; i++)
                 {
-                    if (i >= offset && i < Math.Min(offset + 14, SprListView.Items.Count) && MainWindow.SprLists.ContainsKey(i))
+                    if (i >= offset && i < Math.Min(offset + 20, SprListView.Items.Count) && MainWindow.SprLists.ContainsKey(i))
                         MainWindow.AllSprList[i].Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[i]);
                     else
                         MainWindow.AllSprList[i].Image = null;
@@ -123,26 +156,6 @@ namespace Assets_Editor
                     scrollViewer.ScrollToVerticalOffset(SprListView.SelectedIndex);
             }
         }
-        private void UpdateShowList(int selection)
-        {
-            if (ObjListView != null)
-            {
-                ObjListViewSelectedIndex.Minimum = 1;
-                if (selection == 0)
-                    ObjListView.ItemsSource = ThingsOutfit;
-                else if (selection == 1)
-                {
-                    ObjListView.ItemsSource = ThingsItem;
-                    ObjListViewSelectedIndex.Minimum = 100;
-                }
-                else if (selection == 2)
-                    ObjListView.ItemsSource = ThingsEffect;
-                else if (selection == 3)
-                    ObjListView.ItemsSource = ThingsMissile;
-
-                ObjListView.SelectedIndex = 0;
-            }
-        }
 
         private void ObjectMenuChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
@@ -157,8 +170,9 @@ namespace Assets_Editor
 
                 for (int i = 0; i < ObjListView.Items.Count; i++)
                 {
-                    if (i >= offset && i < Math.Min(offset + 14, ObjListView.Items.Count))
+                    if (i >= offset && i < Math.Min(offset + 20, ObjListView.Items.Count))
                     {
+                        ShowList item = (ShowList)ObjListView.Items[i];
                         if (ObjectMenu.SelectedIndex == 0)
                             ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)MainWindow.appearances.Outfit[i].FrameGroup[0].SpriteInfo.SpriteId[0]]);
                         else if (ObjectMenu.SelectedIndex == 1)
@@ -167,6 +181,8 @@ namespace Assets_Editor
                             ThingsEffect[i].Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)MainWindow.appearances.Effect[i].FrameGroup[0].SpriteInfo.SpriteId[0]]);
                         else if (ObjectMenu.SelectedIndex == 3)
                             ThingsMissile[i].Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)MainWindow.appearances.Missile[i].FrameGroup[0].SpriteInfo.SpriteId[0]]);
+
+                        AnimateSelectedListItem(item);
                     }
                     else
                     {
@@ -215,15 +231,12 @@ namespace Assets_Editor
                 if (ObjectMenu.SelectedIndex == 0)
                     LoadSelectedObjectAppearances(MainWindow.appearances.Outfit[ObjListView.SelectedIndex]);
                 else if (ObjectMenu.SelectedIndex == 1)
-                {
                     LoadSelectedObjectAppearances(MainWindow.appearances.Object[ObjListView.SelectedIndex]);
-                }
                 else if (ObjectMenu.SelectedIndex == 2)
                     LoadSelectedObjectAppearances(MainWindow.appearances.Effect[ObjListView.SelectedIndex]);
                 else if (ObjectMenu.SelectedIndex == 3)
                     LoadSelectedObjectAppearances(MainWindow.appearances.Missile[ObjListView.SelectedIndex]);
 
-                ObjListViewSelectedIndex.Value = (int)showList.Id;
                 if (ObjectMenu.SelectedIndex == 0)
                 {
                     SprUpArrow.Visibility = Visibility.Visible;
@@ -243,28 +256,83 @@ namespace Assets_Editor
 
             }
         }
+
         private void LoadSelectedObjectAppearances(Appearance ObjectAppearance)
         {
             CurrentObjectAppearance = ObjectAppearance.Clone();
             LoadCurrentObjectAppearances();
             SprGroupSlider.ValueChanged -= SprGroupSlider_ValueChanged;
-            A_SprGroups.Value = CurrentObjectAppearance.FrameGroup.Count;
-            SprFramesSlider.Value = 0;
-
             SprGroupSlider.Value = 0;
-            SprGroupType.Content = "Idle";
-
-            LoadSprPatterns((int)SprGroupSlider.Value);
+            ChangeGroupType(0);
             SprGroupSlider.ValueChanged += SprGroupSlider_ValueChanged;
-            CurrentSprDir = 1;
-            SprBlendLayer.IsChecked = false;
-            SprMount.IsChecked = false;
-            SprFramesSliderCounter.Content = 1;
-            ChangeObjectSprImg(CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value], true);
-            
+
         }
+
+        private void ChangeGroupType(int group)
+        {
+            isObjectLoaded = false;
+            A_SprGroups.Value = CurrentObjectAppearance.FrameGroup.Count;
+            A_SprLayers.Value = (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Layers;
+            A_SprPaternX.Value = (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.PatternWidth;
+            A_SprPaternY.Value = (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.PatternHeight;
+            A_SprPaternZ.Value = (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.PatternDepth;
+            A_SprAnimation.Value = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation != null ? (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.SpritePhase.Count : 1;
+
+            CurrentSprDir = 2;
+            ButtonProgressAssist.SetIsIndicatorVisible(SprUpArrow, false);
+            ButtonProgressAssist.SetIsIndicatorVisible(SprRightArrow, false);
+            ButtonProgressAssist.SetIsIndicatorVisible(SprDownArrow, true);
+            ButtonProgressAssist.SetIsIndicatorVisible(SprLeftArrow, false);
+            ForceSliderChange();
+            SprFramesSlider.Maximum = (double)A_SprAnimation.Value - 1;
+            AnimationTab.IsEnabled = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation != null;
+            if (A_SprAnimation.Value > 1)
+            {
+                SprDefaultPhase.Value = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasDefaultStartPhase ? (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.DefaultStartPhase : 0;
+                SprRandomPhase.IsChecked = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasRandomStartPhase ? CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.RandomStartPhase : false;
+                SprSynchronized.IsChecked = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasSynchronized ? CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.Synchronized : false;
+                if (CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasLoopType)
+                {
+                    if (CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.LoopType == ANIMATION_LOOP_TYPE.Pingpong)
+                        SprLoopType.SelectedIndex = 0;
+                    else if (CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.LoopType == ANIMATION_LOOP_TYPE.Infinite)
+                        SprLoopType.SelectedIndex = 1;
+                    else if (CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.LoopType == ANIMATION_LOOP_TYPE.Counted)
+                        SprLoopType.SelectedIndex = 2;
+                    else
+                        SprLoopType.SelectedIndex = -1;
+                }
+                SprLoopCount.Value = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasLoopCount ? (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.LoopCount : 0;
+
+            }
+
+            A_SprOpaque.IsChecked = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.IsOpaque;
+            A_SprBounding.Value = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.HasBoundingSquare ? (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.BoundingSquare : 0;
+
+            if (CurrentObjectAppearance.FrameGroup[group].SpriteInfo.BoundingBoxPerDirection != null)
+            {
+                BoundingBoxList.Clear();
+                foreach (var box in CurrentObjectAppearance.FrameGroup[group].SpriteInfo.BoundingBoxPerDirection)
+                    BoundingBoxList.Add(new Box() { X = box.X, Y = box.Y, Width = box.Width, Height = box.Height });
+                BoxPerDirection.ItemsSource = null;
+                BoxPerDirection.ItemsSource = BoundingBoxList;
+
+            }
+            SprGroupType.Content = SprGroupSlider.Value == 0 ? "Idle" : "Walking";
+            isObjectLoaded = true;
+        }
+        private void ForceSliderChange()
+        {
+            SprFramesSlider.ValueChanged -= SprFramesSlider_ValueChanged;
+            SprFramesSlider.Minimum = -1;
+            SprFramesSlider.Value = -1;
+            SprFramesSlider.ValueChanged += SprFramesSlider_ValueChanged;
+            SprFramesSlider.Minimum = 0;
+        }
+
         private void LoadCurrentObjectAppearances()
         {
+            A_FlagId.Value = (int)CurrentObjectAppearance.Id;
             A_FlagGround.IsChecked = CurrentObjectAppearance.Flags.Bank != null;
             A_FlagGroundSpeed.Value = (CurrentObjectAppearance.Flags.Bank != null && CurrentObjectAppearance.Flags.Bank.HasWaypoints) ? (int)CurrentObjectAppearance.Flags.Bank.Waypoints : 0;
             A_FlagClip.IsChecked = CurrentObjectAppearance.Flags.Clip;
@@ -324,32 +392,32 @@ namespace Assets_Editor
             A_FlagProfessionSorcerer.IsChecked = false;
             A_FlagProfessionDruid.IsChecked = false;
             A_FlagProfessionPromoted.IsChecked = false;
-            if (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.RestrictToProfession.Count > 0)
+            if (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.RestrictToVocation.Count > 0)
             {
-                foreach (var profession in CurrentObjectAppearance.Flags.Market.RestrictToProfession)
+                foreach (var profession in CurrentObjectAppearance.Flags.Market.RestrictToVocation)
                 {
-                    if (profession == PLAYER_PROFESSION.Any)
+                    if (profession == VOCATION.Any)
                         A_FlagProfessionAny.IsChecked = true;
-                    else if (profession == PLAYER_PROFESSION.None)
+                    else if (profession == VOCATION.None)
                         A_FlagProfessionNone.IsChecked = true;
-                    else if (profession == PLAYER_PROFESSION.Knight)
+                    else if (profession == VOCATION.Knight)
                         A_FlagProfessionKnight.IsChecked = true;
-                    else if (profession == PLAYER_PROFESSION.Paladin)
+                    else if (profession == VOCATION.Paladin)
                         A_FlagProfessionPaladin.IsChecked = true;
-                    else if (profession == PLAYER_PROFESSION.Sorcerer)
+                    else if (profession == VOCATION.Sorcerer)
                         A_FlagProfessionSorcerer.IsChecked = true;
-                    else if (profession == PLAYER_PROFESSION.Druid)
+                    else if (profession == VOCATION.Druid)
                         A_FlagProfessionDruid.IsChecked = true;
-                    else if (profession == PLAYER_PROFESSION.Promoted)
+                    else if (profession == VOCATION.Promoted)
                         A_FlagProfessionPromoted.IsChecked = true;
                 }
             }
             A_FlagMarketlevel.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasMinimumLevel) ? (int)CurrentObjectAppearance.Flags.Market.MinimumLevel : 0;
-            A_FlagName.Text = CurrentObjectAppearance.HasName ? CurrentObjectAppearance.Name.ToString() : null;
-            A_FlagDescription.Text = CurrentObjectAppearance.HasDescription ? CurrentObjectAppearance.Description.ToString() : null;
+            A_FlagName.Text = CurrentObjectAppearance.HasName ? CurrentObjectAppearance.Name : null;
+            A_FlagDescription.Text = CurrentObjectAppearance.HasDescription ? CurrentObjectAppearance.Description : null;
             A_FlagWrap.IsChecked = CurrentObjectAppearance.Flags.HasWrap;
             A_FlagUnwrap.IsChecked = CurrentObjectAppearance.Flags.HasUnwrap;
-            A_FlagWrapkit.IsChecked = CurrentObjectAppearance.Flags.HasWrapkit;
+            A_FlagDecoItemKit.IsChecked = CurrentObjectAppearance.Flags.HasDecoItemKit;
             A_FlagTopeffect.IsChecked = CurrentObjectAppearance.Flags.HasTop;
             A_FlagChangedToExpire.IsChecked = CurrentObjectAppearance.Flags.Changedtoexpire != null;
             A_FlagChangedToExpireId.Value = (CurrentObjectAppearance.Flags.Changedtoexpire != null && CurrentObjectAppearance.Flags.Changedtoexpire.HasFormerObjectTypeid) ? (int)CurrentObjectAppearance.Flags.Changedtoexpire.FormerObjectTypeid : 0;
@@ -383,6 +451,7 @@ namespace Assets_Editor
 
             A_FlagNPCData.ItemsSource = null;
             A_FlagNPCData.ItemsSource = NpcDataList;
+            A_FullInfo.Text = CurrentObjectAppearance.ToString();
         }
         private void A_FlagLightColorPickerChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
@@ -413,348 +482,281 @@ namespace Assets_Editor
         {
             A_FlagMarketProfession.SelectedIndex = -1;
         }
+        private void SprFramesSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            FrameGroup frameGroup = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value];
+            if (frameGroup.SpriteInfo.Animation != null)
+            {
+                SprPhaseMin.Value = (int)frameGroup.SpriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMin;
+                SprPhaseMax.Value = (int)frameGroup.SpriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMax;
+            }
 
+            SpriteViewerGrid.Children.Clear();
+            SpriteViewerGrid.RowDefinitions.Clear();
+            SpriteViewerGrid.ColumnDefinitions.Clear();
+            int gridWidth = 1;
+            int gridHeight = 1;
+            if (ObjectMenu.SelectedIndex != 0)
+            {
+                gridWidth = (int)frameGroup.SpriteInfo.PatternHeight;
+                gridHeight = (int)frameGroup.SpriteInfo.PatternWidth;
+            }
+            int imgWidth = (int)Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)frameGroup.SpriteInfo.SpriteId[0]]).Width;
+            int imgHeight = (int)Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)frameGroup.SpriteInfo.SpriteId[0]]).Height;
 
+            for (int i = 0; i < gridWidth; i++)
+            {
+                RowDefinition rowDef = new RowDefinition();
+                rowDef.Height = new GridLength(imgHeight);
+                SpriteViewerGrid.RowDefinitions.Add(rowDef);
+            }
+            for (int i = 0; i < gridHeight; i++)
+            {
+                ColumnDefinition colDef = new ColumnDefinition();
+                colDef.Width = new GridLength(imgWidth);
+                SpriteViewerGrid.ColumnDefinitions.Add(colDef);
+            }
+
+            if (ObjectMenu.SelectedIndex == 0)
+            {
+                int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.Layers - 1 : 0;
+                int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
+                int addon = frameGroup.SpriteInfo.PatternWidth > 1 ? (int)SprAddonSlider.Value : 0;
+                int index = GetSpriteIndex(frameGroup, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), addon, mount, (int)SprFramesSlider.Value);
+                int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
+                SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(MainWindow.SprLists[spriteId]), 1, spriteId, index);
+            }
+            else
+            {
+                int counter = 1;
+                int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
+                for (int ph = 0; ph < frameGroup.SpriteInfo.PatternHeight; ph++)
+                {
+                    for (int pw = 0; pw < frameGroup.SpriteInfo.PatternWidth; pw++)
+                    {
+                        int index = GetSpriteIndex(frameGroup, 0, pw, ph, mount, (int)SprFramesSlider.Value);
+                        int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
+                        SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(MainWindow.SprLists[spriteId]), counter, spriteId, index);
+                        counter++;
+                    }
+                }
+            }
+        }
+        private void SetImageInGrid(Grid grid, int gridWidth, int gridHeight, BitmapImage image, int id, int spriteId, int index)
+        {
+            // Get the row and column of the cell based on the ID number
+            int row = (id - 1) / gridHeight;
+            int col = (id - 1) % gridHeight;
+
+            // Get the existing Image control in the cell, or create a new one if it doesn't exist
+            Image existingImage = null;
+            foreach (UIElement element in grid.Children)
+            {
+                if (Grid.GetRow(element) == row && Grid.GetColumn(element) == col && element is Image)
+                {
+                    existingImage = element as Image;
+                    break;
+                }
+            }
+            if (existingImage == null)
+            {
+                existingImage = new Image();
+                existingImage.Width = image.Width;
+                existingImage.Height = image.Height;
+                AllowDrop = true;
+                Grid.SetRow(existingImage, row);
+                Grid.SetColumn(existingImage, col);
+                grid.Children.Add(existingImage);
+            }
+            existingImage.MouseLeftButtonDown += Img_PreviewMouseLeftButtonDown;
+            existingImage.Drop += Spr_Drop;
+            existingImage.ToolTip = spriteId.ToString();
+            existingImage.Tag = index;
+            // Set the Source property of the Image control to the specified Image
+            existingImage.Source = image;
+            RenderOptions.SetBitmapScalingMode(existingImage, BitmapScalingMode.NearestNeighbor);
+        }
         private void Spr_Drop(object sender, DragEventArgs e)
         {
             Image img = e.Source as Image;
             ShowList data = (ShowList)e.Data.GetData(typeof(ShowList));
-            ObjectSprList[(int)SprFramesSlider.Value + (int)img.Tag].Id = data.Id;
-            ObjectSprList[(int)SprFramesSlider.Value + (int)img.Tag].Image = data.Image;
             img.Source = data.Image;
-
-            uint patternHeight = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.HasPatternHeight ? CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.PatternHeight : 1;
-            uint patternWidth = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.HasPatternWidth ? CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.PatternWidth : 1;
-            ObjectSprImgPanel.Width = ObjectMenu.SelectedIndex == 0 ? data.Image.Width : data.Image.Width * patternWidth;
-            ObjectSprImgPanel.Height = ObjectMenu.SelectedIndex == 0 ? data.Image.Height : data.Image.Height * patternHeight;
-        }
-
-
-        private void SprFramesSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            SprFramesSliderCounter.Content = (int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency) + 1;
-            SetSpriteFrame();
-        }
-
-        private void SetSpriteFrame()
-        {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
+            img.Width = data.Image.Width;
+            img.Height = data.Image.Height;
+            foreach (ColumnDefinition column in SpriteViewerGrid.ColumnDefinitions)
             {
-                SpriteAnimationGroup.IsEnabled = true;
-                SprPhaseMin.Value = (int)CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMin;
-                SprPhaseMax.Value = (int)CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMax;
-
-                List<Image> images = Utils.GetLogicalChildCollection<Image>(ObjectSprImgPanel);
-                foreach (Image child in images)
-                {
-                    child.Source = ObjectSprList[(int)child.Tag + ((int)SprFramesSlider.Value * images.Count)].Image;
-                }
+                column.Width = new GridLength(img.Width);
             }
-            else
-                SpriteAnimationGroup.IsEnabled = false;
+
+            foreach (RowDefinition row in SpriteViewerGrid.RowDefinitions)
+            {
+                row.Height = new GridLength(img.Height);
+            }
+
+            img.ToolTip = data.Id.ToString();
+            CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.SpriteId[(int)img.Tag] = uint.Parse((string)img.ToolTip);
         }
+
+        public  int GetSpriteIndex(FrameGroup frameGroup, int layers, int patternX, int patternY, int patternZ, int frames)
+        {
+            var spriteInfo = frameGroup.SpriteInfo;
+            int index = 0;
+
+            if (spriteInfo.Animation != null)
+                index = (int)(frames % spriteInfo.Animation.SpritePhase.Count);
+            index = index * (int)spriteInfo.PatternDepth + patternZ;
+            index = index * (int)spriteInfo.PatternHeight + patternY;
+            index = index * (int)spriteInfo.PatternWidth + patternX;
+            index = index * (int)spriteInfo.Layers + layers;
+            return index;
+        }
+
         private void SprGroupSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            SaveSprPatterns(SprGroupSlider.Value == 0 ? 1 : 0);
-            LoadSprPatterns((int)SprGroupSlider.Value);
-            SprGroupType.Content = SprGroupSlider.Value == 0 ? "Idle" : "Walking";
-            StorePreviousGroup(SprGroupSlider.Value == 0 ? 1 : 0);
-            ChangeObjectSprImg(CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value], true);
+            ChangeGroupType((int)SprGroupSlider.Value);
         }
-        private void LoadSprPatterns(int groupId)
-        {
-            A_SprLayers.Value = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.HasLayers ? (int)CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Layers : 1;
-            A_SprPaternX.Value = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.HasPatternWidth ? (int)CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.PatternWidth : 1;
-            A_SprPaternY.Value = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.HasPatternHeight ? (int)CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.PatternHeight : 1;
-            A_SprPaternZ.Value = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.HasPatternDepth ? (int)CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.PatternDepth : 1;
-            AnimationTab.IsEnabled = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation != null;
-            if (CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation != null)
-            {
-                SprDefaultPhase.Value = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.HasDefaultStartPhase ? (int)CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.DefaultStartPhase : 0;
-                SprRandomPhase.IsChecked = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.HasRandomStartPhase ? CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.RandomStartPhase : false;
-                SprSynchronized.IsChecked = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.HasSynchronized ? CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.Synchronized : false;
 
-                if (CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.HasLoopType)
-                {
-                    if (CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.LoopType == ANIMATION_LOOP_TYPE.Pingpong)
-                        SprLoopType.SelectedIndex = 0;
-                    else if (CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.LoopType == ANIMATION_LOOP_TYPE.Infinite)
-                        SprLoopType.SelectedIndex = 1;
-                    else if (CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.LoopType == ANIMATION_LOOP_TYPE.Counted)
-                        SprLoopType.SelectedIndex = 2;
-                    else
-                        SprLoopType.SelectedIndex = -1;
-                }
-                SprLoopCount.Value = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.HasLoopCount ? (int)CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.LoopCount : 0;
-            }
-            A_SprOpaque.IsChecked = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.IsOpaque;
-            A_SprBounding.Value = CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.HasBoundingSquare ? (int)CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.BoundingSquare : 0;
-
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection != null)
-            {
-                BoundingBoxList.Clear();
-                foreach (var box in CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection)
-                    BoundingBoxList.Add(new Box() { X = box.X, Y = box.Y, Width = box.Width, Height = box.Height });
-                BoxPerDirection.ItemsSource = null;
-                BoxPerDirection.ItemsSource = BoundingBoxList;
-
-            }
-        }
-        private void SaveSprPatterns(int groupId)
-        {
-            CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.IsOpaque = (bool)A_SprOpaque.IsChecked;
-            A_SprOpaque.IsChecked = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.IsOpaque;
-
-            CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.BoundingSquare = (uint)A_SprBounding.Value;
-            A_SprBounding.Value = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.HasBoundingSquare ? (int)CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingSquare : 0;
-
-
-            if (CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation != null)
-            {
-                CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.DefaultStartPhase = (uint)SprDefaultPhase.Value;
-                CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.RandomStartPhase = (bool)SprRandomPhase.IsChecked;
-                CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.Synchronized = (bool)SprSynchronized.IsChecked;
-
-                if (SprLoopType.SelectedIndex > -1)
-                    CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.LoopType = (ANIMATION_LOOP_TYPE)(SprLoopType.SelectedIndex - 1);
-                if (SprLoopCount.Value > 0)
-                    CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.Animation.LoopCount = (uint)SprLoopCount.Value;
-            }
-
-            if (BoundingBoxList.Count > 0)
-            {
-                CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.BoundingBoxPerDirection.Clear();
-                foreach (var box in BoundingBoxList)
-                    CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.BoundingBoxPerDirection.Add(box);
-            }
-        }
-        private void StorePreviousGroup(int groupId)
-        {
-
-            foreach (ShowList showList in ObjectOutfitSprList)
-            {
-                CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.SpriteId[showList.Pos] = showList.Id;
-            }
-            foreach (ShowList showList in ObjectMountSprList)
-            {
-                CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.SpriteId[showList.Pos] = showList.Id;
-            }
-            foreach (ShowList showList in ObjectAddonSprList)
-            {
-                CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.SpriteId[showList.Pos] = showList.Id;
-            }
-            foreach (ShowList showList in ObjectAddonMountSprList)
-            {
-                CurrentObjectAppearance.FrameGroup[groupId].SpriteInfo.SpriteId[showList.Pos] = showList.Id;
-            }
-        }
         private void ChangeDirection(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             Button _dir = (Button)sender;
 
             CurrentSprDir = int.Parse(_dir.Uid);
-            ChangeSprDirection();
+            ForceSliderChange();
+            ButtonProgressAssist.SetIsIndicatorVisible(SprUpArrow, false);
+            ButtonProgressAssist.SetIsIndicatorVisible(SprRightArrow, false);
+            ButtonProgressAssist.SetIsIndicatorVisible(SprDownArrow, false);
+            ButtonProgressAssist.SetIsIndicatorVisible(SprLeftArrow, false);
+            ButtonProgressAssist.SetIsIndicatorVisible(_dir, true);
         }
 
-        private void ChangeSprDirection()
-        {
-            uint patternLayers = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.HasLayers ? CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Layers : 1;
-            uint patternHeight = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.HasPatternHeight ? CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.PatternHeight : 1;
-            uint patternWidth = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.HasPatternWidth ? CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.PatternWidth : 1;
-            uint patternDepth = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.HasPatternDepth ? CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.PatternDepth : 1;
-            int SprPreFrame = (int)(patternWidth * patternHeight * patternDepth * patternLayers);
-            int AnimationCount = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.SpriteId.Count / SprPreFrame;
-
-            SprFramesSlider.Minimum = CurrentSprDir;
-            SprFramesSlider.Maximum = ObjectSprList.Count - ((4 - CurrentSprDir) * patternLayers);
-            if (patternLayers > 1)
-            {
-                if (CurrentSprDir > 0)
-                {
-                    SprFramesSlider.Minimum += (CurrentSprDir * 1);
-                }
-
-                if (SprBlendLayer.IsChecked == true)
-                {
-                    SprFramesSlider.Minimum += 1;
-                    if (A_SprAnimation.Value > 1)
-                        SprFramesSlider.Maximum += 1;
-                }
-            }
-
-            SprFramesSlider.TickFrequency = patternWidth * patternLayers;
-            if (SprAddonSlider.Value > 0)
-            {
-                SprFramesSlider.TickFrequency = (SprFramesSlider.TickFrequency * 2);
-                if (SprAddonSlider.Value == 1)
-                    SprFramesSlider.Maximum -= (patternWidth * patternLayers);
-                else if (SprAddonSlider.Value == 2)
-                    SprFramesSlider.Minimum += (patternWidth * patternLayers);
-            }
-
-            SprFramesSlider.Value = SprFramesSlider.Minimum;
-
-            if (ObjectMenu.SelectedIndex != 0)
-            {
-                SprFramesSlider.Maximum = (int)A_SprAnimation.Value - 1;
-                SprFramesSlider.TickFrequency = 1;
-            }
-
-            List<Image> images = Utils.GetLogicalChildCollection<Image>(ObjectSprImgPanel);
-            foreach (Image child in images)
-            {
-                ObjectSprImgPanel.Children.Remove(child);
-            }
-
-            int ObjectSprImgCount = ObjectMenu.SelectedIndex == 0 ? 1 : (int)(patternWidth * patternHeight);
-            int ImgPanelWidth = 32;
-            int ImgPanelHeight = 32;
-
-            if (ObjectSprList.Count == 1)
-            {
-                SprFramesSlider.Minimum = 0;
-                SprFramesSlider.Maximum = 0;
-            }
-
-            for (int i = 0; i < (ObjectSprImgCount); i++)
-            {
-                Image img = new Image
-                {
-                    Stretch = Stretch.None,
-                    MinWidth = 32,
-                    MinHeight = 32,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    AllowDrop = true
-                };
-                img.Drop += Spr_Drop;
-                img.PreviewMouseLeftButtonDown += Img_PreviewMouseLeftButtonDown;
-                img.Source = ObjectSprList[(int)SprFramesSlider.Minimum + i].Image;
-                img.Tag = i;
-                ObjectSprImgPanel.Children.Add(img);
-                if (ObjectSprList[i].Image.Width > ImgPanelWidth)
-                    ImgPanelWidth = (int)ObjectSprList[i].Image.Width;
-                if (ObjectSprList[i].Image.Height > ImgPanelHeight)
-                    ImgPanelHeight = (int)ObjectSprList[i].Image.Height;
-
-            }
-            ObjectSprImgPanel.Width = ObjectMenu.SelectedIndex == 0 ? ImgPanelWidth : ImgPanelWidth * patternWidth;
-            ObjectSprImgPanel.Height = ObjectMenu.SelectedIndex == 0 ? ImgPanelHeight : ImgPanelHeight * patternHeight;
-        }
 
         private void Img_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             Image img = e.Source as Image;
-            List<Image> images = Utils.GetLogicalChildCollection<Image>(ObjectSprImgPanel);
-            SprListView.SelectedIndex = (int)ObjectSprList[((int)SprFramesSlider.Value * images.Count) + (int)img.Tag].Id;
+            SprListView.SelectedIndex = int.Parse((string)img.ToolTip);
             ScrollViewer scrollViewer = Utils.FindVisualChild<ScrollViewer>(SprListView);
             scrollViewer.ScrollToVerticalOffset(SprListView.SelectedIndex);
         }
 
-        private void ChangeObjectSprImg(FrameGroup frameGroup, bool reset)
-        {
-            uint patternWidth = frameGroup.SpriteInfo.HasPatternWidth ? frameGroup.SpriteInfo.PatternWidth : 1;
-            uint patternHeight = frameGroup.SpriteInfo.HasPatternHeight ? frameGroup.SpriteInfo.PatternHeight : 1;
-            uint patternDepth = frameGroup.SpriteInfo.HasPatternDepth ? frameGroup.SpriteInfo.PatternDepth : 1;
-            uint patternLayers = frameGroup.SpriteInfo.HasLayers ? frameGroup.SpriteInfo.Layers : 1;
-            int SprPreFrame = (int)(patternWidth * patternHeight * patternDepth * patternLayers);
-            int AnimationCount = frameGroup.SpriteInfo.SpriteId.Count / SprPreFrame;
-
-            SprAddonSlider.Maximum = patternHeight - 1;
-            A_SprAnimation.Value = AnimationCount;
-
-            CurrentSprDir = 0;
-            if (reset)
-            {
-                ObjectOutfitSprList.Clear();
-                ObjectAddonSprList.Clear();
-                ObjectMountSprList.Clear();
-                ObjectAddonMountSprList.Clear();
-                ObjectSprList.Clear();
-
-                for (int x = 0; x < A_SprAnimation.Value; x++)
-                {
-                    for (int i = SprPreFrame * x; i < SprPreFrame * (x + 1); i++)
-                    {
-                        if ((i < (patternWidth * patternLayers) + (SprPreFrame * x)) || ObjectMenu.SelectedIndex != 0)
-                        {
-                            if (i < ((patternWidth * patternHeight * patternLayers) + (SprPreFrame * x)))
-                                ObjectOutfitSprList.Add(new ShowList() { Id = frameGroup.SpriteInfo.SpriteId[i], Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)frameGroup.SpriteInfo.SpriteId[i]]), Pos = i });
-                            else
-                                ObjectMountSprList.Add(new ShowList() { Id = frameGroup.SpriteInfo.SpriteId[i], Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)frameGroup.SpriteInfo.SpriteId[i]]), Pos = i });
-                        }
-                        else if ((i >= (patternWidth * patternLayers) + (SprPreFrame * x) && i < (patternWidth * patternHeight * patternLayers) + (SprPreFrame * x)))
-                            ObjectAddonSprList.Add(new ShowList() { Id = frameGroup.SpriteInfo.SpriteId[i], Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)frameGroup.SpriteInfo.SpriteId[i]]), Pos = i });
-                        else if (i >= ((patternWidth * patternHeight * patternLayers) + (SprPreFrame * x)) && i < (patternWidth * patternHeight * patternDepth * patternLayers - (patternWidth * patternDepth * patternLayers) + (SprPreFrame * x)))
-                            ObjectMountSprList.Add(new ShowList() { Id = frameGroup.SpriteInfo.SpriteId[i], Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)frameGroup.SpriteInfo.SpriteId[i]]), Pos = i });
-                        else if (i >= (patternWidth * patternHeight * patternDepth * patternLayers - (patternWidth * patternDepth * patternLayers) + (SprPreFrame * x)))
-                            ObjectAddonMountSprList.Add(new ShowList() { Id = frameGroup.SpriteInfo.SpriteId[i], Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)frameGroup.SpriteInfo.SpriteId[i]]), Pos = i });
-                    }
-
-                }
-            }
-
-            if (SprAddonSlider.Value == 0 && SprMount.IsChecked == false)
-                ObjectSprList = ObjectOutfitSprList;
-            else if (SprAddonSlider.Value == 0 && SprMount.IsChecked == true)
-                ObjectSprList = ObjectMountSprList;
-            else if (SprAddonSlider.Value > 0 && SprMount.IsChecked == false)
-                ObjectSprList = ObjectAddonSprList;
-            else if (SprAddonSlider.Value > 0 && SprMount.IsChecked == true)
-                ObjectSprList = ObjectAddonMountSprList;
-
-            ChangeSprDirection();
-            SetSpriteFrame();
-
-        }
         private void SprMount_Click(object sender, RoutedEventArgs e)
         {
-            ChangeObjectSprImg(CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value], false);
+            ForceSliderChange();
         }
 
         private void SprBlendLayer_Click(object sender, RoutedEventArgs e)
         {
-            ChangeObjectSprImg(CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value], false);
+            ForceSliderChange();
         }
 
         private void SprAddonSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ChangeObjectSprImg(CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value], false);
+            ForceSliderChange();
         }
 
         private void BoxPerDirection_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (BoundingBoxList.Count > 4)
                 BoundingBoxList.RemoveAt(BoundingBoxList.Count - 1);
+
+            if (BoundingBoxList.Count > 0)
+            {
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Clear();
+                foreach (var box in BoundingBoxList)
+                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Add(box);
+            }
+        }
+        private void FixSpritesCount()
+        {
+            SpriteInfo spriteInfo = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo;
+            int NumSprites = (int)(spriteInfo.PatternWidth * spriteInfo.PatternHeight * spriteInfo.PatternDepth * spriteInfo.Layers * A_SprAnimation.Value);
+
+            if (spriteInfo.SpriteId.Count > NumSprites)
+            {
+                int excessCount = spriteInfo.SpriteId.Count - NumSprites;
+                for (int i = 0; i < excessCount; i++)
+                {
+                    spriteInfo.SpriteId.RemoveAt(spriteInfo.SpriteId.Count - 1);
+                }
+            }
+            else if (spriteInfo.SpriteId.Count < NumSprites)
+            {
+                int missingCount = NumSprites - spriteInfo.SpriteId.Count;
+                for (int i = 0; i < missingCount; i++)
+                {
+                    spriteInfo.SpriteId.Add(blankSpr);
+                }
+            }
+        }
+        private void A_Texture_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (!isPageLoaded || isObjectLoaded == false)
+                return;
+
+            FrameworkElement frameworkElement = sender as FrameworkElement;
+            SpriteInfo spriteInfo = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo;
+            if (frameworkElement.Name == "A_SprGroups")
+            {
+                if (A_SprGroups.Value == 1 && CurrentObjectAppearance.FrameGroup.Count == 2)
+                {
+                    CurrentObjectAppearance.FrameGroup.RemoveAt(1);
+                    CurrentObjectAppearance.FrameGroup[0].FixedFrameGroup = FIXED_FRAME_GROUP.OutfitMoving;
+                }
+                else if (A_SprGroups.Value == 2 && CurrentObjectAppearance.FrameGroup.Count == 1)
+                {
+                    FrameGroup newFrameGroup = CurrentObjectAppearance.FrameGroup[0].Clone();
+                    CurrentObjectAppearance.FrameGroup.Add(newFrameGroup);
+                    CurrentObjectAppearance.FrameGroup[0].FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
+                }
+            }
+            else if (frameworkElement.Name == "A_SprLayers")
+            {
+                spriteInfo.Layers = (uint)A_SprLayers.Value;
+                FixSpritesCount();
+                SprBlendLayer.IsEnabled = A_SprLayers.Value > 1 ? true : false;
+            }
+            else if (frameworkElement.Name == "A_SprPaternX")
+            {
+                spriteInfo.PatternWidth = (uint)A_SprPaternX.Value;
+                FixSpritesCount();
+            }
+            else if (frameworkElement.Name == "A_SprPaternY")
+            {
+                spriteInfo.PatternHeight = (uint)A_SprPaternY.Value;
+                FixSpritesCount();
+            }
+            else if (frameworkElement.Name == "A_SprPaternZ")
+            {
+                spriteInfo.PatternDepth = (uint)A_SprPaternZ.Value;
+                FixSpritesCount();
+                SprMount.IsEnabled = A_SprPaternZ.Value > 1 ? true : false;
+            }
+            else if (frameworkElement.Name == "A_SprAnimation")
+            {
+                if (A_SprAnimation.Value == 1)
+                {
+                    spriteInfo.Animation = null;
+                }
+                else
+                {
+                    SpriteAnimation spriteAnimation = new SpriteAnimation();
+                    for (int i = 0; i < A_SprAnimation.Value; i++)
+                        spriteAnimation.SpritePhase.Add(new SpritePhase() { DurationMin = 100, DurationMax = 100 });
+                    spriteInfo.Animation = spriteAnimation;
+                }
+
+                FixSpritesCount();
+                SpriteAnimationGroup.IsEnabled = A_SprAnimation.Value > 1 ? true : false;
+                SprFramesSlider.Maximum = (double)A_SprAnimation.Value - 1;
+            }
         }
 
-        private void A_SprGroups_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            SprGroupSlider.Maximum = (int)A_SprGroups.Value - 1;
-        }
-
-        private void A_SprLayers_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            if (A_SprLayers.Value > 1)
-                SprBlendLayer.IsEnabled = true;
-            else
-                SprBlendLayer.IsEnabled = false;
-        }
-
-        private void A_SprPaternZ_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            if (A_SprPaternZ.Value > 1)
-                SprMount.IsEnabled = true;
-            else
-                SprMount.IsEnabled = false;
-        }
         private void ObjectSave_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(A_FlagName.Text))
-                CurrentObjectAppearance.Name = ByteString.CopyFrom(A_FlagName.Text, Encoding.UTF8);
+                CurrentObjectAppearance.Name = A_FlagName.Text;
 
             if (!string.IsNullOrWhiteSpace(A_FlagDescription.Text))
-                CurrentObjectAppearance.Description = ByteString.CopyFrom(A_FlagDescription.Text, Encoding.UTF8);
+                CurrentObjectAppearance.Description = A_FlagDescription.Text;
 
             if ((bool)A_FlagGround.IsChecked) {
                 CurrentObjectAppearance.Flags.Bank = new AppearanceFlagBank
@@ -1051,14 +1053,14 @@ namespace Assets_Editor
                     ShowAsObjectId = (uint)A_FlagMarketShow.Value,
                     MinimumLevel = (uint)A_FlagMarketlevel.Value,
                 };
-                CurrentObjectAppearance.Flags.Market.RestrictToProfession.Clear();
-                if ((bool)A_FlagProfessionAny.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToProfession.Add(PLAYER_PROFESSION.Any);
-                if ((bool)A_FlagProfessionNone.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToProfession.Add(PLAYER_PROFESSION.None);
-                if ((bool)A_FlagProfessionKnight.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToProfession.Add(PLAYER_PROFESSION.Knight);
-                if ((bool)A_FlagProfessionPaladin.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToProfession.Add(PLAYER_PROFESSION.Paladin);
-                if ((bool)A_FlagProfessionSorcerer.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToProfession.Add(PLAYER_PROFESSION.Sorcerer);
-                if ((bool)A_FlagProfessionDruid.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToProfession.Add(PLAYER_PROFESSION.Druid);
-                if ((bool)A_FlagProfessionPromoted.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToProfession.Add(PLAYER_PROFESSION.Promoted);
+                CurrentObjectAppearance.Flags.Market.RestrictToVocation.Clear();
+                if ((bool)A_FlagProfessionAny.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Any);
+                if ((bool)A_FlagProfessionNone.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.None);
+                if ((bool)A_FlagProfessionKnight.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Knight);
+                if ((bool)A_FlagProfessionPaladin.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Paladin);
+                if ((bool)A_FlagProfessionSorcerer.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Sorcerer);
+                if ((bool)A_FlagProfessionDruid.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Druid);
+                if ((bool)A_FlagProfessionPromoted.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Promoted);
             }
             else
                 CurrentObjectAppearance.Flags.Market = null;
@@ -1073,10 +1075,10 @@ namespace Assets_Editor
             else if (CurrentObjectAppearance.Flags.HasUnwrap)
                 CurrentObjectAppearance.Flags.ClearUnwrap();
 
-            if ((bool)A_FlagWrapkit.IsChecked)
-                CurrentObjectAppearance.Flags.Wrapkit = true;
-            else if (CurrentObjectAppearance.Flags.HasWrapkit)
-                CurrentObjectAppearance.Flags.ClearWrapkit();
+            if ((bool)A_FlagDecoItemKit.IsChecked)
+                CurrentObjectAppearance.Flags.DecoItemKit = true;
+            else if (CurrentObjectAppearance.Flags.HasDecoItemKit)
+                CurrentObjectAppearance.Flags.ClearDecoItemKit();
 
             if ((bool)A_FlagTopeffect.IsChecked)
                 CurrentObjectAppearance.Flags.Topeffect = true;
@@ -1125,8 +1127,6 @@ namespace Assets_Editor
                 }
             }
 
-            SaveSprPatterns((int)SprGroupSlider.Value);
-            StorePreviousGroup((int)SprGroupSlider.Value);
             if (ObjectMenu.SelectedIndex == 0)
                 MainWindow.appearances.Outfit[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
             else if (ObjectMenu.SelectedIndex == 1)
@@ -1135,19 +1135,58 @@ namespace Assets_Editor
                 MainWindow.appearances.Effect[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
             else if (ObjectMenu.SelectedIndex == 3)
                 MainWindow.appearances.Missile[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
+
+            ShowList showList = ObjListView.SelectedItem as ShowList;
+
+            if(showList.Id != CurrentObjectAppearance.Id)
+            {
+                showList.Id = CurrentObjectAppearance.Id;
+                List<Appearance> sortedAppearances = new List<Appearance>();
+                if (ObjectMenu.SelectedIndex == 0)
+                {
+                    sortedAppearances = MainWindow.appearances.Outfit.OrderBy(item => item.Id).ToList();
+                    MainWindow.appearances.Outfit.Clear();
+                    foreach (Appearance appearance in sortedAppearances)
+                    {
+                        MainWindow.appearances.Outfit.Add(appearance);
+                    }
+                    ThingsOutfit = new ObservableCollection<ShowList>(ThingsOutfit.OrderBy(item => item.Id));
+                }
+                else if (ObjectMenu.SelectedIndex == 1)
+                {
+                    sortedAppearances = MainWindow.appearances.Object.OrderBy(item => item.Id).ToList();
+                    MainWindow.appearances.Object.Clear();
+                    foreach (Appearance appearance in sortedAppearances)
+                    {
+                        MainWindow.appearances.Object.Add(appearance);
+                    }
+                    ThingsItem = new ObservableCollection<ShowList>(ThingsItem.OrderBy(item => item.Id));
+                }
+                else if (ObjectMenu.SelectedIndex == 2)
+                {
+                    sortedAppearances = MainWindow.appearances.Effect.OrderBy(item => item.Id).ToList();
+                    MainWindow.appearances.Effect.Clear();
+                    foreach (Appearance appearance in sortedAppearances)
+                    {
+                        MainWindow.appearances.Effect.Add(appearance);
+                    }
+                    ThingsEffect = new ObservableCollection<ShowList>(ThingsEffect.OrderBy(item => item.Id));
+                }
+                else if (ObjectMenu.SelectedIndex == 3)
+                {
+                    sortedAppearances = MainWindow.appearances.Missile.OrderBy(item => item.Id).ToList();
+                    MainWindow.appearances.Missile.Clear();
+                    foreach (Appearance appearance in sortedAppearances)
+                    {
+                        MainWindow.appearances.Missile.Add(appearance);
+                    }
+                    ThingsMissile = new ObservableCollection<ShowList>(ThingsMissile.OrderBy(item => item.Id));
+                }
+                UpdateShowList(ObjectMenu.SelectedIndex);
+            }
+            
+
             StatusBar.MessageQueue.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
-        }
-
-        private void SprPhaseMin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMin = (uint)SprPhaseMin.Value;
-        }
-
-        private void SprPhaseMax_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMax = (uint)SprPhaseMax.Value;
         }
         private void CopyObjectFlags(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -1161,42 +1200,28 @@ namespace Assets_Editor
                 CurrentObjectAppearance.Flags = CurrentFlags.Clone();
                 LoadCurrentObjectAppearances();
                 StatusBar.MessageQueue.Enqueue($"Pasted Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
-            }else
+            }
+            else
                 StatusBar.MessageQueue.Enqueue($"Copy Flags First.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
+        private void SprPhaseMin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMin = (uint)SprPhaseMin.Value;
+        }
+
+        private void SprPhaseMax_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMax = (uint)SprPhaseMax.Value;
+        }
+
+
         private void OpenSpriteManager_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            SprEditor sprEditor = new SprEditor();
+            SprEditor sprEditor = new SprEditor(this);
             SprEditor.CustomSheetsList.Clear();
-            foreach (MainWindow.Catalog sheet in MainWindow.catalog)
-            {
-                string _sprPath = String.Format("{0}{1}", MainWindow._assetsPath, sheet.File);
-                if (File.Exists(_sprPath))
-                {
-                    if (sheet.FirstSpriteid >= 250000)
-                    {
-                        MainWindow.CustomSprLastId = sheet.LastSpriteid;
-                        SprEditor.CustomCatalog.Add(sheet);
-                        using System.Drawing.Bitmap SheetM = LZMA.DecompressFileLZMA(_sprPath);
-                        var lockedBitmap = new LockBitmap(SheetM);
-                        lockedBitmap.LockBits();
-                        for (int y = 0; y < SheetM.Height; y++)
-                        {
-                            for (int x = 0; x < SheetM.Width; x++)
-                            {
-                                if (lockedBitmap.GetPixel(x, y) == System.Drawing.Color.FromArgb(255, 255, 0, 255))
-                                {
-                                    lockedBitmap.SetPixel(x, y, System.Drawing.Color.FromArgb(0, 255, 0, 255));
-                                }
-                            }
-                        }
-                        lockedBitmap.UnlockBits();
-                        SprEditor.CustomSheetsList.Add(new ShowList() { Id = (uint)sheet.FirstSpriteid, Image = Utils.BitmapToBitmapImage(SheetM), Name = sheet.File });
-                    }
-                }
-            }
-            sprEditor.SheetsList.ItemsSource = SprEditor.CustomSheetsList;
             sprEditor.Show();
         }
 
@@ -1240,198 +1265,705 @@ namespace Assets_Editor
             Regex regex = new Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
         }
-        private void NewObjectDialogHost_OnDialogClosing(object sender, DialogClosingEventArgs eventArgs)
-        {
-            if (!Equals(eventArgs.Parameter, true)) return;
-
-            Appearance newObject = new Appearance();
-            newObject.Flags = new AppearanceFlags();
-            FrameGroup frameIdleGroup = new FrameGroup();
-            frameIdleGroup.SpriteInfo = new SpriteInfo();
-            frameIdleGroup.SpriteInfo.Layers = uint.Parse(NLayers.Text);
-            frameIdleGroup.SpriteInfo.PatternWidth = uint.Parse(NPatternX.Text);
-            frameIdleGroup.SpriteInfo.PatternHeight = uint.Parse(NPatternY.Text);
-            frameIdleGroup.SpriteInfo.PatternDepth = uint.Parse(NPatternZ.Text);
-
-            if (NObjectType.SelectedIndex == 0)
-            {
-                frameIdleGroup.Id = 0;
-                frameIdleGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
-                if (int.Parse(NIdleGroupCount.Text) > 1)
-                {
-                    SpriteAnimation spriteAnimation = new SpriteAnimation();
-                    for (int i = 0; i < (int.Parse(NIdleGroupCount.Text)); i++)
-                        spriteAnimation.SpritePhase.Add(new SpritePhase() { DurationMin = 100, DurationMax = 100 });
-                    frameIdleGroup.SpriteInfo.Animation = spriteAnimation;
-                }
-                int spritecount = (int)(frameIdleGroup.SpriteInfo.Layers * frameIdleGroup.SpriteInfo.PatternWidth * frameIdleGroup.SpriteInfo.PatternHeight * frameIdleGroup.SpriteInfo.PatternDepth * int.Parse(NIdleGroupCount.Text));
-                for (int i = 0; i < spritecount; i++)
-                    frameIdleGroup.SpriteInfo.SpriteId.Add(0);
-
-                if (String.IsNullOrEmpty(ID.Text))
-                {
-                    newObject.Id = (uint)(MainWindow.appearances.Outfit[^1].Id + 1);
-                }
-                else
-                {
-                    newObject.Id = uint.Parse(ID.Text);
-                }
-                newObject.FrameGroup.Add(frameIdleGroup);
-                if (NMoveGroup.IsChecked == true)
-                {
-                    FrameGroup frameMoveGroup = new FrameGroup();
-                    frameMoveGroup.Id = 1;
-                    frameMoveGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitMoving;
-                    frameMoveGroup.SpriteInfo = new SpriteInfo();
-                    frameMoveGroup.SpriteInfo.Layers = uint.Parse(NLayers.Text);
-                    frameMoveGroup.SpriteInfo.PatternWidth = uint.Parse(NPatternX.Text);
-                    frameMoveGroup.SpriteInfo.PatternHeight = uint.Parse(NPatternY.Text);
-                    frameMoveGroup.SpriteInfo.PatternDepth = uint.Parse(NPatternZ.Text);
-                    SpriteAnimation spriteMoveAnimation = new SpriteAnimation();
-                    for (int i = 0; i < (int.Parse(NMoveGroupCount.Text)); i++)
-                        spriteMoveAnimation.SpritePhase.Add(new SpritePhase() { DurationMin = 100, DurationMax = 100 });
-                    frameMoveGroup.SpriteInfo.Animation = spriteMoveAnimation;
-                    spritecount = (int)(frameMoveGroup.SpriteInfo.Layers * frameMoveGroup.SpriteInfo.PatternWidth * frameMoveGroup.SpriteInfo.PatternHeight * frameMoveGroup.SpriteInfo.PatternDepth * int.Parse(NMoveGroupCount.Text));
-                    for (int i = 0; i < spritecount; i++)
-                        frameMoveGroup.SpriteInfo.SpriteId.Add(0);
-                    newObject.FrameGroup.Add(frameMoveGroup);
-                }
-                MainWindow.appearances.Outfit.Add(newObject);
-                ThingsOutfit.Add(new ShowList() { Id = newObject.Id});
-
-            }
-            else if (NObjectType.SelectedIndex == 1)
-            {
-                frameIdleGroup.FixedFrameGroup = FIXED_FRAME_GROUP.ObjectInitial;
-                if (int.Parse(NIdleGroupCount.Text) > 1)
-                {
-                    SpriteAnimation spriteAnimation = new SpriteAnimation();
-                    for (int i = 0; i < (int.Parse(NIdleGroupCount.Text)); i++)
-                        spriteAnimation.SpritePhase.Add(new SpritePhase() { DurationMin = 100, DurationMax = 100 });
-                    frameIdleGroup.SpriteInfo.Animation = spriteAnimation;
-                }
-                int spritecount = (int)(frameIdleGroup.SpriteInfo.Layers * frameIdleGroup.SpriteInfo.PatternWidth * frameIdleGroup.SpriteInfo.PatternHeight * frameIdleGroup.SpriteInfo.PatternDepth * int.Parse(NIdleGroupCount.Text));
-                for (int i = 0; i < spritecount; i++)
-                    frameIdleGroup.SpriteInfo.SpriteId.Add(0);
-
-                if (String.IsNullOrEmpty(ID.Text))
-                {
-                    newObject.Id = (uint)(MainWindow.appearances.Object[^1].Id + 1);
-                }
-                else
-                {
-                    newObject.Id = uint.Parse(ID.Text);
-                }
-                newObject.FrameGroup.Add(frameIdleGroup);
-                MainWindow.appearances.Object.Add(newObject);
-                ThingsItem.Add(new ShowList() { Id = newObject.Id});
-
-            }
-            else if (NObjectType.SelectedIndex == 2)
-            {
-                frameIdleGroup.FixedFrameGroup = FIXED_FRAME_GROUP.ObjectInitial;
-                if (int.Parse(NIdleGroupCount.Text) > 1)
-                {
-                    SpriteAnimation spriteAnimation = new SpriteAnimation();
-                    for (int i = 0; i < (int.Parse(NIdleGroupCount.Text)); i++)
-                        spriteAnimation.SpritePhase.Add(new SpritePhase() { DurationMin = 100, DurationMax = 100 });
-                    frameIdleGroup.SpriteInfo.Animation = spriteAnimation;
-                }
-                int spritecount = (int)(frameIdleGroup.SpriteInfo.Layers * frameIdleGroup.SpriteInfo.PatternWidth * frameIdleGroup.SpriteInfo.PatternHeight * frameIdleGroup.SpriteInfo.PatternDepth * int.Parse(NIdleGroupCount.Text));
-                for (int i = 0; i < spritecount; i++)
-                    frameIdleGroup.SpriteInfo.SpriteId.Add(0);
-
-                if (String.IsNullOrEmpty(ID.Text))
-                {
-                    newObject.Id = (uint)(MainWindow.appearances.Effect[^1].Id + 1);
-                }
-                else
-                {
-                    newObject.Id = uint.Parse(ID.Text);
-                }
-                newObject.FrameGroup.Add(frameIdleGroup);
-                MainWindow.appearances.Effect.Add(newObject);
-                ThingsEffect.Add(new ShowList() { Id = newObject.Id});
-
-            }
-            else if (NObjectType.SelectedIndex == 3)
-            {
-                frameIdleGroup.FixedFrameGroup = FIXED_FRAME_GROUP.ObjectInitial;
-                if (int.Parse(NIdleGroupCount.Text) > 1)
-                {
-                    SpriteAnimation spriteAnimation = new SpriteAnimation();
-                    for (int i = 0; i < (int.Parse(NIdleGroupCount.Text)); i++)
-                        spriteAnimation.SpritePhase.Add(new SpritePhase() { DurationMin = 100, DurationMax = 100 });
-                    frameIdleGroup.SpriteInfo.Animation = spriteAnimation;
-                }
-                int spritecount = (int)(frameIdleGroup.SpriteInfo.Layers * frameIdleGroup.SpriteInfo.PatternWidth * frameIdleGroup.SpriteInfo.PatternHeight * frameIdleGroup.SpriteInfo.PatternDepth * int.Parse(NIdleGroupCount.Text));
-                for (int i = 0; i < spritecount; i++)
-                    frameIdleGroup.SpriteInfo.SpriteId.Add(0);
-
-                if (String.IsNullOrEmpty(ID.Text))
-                {
-                    newObject.Id = (uint)(MainWindow.appearances.Missile[^1].Id + 1);
-                }
-                else
-                {
-                    newObject.Id = uint.Parse(ID.Text);
-                }
-                newObject.FrameGroup.Add(frameIdleGroup);
-                MainWindow.appearances.Missile.Add(newObject);
-                ThingsMissile.Add(new ShowList() { Id = newObject.Id});
-
-            }
-        }
-
-        private void NObjectType_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (IsLoaded)
-            {
-                if (NObjectType.SelectedIndex == 0)
-                    NMoveGroup.IsEnabled = true;
-                else
-                    NMoveGroup.IsEnabled = false;
-            }
-        }
 
         private void SpriteExport_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            ShowList data = (ShowList)SprListView.SelectedItem;
-            if (data != null && data.Image != null)
+            List<ShowList> selectedItems = SprListView.SelectedItems.Cast<ShowList>().ToList();
+            if (selectedItems.Any())
             {
-                System.Drawing.Bitmap targetImg = new System.Drawing.Bitmap((int)data.Image.Width, (int)data.Image.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(targetImg);
-                g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
-                System.Drawing.Image image = System.Drawing.Image.FromStream(MainWindow.SprLists[(int)data.Id]);
-                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-                g.DrawImage(image, new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), System.Drawing.GraphicsUnit.Pixel);
-                g.Dispose();
                 SaveFileDialog saveFileDialog = new SaveFileDialog
                 {
-                    Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png"
+                    Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png",
+                    FileName = " "
                 };
-
                 if (saveFileDialog.ShowDialog() == true)
                 {
-                    switch (saveFileDialog.FilterIndex)
+                    foreach (var item in selectedItems)
                     {
-                        case 1:
-                            targetImg.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
-                            break;
-                        case 2:
-                            targetImg.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Gif);
-                            break;
-                        case 3:
-                            targetImg.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
-                            break;
-                        case 4:
-                            targetImg.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                            break;
+                        if (item.Image != null)
+                        {
+                            System.Drawing.Bitmap targetImg = new System.Drawing.Bitmap((int)item.Image.Width, (int)item.Image.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                            System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(targetImg);
+                            if (saveFileDialog.FilterIndex != 4)
+                                g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
+                            System.Drawing.Image image = System.Drawing.Image.FromStream(MainWindow.SprLists[(int)item.Id]);
+                            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                            g.DrawImage(image, new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), System.Drawing.GraphicsUnit.Pixel);
+                            g.Dispose();
+                            string directoryPath = System.IO.Path.GetDirectoryName(saveFileDialog.FileName);
+                            switch (saveFileDialog.FilterIndex)
+                            {
+                                case 1:
+                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                                    break;
+                                case 2:
+                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".gif", System.Drawing.Imaging.ImageFormat.Gif);
+                                    break;
+                                case 3:
+                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                                    break;
+                                case 4:
+                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                                    break;
+                            }
+                            targetImg.Dispose();
+                        }
                     }
-                    targetImg.Dispose();
                 }
+            }
+        }
+
+        private void NewObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Appearance newObject = new Appearance();
+
+            newObject.Flags = new AppearanceFlags();
+
+            FrameGroup frameGroup = new FrameGroup();
+            frameGroup.SpriteInfo = new SpriteInfo();
+
+            frameGroup.SpriteInfo.Layers = 1;
+            frameGroup.SpriteInfo.PatternWidth = 1;
+            frameGroup.SpriteInfo.PatternHeight = 1;
+            frameGroup.SpriteInfo.PatternDepth = 1;
+
+            if (ObjectMenu.SelectedIndex == 0)
+                frameGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
+            else
+                frameGroup.FixedFrameGroup = FIXED_FRAME_GROUP.ObjectInitial;
+
+            frameGroup.SpriteInfo.SpriteId.Add(blankSpr);
+            newObject.FrameGroup.Add(frameGroup);
+
+            if (ObjectMenu.SelectedIndex == 0)
+            {
+                newObject.Id = (uint)(MainWindow.appearances.Outfit[^1].Id + 1);
+                MainWindow.appearances.Outfit.Add(newObject);
+                ThingsOutfit.Add(new ShowList() { Id = newObject.Id });
+            }
+            else if (ObjectMenu.SelectedIndex == 1)
+            {
+                newObject.Id = (uint)(MainWindow.appearances.Object[^1].Id + 1);
+                MainWindow.appearances.Object.Add(newObject);
+                ThingsItem.Add(new ShowList() { Id = newObject.Id });
+            }
+            else if (ObjectMenu.SelectedIndex == 2)
+            {
+                newObject.Id = (uint)(MainWindow.appearances.Effect[^1].Id + 1);
+                MainWindow.appearances.Effect.Add(newObject);
+                ThingsEffect.Add(new ShowList() { Id = newObject.Id });
 
             }
+            else if (ObjectMenu.SelectedIndex == 3)
+            {
+                newObject.Id = (uint)(MainWindow.appearances.Missile[^1].Id + 1);
+                MainWindow.appearances.Missile.Add(newObject);
+                ThingsMissile.Add(new ShowList() { Id = newObject.Id });
+
+            }
+
+            ObjectMenu.SelectedIndex = ObjectMenu.SelectedIndex;
+            UpdateShowList(ObjectMenu.SelectedIndex);
+
+            StatusBar.MessageQueue.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+        }
+
+        private void ObjectClone_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Appearance NewObject = CurrentObjectAppearance.Clone();
+            if (ObjectMenu.SelectedIndex == 0)
+            {
+                NewObject.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
+                MainWindow.appearances.Outfit.Add(NewObject);
+                ThingsOutfit.Add(new ShowList() { Id = NewObject.Id });
+            }
+            else if (ObjectMenu.SelectedIndex == 1)
+            {
+                NewObject.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
+                MainWindow.appearances.Object.Add(NewObject);
+                ThingsItem.Add(new ShowList() { Id = NewObject.Id });
+            }
+            else if (ObjectMenu.SelectedIndex == 2)
+            {
+                NewObject.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
+                MainWindow.appearances.Effect.Add(NewObject);
+                ThingsEffect.Add(new ShowList() { Id = NewObject.Id });
+            }
+            else if (ObjectMenu.SelectedIndex == 3)
+            {
+                NewObject.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
+                MainWindow.appearances.Missile.Add(NewObject);
+                ThingsMissile.Add(new ShowList() { Id = NewObject.Id });
+            }
+            ObjectMenu.SelectedIndex = ObjectMenu.SelectedIndex;
+            UpdateShowList(ObjectMenu.SelectedIndex);
+
+            StatusBar.MessageQueue.Enqueue($"Object successfully duplicated.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+        }
+
+        private void DeleteObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ObjectMenu.SelectedIndex == 0)
+            {
+                MainWindow.appearances.Outfit.RemoveAt(ObjListView.SelectedIndex);
+                ThingsOutfit.Remove((ShowList)ObjListView.SelectedItem);
+            }
+            else if (ObjectMenu.SelectedIndex == 1)
+            {
+                MainWindow.appearances.Object.RemoveAt(ObjListView.SelectedIndex);
+                ThingsItem.Remove((ShowList)ObjListView.SelectedItem);
+            }
+            else if (ObjectMenu.SelectedIndex == 2)
+            {
+                MainWindow.appearances.Effect.RemoveAt(ObjListView.SelectedIndex);
+                ThingsEffect.Remove((ShowList)ObjListView.SelectedItem);
+
+            }
+            else if (ObjectMenu.SelectedIndex == 3)
+            {
+                MainWindow.appearances.Missile.RemoveAt(ObjListView.SelectedIndex);
+                ThingsMissile.Remove((ShowList)ObjListView.SelectedItem);
+
+            }
+            ObjListView.SelectedIndex = 0;
+            StatusBar.MessageQueue.Enqueue($"Object successfully deleted.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+        }
+
+        private void SprDefaultPhase_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.DefaultStartPhase = (uint)SprDefaultPhase.Value;
+        }
+
+        private void SprLoopCount_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.LoopCount = (uint)SprLoopCount.Value;
+
+        }
+
+        private void SprSynchronized_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.Synchronized = (bool)SprSynchronized.IsChecked;
+
+        }
+
+        private void SprRandomPhase_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.RandomStartPhase = (bool)SprRandomPhase.IsChecked;
+
+        }
+
+        private void SprLoopType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.HasLoopType)
+            {
+                if (SprLoopType.SelectedIndex == 0)
+                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.LoopType = ANIMATION_LOOP_TYPE.Pingpong;
+                else if (SprLoopType.SelectedIndex == 1)
+                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.LoopType = ANIMATION_LOOP_TYPE.Infinite;
+                else if (SprLoopType.SelectedIndex == 2)
+                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.LoopType = ANIMATION_LOOP_TYPE.Counted;
+            }
+        }
+        private void SearchItem_Click(object sender, RoutedEventArgs e)
+        {
+            SearchWindow searchWindow = new SearchWindow(this, false);
+            searchWindow.Show();
+        }
+        private void OTBEditor_Click(object sender, RoutedEventArgs e)
+        {
+            OTBEditor oTBEditor = new OTBEditor(this, false);
+            oTBEditor.Show();
+        }
+
+        private List<MainWindow.Catalog> CreateSpriteSheetsAndSaveAsPng(List<MemoryStream> spriteStreams, string outputDirectory)
+        {
+            Directory.CreateDirectory(outputDirectory);
+
+            var spriteSizes = new List<System.Drawing.Size>
+            {
+                new System.Drawing.Size(32, 32),
+                new System.Drawing.Size(32, 64),
+                new System.Drawing.Size(64, 32),
+                new System.Drawing.Size(64, 64)
+            };
+
+            var spriteInfos = spriteStreams.Select((stream, index) =>
+            {
+                stream.Position = 0;
+                using (var image = System.Drawing.Image.FromStream(stream))
+                {
+                    return new ImportSpriteInfo { Stream = stream, OriginalIndex = index, Size = new System.Drawing.Size(image.Width, image.Height) };
+                }
+            }).ToList();
+
+            var catalogs = new List<MainWindow.Catalog>();
+            foreach (var size in spriteSizes)
+            {
+                var matchingSprites = spriteInfos.Where(si => si.Size == size).ToList();
+                if (!matchingSprites.Any()) continue;
+
+                var spriteType = spriteSizes.IndexOf(size);
+                var spriteSheetResults = ProcessSpriteGroup(matchingSprites, size, outputDirectory, spriteType);
+                catalogs.AddRange(spriteSheetResults);
+            }
+
+            return catalogs;
+        }
+        private List<MainWindow.Catalog> ProcessSpriteGroup(List<ImportSpriteInfo> spriteInfos, System.Drawing.Size spriteSize, string outputDirectory, int spriteType)
+        {
+            int spritesPerRow = 384 / spriteSize.Width;
+            int spritesPerColumn = 384 / spriteSize.Height;
+            int spritesPerSheet = spritesPerRow * spritesPerColumn;
+
+            var catalogs = new List<MainWindow.Catalog>();
+            System.Drawing.Bitmap currentSheet = null;
+            System.Drawing.Graphics graphics = null;
+            int sheetNumber = 0;
+            int currentSpriteIndex = 0; // Counter for sprites in the current sheet
+
+            Action finalizeSheet = () =>
+            {
+                string GenerateUniqueFilePath(string path)
+                {
+                    var random = new Random();
+                    string directory = Path.GetDirectoryName(path);
+                    string filenameWithoutExt = Path.GetFileNameWithoutExtension(path);
+                    string extension = Path.GetExtension(path);
+                    string newFilePath;
+
+                    do
+                    {
+                        int randomNumber = random.Next(1000, 9999); // You can choose the range for random numbers
+                        newFilePath = $"{filenameWithoutExt.Substring(0, filenameWithoutExt.Length - 9)}_{randomNumber}.bmp.lzma";
+                    }
+                    while (MainWindow.catalog.Any(catalog => catalog.File.Equals(newFilePath, StringComparison.OrdinalIgnoreCase)));
+
+                    return newFilePath;
+                }
+
+                if (currentSheet != null && graphics != null && currentSpriteIndex > 0) // Make sure the sheet has sprites
+                {
+                    string fileName = MainWindow._assetsPath;
+                    LZMA.ExportLzmaFile(currentSheet, ref fileName);
+                    bool catalogExists = MainWindow.catalog.Any(catalog => catalog.File.Equals(fileName, StringComparison.OrdinalIgnoreCase));
+
+                    if (catalogExists)
+                    {
+                        string uniqueFilePath = GenerateUniqueFilePath(MainWindow._assetsPath + "\\" + fileName);
+                        File.Copy(MainWindow._assetsPath + "\\" + fileName, MainWindow._assetsPath + "\\" + uniqueFilePath);
+                        fileName = uniqueFilePath;
+                    }
+                    catalogs.Add(new MainWindow.Catalog
+                    {
+                        Type = "sprite",
+                        File = fileName,
+                        SpriteType = spriteType,
+                        FirstSpriteid = importSprCounter - currentSpriteIndex,
+                        LastSpriteid = importSprCounter - 1,
+                        Area = 0
+                    });
+                    sheetNumber++;
+                }
+
+                if (currentSheet != null)
+                {
+                    currentSheet.Dispose();
+                    currentSheet = null;
+                }
+                if (graphics != null)
+                {
+                    graphics.Dispose();
+                    graphics = null;
+                }
+                currentSpriteIndex = 0; // Reset the current sprite index for the next sheet
+            };
+
+            foreach (var spriteInfo in spriteInfos)
+            {
+                if (currentSheet == null || currentSpriteIndex >= spritesPerSheet)
+                {
+                    finalizeSheet(); // Finalize the current sheet before starting a new one
+
+                    currentSheet = new System.Drawing.Bitmap(384, 384, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    graphics = System.Drawing.Graphics.FromImage(currentSheet);
+                    graphics.Clear(System.Drawing.Color.FromArgb(0, 255, 0, 255));
+                }
+
+                int x = (currentSpriteIndex % spritesPerRow) * spriteSize.Width;
+                int y = (currentSpriteIndex / spritesPerRow) * spriteSize.Height;
+                
+                graphics.DrawImage(System.Drawing.Image.FromStream(spriteInfo.Stream), x, y, spriteSize.Width, spriteSize.Height);
+                MainWindow.SprLists[importSprCounter] = spriteInfo.Stream;
+                MainWindow.AllSprList.Add(new ShowList() { Id = (uint)importSprCounter });
+                importSprIdList[(uint)spriteInfo.OriginalIndex] = (uint)importSprCounter;
+                importSprCounter++;
+                currentSpriteIndex++;
+            }
+
+            // Handle any remaining sprites in the last sheet
+            finalizeSheet();
+            SprListView.ItemsSource = null;
+            SprListView.ItemsSource = MainWindow.AllSprList;
+
+            if (currentSheet != null) currentSheet.Dispose();
+            if (graphics != null) graphics.Dispose();
+
+            return catalogs;
+        }
+
+        private void ImportObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Appearances appearances = new Appearances();
+            importSprCounter = MainWindow.AllSprList.Count;
+            importSprIdList.Clear();
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "assets editor container (*.aec)|*.aec" // Add appropriate filter here
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                using (FileStream fileStream = new FileStream(openFileDialog.FileName, FileMode.Open, FileAccess.Read))
+                {
+                    appearances = Appearances.Parser.ParseFrom(fileStream);
+                    var spriteStreams = new List<MemoryStream>();
+                    foreach (Appearance appearance in appearances.Outfit)
+                    {
+                        foreach (var spr in appearance.SpriteData)
+                        {
+                            spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
+                            importSprIdList.Add((uint)importSprIdList.Count, 0);
+                        }
+                    }
+                    foreach (Appearance appearance in appearances.Object)
+                    {
+                        foreach (var spr in appearance.SpriteData)
+                        {
+                            spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
+                            importSprIdList.Add((uint)importSprIdList.Count, 0);
+                        }
+                    }
+                    foreach (Appearance appearance in appearances.Effect)
+                    {
+                        foreach (var spr in appearance.SpriteData)
+                        {
+                            spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
+                            importSprIdList.Add((uint)importSprIdList.Count, 0);
+                        }
+                    }
+                    foreach (Appearance appearance in appearances.Missile)
+                    {
+                        foreach (var spr in appearance.SpriteData)
+                        {
+                            spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
+                            importSprIdList.Add((uint)importSprIdList.Count, 0);
+                        }
+                    }
+
+                    var outputDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                    List<MainWindow.Catalog> catalogList = CreateSpriteSheetsAndSaveAsPng(spriteStreams, outputDirectory);
+                    int counter = 0;
+                    foreach (Appearance appearance in appearances.Outfit)
+                    {
+                        for (int i = 0; i < appearance.FrameGroup.Count; i++)
+                        {
+                            for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
+                            {
+                                appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
+                                counter++;
+                            }
+                        }
+                    }
+                    
+                    foreach (Appearance appearance in appearances.Object)
+                    {
+                        for (int i = 0; i < appearance.FrameGroup.Count; i++)
+                        {
+                            for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
+                            {
+                                appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
+                                counter++;
+                            }
+                        }
+                    }
+                    
+                    foreach (Appearance appearance in appearances.Effect)
+                    {
+                        for (int i = 0; i < appearance.FrameGroup.Count; i++)
+                        {
+                            for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
+                            {
+                                appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
+                                counter++;
+                            }
+                        }
+                    }
+                    
+                    foreach (Appearance appearance in appearances.Missile)
+                    {
+                        for (int i = 0; i < appearance.FrameGroup.Count; i++)
+                        {
+                            for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
+                            {
+                                appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
+                                counter++;
+                            }
+                        }
+                    }
+
+                    foreach (var catalog in catalogList)
+                    {
+                        MainWindow.catalog.Add(catalog);
+                    }
+
+                    foreach (Appearance appearance in appearances.Outfit)
+                    {
+                        appearance.SpriteData.Clear();
+                        appearance.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
+                        MainWindow.appearances.Outfit.Add(appearance.Clone());
+                        ThingsOutfit.Add(new ShowList() { Id = appearance.Id });
+                    }
+
+                    foreach (Appearance appearance in appearances.Object)
+                    {
+                        appearance.SpriteData.Clear();
+                        appearance.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
+                        MainWindow.appearances.Object.Add(appearance.Clone());
+                        ThingsItem.Add(new ShowList() { Id = appearance.Id });
+                    }
+                    
+                    foreach (Appearance appearance in appearances.Effect)
+                    {
+                        appearance.SpriteData.Clear();
+                        appearance.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
+                        MainWindow.appearances.Effect.Add(appearance.Clone());
+                        ThingsEffect.Add(new ShowList() { Id = appearance.Id });
+                    }
+                    
+                    foreach (Appearance appearance in appearances.Missile)
+                    {
+                        appearance.SpriteData.Clear();
+                        appearance.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
+                        MainWindow.appearances.Missile.Add(appearance.Clone());
+                        ThingsMissile.Add(new ShowList() { Id = appearance.Id });
+                    }
+
+                    ObjectMenu.SelectedIndex = ObjectMenu.SelectedIndex;
+                    UpdateShowList(ObjectMenu.SelectedIndex);
+                }
+            }
+        }
+
+        private void AddExportObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            List<ShowList> selectedItems = ObjListView.SelectedItems.Cast<ShowList>().ToList();
+            if (selectedItems.Any())
+            {
+                ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
+
+                foreach (var item in selectedItems)
+                {
+                    Appearance appearance = new Appearance();
+                    if (ObjectMenu.SelectedIndex == 0)
+                    {
+                        appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        if (!exportObjects.Outfit.Any(a => a.Id == appearance.Id))
+                        {
+                            exportObjects.Outfit.Add(appearance);
+                            AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") + 1;
+
+                        }
+                    }
+                    else if (ObjectMenu.SelectedIndex == 1)
+                    {
+                        appearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        if (!exportObjects.Object.Any(a => a.Id == appearance.Id))
+                        {
+                            exportObjects.Object.Add(appearance);
+                            AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") + 1;
+                        }
+                    }
+                    else if (ObjectMenu.SelectedIndex == 2)
+                    {
+                        appearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        if (!exportObjects.Effect.Any(a => a.Id == appearance.Id))
+                        {
+                            exportObjects.Effect.Add(appearance);
+                            AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") + 1;
+                        }
+                        
+                    }
+                    else if (ObjectMenu.SelectedIndex == 3)
+                    {
+                        appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        if (!exportObjects.Missile.Any(a => a.Id == appearance.Id))
+                        {
+                            exportObjects.Missile.Add(appearance);
+                            AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") + 1;
+                        }
+                        
+                    }
+
+                    for (int i = 0; i < appearance.FrameGroup.Count; i++)
+                    {
+                        for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
+                        {
+                            ByteString sprData = ByteString.CopyFrom(MainWindow.SprLists[(int)appearance.FrameGroup[i].SpriteInfo.SpriteId[s]].ToArray());
+                            appearance.SpriteData.Add(sprData);
+                            appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = exportSprCounter;
+                            exportSprCounter++;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ExportObject_PreviewMouseLeftButtonDown(object sender, RoutedEventArgs e)
+        {
+            if(int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") == 0)
+            {
+                StatusBar.MessageQueue.Enqueue($"Export list is empty.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                return;
+            }    
+
+            System.Windows.Forms.FolderBrowserDialog exportPath = new System.Windows.Forms.FolderBrowserDialog();
+            if (exportPath.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string fullPath = Path.Combine(exportPath.SelectedPath, "Appearances.aec");
+                var output = File.Create(fullPath);
+                exportObjects.WriteTo(output);
+                output.Close();
+                AddExportObjectCounter.Badge = 0;
+                exportSprCounter = 0;
+                exportObjects = new Appearances();
+                StatusBar.MessageQueue.Enqueue($"Successfully exported objects.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
+        }
+
+        private void AddExportObject_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            AddExportObjectCounter.Badge = 0;
+            exportSprCounter = 0;
+            exportObjects = new Appearances();
+        }
+
+        private void A_FlagIdCheck_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            uint newId = (uint)A_FlagId.Value;
+
+            if (ObjectMenu.SelectedIndex == 0)
+            {
+                if (!MainWindow.appearances.Outfit.Any(a => a.Id == newId))
+                {
+                    CurrentObjectAppearance.Id = newId;
+                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                }
+                else
+                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
+            else if (ObjectMenu.SelectedIndex == 1)
+            {
+                if (!MainWindow.appearances.Object.Any(a => a.Id == newId) && newId > 100)
+                {
+                    CurrentObjectAppearance.Id = newId;
+                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                }
+                else
+                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
+            else if (ObjectMenu.SelectedIndex == 2)
+            {
+                if (!MainWindow.appearances.Effect.Any(a => a.Id == newId))
+                {
+                    CurrentObjectAppearance.Id = newId;
+                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                }
+                else
+                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+
+            }
+            else if (ObjectMenu.SelectedIndex == 3)
+            {
+                if (!MainWindow.appearances.Missile.Any(a => a.Id == newId))
+                {
+                    CurrentObjectAppearance.Id = newId;
+                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                }
+                else
+                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
+        }
+
+
+        private void StartSpriteAnimation(Image imageControl, TimeSpan frameRate, ShowList showList, IEnumerable<BitmapImage> imageFrames)
+        {
+            if (imageControl == null) throw new ArgumentNullException(nameof(imageControl));
+
+            var animation = new ObjectAnimationUsingKeyFrames();
+            TimeSpan currentTime = TimeSpan.Zero;
+
+            foreach (BitmapImage imageFrame in imageFrames)
+            {
+                var keyFrame = new DiscreteObjectKeyFrame(imageFrame, currentTime);
+                animation.KeyFrames.Add(keyFrame);
+                currentTime += frameRate;
+            }
+
+            Storyboard.SetTarget(animation, imageControl);
+            Storyboard.SetTargetProperty(animation, new PropertyPath(Image.SourceProperty));
+
+            var storyboard = new Storyboard();
+            storyboard.Children.Add(animation);
+            storyboard.RepeatBehavior = RepeatBehavior.Forever;
+            storyboard.Begin();
+            showList.Storyboard = storyboard;
+        }
+
+        private void AnimateSelectedListItem(ShowList showList)
+        {
+            // Find the ListViewItem for the selected item
+            var listViewItem = ObjListView.ItemContainerGenerator.ContainerFromItem(showList) as ListViewItem;
+            if (listViewItem != null)
+            {
+                // Find the Image control within the ListViewItem
+                var imageControl = Utils.FindVisualChild<Image>(listViewItem);
+                if (imageControl != null)
+                {
+                    List<BitmapImage> imageFrames = new List<BitmapImage>();
+
+                    Appearance appearance = null;
+
+                    if (ObjectMenu.SelectedIndex == 0)
+                        appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == showList.Id);
+                    else if (ObjectMenu.SelectedIndex == 1)
+                        appearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == showList.Id);
+                    else if (ObjectMenu.SelectedIndex == 2)
+                        appearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == showList.Id);
+                    else if (ObjectMenu.SelectedIndex == 3)
+                        appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
+
+                    TimeSpan frameRate = TimeSpan.FromMilliseconds(200);
+
+                    for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.SpriteId.Count; i++)
+                    {
+                        int index = GetSpriteIndex(appearance.FrameGroup[0], 0, (ObjectMenu.SelectedIndex == 0 || ObjectMenu.SelectedIndex == 2) ? (int)Math.Min(2, appearance.FrameGroup[0].SpriteInfo.PatternWidth - 1) : 0, ObjectMenu.SelectedIndex == 2 ? (int)Math.Min(1, appearance.FrameGroup[0].SpriteInfo.PatternHeight - 1) : 0, 0, i);
+                        BitmapImage imageFrame = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)appearance.FrameGroup[0].SpriteInfo.SpriteId[index]]);
+                        imageFrames.Add(imageFrame);
+                    }
+
+                    StartSpriteAnimation(imageControl, frameRate, showList, imageFrames);
+                }
+            }
+        }
+
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            AboutWindow aboutWindow = new AboutWindow();
+            aboutWindow.Show();
         }
     }
 }

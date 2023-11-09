@@ -119,5 +119,45 @@ namespace Assets_Editor
                 return new System.Drawing.Bitmap(bitmap);
             }
         }
+        public static bool ByteArrayCompare(byte[] a1, byte[] a2)
+        {
+            if (a1.Length != a2.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < a1.Length; i++)
+            {
+                if (a1[i] != a2[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static Bitmap ConvertBackgroundToMagenta(Bitmap original, bool opaque)
+        {
+            System.Drawing.Color magentaOpaque = System.Drawing.Color.FromArgb(255, 255, 0, 255); // Opaque magenta
+            System.Drawing.Color magentaTransparent = System.Drawing.Color.FromArgb(0, 255, 0, 255); // Transparent magenta
+            System.Drawing.Color magenta = opaque ? magentaOpaque : magentaTransparent;
+
+            // Create a bitmap with the same size as the original
+            Bitmap bmpWithMagentaBackground = new Bitmap(original.Width, original.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            using (Graphics graphics = Graphics.FromImage(bmpWithMagentaBackground))
+            {
+                // Fill the background with magenta
+                graphics.Clear(magenta);
+
+                // Draw the original image on top of the magenta background
+                graphics.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height));
+            }
+
+            return bmpWithMagentaBackground;
+        }
+
+
     }
 }

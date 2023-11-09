@@ -1,0 +1,90 @@
+﻿<Window x:Class="Assets_Editor.SearchWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Assets_Editor" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" 
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="SearchWindow" Height="860" Width="600">
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Stretch" HorizontalAlignment="Left" Margin="0,5,0,10">
+            <ListView x:Name="ItemListView" HorizontalAlignment="Center" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="ItemListView_ScrollChanged" SelectionChanged="ItemListView_SelectionChanged" SelectedIndex="0" Width="207" Margin="0,10,0,0">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="False">
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="{x:Type GridViewColumnHeader}">
+                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
+                        <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
+                        <GridViewColumn Header="Sprite" Width="90">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding Image}" Stretch="None" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Border>
+        <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Width="320" VerticalAlignment="Stretch" Margin="20,5,0,10">
+            <GroupBox Header="AppearanceFlags" Background="#FFEAEAEA" HorizontalAlignment="Stretch" Width="320" VerticalAlignment="Stretch">
+                <WrapPanel >
+                    <CheckBox x:Name="A_FlagGround" Content="Ground" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagClip" Content="Clip" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagBottom" Content="Bottom" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagTop" Content="Top" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagContainer" Content="Container" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagCumulative" Content="Cumulative" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagUsable" Content="Usable" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagForceuse" Content="Forceuse" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagMultiuse" Content="Multiuse" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagWrite" Content="Write" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagWriteOnce" Content="Write Once" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagLiquidpool" Content="Liquid Pool" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagUnpass" Content="Unpass" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagUnmove" Content="Unmove" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagUnsight" Content="Unsight" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagAvoid" Content="Avoid" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagNoMoveAnimation" Content="No Move Animation" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagTake" Content="Take" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagLiquidcontainer" Content="Liquid Container" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagHang" Content="Hang" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagHookSouth" Content="Hook South" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagHookEast" Content="Hook East" Margin="0,5,0,0" Width="140" Padding="4,0,0,0"/>
+                    <CheckBox x:Name="A_FlagRotate" Content="Rotate" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagLight" Content="Light" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagDontHide" Content="Dont Hide" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagTranslucent" Content="Translucent" Margin="0,5,0,5"/>
+                    <CheckBox x:Name="A_FlagShift" Content="Shift" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagHeight" Content="Height" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagLyingObject" Content="Lying Object" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagAutomap" Content="Auto Map" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagLenshelp" Content="Lens help" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagFullGround" Content="Full Ground" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagIgnoreLook" Content="Ignore Look" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagClothes" Content="Clothes" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagDefaultAction" Content="Default Action" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagMarket" Content="Market" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagWrap" Content="Wrap" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagUnwrap" Content="Unwrap" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagTopeffect" Content="Top Effect" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagAnimated" Content="Animated" Margin="0,5,0,0" Width="140"/>
+                </WrapPanel>
+            </GroupBox>
+            <Button x:Name="SearchItem" Content="Search" Width="100" ToolTip="Save" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="SearchItem_PreviewMouseLeftButtonDown" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>

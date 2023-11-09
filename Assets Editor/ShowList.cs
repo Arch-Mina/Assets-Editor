@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace Assets_Editor
 {
     public class ShowList : INotifyPropertyChanged
     {
         private uint id;
+        private uint cid;
         private ImageSource image;
         private int pos;
         private String name;
+        private Storyboard storyboard = null;
         public uint Id
         {
             get { return id; }
@@ -21,6 +24,18 @@ namespace Assets_Editor
                 {
                     id = value;
                     NotifyPropertyChanged("Id");
+                }
+            }
+        }
+        public uint Cid
+        {
+            get { return cid; }
+            set
+            {
+                if (cid != value)
+                {
+                    cid = value;
+                    NotifyPropertyChanged("Cid");
                 }
             }
         }
@@ -57,6 +72,18 @@ namespace Assets_Editor
                 {
                     name = value;
                     NotifyPropertyChanged("Name");
+                }
+            }
+        }
+        public Storyboard Storyboard
+        {
+            get { return storyboard; }
+            set
+            {
+                if (storyboard != value)
+                {
+                    storyboard = value;
+                    NotifyPropertyChanged("Storyboard");
                 }
             }
         }

@@ -25,6 +25,7 @@
             <Label Content="Outfits:"/>
             <Label Content="Effects:"/>
             <Label Content="Missiles:"/>
+            <CheckBox x:Name="SprTransparent" Content="Transparent" Visibility="Hidden"></CheckBox>
         </StackPanel>
         <StackPanel Margin="219,92,0,0" HorizontalAlignment="Left">
             <Label x:Name="ObjectsCount"/>

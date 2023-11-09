@@ -17,6 +17,7 @@ namespace Efundies
         public int Depth { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
+        public int Length { get; private set; }
 
         public LockBitmap(Bitmap source)
         {
@@ -33,7 +34,7 @@ namespace Efundies
                 // Get width and height of bitmap
                 Width = _source.Width;
                 Height = _source.Height;
-
+                Length = Width * Height * 4;
                 // get total locked pixels count
                 int pixelCount = Width * Height;
 
@@ -160,6 +161,33 @@ namespace Efundies
             // For 8 bpp set color value (Red, Green and Blue values are the same)
             {
                 Pixels[i] = color.B;
+            }
+        }
+        public void CopyPixels(Bitmap source, int rx, int ry, int rw, int rh, int px, int py)
+        {
+            int maxIndex = this.Length - 4;
+
+            for (int y = 0; y < rh; y++)
+            {
+                int row = ((py + y) * this.Width);
+
+                for (int x = 0; x < rw; x++)
+                {
+                    Color color = source.GetPixel(rx + x, ry + y);
+                    if (color.A != 0)
+                    {
+                        int i = (row + (px + x)) * 4;
+                        if (i > maxIndex)
+                        {
+                            continue;
+                        }
+
+                        this.Pixels[i] = color.B;
+                        this.Pixels[i + 1] = color.G;
+                        this.Pixels[i + 2] = color.R;
+                        this.Pixels[i + 3] = color.A;
+                    }
+                }
             }
         }
     }

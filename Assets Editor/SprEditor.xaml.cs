@@ -16,10 +16,7 @@ using System.Diagnostics;
 using static Assets_Editor.MainWindow;
 using System.Runtime.InteropServices;
 using Efundies;
-using System.Security.Cryptography;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Linq;
 
 namespace Assets_Editor
 {
@@ -28,10 +25,11 @@ namespace Assets_Editor
     /// </summary>
     public partial class SprEditor : Window
     {
-        public SprEditor()
+        private DatEditor _editor;
+        public SprEditor(DatEditor editor)
         {
             InitializeComponent();
-            CustomCatalog = new List<Catalog>();
+            _editor = editor;
         }
         private int SpriteWidth = 32;
         private int SpriteHeight = 32;
@@ -40,7 +38,6 @@ namespace Assets_Editor
         private int SprType = 0;
         private bool EmptyTiles = true;
         public static ObservableCollection<ShowList> CustomSheetsList = new ObservableCollection<ShowList>();
-        public static List<Catalog> CustomCatalog;
         private Catalog CurrentSheet = null;
         private void CreateNewSheetImg(int sprType, bool modify)
         {
@@ -94,6 +91,7 @@ namespace Assets_Editor
                 img.Source = image;
                 img.Tag = i;
                 img.Margin = new Thickness(1, 1, 0, 0);
+                RenderOptions.SetBitmapScalingMode(img, BitmapScalingMode.NearestNeighbor);
                 SheetWrap.Children.Add(img);
             }
             SheetWrap.Width = SprSheetWidth + 1 + (SprSheetWidth / SpriteWidth);
@@ -109,7 +107,7 @@ namespace Assets_Editor
                 List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
                 if (Math.Ceiling(sourceBitmap.Width) >= SprSheetWidth && Math.Ceiling(sourceBitmap.Height) >= SprSheetHeight)
                 {
-                    Bitmap original = new Bitmap(@files[0]);
+                    Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
                     int sprCount = 0;
                     int xCols = SpriteWidth == 32 ? 12 : 6;
                     int yCols = SpriteHeight == 32 ? 12 : 6;
@@ -131,15 +129,15 @@ namespace Assets_Editor
                     {
                         for (int i = 0; i < files.Length; i++)
                         {
-                            sourceBitmap = new BitmapImage(new Uri(files[i]));
-                            images[i].Source = sourceBitmap;
+                            Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[i]), true);
+                            images[i].Source = Utils.BitmapToBitmapImage(original);
                         }
                     }
                     else
                     {
-                        sourceBitmap = new BitmapImage(new Uri(files[0]));
+                        Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
                         Image img = e.Source as Image;
-                        img.Source = sourceBitmap;
+                        img.Source = Utils.BitmapToBitmapImage(original);
                     }
                 }
                 EmptyTiles = false;
@@ -159,67 +157,7 @@ namespace Assets_Editor
                 CreateNewSheetImg(TSpriteType.SelectedIndex, false);
             }
         }
-        private void ExportLzmaFile(Bitmap targetImg, ref string filename)
-        {
-            Bitmap targetBmp = targetImg.Clone(new Rectangle(0, 0, targetImg.Width, targetImg.Height), System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            MemoryStream ms = new MemoryStream();
-            targetBmp.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-            ms.Position = 0xA;
-            int bmpData = ms.ReadByte();
-            MemoryStream outFile = new MemoryStream();
-            //BITMAPV$HEADER
-            outFile.WriteByte(0x42);                                    //Magic value identifying bitmap file
-            outFile.WriteByte(0x4D);                                    //Magic value identifying bitmap file
-            outFile.Write(BitConverter.GetBytes(0));                    // Bitmap Size
-            outFile.Write(BitConverter.GetBytes((ushort)0));            // Reserved
-            outFile.Write(BitConverter.GetBytes((ushort)0));            // Reserved
-            outFile.Write(BitConverter.GetBytes(122));                  // Offset of pixel array
-            outFile.Write(BitConverter.GetBytes(108));                  // bV4Size
-            outFile.Write(BitConverter.GetBytes(targetBmp.Width));      // bV4Width 
-            outFile.Write(BitConverter.GetBytes(targetBmp.Height));     // bV4Height  
-            outFile.Write(BitConverter.GetBytes((ushort)1));            // bV4Planes
-            outFile.Write(BitConverter.GetBytes((ushort)32));           // bV4BitCount
-            outFile.Write(BitConverter.GetBytes(3));                    // bV4V4Compression
-            outFile.Write(BitConverter.GetBytes(0));                    // bV4SizeImage
-            outFile.Write(BitConverter.GetBytes(0));                    // bV4XPelsPerMeter
-            outFile.Write(BitConverter.GetBytes(0));                    // bV4YPelsPerMeter
-            outFile.Write(BitConverter.GetBytes(0));                    // bV4ClrUsed
-            outFile.Write(BitConverter.GetBytes(0));                    // bV4ClrImportant
-            outFile.Write(new byte[] { 0x0, 0x0, 0xFF, 0x0 }, 0, 4);    // bV4RedMask
-            outFile.Write(new byte[] { 0x0, 0xFF, 0x0, 0x0 }, 0, 4);    // bV4GreenMask
-            outFile.Write(new byte[] { 0xFF, 0x0, 0x0, 0x0 }, 0, 4);    // bV4BlueMask
-            outFile.Write(new byte[] { 0x0, 0x0, 0x0, 0xFF }, 0, 4);    // bV4AlphaMask
-            outFile.Write(new byte[] { 0x57, 0x69, 0x6E, 0x20 }, 0, 4); //(0x73524742); // bV4CSType (0x42475273 = "BGRs")
-            outFile.Write(BitConverter.GetBytes(0));                    // X coordinate of red endpoint
-            outFile.Write(BitConverter.GetBytes(0));                    // Y coordinate of red endpoint
-            outFile.Write(BitConverter.GetBytes(0));                    // Z coordinate of red endpoint
-            outFile.Write(BitConverter.GetBytes(0));                    // X coordinate of green endpoint
-            outFile.Write(BitConverter.GetBytes(0));                    // Y coordinate of green endpoint
-            outFile.Write(BitConverter.GetBytes(0));                    // Z coordinate of green endpoint
-            outFile.Write(BitConverter.GetBytes(0));                    // X coordinate of blue endpoint
-            outFile.Write(BitConverter.GetBytes(0));                    // Y coordinate of blue endpoint
-            outFile.Write(BitConverter.GetBytes(0));                    // Z coordinate of blue endpoint
-            outFile.Write(BitConverter.GetBytes(0));                    // bV4GammaRed
-            outFile.Write(BitConverter.GetBytes(0));                    // bV4GammaGreen
-            outFile.Write(BitConverter.GetBytes(0));                    // bV4GammaBlue
-
-            outFile.Write(ms.ToArray(), bmpData, (int)ms.Length - bmpData);
-            outFile.Seek(2, SeekOrigin.Begin);
-            outFile.Write(BitConverter.GetBytes(outFile.Length));
-            outFile.Position = 0;
-            using HashAlgorithm crypt = SHA256.Create();
-            byte[] hashValue = crypt.ComputeHash(outFile);
-            string hash = String.Empty;
-            foreach (byte theByte in hashValue)
-            {
-                hash += theByte.ToString("x2");
-            }
-            outFile.Position = 0;
-            string fullpath = filename + "\\sprites-" + hash + ".bmp.lzma";
-            filename = "sprites-" + hash + ".bmp.lzma";
-            LZMA.CompressFileLZMA(outFile, fullpath);
-        }
+        
 
         private Bitmap GetBitmapFromTiles(List<Image> images)
         {
@@ -265,6 +203,11 @@ namespace Assets_Editor
         private void ExportSheet_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
+            if(images.Count == 0)
+            {
+                SprStatusBar.MessageQueue.Enqueue($"Current sheet is empty.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                return;
+            }
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Lzma Archive (.lzma)|*.lzma"
@@ -292,7 +235,7 @@ namespace Assets_Editor
                         {
                             FileInfo fileInfo = new FileInfo(saveFileDialog.FileName);
                             string dirPath = fileInfo.DirectoryName;
-                            ExportLzmaFile(targetImg, ref dirPath);
+                            LZMA.ExportLzmaFile(targetImg, ref dirPath);
                             break;
                         }
                 }
@@ -311,8 +254,8 @@ namespace Assets_Editor
                     Type = "sprite",
                     File = "",
                     SpriteType = SprType,
-                    FirstSpriteid = MainWindow.CustomSprLastId + 1,
-                    LastSpriteid = MainWindow.CustomSprLastId + images.Count,
+                    FirstSpriteid = AllSprList.Count,
+                    LastSpriteid = AllSprList.Count + images.Count,
                     Area = 0
                 };
 
@@ -352,25 +295,36 @@ namespace Assets_Editor
                     imported.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                     SprLists[sprInfo.FirstSpriteid + counter] = stream;
                     counter++;
-                    if (CurrentSheet == null)
-                        MainWindow.CustomSprLastId++;
                 }
                 Bitmap targetImg = GetBitmapFromTiles(images);
                 string dirPath = _assetsPath;
-                ExportLzmaFile(targetImg, ref dirPath);
+                LZMA.ExportLzmaFile(targetImg, ref dirPath);
 
                 sprInfo.File = dirPath;
                 if (CurrentSheet != null)
-                    CustomCatalog.Remove(CurrentSheet);
+                    MainWindow.catalog.Remove(CurrentSheet);
 
                 MainWindow.catalog.Add(sprInfo);
+
+                ShowList foundEntry = SprEditor.CustomSheetsList.FirstOrDefault(showList => showList.Id == (uint)sprInfo.FirstSpriteid);
+
+                if (foundEntry != null)
+                {
+                    SprEditor.CustomSheetsList.Remove(foundEntry);
+                }
+
                 SprEditor.CustomSheetsList.Add(new ShowList() { Id = (uint)sprInfo.FirstSpriteid, Image = Utils.BitmapToBitmapImage(targetImg), Name = sprInfo.File });
 
-                for (int i = AllSprList.Count; i < CustomSprLastId; i++)
+                if (CurrentSheet == null)
                 {
-                    AllSprList.Add(new ShowList() { Id = (uint)i });
+                    for (int i = sprInfo.FirstSpriteid; i < sprInfo.LastSpriteid; i++)
+                    {
+                        AllSprList.Add(new ShowList() { Id = (uint)i });
+                    }
                 }
                 SprStatusBar.MessageQueue.Enqueue($"New sheet saved.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                _editor.SprListView.ItemsSource = null;
+                _editor.SprListView.ItemsSource = MainWindow.AllSprList;
             }
             else
                 SprStatusBar.MessageQueue.Enqueue($"Create a new sheet to import.", null, null, null, false, true, TimeSpan.FromSeconds(3));
@@ -381,7 +335,7 @@ namespace Assets_Editor
             if (SheetsList.SelectedIndex > -1)
             {               
                 ShowList showList = (ShowList)SheetsList.SelectedItem;
-                CurrentSheet = CustomCatalog.Find(x => x.File == showList.Name);
+                CurrentSheet = MainWindow.catalog.Find(x => x.File == showList.Name);
                 CreateNewSheetImg(CurrentSheet.SpriteType, true);
                 EmptyTiles = false;
                 List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
@@ -402,6 +356,52 @@ namespace Assets_Editor
                     }
                 }
             }
+        }
+
+        private void CreateNewSheet_Click(object sender, RoutedEventArgs e)
+        {
+            if (TSpriteType.SelectedIndex > -1)
+            {
+                CreateNewSheetImg(TSpriteType.SelectedIndex, false);
+                NewSheetDialogHost.IsOpen = false;
+            }
+        }
+
+        private void CreateSheet_Click(object sender, RoutedEventArgs e)
+        {
+            NewSheetDialogHost.IsOpen = true;
+        }
+
+        private void SearchSpr_Click(object sender, RoutedEventArgs e)
+        {
+
+            foreach (var catalog in MainWindow.catalog)
+            {
+                if (A_SearchSprId.Value >= catalog.FirstSpriteid && A_SearchSprId.Value <= catalog.LastSpriteid)
+                {
+                    string _sprPath = String.Format("{0}{1}", MainWindow._assetsPath, catalog.File);
+                    if (File.Exists(_sprPath))
+                    {
+                        ShowList foundEntry = SprEditor.CustomSheetsList.FirstOrDefault(showList => showList.Id == (uint)catalog.FirstSpriteid);
+                        if (foundEntry == null)
+                        {
+                            using System.Drawing.Bitmap SheetM = LZMA.DecompressFileLZMA(_sprPath);
+                            using Bitmap transparentBitmap = new Bitmap(SheetM.Width, SheetM.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                            using (Graphics g = Graphics.FromImage(transparentBitmap))
+                            {
+                                g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
+                                g.DrawImage(SheetM, 0, 0);
+
+                            }
+
+                            SprEditor.CustomSheetsList.Add(new ShowList() { Id = (uint)catalog.FirstSpriteid, Image = Utils.BitmapToBitmapImage(transparentBitmap), Name = catalog.File });
+                        }
+                        
+                    }
+                }
+            }
+            SheetsList.ItemsSource = SprEditor.CustomSheetsList;
+
         }
     }
 }

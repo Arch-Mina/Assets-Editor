@@ -6,7 +6,22 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="about.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="DatEditor.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="ImportManager.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="LegacyDatEditor.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="OTBEditor.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="SearchWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="SprEditor.xaml.cs">
@@ -14,10 +29,25 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Update="about.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="DatEditor.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="ImportManager.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="LegacyDatEditor.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="OTBEditor.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="SearchWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="SprEditor.xaml">

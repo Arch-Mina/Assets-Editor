@@ -13,6 +13,7 @@ using System.Linq;
 using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Assets_Editor
 {
@@ -23,14 +24,16 @@ namespace Assets_Editor
     {
         public static  string _assetsPath = "";
         public static string _datPath = "";
-        public ushort ObjectCount { get; set; }
-        public ushort OutfitCount { get; set; }
-        public ushort EffectCount { get; set; }
-        public ushort MissileCount { get; set; }
+        public static string _sprPath = "";
+        public static ushort ObjectCount { get; set; }
+        public static ushort OutfitCount { get; set; }
+        public static ushort EffectCount { get; set; }
+        public static ushort MissileCount { get; set; }
         public ushort Version { get; set; }
 
+        public static Dictionary<uint, Sprite> sprites = new Dictionary<uint, Sprite>();
+
         readonly BackgroundWorker worker = new BackgroundWorker();
-        private int progress;
         public MainWindow()
         {
             InitializeComponent();
@@ -66,10 +69,12 @@ namespace Assets_Editor
         
         public static List<Catalog> catalog;
 
-        public static Appearances appearances;       
-        public static ObservableCollection<ShowList> AllSprList = new ObservableCollection<ShowList>();
+        public static Appearances appearances;
+        public static List<ShowList> AllSprList = new List<ShowList>();
         public static ConcurrentDictionary<int, MemoryStream> SprLists = new ConcurrentDictionary<int, MemoryStream>();
-        public static int CustomSprLastId = 249999;
+        public static bool LegacyClient = false;
+        public static uint DatSignature { get; set; }
+        public static uint SprSignature { get; set; }
 
         private void LoadCatalogJson()
         {
@@ -92,7 +97,7 @@ namespace Assets_Editor
             FileStream appStream;
             using (appStream = new FileStream(_datPath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
             {
-                appearances = Appearances.Parser.ParseFrom(appStream);
+                appearances = Tibia.Protobuf.Appearances.Appearances.Parser.ParseFrom(appStream);
                 ObjectCount = (ushort)appearances.Object[^1].Id;
                 OutfitCount = (ushort)appearances.Outfit[^1].Id;
                 EffectCount = (ushort)appearances.Effect[^1].Id;
@@ -102,6 +107,40 @@ namespace Assets_Editor
                 OutfitsCount.Content = OutfitCount;
                 EffectsCount.Content = EffectCount;
                 MissilesCount.Content = MissileCount;
+            }
+        }
+
+        private void LoadLegacyDat()
+        {
+            LegacyAppearance Dat = new LegacyAppearance();
+            Dat.ReadLegacyDat(_datPath);
+            DatSignature = Dat.Signature;
+            appearances = Dat.Appearances;
+            ObjectsCount.Content = Dat.ObjectCount;
+            OutfitsCount.Content = Dat.OutfitCount;
+            EffectsCount.Content = Dat.EffectCount;
+            MissilesCount.Content = Dat.MissileCount;
+
+        }
+        private void LoadLegacySpr()
+        {
+            SpriteLoader Spr = new SpriteLoader();
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                Spr.Transparency = (bool)SprTransparent.IsChecked;
+            });
+            var progressReporter = new Progress<int>(value =>
+            {
+                worker.ReportProgress(value);
+            });
+            bool status = Spr.ReadSprites(_sprPath, ref sprites, progressReporter);
+            SprSignature = Spr.Signature;
+            SprLists = new ConcurrentDictionary<int, MemoryStream>();
+
+            for (uint i = 0; i < sprites.Count; i++)
+            {
+                SprLists[(int)i] = sprites[i].MemoryStream;
+                AllSprList.Add(new ShowList() { Id = i });
             }
         }
 
@@ -117,17 +156,31 @@ namespace Assets_Editor
             }
             if (_assetsPath != "" && File.Exists(_assetsPath + "catalog-content.json") == true)
             {
-
+                LegacyClient = false;
                 LoadCatalogJson();
                 LoadAppearances();
                 LoadAssets.IsEnabled = true;
+                SprTransparent.Visibility = Visibility.Hidden;
+            }
+            else if (_assetsPath != "" && File.Exists(_assetsPath + "Tibia.dat") == true && File.Exists(_assetsPath + "Tibia.spr") == true)
+            {
+                LegacyClient = true;
+                _datPath = String.Format("{0}{1}", _assetsPath, "Tibia.dat");
+                _sprPath = String.Format("{0}{1}", _assetsPath, "Tibia.spr");
+                LoadLegacyDat();
+                LoadAssets.IsEnabled = true;
+                SprTransparent.Visibility = Visibility.Visible;
+
             }
             else
                 MessageBox.Show("You have selected a wrong assets path.");
         }
         private void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            LoadSprSheet();
+            if (LegacyClient == false)
+                LoadSprSheet();
+            else
+                LoadLegacySpr();
         }
         private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
@@ -135,8 +188,16 @@ namespace Assets_Editor
         }
         private void Worker_Completed(object sender, RunWorkerCompletedEventArgs e)
         {
-            DatEditor datEditor = new DatEditor(appearances);
-            datEditor.Show();
+            if (LegacyClient == false)
+            {
+                DatEditor datEditor = new DatEditor(appearances);
+                datEditor.Show();
+            }
+            else
+            {
+                LegacyDatEditor legacyDatEditor = new LegacyDatEditor(appearances);
+                legacyDatEditor.Show();
+            }
             Hide();
         }
         private void LoadAssets_Click(object sender, RoutedEventArgs e)
@@ -187,7 +248,7 @@ namespace Assets_Editor
 
         private void LoadSprSheet()
         {
-            progress = 0;
+            int progress = 0;
             SprLists = new ConcurrentDictionary<int, MemoryStream>();
             var options = new ParallelOptions()
             {

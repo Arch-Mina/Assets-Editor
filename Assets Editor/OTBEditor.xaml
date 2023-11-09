@@ -1,0 +1,191 @@
+﻿<Window x:Class="Assets_Editor.OTBEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Assets_Editor" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" 
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="OTBEditor" Height="860" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}">
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Stretch" HorizontalAlignment="Left" Margin="10,5,0,10">
+            <ListView x:Name="ItemListView" HorizontalAlignment="Center" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="ItemListView_ScrollChanged" SelectionChanged="ItemListView_SelectionChanged" SelectedIndex="0" Width="207" Margin="0,10,0,0">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="False">
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="{x:Type GridViewColumnHeader}">
+                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
+                        <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
+                        <GridViewColumn Header="Sprite" Width="90">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding Image}" Stretch="None" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Border>
+
+        <Border Grid.Row="0" Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" Margin="5,5,10,10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Menu IsMainMenu="True" DockPanel.Dock="Top" Grid.Row="0">
+                    <MenuItem Header="_File">
+                        <MenuItem Header="Save As" Click="SaveAs_Click">
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="ContentSave"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="_Edit">
+                        <MenuItem Header="Create Missing Items" Click="CreateMissingItems">
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="CogRefresh"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Check MisMatched Items" Click="CheckMisMatcheditems">
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="CogRefresh"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Reload Selected Items Attr" Click="ReloadItemsAttr">
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="CogRefresh"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuItem>
+                </Menu>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="OTB File:" VerticalAlignment="Center"/>
+                    <TextBox x:Name="OtbPathText" Grid.Column="1" VerticalAlignment="Center" Width="330" IsEnabled="False" Margin="5,0,5,0"/>
+                    <Button x:Name="OpenOTBButton" Grid.Column="2" Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" Height="55" Width="55" Click="OpenOTBButton_Click">
+                        <materialDesign:PackIcon Kind="CardSearch" Height="40" Width="40" />
+                    </Button>
+                </Grid>
+                <StackPanel Grid.Row="2" Margin="5,10,5,0">
+                    <Rectangle Fill="Gray" Height="1" Margin="0,5,0,10" />
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Label Content="Server Id:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <xctk:IntegerUpDown x:Name="I_ServerId" Width="110" Minimum="0" Maximum="1000" />
+                        <Label Content="Client Id:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <xctk:IntegerUpDown x:Name="I_ClientId" Width="110" Minimum="0" Maximum="1000" />
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                        <Label Content="Name:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <TextBox x:Name="I_Name" Text="testing" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" FontWeight="Medium" VerticalAlignment="Center" Width="110"/>
+                        <Label Content="Stack Order:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <ComboBox x:Name="I_StackOrder" Width="110" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
+                            <ComboBoxItem Content="None"/>
+                            <ComboBoxItem Content="Border"/>
+                            <ComboBoxItem Content="Bottom"/>
+                            <ComboBoxItem Content="Top"/>
+                        </ComboBox>
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                        <Label Content="Type:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <ComboBox x:Name="I_Type" BorderThickness="1,1,1,1" SelectedIndex="0" Padding="6,1,5,3" Width="110">
+                            <ComboBoxItem Content="None"/>
+                            <ComboBoxItem Content="Ground"/>
+                            <ComboBoxItem Content="Container"/>
+                            <ComboBoxItem Content="Fluid"/>
+                            <ComboBoxItem Content="Splash"/>
+                            <ComboBoxItem Content="Deprecated"/>
+                            <ComboBoxItem Content="Podium"/>
+                        </ComboBox>
+                        <Label Content="Ground Speed:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <xctk:IntegerUpDown x:Name="I_GroundSpeed" Minimum="0" Maximum="1000" Width="110"/>
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                        <CheckBox x:Name="I_Unpassable" Content="Unpassable" Width="110"/>
+                        <CheckBox x:Name="I_Movable" Content="Movable" Width="110"/>
+                        <CheckBox x:Name="I_BlockMissiles" Content="Block Missiles" Width="110"/>
+                        <CheckBox x:Name="I_BlockPath" Content="Block Path" Width="110"/>
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                        <CheckBox x:Name="I_Pickable" Content="Pickable" Width="110"/>
+                        <CheckBox x:Name="I_Stackable" Content="Stackable" Width="110"/>
+                        <CheckBox x:Name="I_ForceUse" Content="Force Use" Width="110"/>
+                        <CheckBox x:Name="I_MultiUse" Content="Multi Use" Width="110"/>
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                        <CheckBox x:Name="I_Rotateable" Content="Rotateable" Width="110"/>
+                        <CheckBox x:Name="I_Hangable" Content="Hangable" Width="110"/>
+                        <CheckBox x:Name="I_HookSouth" Content="HookSouth" Width="110"/>
+                        <CheckBox x:Name="I_HookEast" Content="HookEast" Width="110"/>
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                        <CheckBox x:Name="I_Elevation" Content="Elevation" Width="110"/>
+                        <CheckBox x:Name="I_IgnoreLook" Content="Ignore Look" Width="110"/>
+                        <CheckBox x:Name="I_Readable" Content="Readable" Width="110"/>
+                        <CheckBox x:Name="I_FullGround" Content="Full Ground" Width="110"/>
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                        <Label Content="MiniMap Color:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <xctk:IntegerUpDown x:Name="I_MiniMapColor" Width="110" Minimum="0" Maximum="1000" />
+                        <Label Content="Show As:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <xctk:IntegerUpDown x:Name="I_ShowAs" Width="110" Minimum="0" Maximum="1000" />
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                        <Label Content="Light Level:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <xctk:IntegerUpDown x:Name="I_LightLevel" Width="110" Minimum="0" Maximum="1000" />
+                        <Label Content="Light Color:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <xctk:IntegerUpDown x:Name="I_LightColor" Width="110" Minimum="0" Maximum="1000" />
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                        <Label Content="Max ReadWrite:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <xctk:IntegerUpDown x:Name="I_MaxReadWriteChars" Width="110" Minimum="0" Maximum="1000" />
+                        <Label Content="Max Read:" HorizontalAlignment="Left" VerticalAlignment="Center" Width="110"/>
+                        <xctk:IntegerUpDown x:Name="I_MaxReadChars" Width="110" Minimum="0" Maximum="1000" />
+                    </WrapPanel>
+                    <Button x:Name="SaveItemButton" Content="Save" materialDesign:RippleAssist.IsDisabled="True" Height="30" Width="300" Click="SaveItemButton_Click"  Margin="0,10,0,10">
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <Border Grid.Row="0" Grid.Column="2" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Stretch" HorizontalAlignment="Left" Margin="0,5,0,10">
+            <ListView x:Name="NewItemListView" HorizontalAlignment="Center" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="NewItemListView_SelectionChanged"  SelectedIndex="0" Width="207" Margin="0,10,0,0">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="False">
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="{x:Type GridViewColumnHeader}">
+                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
+                        <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
+                        <GridViewColumn Header="Sprite" Width="90">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding Image}" Stretch="None" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Border>
+    </Grid>
+</Window>

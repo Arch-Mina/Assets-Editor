@@ -1,0 +1,184 @@
+﻿<Window x:Class="Assets_Editor.ImportManager"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Assets_Editor" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" 
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Import Manager" Height="860" Width="800" materialDesign:ShadowAssist.CacheMode="{x:Null}">
+    <Grid>
+        <materialDesign:DialogHost Grid.Row="1" x:Name="ImportAsDialogHost" OverlayBackground="Gray" >
+            <materialDesign:DialogHost.DialogContent>
+                <GroupBox Header="Import Object As" Width="300" Height="150">
+                    <Grid >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="60"/>
+                        </Grid.RowDefinitions>
+                        <ComboBox SelectedIndex="0" Width="150">
+                            <ComboBoxItem Content="Outfit"></ComboBoxItem>
+                        </ComboBox>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Click="ConvertObject"  Content="Import" Width="100" Margin="0,0,20,0"/>
+                            <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+            </materialDesign:DialogHost.DialogContent>
+        </materialDesign:DialogHost>
+        <TabControl>
+            <TabItem Header="Import From Client" BorderBrush="{DynamicResource PrimaryHueMidBrush}" Background="{DynamicResource PrimaryHueDarkBrush}">
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center" Margin="5,10,5,5">
+                        <Label Content="Client Path:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="ClientPathText" VerticalAlignment="Center" Width="300" IsEnabled="False" Margin="5,0,5,0"/>
+                        <Button x:Name="OpenClient" Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" Height="55" Width="55" Click="OpenClient_Click">
+                            <materialDesign:PackIcon Kind="CardSearch" Height="40" Width="40" />
+                        </Button>
+                    </StackPanel>
+                    <CheckBox Grid.Row="1" x:Name="SprTransparent" Content="Transparent" HorizontalAlignment="Center"></CheckBox>
+                    <ProgressBar x:Name="LoadProgress" Minimum="0" Maximum="100" Value="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="50,0,50,5" Height="10" MaxWidth="500" Grid.Row="2"/>
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch" Grid.Row="3" Margin="5,0,5,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Row="0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Stretch" HorizontalAlignment="Left" Margin="10,5,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="45"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="40"/>
+                                    <RowDefinition Height="45"/>
+                                </Grid.RowDefinitions>
+                                <ComboBox Grid.Row="0" x:Name="ObjectMenu" Style="{StaticResource MaterialDesignFilledComboBox}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" SelectionChanged="ObjectMenuChanged" SelectedIndex="0" Width="228" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,-15,0,0" Focusable="False" SnapsToDevicePixels="True" FlowDirection="LeftToRight" Height="50" Background="{DynamicResource PrimaryHueMidBrush}" BorderThickness="0,0,0,0" >
+                                    <ComboBoxItem Content="Outfits"/>
+                                    <ComboBoxItem Content="Items"/>
+                                    <ComboBoxItem Content="Effects"/>
+                                    <ComboBoxItem Content="Missiles"/>
+                                </ComboBox>
+                                <ListView Grid.Row="1" x:Name="ObjListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="ObjListView_ScrollChanged" SelectionChanged="ObjListView_SelectionChanged" SelectedIndex="0" Margin="0,5,0,0">
+                                    <ListView.View>
+                                        <GridView AllowsColumnReorder="False">
+                                            <GridView.ColumnHeaderContainerStyle>
+                                                <Style TargetType="{x:Type GridViewColumnHeader}">
+                                                    <Setter Property="IsHitTestVisible" Value="False"/>
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </Style>
+                                            </GridView.ColumnHeaderContainerStyle>
+                                            <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
+                                            <GridViewColumn Header="Sprite" Width="90">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Image Source="{Binding Image}" Stretch="None" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                                <xctk:IntegerUpDown Grid.Row="2" x:Name="ObjListViewSelectedIndex" ParsingNumberStyle="Integer" ValueChanged="ObjListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="0,5,0,0"/>
+                                <Border Grid.Row="3" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="-1,5,-1,-1">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button x:Name="ObjectImport" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Import Object" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ObjectImport_PreviewMouseLeftButtonDown" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="ArrowDownBox" Width="25" Height="25"/>
+                                        </Button>
+                                        <Button x:Name="ObjectImportAs" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Import Object As" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ObjectImportAs_PreviewMouseLeftButtonDown" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="PuzzleEdit" Width="25" Height="25"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <GroupBox Grid.Row="0" Grid.Column="1" Header="Sprite List" Width="225" HorizontalAlignment="Stretch" Margin="10,5,0,10" VerticalAlignment="Stretch" Padding="1,10,0,0">
+                            <GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="ImageArea" Height="32" Width="32" VerticalAlignment="Center" />
+                                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text="{Binding}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GroupBox.HeaderTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="40"/>
+                                    <RowDefinition Height="45"/>
+                                </Grid.RowDefinitions>
+                                <ListView Grid.Row="0" Grid.Column="0" Margin="0,5,0,0" x:Name="SprListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="SprListView_ScrollChanged" SelectedIndex="0">
+                                    <ListView.View>
+                                        <GridView AllowsColumnReorder="False">
+                                            <GridView.ColumnHeaderContainerStyle>
+                                                <Style TargetType="{x:Type GridViewColumnHeader}">
+                                                    <Setter Property="IsHitTestVisible" Value="False"/>
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </Style>
+                                            </GridView.ColumnHeaderContainerStyle>
+                                            <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
+                                            <GridViewColumn Header="Sprite" Width="90">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Image Source="{Binding Image}" Stretch="None" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                                <xctk:IntegerUpDown Grid.Row="1" x:Name="SprListViewSelectedIndex" ParsingNumberStyle="Integer" Value="{Binding ElementName=SprListView, Path=SelectedIndex, Mode=TwoWay}" ValueChanged="SprListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="0,5,0,0"/>
+                                <Border Grid.Row="2" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,5,0,0">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button x:Name="ImportSpr" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Import Sprite" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ImportSpr_PreviewMouseLeftButtonDown" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="ArrowDownBox" Width="25" Height="25"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Grid.Row="0" Grid.Column="2" Header="Import OBD file" Width="300" Height="300" HorizontalAlignment="Stretch" Margin="10,5,10,10" VerticalAlignment="Top" Padding="1,10,0,0">
+                            <GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="CubeScan" Height="32" Width="32" VerticalAlignment="Center" />
+                                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text="{Binding}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GroupBox.HeaderTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="150"/>
+                                    <RowDefinition Height="50"/>
+                                    <RowDefinition Height="50"/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,5,0,10">
+                                    <Image x:Name="OBDImage" Grid.Row="0" Stretch="None" RenderOptions.BitmapScalingMode="NearestNeighbor" MinWidth="32" MinHeight="32"/>
+                                </Border>
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
+                                    <Label Content="Select File:" VerticalAlignment="Center"/>
+                                    <Button x:Name="ImportObject" VerticalAlignment="Center" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon CardSearch}" ToolTip="Select Object" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ImportObject_PreviewMouseLeftButtonDown"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Center">
+                                    <Label Content="View" VerticalAlignment="Top"/>
+                                    <Slider x:Name="ObjImportSlider" Width="40" IsSnapToTickEnabled="True" TickFrequency="1" Minimum="0" Maximum="1" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="15,5,15,0"/>
+                                    <Label Content="Import" VerticalAlignment="Top" />
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
