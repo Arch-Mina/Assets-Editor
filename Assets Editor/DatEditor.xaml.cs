@@ -36,7 +36,7 @@ namespace Assets_Editor
         public ObservableCollection<Box> BoundingBoxList = new ObservableCollection<Box>();
         private int CurrentSprDir = 0;
         private bool isPageLoaded = false;
-        private uint blankSpr = 158019;
+        private uint blankSpr = 0;
         private bool isObjectLoaded = false;
         private Appearances exportObjects = new Appearances();
         private uint exportSprCounter = 0;

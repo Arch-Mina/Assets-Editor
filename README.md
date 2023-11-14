@@ -26,3 +26,7 @@ Assets Editor is an open-source tool designed for modifying and managing client 
 
 #### Usage
 - Download the latest release from the [Releases](https://github.com/Arch-Mina/Assets-Editor/releases) page.
+
+:sparkles: **Supporting the Project**
+
+If you find this project useful and want to show your appreciation or support, you're welcome to do so through [PayPal](https://paypal.me/SpiderOT?country.x=EG&locale.x=en_US). Your support is entirely optional but greatly appreciated :heart:.
