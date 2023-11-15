@@ -7,13 +7,7 @@
         mc:Ignorable="d"
         Title="Assets Editor" Height="350" Width="600"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        TextElement.FontWeight="Regular"
-        TextElement.FontSize="13"
-        TextOptions.TextFormattingMode="Ideal" 
-        TextOptions.TextRenderingMode="Auto"        
-        Background="{DynamicResource MaterialDesignPaper}"
-        FontFamily="{DynamicResource MaterialDesignFont}">
+        Style="{StaticResource MaterialDesignWindow}">
     <Grid>
         <Label Content="Assets Folder:" HorizontalAlignment="Left" Margin="42,50,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="AssetsPath" HorizontalAlignment="Left" Margin="135,50,0,0" VerticalAlignment="Top" Width="330" IsEnabled="False"/>

@@ -7,7 +7,8 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="SearchWindow" Height="860" Width="600">
+        Title="SearchWindow" Height="860" Width="600"
+        Style="{StaticResource MaterialDesignWindow}">
     <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -40,7 +41,7 @@
             </ListView>
         </Border>
         <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Width="320" VerticalAlignment="Stretch" Margin="20,5,0,10">
-            <GroupBox Header="AppearanceFlags" Background="#FFEAEAEA" HorizontalAlignment="Stretch" Width="320" VerticalAlignment="Stretch">
+            <GroupBox Header="AppearanceFlags" HorizontalAlignment="Stretch" Width="320" VerticalAlignment="Stretch">
                 <WrapPanel >
                     <CheckBox x:Name="A_FlagGround" Content="Ground" Margin="0,5,0,0" Width="140"/>
                     <CheckBox x:Name="A_FlagClip" Content="Clip" Margin="0,5,0,0" Width="140"/>

@@ -7,7 +7,8 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="OTBEditor" Height="860" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}">
+        Title="OTBEditor" Height="860" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}"
+        Style="{StaticResource MaterialDesignWindow}">
     <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>

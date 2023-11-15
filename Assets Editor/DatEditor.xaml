@@ -7,7 +7,8 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="DatEditor" Height="860" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}" Loaded="Window_Loaded">
+        Title="DatEditor" Height="860" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}" Loaded="Window_Loaded"
+        Style="{StaticResource MaterialDesignWindow}">
     <Window.Resources>
         <local:ArithmeticConverter x:Key="ArithmeticConverter" />
         <local:NullableColorToBrushConverter x:Key="NullableColorToBrushConverter" />
@@ -57,7 +58,7 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <xctk:IntegerUpDown Grid.Row="2" x:Name="ObjListViewSelectedIndex" ParsingNumberStyle="Integer" ValueChanged="ObjListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="0,5,0,0"/>
+                    <xctk:IntegerUpDown Grid.Row="2" x:Name="ObjListViewSelectedIndex" ParsingNumberStyle="Integer" ValueChanged="ObjListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="0,5,0,0" Background="{DynamicResource MaterialDesignLightSeparatorBackground}"/>
                     <Border Grid.Row="3" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="-1,5,-1,-1">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -108,42 +109,47 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="60"/>
                 </Grid.RowDefinitions>
-                <Menu Grid.Row="0" IsMainMenu="True" materialDesign:MenuAssist.TopLevelMenuItemHeight="30">
-                    <MenuItem Header="_File">
-                        <MenuItem Header="Exit" InputGestureText="Ctrl+E" Click="Exit_Click">
-                            <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="ExitToApp" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Compile" Click="Compile_Click">
-                            <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="ContentSaveCogOutline" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <!-- 
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <Menu IsMainMenu="True" materialDesign:MenuAssist.TopLevelMenuItemHeight="30">
+                        <MenuItem Header="_File">
+                            <MenuItem Header="Exit" InputGestureText="Ctrl+E" Click="Exit_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="ExitToApp" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Compile" Click="Compile_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="ContentSaveCogOutline" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <!-- 
                         <MenuItem Header="OTB Editor" Click="OTBEditor_Click">
                             <MenuItem.Icon>
                                 <materialDesign:PackIcon Kind="CookieEdit" />
                             </MenuItem.Icon>
                         </MenuItem>
                         -->
-                        <MenuItem Header="Search Item" Click="SearchItem_Click">
-                            <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="LayersSearchOutline" />
-                            </MenuItem.Icon>
+                            <MenuItem Header="Search Item" Click="SearchItem_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="LayersSearchOutline" />
+                                </MenuItem.Icon>
+                            </MenuItem>
                         </MenuItem>
-                    </MenuItem>
-                    <MenuItem Header="_About">
-                        <MenuItem Header="About" Click="About_Click">
-                            <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="InformationVariant" />
-                            </MenuItem.Icon>
+                        <MenuItem Header="_About">
+                            <MenuItem Header="About" Click="About_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="InformationVariant" />
+                                </MenuItem.Icon>
+                            </MenuItem>
                         </MenuItem>
-                    </MenuItem>
-                </Menu>
+                    </Menu>
+                    <Label Content="Light" VerticalAlignment="Center"/>
+                    <ToggleButton x:Name="DarkModeToggle" Margin="5,0,5,0" Checked="DarkModeToggle_Checked" Unchecked="DarkModeToggle_Checked"/>
+                    <Label Content="Dark" VerticalAlignment="Center"/>
+                </StackPanel>
                 <TabControl Grid.Row="1" x:Name="ViewTabControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,0,0,10">
                     <TabItem Header="Properties">
-                        <GroupBox Header="AppearanceFlags" Background="#FFEAEAEA" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="Tab1">
+                        <GroupBox Header="AppearanceFlags" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="Tab1">
                             <ScrollViewer>
                                 <WrapPanel Orientation="Horizontal">
                                     <StackPanel Margin="5,0,5,10">
@@ -391,7 +397,7 @@
                         </GroupBox>
                     </TabItem>
                     <TabItem Header="Texture" UseLayoutRounding="True" RenderOptions.BitmapScalingMode="Fant">
-                        <GroupBox Header="Sprites" Background="#FFEAEAEA" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+                        <GroupBox Header="Sprites" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
                             <ScrollViewer>
                                 <WrapPanel Orientation="Horizontal" MaxWidth="700">
                                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="321" Margin="5,0,5,0">
@@ -502,18 +508,12 @@
                                         <CheckBox x:Name="A_SprOpaque" Content="Is Opaque" HorizontalAlignment="Left" Margin="5,5,0,0"/>
                                     </StackPanel>
                                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Margin="5,25,5,0">
-                                        <Label Content="Bounding box per direction">
-                                            <Label.Background>
-                                                <SolidColorBrush Color="{DynamicResource PrimaryHueMid}"/>
-                                            </Label.Background>
-                                            <Label.Foreground>
-                                                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
-                                            </Label.Foreground>
-                                        </Label>
+                                        <Label Content="Bounding box per direction"/>
                                         <DataGrid x:Name="BoxPerDirection" Height="200" HorizontalAlignment="Left" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" RowEditEnding="BoxPerDirection_RowEditEnding" CanUserSortColumns="False">
                                             <DataGrid.ColumnHeaderStyle>
                                                 <Style TargetType="DataGridColumnHeader">
                                                     <Setter Property="FontSize" Value="10"/>
+                                                    <Setter Property="Background" Value="{DynamicResource MaterialDesignLightSeparatorBackground}"/>
                                                 </Style>
                                             </DataGrid.ColumnHeaderStyle>
                                             <DataGrid.Columns>
@@ -529,7 +529,7 @@
                         </GroupBox>
                     </TabItem>
                     <TabItem Header="Other" UseLayoutRounding="True" RenderOptions.BitmapScalingMode="Fant">
-                        <GroupBox Header="Full info" Background="#FFEAEAEA" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+                        <GroupBox Header="Full info" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
                             <TextBox x:Name="A_FullInfo" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsReadOnly="True"/>
                         </GroupBox>
                     </TabItem>
@@ -573,7 +573,7 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <xctk:IntegerUpDown Grid.Row="1" Grid.Column="0" x:Name="SprListViewSelectedIndex" ParsingNumberStyle="Integer" Value="{Binding ElementName=SprListView, Path=SelectedIndex, Mode=TwoWay}" ValueChanged="SprListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False"/>
+                    <xctk:IntegerUpDown Grid.Row="1" Grid.Column="0" x:Name="SprListViewSelectedIndex" ParsingNumberStyle="Integer" Value="{Binding ElementName=SprListView, Path=SelectedIndex, Mode=TwoWay}" ValueChanged="SprListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Background="{DynamicResource MaterialDesignLightSeparatorBackground}"/>
                     <Border Grid.Row="2" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,5,0,5">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button x:Name="SpriteExport" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Export Sprite" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="SpriteExport_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">

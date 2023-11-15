@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-
         xmlns:local="clr-namespace:Assets_Editor"
         mc:Ignorable="d"
-        Title="About" Height="250" Width="470" ScrollViewer.VerticalScrollBarVisibility="Disabled" ResizeMode="NoResize">
+        Title="About" Height="250" Width="470" ScrollViewer.VerticalScrollBarVisibility="Disabled" ResizeMode="NoResize"
+        Style="{StaticResource MaterialDesignWindow}">
     <Grid>
         <Image Source="pack://application:,,,/Resources/Walking_000.png" Margin="0,10,280,0" Stretch="Fill" Width="160" Height="128"/>
         <Label Content="Assets Editor V2.0" HorizontalAlignment="Center" Margin="0,5,0,0" FontFamily="Algerian" FontSize="28"/>

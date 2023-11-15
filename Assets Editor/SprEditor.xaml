@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Assets_Editor" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="SprEditor" Height="640" Width="700">
+        Title="SprEditor" Height="640" Width="700"
+        Style="{StaticResource MaterialDesignWindow}">
     <Window.Resources>
         <local:ArithmeticConverter x:Key="ArithmeticConverter" />
         <local:NullableColorToBrushConverter x:Key="NullableColorToBrushConverter" />
@@ -78,7 +79,7 @@
                         <StackPanel Orientation="Vertical">
                             <Label Content="Search Sprite Sheet" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="25">
-                                <xctk:IntegerUpDown x:Name="A_SearchSprId" Width="120" Minimum="1"/>
+                                <xctk:IntegerUpDown x:Name="A_SearchSprId" Width="120" Minimum="1" Background="{DynamicResource MaterialDesignLightSeparatorBackground}"/>
                                 <Button x:Name="SearchSpr" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Create New Sheet" materialDesign:RippleAssist.IsDisabled="True" HorizontalAlignment="Left" VerticalAlignment="Center" Click="SearchSpr_Click">
                                     <materialDesign:PackIcon Kind="ImageSearch" Width="25" Height="25"/>
                                 </Button>

@@ -7,7 +7,8 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Import Manager" Height="860" Width="800" materialDesign:ShadowAssist.CacheMode="{x:Null}">
+        Title="Import Manager" Height="860" Width="800" materialDesign:ShadowAssist.CacheMode="{x:Null}"
+        Style="{StaticResource MaterialDesignWindow}">
     <Grid>
         <materialDesign:DialogHost Grid.Row="1" x:Name="ImportAsDialogHost" OverlayBackground="Gray" >
             <materialDesign:DialogHost.DialogContent>
@@ -89,7 +90,7 @@
                                         </GridView>
                                     </ListView.View>
                                 </ListView>
-                                <xctk:IntegerUpDown Grid.Row="2" x:Name="ObjListViewSelectedIndex" ParsingNumberStyle="Integer" ValueChanged="ObjListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="0,5,0,0"/>
+                                <xctk:IntegerUpDown Grid.Row="2" x:Name="ObjListViewSelectedIndex" Background="{DynamicResource MaterialDesignLightSeparatorBackground}" ParsingNumberStyle="Integer" ValueChanged="ObjListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="0,5,0,0"/>
                                 <Border Grid.Row="3" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="-1,5,-1,-1">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <Button x:Name="ObjectImport" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Import Object" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ObjectImport_PreviewMouseLeftButtonDown" VerticalAlignment="Center">
@@ -137,7 +138,7 @@
                                         </GridView>
                                     </ListView.View>
                                 </ListView>
-                                <xctk:IntegerUpDown Grid.Row="1" x:Name="SprListViewSelectedIndex" ParsingNumberStyle="Integer" Value="{Binding ElementName=SprListView, Path=SelectedIndex, Mode=TwoWay}" ValueChanged="SprListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="0,5,0,0"/>
+                                <xctk:IntegerUpDown Grid.Row="1" x:Name="SprListViewSelectedIndex" Background="{DynamicResource MaterialDesignLightSeparatorBackground}" ParsingNumberStyle="Integer" Value="{Binding ElementName=SprListView, Path=SelectedIndex, Mode=TwoWay}" ValueChanged="SprListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="0,5,0,0"/>
                                 <Border Grid.Row="2" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,5,0,0">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <Button x:Name="ImportSpr" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Import Sprite" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ImportSpr_PreviewMouseLeftButtonDown" VerticalAlignment="Center">

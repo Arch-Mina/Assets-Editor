@@ -68,6 +68,21 @@ namespace Assets_Editor
                 A_FlagAutomapColorPicker.AvailableColors.Add(new Xceed.Wpf.Toolkit.ColorItem(System.Windows.Media.Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
             }
         }
+        private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
+        {
+            PaletteHelper palette = new PaletteHelper();
+
+            ITheme theme = palette.GetTheme();
+            if ((bool)DarkModeToggle.IsChecked)
+            {
+                theme.SetBaseTheme(Theme.Dark);
+            }
+            else
+            {
+                theme.SetBaseTheme(Theme.Light);
+            }
+            palette.SetTheme(theme);
+        }
         public DatEditor(Appearances appearances)
             :this()
         {
