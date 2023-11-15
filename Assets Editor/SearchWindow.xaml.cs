@@ -52,10 +52,6 @@ namespace Assets_Editor
                     {
                         ShowList item = (ShowList)ItemListView.Items[i];
                         item.Image = null;
-                        if(item.Storyboard != null)
-                        {
-                            item.Storyboard.Stop();
-                        }
                     }
                 }
             }

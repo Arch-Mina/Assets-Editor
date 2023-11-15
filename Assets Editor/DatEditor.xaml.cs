@@ -170,9 +170,9 @@ namespace Assets_Editor
 
                 for (int i = 0; i < ObjListView.Items.Count; i++)
                 {
+                    ShowList item = (ShowList)ObjListView.Items[i];
                     if (i >= offset && i < Math.Min(offset + 20, ObjListView.Items.Count))
                     {
-                        ShowList item = (ShowList)ObjListView.Items[i];
                         if (ObjectMenu.SelectedIndex == 0)
                             ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)MainWindow.appearances.Outfit[i].FrameGroup[0].SpriteInfo.SpriteId[0]]);
                         else if (ObjectMenu.SelectedIndex == 1)
@@ -194,6 +194,12 @@ namespace Assets_Editor
                             ThingsEffect[i].Image = null;
                         else if (ObjectMenu.SelectedIndex == 3)
                             ThingsMissile[i].Image = null;
+
+                        if (item.Storyboard != null)
+                        {
+                            item.Storyboard.Stop();
+                        }
+
                     }
                 }
             }
@@ -1137,8 +1143,8 @@ namespace Assets_Editor
                 MainWindow.appearances.Missile[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
 
             ShowList showList = ObjListView.SelectedItem as ShowList;
-
-            if(showList.Id != CurrentObjectAppearance.Id)
+            AnimateSelectedListItem(showList);
+            if (showList.Id != CurrentObjectAppearance.Id)
             {
                 showList.Id = CurrentObjectAppearance.Id;
                 List<Appearance> sortedAppearances = new List<Appearance>();
@@ -1182,7 +1188,6 @@ namespace Assets_Editor
                     }
                     ThingsMissile = new ObservableCollection<ShowList>(ThingsMissile.OrderBy(item => item.Id));
                 }
-                UpdateShowList(ObjectMenu.SelectedIndex);
             }
             
 
@@ -1361,72 +1366,99 @@ namespace Assets_Editor
                 ThingsMissile.Add(new ShowList() { Id = newObject.Id });
 
             }
-
-            ObjectMenu.SelectedIndex = ObjectMenu.SelectedIndex;
-            UpdateShowList(ObjectMenu.SelectedIndex);
+            ObjListView.SelectedItem = ObjListView.Items[^1];
 
             StatusBar.MessageQueue.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void ObjectClone_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            Appearance NewObject = CurrentObjectAppearance.Clone();
-            if (ObjectMenu.SelectedIndex == 0)
+            List<ShowList> selectedItems = ObjListView.SelectedItems.Cast<ShowList>().ToList();
+            if (selectedItems.Any())
             {
-                NewObject.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
-                MainWindow.appearances.Outfit.Add(NewObject);
-                ThingsOutfit.Add(new ShowList() { Id = NewObject.Id });
-            }
-            else if (ObjectMenu.SelectedIndex == 1)
-            {
-                NewObject.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
-                MainWindow.appearances.Object.Add(NewObject);
-                ThingsItem.Add(new ShowList() { Id = NewObject.Id });
-            }
-            else if (ObjectMenu.SelectedIndex == 2)
-            {
-                NewObject.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
-                MainWindow.appearances.Effect.Add(NewObject);
-                ThingsEffect.Add(new ShowList() { Id = NewObject.Id });
-            }
-            else if (ObjectMenu.SelectedIndex == 3)
-            {
-                NewObject.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
-                MainWindow.appearances.Missile.Add(NewObject);
-                ThingsMissile.Add(new ShowList() { Id = NewObject.Id });
-            }
-            ObjectMenu.SelectedIndex = ObjectMenu.SelectedIndex;
-            UpdateShowList(ObjectMenu.SelectedIndex);
+                ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
 
-            StatusBar.MessageQueue.Enqueue($"Object successfully duplicated.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                foreach (var item in selectedItems)
+                {
+                    Appearance NewObject = new Appearance();
+                    if (ObjectMenu.SelectedIndex == 0)
+                    {
+                        NewObject = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        NewObject.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
+                        MainWindow.appearances.Outfit.Add(NewObject);
+                        ThingsOutfit.Add(new ShowList() { Id = NewObject.Id });
+                    }
+                    else if (ObjectMenu.SelectedIndex == 1)
+                    {
+                        NewObject = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        NewObject.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
+                        MainWindow.appearances.Object.Add(NewObject);
+                        ThingsItem.Add(new ShowList() { Id = NewObject.Id });
+
+                    }
+                    else if (ObjectMenu.SelectedIndex == 2)
+                    {
+                        NewObject = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        NewObject.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
+                        MainWindow.appearances.Effect.Add(NewObject);
+                        ThingsEffect.Add(new ShowList() { Id = NewObject.Id });
+
+                    }
+                    else if (ObjectMenu.SelectedIndex == 3)
+                    {
+                        NewObject = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        NewObject.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
+                        MainWindow.appearances.Missile.Add(NewObject);
+                        ThingsMissile.Add(new ShowList() { Id = NewObject.Id });
+
+                    }
+
+                }
+                ObjListView.SelectedItem = ObjListView.Items[^1];
+                StatusBar.MessageQueue.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
         }
 
         private void DeleteObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (ObjectMenu.SelectedIndex == 0)
+            List<ShowList> selectedItems = ObjListView.SelectedItems.Cast<ShowList>().ToList();
+            if (selectedItems.Any())
             {
-                MainWindow.appearances.Outfit.RemoveAt(ObjListView.SelectedIndex);
-                ThingsOutfit.Remove((ShowList)ObjListView.SelectedItem);
-            }
-            else if (ObjectMenu.SelectedIndex == 1)
-            {
-                MainWindow.appearances.Object.RemoveAt(ObjListView.SelectedIndex);
-                ThingsItem.Remove((ShowList)ObjListView.SelectedItem);
-            }
-            else if (ObjectMenu.SelectedIndex == 2)
-            {
-                MainWindow.appearances.Effect.RemoveAt(ObjListView.SelectedIndex);
-                ThingsEffect.Remove((ShowList)ObjListView.SelectedItem);
+                ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
+                int currentIndex = ObjListView.SelectedIndex;
+                foreach (var item in selectedItems)
+                {
+                    Appearance DelObject = new Appearance();
+                    if (ObjectMenu.SelectedIndex == 0)
+                    {
+                        DelObject = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id);
+                        MainWindow.appearances.Outfit.Remove(DelObject);
+                        ThingsOutfit.Remove(item);
+                    }
+                    else if (ObjectMenu.SelectedIndex == 1)
+                    {
+                        DelObject = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id);
+                        MainWindow.appearances.Object.Remove(DelObject);
+                        ThingsItem.Remove(item);
+                    }
+                    else if (ObjectMenu.SelectedIndex == 2)
+                    {
+                        DelObject = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id);
+                        MainWindow.appearances.Effect.Remove(DelObject);
+                        ThingsEffect.Remove(item);
 
-            }
-            else if (ObjectMenu.SelectedIndex == 3)
-            {
-                MainWindow.appearances.Missile.RemoveAt(ObjListView.SelectedIndex);
-                ThingsMissile.Remove((ShowList)ObjListView.SelectedItem);
+                    }
+                    else if (ObjectMenu.SelectedIndex == 3)
+                    {
+                        DelObject = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id);
+                        MainWindow.appearances.Missile.Remove(DelObject);
+                        ThingsMissile.Remove(item);
 
+                    }
+                }
+                ObjListView.SelectedIndex = Math.Min(currentIndex, ObjListView.Items.Count - 1);
+                StatusBar.MessageQueue.Enqueue($"Successfully deleted {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
-            ObjListView.SelectedIndex = 0;
-            StatusBar.MessageQueue.Enqueue($"Object successfully deleted.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void SprDefaultPhase_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -1751,9 +1783,6 @@ namespace Assets_Editor
                         MainWindow.appearances.Missile.Add(appearance.Clone());
                         ThingsMissile.Add(new ShowList() { Id = appearance.Id });
                     }
-
-                    ObjectMenu.SelectedIndex = ObjectMenu.SelectedIndex;
-                    UpdateShowList(ObjectMenu.SelectedIndex);
                 }
             }
         }

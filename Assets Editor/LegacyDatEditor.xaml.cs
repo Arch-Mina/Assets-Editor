@@ -160,9 +160,9 @@ namespace Assets_Editor
                 int offset = (int)panel.VerticalOffset;
                 for (int i = 0; i < ObjListView.Items.Count; i++)
                 {
+                    ShowList item = (ShowList)ObjListView.Items[i];
                     if (i >= offset && i < Math.Min(offset + 20, ObjListView.Items.Count))
                     {
-                        ShowList item = (ShowList)ObjListView.Items[i];
                         if (ObjectMenu.SelectedIndex == 0)
                             ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Outfit[i], MainWindow.SprLists));
                         else if (ObjectMenu.SelectedIndex == 1)
@@ -184,6 +184,11 @@ namespace Assets_Editor
                             ThingsEffect[i].Image = null;
                         else if (ObjectMenu.SelectedIndex == 3)
                             ThingsMissile[i].Image = null;
+
+                        if (item.Storyboard != null)
+                        {
+                            item.Storyboard.Stop();
+                        }
                     }
                 }
             }
@@ -959,6 +964,10 @@ namespace Assets_Editor
                 MainWindow.appearances.Effect[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
             else if (ObjectMenu.SelectedIndex == 3)
                 MainWindow.appearances.Missile[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
+
+            ShowList showList = ObjListView.SelectedItem as ShowList;
+            AnimateSelectedListItem(showList);
+
             StatusBar.MessageQueue.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
@@ -1290,35 +1299,50 @@ namespace Assets_Editor
 
         private void ObjectClone_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            Appearance NewObject = CurrentObjectAppearance.Clone();
-            if (ObjectMenu.SelectedIndex == 0)
+            List<ShowList> selectedItems = ObjListView.SelectedItems.Cast<ShowList>().ToList();
+            if (selectedItems.Any())
             {
-                NewObject.Id = (uint)MainWindow.appearances.Outfit.Count + 1;
-                MainWindow.appearances.Outfit.Add(NewObject);
-                ThingsOutfit.Add(new ShowList() { Id = NewObject.Id });
-            }
-            else if (ObjectMenu.SelectedIndex == 1)
-            {
-                NewObject.Id = (uint)MainWindow.appearances.Object.Count + 100;
-                MainWindow.appearances.Object.Add(NewObject);
-                ThingsItem.Add(new ShowList() { Id = NewObject.Id });
-            }
-            else if (ObjectMenu.SelectedIndex == 2)
-            {
-                NewObject.Id = (uint)MainWindow.appearances.Effect.Count + 1;
-                MainWindow.appearances.Effect.Add(NewObject);
-                ThingsEffect.Add(new ShowList() { Id = NewObject.Id });
-            }
-            else if (ObjectMenu.SelectedIndex == 3)
-            {
-                NewObject.Id = (uint)MainWindow.appearances.Missile.Count + 1;
-                MainWindow.appearances.Missile.Add(NewObject);
-                ThingsMissile.Add(new ShowList() { Id = NewObject.Id });
-            }
-            ObjectMenu.SelectedIndex = ObjectMenu.SelectedIndex;
-            UpdateShowList(ObjectMenu.SelectedIndex);
+                ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
 
-            StatusBar.MessageQueue.Enqueue($"Object successfully duplicated.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                foreach (var item in selectedItems)
+                {
+                    Appearance NewObject = new Appearance();
+                    if (ObjectMenu.SelectedIndex == 0)
+                    {
+                        NewObject = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        NewObject.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
+                        MainWindow.appearances.Outfit.Add(NewObject);
+                        ThingsOutfit.Add(new ShowList() { Id = NewObject.Id });
+                    }
+                    else if (ObjectMenu.SelectedIndex == 1)
+                    {
+                        NewObject = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        NewObject.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
+                        MainWindow.appearances.Object.Add(NewObject);
+                        ThingsItem.Add(new ShowList() { Id = NewObject.Id });
+
+                    }
+                    else if (ObjectMenu.SelectedIndex == 2)
+                    {
+                        NewObject = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        NewObject.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
+                        MainWindow.appearances.Effect.Add(NewObject);
+                        ThingsEffect.Add(new ShowList() { Id = NewObject.Id });
+
+                    }
+                    else if (ObjectMenu.SelectedIndex == 3)
+                    {
+                        NewObject = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        NewObject.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
+                        MainWindow.appearances.Missile.Add(NewObject);
+                        ThingsMissile.Add(new ShowList() { Id = NewObject.Id });
+
+                    }
+
+                }
+                ObjListView.SelectedItem = ObjListView.Items[^1];
+                StatusBar.MessageQueue.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
         }
 
         private void SearchItem_Click(object sender, RoutedEventArgs e)
@@ -1468,12 +1492,8 @@ namespace Assets_Editor
 
             }
 
-            ObjectMenu.SelectedIndex = ObjectMenu.SelectedIndex;
-            UpdateShowList(ObjectMenu.SelectedIndex);
-
+            ObjListView.SelectedItem = ObjListView.Items[^1];
             StatusBar.MessageQueue.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
-
-
         }
 
         private void SprSynchronized_Click(object sender, RoutedEventArgs e)
