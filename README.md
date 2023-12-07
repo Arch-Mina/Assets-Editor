@@ -7,6 +7,7 @@ Assets Editor is an open-source tool designed for modifying and managing client 
 ![OTB Editor](/Assets%20Editor/Resources/3.PNG)
 ![Sheet Editor](/Assets%20Editor/Resources/4.PNG)
 ![Import and Export](/Assets%20Editor/Resources/5.gif)
+![Dark Mode](/Assets%20Editor/Resources/6.PNG)
 
 ### Features
 

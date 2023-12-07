@@ -45,7 +45,7 @@ namespace Assets_Editor
                         else
                         {
                             Appearance obj = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id);
-                            item.Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)obj.FrameGroup[0].SpriteInfo.SpriteId[0]]);
+                            item.Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)obj.FrameGroup[0].SpriteInfo.SpriteId[0]));
                         }
                     }
                     else

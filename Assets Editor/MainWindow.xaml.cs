@@ -208,7 +208,7 @@ namespace Assets_Editor
             }
         }
 
-        private void GenerateTileSetImageList(Bitmap bitmap, Catalog sheet)
+        private static void GenerateTileSetImageList(Bitmap bitmap, Catalog sheet)
         {
             using Bitmap tileSetImage = new Bitmap(bitmap);
             int tileCount = sheet.LastSpriteid - sheet.FirstSpriteid;
@@ -258,22 +258,46 @@ namespace Assets_Editor
             {
                 if (spr.Type == "sprite")
                 {
-                    string _sprPath = String.Format("{0}{1}", _assetsPath, spr.File);
-                    if (File.Exists(_sprPath))
+                    for (int i = spr.FirstSpriteid; i <= spr.LastSpriteid; i++)
                     {
-                        Bitmap SheetM = LZMA.DecompressFileLZMA(_sprPath);
-                        GenerateTileSetImageList(SheetM, spr);
-                        SheetM.Dispose();
+                        SprLists[i] = null;
                     }
-
+                    progress++;
+                    worker.ReportProgress((int)(progress * 100 / catalog.Count));
                 }
-                progress++;
-                worker.ReportProgress((int)(progress * 100 / catalog.Count));
             });
-            for (uint i = 0; i < catalog.Max(r => r.LastSpriteid) + 1; i++)
+            uint maxSpriteId = (uint)(catalog.Max(r => r.LastSpriteid) + 1);
+            for (uint i = 0; i < maxSpriteId; i++)
             {
                 AllSprList.Add(new ShowList() { Id = i });
             }
+        }
+
+        public static MemoryStream getSpriteStream(int spriteId)
+        {
+            if (SprLists[spriteId] != null)
+            {
+                return SprLists[spriteId];
+            }
+            Catalog CatalogInfo = null;
+            foreach (var SprCatalog in catalog)
+            {
+                if (spriteId >= SprCatalog.FirstSpriteid && spriteId <= SprCatalog.LastSpriteid)
+                {
+                    CatalogInfo = SprCatalog;
+                    break;
+                }
+            }
+
+            if (CatalogInfo != null)
+            {
+                string _sprPath = String.Format("{0}{1}", _assetsPath, CatalogInfo.File);
+                Bitmap SheetM = LZMA.DecompressFileLZMA(_sprPath);
+                GenerateTileSetImageList(SheetM, CatalogInfo);
+                SheetM.Dispose();
+            }
+
+            return SprLists[spriteId];
         }
     }
 }
