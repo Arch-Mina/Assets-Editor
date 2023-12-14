@@ -158,6 +158,19 @@ namespace Assets_Editor
             return bmpWithMagentaBackground;
         }
 
+        public static T FindAncestorOrSelf<T>(DependencyObject obj) where T : DependencyObject
+        {
+            while (obj != null)
+            {
+                if (obj is T objTyped)
+                {
+                    return objTyped;
+                }
 
+                obj = VisualTreeHelper.GetParent(obj);
+            }
+
+            return null;
+        }
     }
 }

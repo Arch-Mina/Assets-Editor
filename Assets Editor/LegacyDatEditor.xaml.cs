@@ -37,6 +37,7 @@ namespace Assets_Editor
         public ObservableCollection<ShowList> ThingsEffect = new ObservableCollection<ShowList>();
         public ObservableCollection<ShowList> ThingsMissile = new ObservableCollection<ShowList>();
         public Appearance CurrentObjectAppearance;
+        public Appearance ReplaceObjectAppearance;
         public AppearanceFlags CurrentFlags = null;
         private int CurrentSprDir = 2;
         private bool isPageLoaded = false;
@@ -1063,9 +1064,7 @@ namespace Assets_Editor
                     LoadProgress.Value = percent;
                 });
                 CompileBox.IsEnabled = false;
-                Stopwatch stopwatch = Stopwatch.StartNew();
                 await Sprite.CompileSpritesAsync(sprfile, MainWindow.MainSprStorage, (bool)C_Transparent.IsChecked, MainWindow.SprSignature, progress);
-                Debug.WriteLine($"Execution Time: {stopwatch.ElapsedMilliseconds} ms");
             }
             else
                 StatusBar.MessageQueue.Enqueue($".dat or .spr file is being used by another process or is not accessible.", null, null, null, false, true, TimeSpan.FromSeconds(2));
@@ -1572,7 +1571,7 @@ namespace Assets_Editor
             showList.Storyboard = storyboard;
         }
 
-        private void AnimateSelectedListItem(ShowList showList)
+        public void AnimateSelectedListItem(ShowList showList)
         {
             // Find the ListViewItem for the selected item
             var listViewItem = ObjListView.ItemContainerGenerator.ContainerFromItem(showList) as ListViewItem;
@@ -1605,6 +1604,52 @@ namespace Assets_Editor
 
                     StartSpriteAnimation(imageControl, frameRate, showList, imageFrames);
                 }
+            }
+        }
+
+        private void ObjListView_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(ShowList)))
+            {
+                Point dropPosition = e.GetPosition(ObjListView);
+                var result = VisualTreeHelper.HitTest(ObjListView, dropPosition);
+
+                if (result != null)
+                {
+                    ListViewItem listViewItem = Utils.FindAncestorOrSelf<ListViewItem>(result.VisualHit);
+
+                    if (listViewItem != null)
+                    {
+                        listViewItem.Opacity = 1;
+                        ShowList data = (ShowList)listViewItem.DataContext;
+                        ObjListView.SelectedItem = data;
+                        if (ObjectMenu.SelectedIndex == 0)
+                            ReplaceObjectAppearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == data.Id);
+                        else if (ObjectMenu.SelectedIndex == 1)
+                            ReplaceObjectAppearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == data.Id);
+                        else if (ObjectMenu.SelectedIndex == 2)
+                            ReplaceObjectAppearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == data.Id);
+                        else if (ObjectMenu.SelectedIndex == 3)
+                            ReplaceObjectAppearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == data.Id);
+                    }
+                }
+
+            }
+        }
+        private void ObjListView_DragOver(object sender, DragEventArgs e)
+        {
+            ListViewItem listViewItem = Utils.FindAncestorOrSelf<ListViewItem>(e.OriginalSource as DependencyObject);
+            if (listViewItem != null)
+            {
+                listViewItem.Opacity = 0.5;
+            }
+        }
+        private void ObjListView_DragLeave(object sender, DragEventArgs e)
+        {
+            ListViewItem listViewItem = Utils.FindAncestorOrSelf<ListViewItem>(e.OriginalSource as DependencyObject);
+            if (listViewItem != null)
+            {
+                listViewItem.Opacity = 1;
             }
         }
         private void About_Click(object sender, RoutedEventArgs e)

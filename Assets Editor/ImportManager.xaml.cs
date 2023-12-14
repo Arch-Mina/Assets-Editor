@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using Tibia.Protobuf.Appearances;
 
 namespace Assets_Editor
@@ -443,6 +444,73 @@ namespace Assets_Editor
                     }
                 }
 
+            }
+        }
+        private void ObjListView_Drag(object sender, MouseEventArgs e)
+        {
+            
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point dragPosition = e.GetPosition(ObjListView);
+                var result = VisualTreeHelper.HitTest(ObjListView, dragPosition);
+                ShowList data = null;
+                if (result != null)
+                {
+                    ListViewItem listViewItem = Utils.FindAncestorOrSelf<ListViewItem>(result.VisualHit);
+                    if (listViewItem != null)
+                    {
+                        data = (ShowList)listViewItem.DataContext;
+
+                    }
+                    else
+                    {
+                        base.OnMouseMove(e);
+                        return;
+                    }
+                }
+                if (data != null)
+                {
+                    DragDrop.DoDragDrop(ObjListView, data, DragDropEffects.Link);
+
+                    if (_editor.ReplaceObjectAppearance != null)
+                    {
+                        Appearance CurrentObjectAppearance;
+                        if (ObjectMenu.SelectedIndex == _editor.ObjectMenu.SelectedIndex)
+                        {
+                            if (_editor.ReplaceObjectAppearance.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
+                            {
+                                CurrentObjectAppearance = ImportAppearances.Outfit[ObjListView.SelectedIndex].Clone();
+                                updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
+                                CurrentObjectAppearance.Id = _editor.ReplaceObjectAppearance.Id;
+                                MainWindow.appearances.Outfit[(int)_editor.ReplaceObjectAppearance.Id - 1] = CurrentObjectAppearance.Clone();
+                            }
+                            else if (_editor.ReplaceObjectAppearance.AppearanceType == APPEARANCE_TYPE.AppearanceObject)
+                            {
+                                CurrentObjectAppearance = ImportAppearances.Object[ObjListView.SelectedIndex].Clone();
+                                updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
+                                CurrentObjectAppearance.Id = _editor.ReplaceObjectAppearance.Id;
+                                MainWindow.appearances.Object[(int)_editor.ReplaceObjectAppearance.Id - 100] = CurrentObjectAppearance.Clone();
+                            }
+                            else if (_editor.ReplaceObjectAppearance.AppearanceType == APPEARANCE_TYPE.AppearanceEffect)
+                            {
+                                CurrentObjectAppearance = ImportAppearances.Effect[ObjListView.SelectedIndex].Clone();
+                                updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
+                                CurrentObjectAppearance.Id = _editor.ReplaceObjectAppearance.Id;
+                                MainWindow.appearances.Effect[(int)_editor.ReplaceObjectAppearance.Id - 1] = CurrentObjectAppearance.Clone();
+                            }
+                            else if (_editor.ReplaceObjectAppearance.AppearanceType == APPEARANCE_TYPE.AppearanceMissile)
+                            {
+                                CurrentObjectAppearance = ImportAppearances.Missile[ObjListView.SelectedIndex].Clone();
+                                updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
+                                CurrentObjectAppearance.Id = _editor.ReplaceObjectAppearance.Id;
+                                MainWindow.appearances.Missile[(int)_editor.ReplaceObjectAppearance.Id - 1] = CurrentObjectAppearance.Clone();
+                            }
+                            ShowList item = (ShowList)_editor.ObjListView.SelectedItem;
+                            _editor.AnimateSelectedListItem(item);
+                        }else
+                            _editor.StatusBar.MessageQueue.Enqueue($"You can only replace objects of the same type.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    }
+                }
             }
         }
     }
