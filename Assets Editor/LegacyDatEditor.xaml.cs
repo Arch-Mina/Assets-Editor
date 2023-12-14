@@ -13,7 +13,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -126,7 +128,7 @@ namespace Assets_Editor
                 for (int i = 0; i < SprListView.Items.Count; i++)
                 {
                     if (i >= offset && i < Math.Min(offset + 20, SprListView.Items.Count) && MainWindow.SprLists.ContainsKey(i))
-                        MainWindow.AllSprList[i].Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[i]);
+                        MainWindow.AllSprList[i].Image = Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)i));
                     else
                         MainWindow.AllSprList[i].Image = null;
                 }
@@ -179,13 +181,13 @@ namespace Assets_Editor
                     if (i >= offset && i < Math.Min(offset + 20, ObjListView.Items.Count))
                     {
                         if (ObjectMenu.SelectedIndex == 0)
-                            ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Outfit[i], MainWindow.SprLists));
+                            ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Outfit[i], MainWindow.MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 1)
-                            ThingsItem[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Object[i], MainWindow.SprLists));
+                            ThingsItem[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Object[i], MainWindow.MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 2)
-                            ThingsEffect[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Effect[i], MainWindow.SprLists));
+                            ThingsEffect[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Effect[i], MainWindow.MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 3)
-                            ThingsMissile[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Missile[i], MainWindow.SprLists));
+                            ThingsMissile[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Missile[i], MainWindow.MainSprStorage));
 
                         AnimateSelectedListItem(item);
                     }
@@ -484,7 +486,7 @@ namespace Assets_Editor
                     {
                         int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), addon, mount, (int)SprFramesSlider.Value);
                         int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                        SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.SprLists[spriteId]), counter, spriteId, index);
+                        SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), counter, spriteId, index);
                         counter++;
                     }
                 }
@@ -505,7 +507,7 @@ namespace Assets_Editor
                                 int tileid = (int)(ph * gridHeight * frameGroup.SpriteInfo.PatternHeight + (frameGroup.SpriteInfo.PatternHeight - 1 - h) * gridHeight + (pw * frameGroup.SpriteInfo.PatternWidth) + (frameGroup.SpriteInfo.PatternWidth - 1 - w) + 1);
                                 int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, pw, ph, mount, (int)SprFramesSlider.Value);
                                 int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                                SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.SprLists[spriteId]), tileid, spriteId, index);
+                                SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), tileid, spriteId, index);
                                 counter++;
                             }
                         }
@@ -1019,8 +1021,10 @@ namespace Assets_Editor
         private void Compile_Click(object sender, RoutedEventArgs e)
         {
             ComppileDialogHost.IsOpen = true;
+            CompileBox.IsEnabled = true;
         }
-        private void CompileClient(object sender, RoutedEventArgs e)
+
+        private async void CompileClient(object sender, RoutedEventArgs e)
         {
             bool isDatEditable = false;
             bool isSprEditable = false;
@@ -1054,14 +1058,20 @@ namespace Assets_Editor
             if (isDatEditable && isSprEditable)
             {
                 LegacyAppearance.WriteLegacyDat(datfile, MainWindow.DatSignature, MainWindow.appearances);
-                Sprite.CompileSprites(sprfile, MainWindow.SprLists, (bool)C_Transparent.IsChecked, MainWindow.SprSignature);
+                var progress = new Progress<int>(percent =>
+                {
+                    LoadProgress.Value = percent;
+                });
+                CompileBox.IsEnabled = false;
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                await Sprite.CompileSpritesAsync(sprfile, MainWindow.MainSprStorage, (bool)C_Transparent.IsChecked, MainWindow.SprSignature, progress);
+                Debug.WriteLine($"Execution Time: {stopwatch.ElapsedMilliseconds} ms");
             }
             else
                 StatusBar.MessageQueue.Enqueue($".dat or .spr file is being used by another process or is not accessible.", null, null, null, false, true, TimeSpan.FromSeconds(2));
 
             ComppileDialogHost.IsOpen = false;
         }
-
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^0-9]+");
@@ -1088,7 +1098,7 @@ namespace Assets_Editor
                             System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(targetImg);
                             if(saveFileDialog.FilterIndex != 4)
                                 g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
-                            System.Drawing.Image image = System.Drawing.Image.FromStream(MainWindow.SprLists[(int)item.Id]);
+                            System.Drawing.Image image = System.Drawing.Image.FromStream(MainWindow.MainSprStorage.getSpriteStream(item.Id));
                             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
                             g.DrawImage(image, new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), System.Drawing.GraphicsUnit.Pixel);
                             g.Dispose();
@@ -1589,7 +1599,7 @@ namespace Assets_Editor
 
                     for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.PatternFrames; i++)
                     {
-                        BitmapImage imageFrame = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearance, MainWindow.SprLists, i));
+                        BitmapImage imageFrame = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearance, MainWindow.MainSprStorage, i));
                         imageFrames.Add(imageFrame);
                     }
 

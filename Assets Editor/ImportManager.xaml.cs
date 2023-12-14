@@ -37,7 +37,7 @@ namespace Assets_Editor
         private ObservableCollection<ShowList> ThingsItem = new ObservableCollection<ShowList>();
         private ObservableCollection<ShowList> ThingsEffect = new ObservableCollection<ShowList>();
         private ObservableCollection<ShowList> ThingsMissile = new ObservableCollection<ShowList>();
-
+        private static SpriteStorage MainSprStorage;
         private void ImportManager_Closed(object sender, EventArgs e)
         {
             this.Closed -= ImportManager_Closed;
@@ -83,18 +83,18 @@ namespace Assets_Editor
                         LegacyAppearance Dat = new LegacyAppearance();
                         Dat.ReadLegacyDat(_datPath);
                         ImportAppearances = Dat.Appearances;
-                        SpriteLoader Spr = new SpriteLoader();
 
+                        bool transparency = false;
                         System.Windows.Application.Current.Dispatcher.Invoke(() =>
                         {
-                            Spr.Transparency = (bool)SprTransparent.IsChecked;
+                            transparency = (bool)SprTransparent.IsChecked;
                         });
 
-                        bool status = Spr.ReadSprites(_sprPath, ref sprites, progressReporter);
-                        SprLists = new ConcurrentDictionary<int, MemoryStream>();
+                        MainSprStorage = new SpriteStorage(_sprPath, transparency, progressReporter);
+                        SprLists = MainSprStorage.SprLists;
+                        sprites = MainSprStorage.Sprites;
                         for (uint i = 0; i < sprites.Count; i++)
                         {
-                            SprLists[(int)i] = sprites[i].MemoryStream;
                             AllSprList.Add(new ShowList() { Id = i });
                         }
 
@@ -156,13 +156,13 @@ namespace Assets_Editor
                     if (i >= offset && i < Math.Min(offset + 20, ObjListView.Items.Count))
                     {
                         if (ObjectMenu.SelectedIndex == 0)
-                            ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Outfit[i], SprLists));
+                            ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Outfit[i], MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 1)
-                            ThingsItem[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Object[i], SprLists));
+                            ThingsItem[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Object[i], MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 2)
-                            ThingsEffect[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Effect[i], SprLists));
+                            ThingsEffect[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Effect[i], MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 3)
-                            ThingsMissile[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Missile[i], SprLists));
+                            ThingsMissile[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Missile[i], MainSprStorage));
                     }
                     else
                     {
@@ -218,7 +218,7 @@ namespace Assets_Editor
                 for (int i = 0; i < SprListView.Items.Count; i++)
                 {
                     if (i >= offset && i < Math.Min(offset + 20, SprListView.Items.Count) && SprLists.ContainsKey(i))
-                        AllSprList[i].Image = Utils.BitmapToBitmapImage(SprLists[i]);
+                        AllSprList[i].Image = Utils.BitmapToBitmapImage(MainSprStorage.getSpriteStream((uint)i));
                     else
                         AllSprList[i].Image = null;
                 }
@@ -249,8 +249,27 @@ namespace Assets_Editor
                 return;
             int sprId = MainWindow.SprLists.Count;
             ShowList showList = (ShowList)SprListView.SelectedItem;
-            MainWindow.SprLists[sprId] = SprLists[(int)showList.Id];
+            MainWindow.SprLists[sprId] = MainSprStorage.getSpriteStream(showList.Id);
             MainWindow.AllSprList.Add(new ShowList() {Id = (uint)sprId });
+            _editor.SprListView.ItemsSource = null;
+            _editor.SprListView.ItemsSource = MainWindow.AllSprList;
+        }
+
+        private void updateObjectAppearanceSprite(Appearance ObjectAppearance, SpriteStorage spriteStorage)
+        {
+            SpriteInfo spriteInfo = ObjectAppearance.FrameGroup[0].SpriteInfo;
+            
+            for (uint i = 0; i < ObjectAppearance.FrameGroup.Count; i++)
+            {
+                for (uint s = 0; s < ObjectAppearance.FrameGroup[(int)i].SpriteInfo.SpriteId.Count; s++)
+                {
+                    int sprId = MainWindow.SprLists.Count;
+                    int indexId = (int)ObjectAppearance.FrameGroup[(int)i].SpriteInfo.SpriteId[(int)s];
+                    MainWindow.SprLists[sprId] = spriteStorage.getSpriteStream((uint)indexId);
+                    MainWindow.AllSprList.Add(new ShowList() { Id = (uint)sprId });
+                    ObjectAppearance.FrameGroup[(int)i].SpriteInfo.SpriteId[(int)s] = (uint)sprId;
+                }
+            }
             _editor.SprListView.ItemsSource = null;
             _editor.SprListView.ItemsSource = MainWindow.AllSprList;
         }
@@ -258,7 +277,7 @@ namespace Assets_Editor
         private void updateObjectAppearanceSprite(Appearance ObjectAppearance, ConcurrentDictionary<int, MemoryStream> list)
         {
             SpriteInfo spriteInfo = ObjectAppearance.FrameGroup[0].SpriteInfo;
-            
+
             for (uint i = 0; i < ObjectAppearance.FrameGroup.Count; i++)
             {
                 for (uint s = 0; s < ObjectAppearance.FrameGroup[(int)i].SpriteInfo.SpriteId.Count; s++)
@@ -273,6 +292,7 @@ namespace Assets_Editor
             _editor.SprListView.ItemsSource = null;
             _editor.SprListView.ItemsSource = MainWindow.AllSprList;
         }
+
         private void ObjectImport_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             ShowList showList = (ShowList)ObjListView.SelectedItem;
@@ -283,7 +303,7 @@ namespace Assets_Editor
                 if (ObjectMenu.SelectedIndex == 0)
                 {
                     CurrentObjectAppearance = ImportAppearances.Outfit[ObjListView.SelectedIndex].Clone();
-                    updateObjectAppearanceSprite(CurrentObjectAppearance, SprLists);
+                    updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
                     CurrentObjectAppearance.Id = (uint)MainWindow.appearances.Outfit.Count + 1;
                     MainWindow.appearances.Outfit.Add(CurrentObjectAppearance);
                     _editor.ThingsOutfit.Add(new ShowList() { Id = CurrentObjectAppearance.Id });
@@ -291,7 +311,7 @@ namespace Assets_Editor
                 else if (ObjectMenu.SelectedIndex == 1)
                 {
                     CurrentObjectAppearance = ImportAppearances.Object[ObjListView.SelectedIndex].Clone();
-                    updateObjectAppearanceSprite(CurrentObjectAppearance, SprLists);
+                    updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
                     CurrentObjectAppearance.Id = (uint)MainWindow.appearances.Object.Count + 100;
                     MainWindow.appearances.Object.Add(CurrentObjectAppearance);
                     _editor.ThingsItem.Add(new ShowList() { Id = CurrentObjectAppearance.Id });
@@ -299,7 +319,7 @@ namespace Assets_Editor
                 else if (ObjectMenu.SelectedIndex == 2)
                 {
                     CurrentObjectAppearance = ImportAppearances.Effect[ObjListView.SelectedIndex].Clone();
-                    updateObjectAppearanceSprite(CurrentObjectAppearance, SprLists);
+                    updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
                     CurrentObjectAppearance.Id = (uint)MainWindow.appearances.Effect.Count + 1;
                     MainWindow.appearances.Effect.Add(CurrentObjectAppearance);
                     _editor.ThingsEffect.Add(new ShowList() { Id = CurrentObjectAppearance.Id });
@@ -307,7 +327,7 @@ namespace Assets_Editor
                 else if (ObjectMenu.SelectedIndex == 3)
                 {
                     CurrentObjectAppearance = ImportAppearances.Missile[ObjListView.SelectedIndex].Clone();
-                    updateObjectAppearanceSprite(CurrentObjectAppearance, SprLists);
+                    updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
                     CurrentObjectAppearance.Id = (uint)MainWindow.appearances.Missile.Count + 1;
                     MainWindow.appearances.Missile.Add(CurrentObjectAppearance);
                     _editor.ThingsMissile.Add(new ShowList() { Id = CurrentObjectAppearance.Id });
@@ -336,7 +356,7 @@ namespace Assets_Editor
                     {
                         int sprId = MainWindow.SprLists.Count;
                         int indexId = (int)ObjectAppearance.FrameGroup[(int)i].SpriteInfo.SpriteId[(int)s];
-                        MainWindow.SprLists[sprId] = SprLists[indexId];
+                        MainWindow.SprLists[sprId] = MainSprStorage.getSpriteStream((uint)indexId);
                         MainWindow.AllSprList.Add(new ShowList() { Id = (uint)sprId });
                         ObjectAppearance.FrameGroup[(int)i].SpriteInfo.SpriteId[(int)s] = (uint)sprId;
                     }

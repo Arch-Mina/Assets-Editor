@@ -443,78 +443,106 @@ namespace Assets_Editor
             return pixels;
         }
 
-        public static void CompileSprites(string file, ConcurrentDictionary<int, MemoryStream> sprites, bool transparency, uint version)
+        public static async Task CompileSpritesAsync(string file, SpriteStorage spriteStorage, bool transparency, uint version, IProgress<int> progress)
         {
-
-            using (BinaryWriter writer = new BinaryWriter(new FileStream(file, FileMode.Create)))
+            await Task.Run(() =>
             {
-                uint count = (uint)sprites.Count - 1; ;
-                bool transparent = transparency;
-
-                writer.Write(version);
-
-                writer.Write(count);
-
-                byte headSize = 8;
-                int addressPosition = headSize;
-                int address = (int)((count * 4) + headSize);
-                byte[] bytes = null;
-
-                for (uint id = 1; id <= count; id++)
+                int percentageComplete = 0;
+                int currentPercentage = 0;
+                int FullProgress = spriteStorage.SprLists.Count;
+                string tempFile = file + ".tmp";
+                using (BinaryWriter writer = new BinaryWriter(new FileStream(tempFile, FileMode.Create)))
                 {
+                    uint count = (uint)spriteStorage.SprLists.Count - 1; ;
 
-                    writer.Seek(addressPosition, SeekOrigin.Begin);
+                    writer.Write(version);
 
-                    bytes = CompressBitmap(new Bitmap(sprites[(int)id]), transparent);
+                    writer.Write(count);
 
-                    if (bytes.Length > 0)
+                    byte headSize = 8;
+                    int addressPosition = headSize;
+                    int address = (int)((count * 4) + headSize);
+                    byte[] bytes = null;
+
+                    for (uint id = 1; id <= count; id++)
                     {
-                        // write address
-                        writer.Write((uint)address);
-                        writer.Seek(address, SeekOrigin.Begin);
 
-                        // write colorkey
-                        writer.Write((byte)0xFF); // red
-                        writer.Write((byte)0x00); // blue
-                        writer.Write((byte)0xFF); // green
+                        writer.Seek(addressPosition, SeekOrigin.Begin);
 
-                        // write sprite data size
-                        writer.Write((short)bytes.Length);
+                        bytes = CompressBitmap(new Bitmap(spriteStorage.getSpriteStream((uint)id)), transparency);
 
                         if (bytes.Length > 0)
                         {
-                            writer.Write(bytes);
+                            // write address
+                            writer.Write((uint)address);
+                            writer.Seek(address, SeekOrigin.Begin);
+
+                            // write colorkey
+                            writer.Write((byte)0xFF); // red
+                            writer.Write((byte)0x00); // blue
+                            writer.Write((byte)0xFF); // green
+
+                            // write sprite data size
+                            writer.Write((short)bytes.Length);
+
+                            if (bytes.Length > 0)
+                            {
+                                writer.Write(bytes);
+                            }
+                        }
+                        else
+                        {
+                            writer.Write((uint)0);
+                            writer.Seek(address, SeekOrigin.Begin);
+                        }
+                        address = (int)writer.BaseStream.Position;
+                        addressPosition += 4;
+
+                        percentageComplete = (int)(id * 100 / FullProgress);
+                        if (percentageComplete > currentPercentage)
+                        {
+                            progress?.Report(percentageComplete);
+                            currentPercentage = percentageComplete;
                         }
                     }
-                    else
-                    {
-                        writer.Write((uint)0);
-                        writer.Seek(address, SeekOrigin.Begin);
-                    }
-                    address = (int)writer.BaseStream.Position;
-                    addressPosition += 4;
-                }
-                writer.Close();
-            }
 
+                    writer.Close();
+                    File.Move(tempFile, file, overwrite: true);
+                    if (File.Exists(tempFile))
+                    {
+                        try
+                        {
+                            File.Delete(tempFile);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+
+
+            });
         }
 
     }
-    public class SpriteLoader
-    {
-        public SpriteLoader()
-        {
-            Signature = 0;
-            Transparency = false;
-        }
 
+    public class SpriteStorage
+    {
+        public string SprPath { get; set; }
         public uint Signature;
         public bool Transparency;
+        public Dictionary<uint, Sprite> Sprites { get; set; }
+        public ConcurrentDictionary<int, MemoryStream> SprLists { get; set; }
 
-        public bool ReadSprites(string filename, ref Dictionary<uint, Sprite> sprites, IProgress<int> reportProgress = null)
+        public SpriteStorage(string path, bool transparency, IProgress<int> reportProgress = null)
         {
+            SprPath = path;
+            Sprites = new Dictionary<uint, Sprite>();
+            SprLists = new ConcurrentDictionary<int, MemoryStream>();
+            Transparency = transparency;
+
             Sprite.CreateBlankSprite();
-            using FileStream fileStream = new FileStream(filename, FileMode.Open);
+            using FileStream fileStream = new FileStream(path, FileMode.Open);
             using BinaryReader reader = new BinaryReader(fileStream);
 
             Signature = reader.ReadUInt32();
@@ -522,77 +550,65 @@ namespace Assets_Editor
             uint totalPics = reader.ReadUInt32();
 
             List<(uint Index, uint Id)> spriteIndexes = new List<(uint Index, uint Id)>(Convert.ToInt32(totalPics));
-            for (uint i = 0; i < totalPics; ++i)
-            {
-                uint index = reader.ReadUInt32();
-                spriteIndexes.Add((index, i + 1));
-            }
-
             Sprite blankSpr = new Sprite
             {
                 ID = 0,
-                Size = 0,
                 CompressedPixels = Array.Empty<byte>(),
-                Transparent = Transparency
             };
             using Bitmap _bmp = blankSpr.GetBitmap();
             _bmp.Save(blankSpr.MemoryStream, ImageFormat.Png);
             blankSpr.CompressedPixels = null;
-            sprites[0] = blankSpr;
-
-            var options = new ParallelOptions()
-            {
-                MaxDegreeOfParallelism = Environment.ProcessorCount - 1
-            };
-
-            Dictionary<uint, Sprite> localSprites = sprites;
-            object lockObject = new object();
-            int completedTasks = 0;
+            Sprites[0] = blankSpr;
+            SprLists[0] = blankSpr.MemoryStream;
             int lastReportedProgress = -1;
-            object progressLock = new object();
-            Parallel.ForEach(spriteIndexes, options, spriteData =>
+            for (uint i = 0; i < totalPics; ++i)
             {
-                uint index = spriteData.Index + 3;
-                ushort size;
-                byte[] compressedPixels;
-
-                lock (reader)
-                {
-                    reader.BaseStream.Seek(index, SeekOrigin.Begin);
-                    size = reader.ReadUInt16();
-                    compressedPixels = reader.ReadBytes(size);
-                }
-
                 Sprite sprite = new Sprite
                 {
-                    ID = spriteData.Id,
-                    Size = size,
-                    CompressedPixels = compressedPixels,
+                    ID = i + 1,
                     Transparent = Transparency
                 };
+                Sprites[sprite.ID] = sprite;
+                SprLists[(int)sprite.ID] = sprite.MemoryStream;
+                int progress = (int)(i * 100 / totalPics);
+                if (progress != lastReportedProgress && reportProgress != null)
+                {
+                    reportProgress.Report(progress);
+                    lastReportedProgress = progress;
+                }
+            }
+        }
 
-                using Bitmap bmp = sprite.GetBitmap();
+        public MemoryStream getSpriteStream(uint id)
+        {
+            if (SprLists[(int)id] != null && SprLists[(int)id].Length > 0)
+            {
+                return SprLists[(int)id];
+            }
+
+            Sprite sprite = Sprites[id];
+            using (FileStream fileStream = new FileStream(SprPath, FileMode.Open, FileAccess.Read))
+            {
+                using (BinaryReader reader = new BinaryReader(fileStream))
+                {
+                    reader.BaseStream.Seek(8 + (id - 1) * 4, SeekOrigin.Begin);
+                    uint index = reader.ReadUInt32() + 3;
+                    reader.BaseStream.Seek(index, SeekOrigin.Begin);
+                    sprite.Size = reader.ReadUInt16();
+                    sprite.CompressedPixels = reader.ReadBytes((ushort)sprite.Size);
+                }
+            }
+
+            using (Bitmap bmp = sprite.GetBitmap())
+            {
                 bmp.Save(sprite.MemoryStream, ImageFormat.Png);
-                sprite.CompressedPixels = null;
+            }
+            sprite.CompressedPixels = null;
+            SprLists[(int)sprite.ID] = sprite.MemoryStream;
 
-                lock (lockObject)
-                {
-                    localSprites[spriteData.Id] = sprite;
-                }
-                lock (progressLock)
-                {
-                    completedTasks++;
-                    int progress = (int)(completedTasks * 100 / totalPics);
-                    if (progress != lastReportedProgress && reportProgress != null)
-                    {
-                        reportProgress.Report(progress);
-                        lastReportedProgress = progress;
-                    }
-                }
-            });
-
-            return true;
+            return SprLists[(int)sprite.ID];
         }
 
     }
+
 }

@@ -123,14 +123,14 @@ namespace Assets_Editor
                         if (_legacy)
                         {
                             ShowList item = (ShowList)ItemListView.Items[i];
-                            item.Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearanceByClientId[item.Cid], MainWindow.SprLists));
+                            item.Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearanceByClientId[item.Cid], MainWindow.MainSprStorage));
                         }
                         else
                         {
                             ShowList item = (ShowList)ItemListView.Items[i];
                             if (appearanceByClientId.ContainsKey(item.Cid))
                             {
-                                item.Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)appearanceByClientId[item.Cid].FrameGroup[0].SpriteInfo.SpriteId[0]]);
+                                item.Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)appearanceByClientId[item.Cid].FrameGroup[0].SpriteInfo.SpriteId[0]));
                             }
                         }
 
@@ -179,9 +179,9 @@ namespace Assets_Editor
                         OTBItems.Add(item);
                         ItemListView.Items.Add(new ShowList() { Id = item.ServerId, Cid = item.ClientId });
                         if (_legacy)
-                            NewItemListView.Items.Add(new ShowList() { Id = item.ServerId, Cid = item.ClientId, Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearanceByClientId[item.ClientId], MainWindow.SprLists)) });
+                            NewItemListView.Items.Add(new ShowList() { Id = item.ServerId, Cid = item.ClientId, Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearanceByClientId[item.ClientId], MainWindow.MainSprStorage)) });
                         else
-                            NewItemListView.Items.Add(new ShowList() { Id = item.ServerId, Cid = item.ClientId, Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)appearanceByClientId[item.ClientId].FrameGroup[0].SpriteInfo.SpriteId[0]]) });
+                            NewItemListView.Items.Add(new ShowList() { Id = item.ServerId, Cid = item.ClientId, Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)appearanceByClientId[item.ClientId].FrameGroup[0].SpriteInfo.SpriteId[0])) });
                         lastServerId++;
                         newItemCounter++;
                     }
@@ -199,9 +199,9 @@ namespace Assets_Editor
                 if (!Utils.ByteArrayCompare(item.SpriteHash,citem.SpriteHash))
                 {
                     if (_legacy)
-                        NewItemListView.Items.Add(new ShowList() { Id = item.ServerId, Cid = item.ClientId, Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearanceByClientId[item.ClientId], MainWindow.SprLists)) });
+                        NewItemListView.Items.Add(new ShowList() { Id = item.ServerId, Cid = item.ClientId, Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearanceByClientId[item.ClientId], MainWindow.MainSprStorage)) });
                     else
-                        NewItemListView.Items.Add(new ShowList() { Id = item.ServerId, Cid = item.ClientId, Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[(int)appearanceByClientId[item.ClientId].FrameGroup[0].SpriteInfo.SpriteId[0]]) });
+                        NewItemListView.Items.Add(new ShowList() { Id = item.ServerId, Cid = item.ClientId, Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)appearanceByClientId[item.ClientId].FrameGroup[0].SpriteInfo.SpriteId[0])) });
                 }
             }
 

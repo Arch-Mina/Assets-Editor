@@ -32,7 +32,7 @@ namespace Assets_Editor
         public ushort Version { get; set; }
 
         public static Dictionary<uint, Sprite> sprites = new Dictionary<uint, Sprite>();
-
+        public static SpriteStorage MainSprStorage;
         readonly BackgroundWorker worker = new BackgroundWorker();
         public MainWindow()
         {
@@ -124,24 +124,25 @@ namespace Assets_Editor
         }
         private void LoadLegacySpr()
         {
-            SpriteLoader Spr = new SpriteLoader();
+            bool transparency = false;
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                Spr.Transparency = (bool)SprTransparent.IsChecked;
+                transparency = (bool)SprTransparent.IsChecked;
             });
             var progressReporter = new Progress<int>(value =>
             {
                 worker.ReportProgress(value);
             });
-            bool status = Spr.ReadSprites(_sprPath, ref sprites, progressReporter);
-            SprSignature = Spr.Signature;
-            SprLists = new ConcurrentDictionary<int, MemoryStream>();
 
+            MainSprStorage = new SpriteStorage(_sprPath, transparency, progressReporter);
+            SprSignature = MainSprStorage.Signature;
+            SprLists = MainSprStorage.SprLists;
+            sprites = MainSprStorage.Sprites;
             for (uint i = 0; i < sprites.Count; i++)
             {
-                SprLists[(int)i] = sprites[i].MemoryStream;
                 AllSprList.Add(new ShowList() { Id = i });
             }
+
         }
 
         private void SelectAssetsFolder(object sender, RoutedEventArgs e)

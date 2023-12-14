@@ -677,7 +677,6 @@ namespace Assets_Editor
             return index;
         }
 
-
         public static MemoryStream GetObjectImage(Appearance appearance, ConcurrentDictionary<int, MemoryStream> sprList)
         {
             int width = (int)(Sprite.DefaultSize * appearance.FrameGroup[0].SpriteInfo.PatternWidth);
@@ -716,7 +715,45 @@ namespace Assets_Editor
             bitmap.Save(combinedStream, ImageFormat.Png);
             return combinedStream;
         }
-        public static MemoryStream GetObjectImage(Appearance appearance, ConcurrentDictionary<int, MemoryStream> sprList, int frame)
+        public static MemoryStream GetObjectImage(Appearance appearance, SpriteStorage spriteStorage)
+        {
+            int width = (int)(Sprite.DefaultSize * appearance.FrameGroup[0].SpriteInfo.PatternWidth);
+            int height = (int)(Sprite.DefaultSize * appearance.FrameGroup[0].SpriteInfo.PatternHeight);
+
+            using Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            using Graphics g = Graphics.FromImage(bitmap);
+
+            byte layers = (byte)(appearance.FrameGroup[0].SpriteInfo.PatternLayers);
+            byte x = 0;
+
+            if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
+            {
+                layers = 1;
+                x = (byte)(2 % appearance.FrameGroup[0].SpriteInfo.PatternX);
+            }
+
+            // draw sprite
+            for (byte l = 0; l < layers; l++)
+            {
+                for (byte w = 0; w < appearance.FrameGroup[0].SpriteInfo.PatternWidth; w++)
+                {
+                    for (byte h = 0; h < appearance.FrameGroup[0].SpriteInfo.PatternHeight; h++)
+                    {
+                        int index = GetSpriteIndex(appearance.FrameGroup[0], w, h, l, x, 0, 0, 0);
+                        int spriteId = (int)appearance.FrameGroup[0].SpriteInfo.SpriteId[index];
+                        int px = (int)((appearance.FrameGroup[0].SpriteInfo.PatternWidth - w - 1) * Sprite.DefaultSize);
+                        int py = (int)((appearance.FrameGroup[0].SpriteInfo.PatternHeight - h - 1) * Sprite.DefaultSize);
+
+                        using Bitmap _bmp = new Bitmap(spriteStorage.getSpriteStream((uint)spriteId));
+                        g.DrawImage(_bmp, new Rectangle(px, py, Sprite.DefaultSize, Sprite.DefaultSize));
+                    }
+                }
+            }
+            MemoryStream combinedStream = new MemoryStream();
+            bitmap.Save(combinedStream, ImageFormat.Png);
+            return combinedStream;
+        }
+        public static MemoryStream GetObjectImage(Appearance appearance, SpriteStorage spriteStorage, int frame)
         {
             int width = (int)(Sprite.DefaultSize * appearance.FrameGroup[0].SpriteInfo.PatternWidth);
             int height = (int)(Sprite.DefaultSize * appearance.FrameGroup[0].SpriteInfo.PatternHeight);
@@ -745,7 +782,7 @@ namespace Assets_Editor
                         int px = (int)((appearance.FrameGroup[0].SpriteInfo.PatternWidth - w - 1) * Sprite.DefaultSize);
                         int py = (int)((appearance.FrameGroup[0].SpriteInfo.PatternHeight - h - 1) * Sprite.DefaultSize);
 
-                        using Bitmap _bmp = new Bitmap(sprList[spriteId]);
+                        using Bitmap _bmp = new Bitmap(spriteStorage.getSpriteStream((uint)spriteId));
                         g.DrawImage(_bmp, new Rectangle(px, py, Sprite.DefaultSize, Sprite.DefaultSize));
                     }
                 }

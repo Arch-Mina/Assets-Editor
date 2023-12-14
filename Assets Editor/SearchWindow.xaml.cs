@@ -41,7 +41,7 @@ namespace Assets_Editor
                     {
                         ShowList item = (ShowList)ItemListView.Items[i];
                         if (MainWindow.LegacyClient)
-                            item.Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Object[(int)item.Id - 100], MainWindow.SprLists));
+                            item.Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Object[(int)item.Id - 100], MainWindow.MainSprStorage));
                         else
                         {
                             Appearance obj = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id);

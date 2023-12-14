@@ -17,12 +17,13 @@
     <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch" IsHitTestVisible="{Binding ElementName=ComppileDialogHost, Path=IsOpen, Mode=OneWay, Converter={StaticResource BooleanInverter}}">
         <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray" >
             <materialDesign:DialogHost.DialogContent>
-                <GroupBox Header="Compile Client" Width="300">
+                <GroupBox x:Name="CompileBox" Header="Compile Client" Width="300">
                     <Grid >
                         <Grid.RowDefinitions>
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="60"/>
                             <RowDefinition Height="60"/>
+                            <RowDefinition Height="20"/>
                         </Grid.RowDefinitions>
                         <CheckBox Grid.Row="0" x:Name="C_Transparent" Content="Transparent" Margin="0,5,0,0"/>
                         <TextBox Grid.Row="1" x:Name="A_CompileName" Text="Tibia"  Width="240" Style="{StaticResource MaterialDesignOutlinedTextBox}" materialDesign:HintAssist.Hint="Compile As" FontWeight="Medium" VerticalAlignment="Center"/>
@@ -30,6 +31,7 @@
                             <Button Click="CompileClient" Content="Compile" Width="100" Margin="0,0,20,0"/>
                             <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
                         </StackPanel>
+                        <ProgressBar Grid.Row="3" x:Name="LoadProgress" Minimum="0" Maximum="100" Value="0" Width="220" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,10" Height="8" />
                     </Grid>
                 </GroupBox>
             </materialDesign:DialogHost.DialogContent>
