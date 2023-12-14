@@ -70,7 +70,7 @@
                                     <ComboBoxItem Content="Effects"/>
                                     <ComboBoxItem Content="Missiles"/>
                                 </ComboBox>
-                                <ListView Grid.Row="1" x:Name="ObjListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="ObjListView_ScrollChanged" SelectionChanged="ObjListView_SelectionChanged" MouseMove="ObjListView_Drag"  SelectedIndex="0" Margin="0,5,0,0">
+                                <ListView Grid.Row="1" x:Name="ObjListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="ObjListView_ScrollChanged" SelectionChanged="ObjListView_SelectionChanged" MouseMove="ObjListView_Drag"  SelectedIndex="0" Margin="0,5,0,0">
                                     <ListView.View>
                                         <GridView AllowsColumnReorder="False">
                                             <GridView.ColumnHeaderContainerStyle>
@@ -118,7 +118,7 @@
                                     <RowDefinition Height="40"/>
                                     <RowDefinition Height="45"/>
                                 </Grid.RowDefinitions>
-                                <ListView Grid.Row="0" Grid.Column="0" Margin="0,5,0,0" x:Name="SprListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="SprListView_ScrollChanged" SelectedIndex="0">
+                                <ListView Grid.Row="0" Grid.Column="0" Margin="0,5,0,0" x:Name="SprListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="SprListView_ScrollChanged" SelectedIndex="0">
                                     <ListView.View>
                                         <GridView AllowsColumnReorder="False">
                                             <GridView.ColumnHeaderContainerStyle>
