@@ -312,7 +312,7 @@ namespace Assets_Editor
                     
                     if (ObjectMenu.SelectedIndex == 0)
                     {
-                        CurrentObjectAppearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id).Clone();
+                        CurrentObjectAppearance = ImportAppearances.Outfit.FirstOrDefault(o => o.Id == item.Id).Clone();
                         updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
                         CurrentObjectAppearance.Id = (uint)MainWindow.appearances.Outfit.Count + 1;
                         MainWindow.appearances.Outfit.Add(CurrentObjectAppearance);
