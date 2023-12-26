@@ -760,6 +760,9 @@ namespace Assets_Editor
                 else
                 {
                     SpriteAnimation spriteAnimation = new SpriteAnimation();
+                    spriteAnimation.AnimationMode = ANIMATION_ANIMATION_MODE.AnimationAsynchronized;
+                    spriteAnimation.DefaultStartPhase = 0;
+                    spriteAnimation.LoopType = ANIMATION_LOOP_TYPE.Infinite;
                     for (int i = 0; i < A_SprAnimation.Value; i++)
                         spriteAnimation.SpritePhase.Add(new SpritePhase() { DurationMin = 100, DurationMax = 100 });
                     spriteInfo.Animation = spriteAnimation;
