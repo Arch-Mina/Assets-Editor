@@ -553,7 +553,7 @@ namespace Assets_Editor
                     {
                         int index = (int)(w + h * frameGroup.SpriteInfo.PatternWidth + l * frameGroup.SpriteInfo.PatternWidth * frameGroup.SpriteInfo.PatternHeight);
                         int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                        using Bitmap target = new Bitmap(MainWindow.SprLists[spriteId]);
+                        using Bitmap target = new Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId));
                         target.RotateFlip(RotateFlipType.RotateNoneFlipY);
                         var lockedBitmap = new LockBitmap(target);
                         lockedBitmap.LockBits();

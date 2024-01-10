@@ -667,7 +667,7 @@ namespace Assets_Editor
 
                 for (int i = 0; i < group.SpriteInfo.SpriteId.Count; i++)
                 {
-                    byte[] pixels = Sprite.UncompressPixelsARGB(Sprite.CompressBitmap(new Bitmap(MainWindow.SprLists[(int)group.SpriteInfo.SpriteId[i]]), true), true);
+                    byte[] pixels = Sprite.UncompressPixelsARGB(Sprite.CompressBitmap(new Bitmap(MainWindow.MainSprStorage.getSpriteStream(group.SpriteInfo.SpriteId[i])), true), true);
                     writer.Write(group.SpriteInfo.SpriteId[i]);
                     writer.Write(pixels);
                 }
@@ -745,7 +745,7 @@ namespace Assets_Editor
 
                     for (int i = 0; i < group.SpriteInfo.SpriteId.Count; i++)
                     {
-                        byte[] pixels = Sprite.UncompressPixelsARGB(Sprite.CompressBitmap(new Bitmap(MainWindow.SprLists[(int)group.SpriteInfo.SpriteId[i]]), true), true);
+                        byte[] pixels = Sprite.UncompressPixelsARGB(Sprite.CompressBitmap(new Bitmap(MainWindow.MainSprStorage.getSpriteStream(group.SpriteInfo.SpriteId[i])), true), true);
                         writer.Write(group.SpriteInfo.SpriteId[i]);
                         writer.Write(pixels.Length);
                         writer.Write(pixels);

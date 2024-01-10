@@ -1859,7 +1859,7 @@ namespace Assets_Editor
                     {
                         for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
                         {
-                            ByteString sprData = ByteString.CopyFrom(MainWindow.SprLists[(int)appearance.FrameGroup[i].SpriteInfo.SpriteId[s]].ToArray());
+                            ByteString sprData = ByteString.CopyFrom(MainWindow.getSpriteStream((int)appearance.FrameGroup[i].SpriteInfo.SpriteId[s]).ToArray());
                             appearance.SpriteData.Add(sprData);
                             appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = exportSprCounter;
                             exportSprCounter++;
