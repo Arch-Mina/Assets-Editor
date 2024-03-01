@@ -314,7 +314,7 @@ namespace Assets_Editor
 
                         ushort MarketNameSize = r.ReadUInt16();
                         byte[] buffer = r.ReadBytes(MarketNameSize);
-                        appearance.Name = Encoding.Default.GetString(buffer, 0, buffer.Length);
+                        appearance.Name = Encoding.GetEncoding("ISO-8859-1").GetString(buffer, 0, buffer.Length);
                         
                         ushort MarketProfession = r.ReadUInt16();
                         appearance.Flags.Market.Vocation = (VOCATION)MarketProfession;
@@ -412,7 +412,7 @@ namespace Assets_Editor
             try
             {
                 var datFile = new FileStream(fn, FileMode.Create, FileAccess.Write);
-                using (var w = new BinaryWriter(datFile))
+                using (var w = new BinaryWriter(datFile, Encoding.GetEncoding("ISO-8859-1")))
                 {
                     w.Write(signature);
                     w.Write((ushort)(appearances.Object.Count + 99));
