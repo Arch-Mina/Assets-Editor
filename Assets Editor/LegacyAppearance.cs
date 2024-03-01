@@ -112,9 +112,9 @@ namespace Assets_Editor
                     Appearances.Missile.Add(appearance);
                 }
             }
-            catch
+            catch (Exception e)
             {
-                throw new Exception("Couldn't load dat file");
+                throw new Exception("Couldn't load dat file", e);
             }
         }
 
