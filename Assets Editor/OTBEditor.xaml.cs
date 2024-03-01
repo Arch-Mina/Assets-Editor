@@ -123,7 +123,10 @@ namespace Assets_Editor
                         if (_legacy)
                         {
                             ShowList item = (ShowList)ItemListView.Items[i];
-                            item.Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearanceByClientId[item.Cid], MainWindow.MainSprStorage));
+                            if (appearanceByClientId.ContainsKey(item.Cid))
+                            {
+                                item.Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearanceByClientId[item.Cid], MainWindow.MainSprStorage));
+                            }
                         }
                         else
                         {
@@ -195,6 +198,11 @@ namespace Assets_Editor
             NewItemListView.Items.Clear();
             foreach (ServerItem item in OTBItems)
             {
+                if (!appearanceByClientId.ContainsKey(item.ClientId))
+                {
+                    continue;
+                }
+
                 ServerItem citem = new ServerItem(appearanceByClientId[item.ClientId]);
                 if (!Utils.ByteArrayCompare(item.SpriteHash,citem.SpriteHash))
                 {
