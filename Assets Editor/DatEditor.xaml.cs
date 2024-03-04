@@ -1161,7 +1161,6 @@ namespace Assets_Editor
                 MainWindow.appearances.Missile[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
 
             ShowList showList = ObjListView.SelectedItem as ShowList;
-            AnimateSelectedListItem(showList);
             if (showList.Id != CurrentObjectAppearance.Id)
             {
                 showList.Id = CurrentObjectAppearance.Id;
@@ -1207,7 +1206,7 @@ namespace Assets_Editor
                     ThingsMissile = new ObservableCollection<ShowList>(ThingsMissile.OrderBy(item => item.Id));
                 }
             }
-            
+            AnimateSelectedListItem(showList);
 
             StatusBar.MessageQueue.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
