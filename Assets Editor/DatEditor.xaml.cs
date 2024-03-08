@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -2011,5 +2012,58 @@ namespace Assets_Editor
             AboutWindow aboutWindow = new AboutWindow();
             aboutWindow.Show();
         }
+
+        private void ExportAllSprites_Click (object sender, RoutedEventArgs e)
+        {
+            var r = MessageBox.Show(
+                     "This process will generate a bmp file for each sprite, which will consume a lot of processing and storage resources and may take a while.\nDo you want to continue?",
+                     "Alert!",
+                     MessageBoxButton.YesNo,
+                     MessageBoxImage.Warning
+                     );
+            if (r == MessageBoxResult.Yes)
+            {
+                List<ShowList> allItems = MainWindow.AllSprList;
+                if (allItems.Count > 0)
+                {
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.Filter = "BMP Files (*.bmp)|*.bmp";
+                    if (saveFileDialog.ShowDialog() == true)
+                    {
+                        string directoryPath = System.IO.Path.GetDirectoryName(saveFileDialog.FileName);
+                        for (int i = 0; i < allItems.Count; i++)
+                        {
+                            try
+                            {
+                                if (MainWindow.SprLists.ContainsKey(i))
+                                {
+                                    MainWindow.AllSprList[i].Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(i));
+                                    if (MainWindow.AllSprList[i].Image != null)
+                                    {
+                                        System.Drawing.Bitmap targetImg = new System.Drawing.Bitmap((int)MainWindow.AllSprList[i].Image.Width, (int)MainWindow.AllSprList[i].Image.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                                        System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(targetImg);
+                                        g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
+                                        System.Drawing.Image image = System.Drawing.Image.FromStream(MainWindow.getSpriteStream((int)MainWindow.AllSprList[i].Id));
+                                        g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                                        g.DrawImage(image, new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), System.Drawing.GraphicsUnit.Pixel);
+                                        g.Dispose();
+                                        targetImg.Save(directoryPath + "\\" + MainWindow.AllSprList[i].Id.ToString() + ".bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                                        targetImg.Dispose();
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Error processing image {i}: {ex.Message}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
+
+
 }
+
