@@ -203,6 +203,7 @@ namespace Assets_Editor
             {
                 var files = Clipboard.GetFileDropList();
                 MakeFilesAsSprites(files.Cast<string>().ToArray(), focusedIndex, null);
+                EmptyTiles = false;
             }
         }
         
@@ -238,6 +239,7 @@ namespace Assets_Editor
                     var targetImage = Utils.GetLogicalChildCollection<Image>(targetBorder)[0];
                     (targetImage.Source, sourceImage.Source) = (sourceImage.Source, targetImage.Source);
                 }
+                EmptyTiles = false;
                 ClearBorders();
             }
         }
