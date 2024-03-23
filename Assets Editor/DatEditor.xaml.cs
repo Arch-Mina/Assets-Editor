@@ -135,7 +135,14 @@ namespace Assets_Editor
                 for (int i = 0; i < SprListView.Items.Count; i++)
                 {
                     if (i >= offset && i < Math.Min(offset + 20, SprListView.Items.Count) && MainWindow.SprLists.ContainsKey(i))
-                        MainWindow.AllSprList[i].Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(i));
+                        try
+                        {
+                            MainWindow.AllSprList[i].Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(i));
+                        }
+                        catch (Exception ex)
+                        {
+                            MainWindow.AllSprList[i].Image = null;
+                        }
                     else
                         MainWindow.AllSprList[i].Image = null;
                 }
@@ -2010,6 +2017,17 @@ namespace Assets_Editor
         {
             AboutWindow aboutWindow = new AboutWindow();
             aboutWindow.Show();
+        }
+
+        private void EditSprite_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem menuItem) return;
+            if (menuItem.DataContext is not ShowList showList) return;
+            
+            SprEditor sprEditor = new SprEditor(this);
+            SprEditor.CustomSheetsList.Clear();
+            sprEditor.Show();
+            sprEditor.OpenForSpriteId((int)showList.Id);
         }
     }
 }

@@ -112,11 +112,6 @@
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
                     <Menu IsMainMenu="True" materialDesign:MenuAssist.TopLevelMenuItemHeight="30">
                         <MenuItem Header="_File">
-                            <MenuItem Header="Exit" InputGestureText="Ctrl+E" Click="Exit_Click">
-                                <MenuItem.Icon>
-                                    <materialDesign:PackIcon Kind="ExitToApp" />
-                                </MenuItem.Icon>
-                            </MenuItem>
                             <MenuItem Header="Compile" Click="Compile_Click">
                                 <MenuItem.Icon>
                                     <materialDesign:PackIcon Kind="ContentSaveCogOutline" />
@@ -553,7 +548,30 @@
                         <RowDefinition Height="30"/>
                         <RowDefinition Height="40"/>
                     </Grid.RowDefinitions>
-                    <ListView Grid.Row="0" Grid.Column="0" Margin="0,5,0,0" x:Name="SprListView" HorizontalAlignment="Center" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="SprListView_ScrollChanged" MouseMove="SprListView_DragSpr" SelectedIndex="0" Width="207">
+                    <ListView Grid.Row="0" Grid.Column="0" Margin="0,5,0,0" x:Name="SprListView"
+                              HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                              VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True"
+                              SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              ScrollViewer.ScrollChanged="SprListView_ScrollChanged" MouseMove="SprListView_DragSpr"
+                              SelectedIndex="0" Width="207">
+                        <ListView.Resources>
+                            <ContextMenu x:Key="RowContextMenu">
+                                <MenuItem Header="Edit Sprite" Click="EditSprite_Click"/>
+                            </ContextMenu>
+                        </ListView.Resources>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="ContextMenu" Value="{StaticResource RowContextMenu}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsFocused" Value="True">
+                                        <Setter Property="Background" Value="Transparent"></Setter>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="Transparent"></Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                         <ListView.View>
                             <GridView AllowsColumnReorder="False">
                                 <GridView.ColumnHeaderContainerStyle>

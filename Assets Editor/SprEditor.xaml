@@ -7,6 +7,10 @@
         mc:Ignorable="d"
         Title="SprEditor" Height="640" Width="700"
         Style="{StaticResource MaterialDesignWindow}">
+    <Window.CommandBindings>
+        <CommandBinding Command="Paste" Executed="OnPaste"/>
+        <CommandBinding Command="Delete" Executed="OnDelete"/>
+    </Window.CommandBindings>
     <Window.Resources>
         <local:ArithmeticConverter x:Key="ArithmeticConverter" />
         <local:NullableColorToBrushConverter x:Key="NullableColorToBrushConverter" />
@@ -42,19 +46,6 @@
             <StackPanel Grid.Row="0" Grid.Column="0">
                 <GroupBox Header="Current Sheet Viewer" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,10,0">
                     <WrapPanel x:Name="SheetWrap" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="#FFEAEAEA" Width="400" Height="400"/>
-                    <xctk:MagnifierManager.Magnifier>
-                        <xctk:Magnifier
-                               Background="White"
-                               Radius="80"
-                               ZoomFactor="0.3"
-                               FrameType="Circle"
-                               BorderBrush="#FFC72035"
-                               BorderThickness="2"
-                               Width="160"
-                               Height="160"
-                               IsUsingZoomOnMouseWheel="True"
-                               ZoomFactorOnMouseWheel="0.1"/>
-                    </xctk:MagnifierManager.Magnifier>
                 </GroupBox>
                 <Border BorderThickness="1" BorderBrush="#FF673AB7" Height="30" Margin="10,10,10,0" >
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
