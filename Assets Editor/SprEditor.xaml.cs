@@ -467,6 +467,7 @@ namespace Assets_Editor
                     }
                 }
                 SprStatusBar.MessageQueue.Enqueue($"New sheet saved.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                _editor.SprListView.ItemsSource = null;
                 _editor.SprListView.ItemsSource = MainWindow.AllSprList;
             }
             else
