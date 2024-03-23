@@ -1171,8 +1171,7 @@ namespace Assets_Editor
                                     int sprId = MainWindow.SprLists.Count;
                                     MainWindow.SprLists[sprId] = imgMemory;
                                     MainWindow.AllSprList.Add(new ShowList() { Id = (uint)sprId });
-                                    SprListView.ItemsSource = null;
-                                    SprListView.ItemsSource = MainWindow.AllSprList;
+                                    CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
 
                                     imported++;
                                 }
@@ -1201,8 +1200,7 @@ namespace Assets_Editor
                     MainWindow.SprLists[(int)data.Id].Position = 0;
                     using System.Drawing.Bitmap emptyBitmap = new System.Drawing.Bitmap(32, 32, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                     emptyBitmap.Save(MainWindow.SprLists[(int)data.Id], ImageFormat.Png);
-                    SprListView.ItemsSource = null;
-                    SprListView.ItemsSource = MainWindow.AllSprList;
+                    CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
                     StatusBar.MessageQueue.Enqueue($"Sprite successfully removed.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
@@ -1230,8 +1228,7 @@ namespace Assets_Editor
                         {
                             removedStream.Dispose();
                             MainWindow.AllSprList.RemoveAt((int)data.Id);
-                            SprListView.ItemsSource = null;
-                            SprListView.ItemsSource = MainWindow.AllSprList;
+                            CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
                             StatusBar.MessageQueue.Enqueue($"Sprite successfully removed.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                         }
                         else
@@ -1278,8 +1275,7 @@ namespace Assets_Editor
 
                         int sprId = SprListView.SelectedIndex;
                         MainWindow.SprLists[sprId] = imgMemory;
-                        SprListView.ItemsSource = null;
-                        SprListView.ItemsSource = MainWindow.AllSprList;
+                        CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
                     }
                 }
                 StatusBar.MessageQueue.Enqueue($"Sprite successfully replaced.", null, null, null, false, true, TimeSpan.FromSeconds(2));

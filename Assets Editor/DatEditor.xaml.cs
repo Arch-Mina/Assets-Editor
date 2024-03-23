@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -1662,8 +1663,7 @@ namespace Assets_Editor
 
             // Handle any remaining sprites in the last sheet
             finalizeSheet();
-            SprListView.ItemsSource = null;
-            SprListView.ItemsSource = MainWindow.AllSprList;
+            CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
 
             if (currentSheet != null) currentSheet.Dispose();
             if (graphics != null) graphics.Dispose();

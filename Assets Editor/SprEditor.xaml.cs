@@ -18,6 +18,7 @@ using System.Runtime.InteropServices;
 using Efundies;
 using System.Linq;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Assets_Editor
 {
@@ -467,8 +468,7 @@ namespace Assets_Editor
                     }
                 }
                 SprStatusBar.MessageQueue.Enqueue($"New sheet saved.", null, null, null, false, true, TimeSpan.FromSeconds(3));
-                _editor.SprListView.ItemsSource = null;
-                _editor.SprListView.ItemsSource = MainWindow.AllSprList;
+                CollectionViewSource.GetDefaultView(_editor.SprListView.ItemsSource).Refresh();
             }
             else
                 SprStatusBar.MessageQueue.Enqueue($"Create a new sheet to import.", null, null, null, false, true, TimeSpan.FromSeconds(3));
