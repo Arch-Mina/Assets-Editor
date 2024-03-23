@@ -46,6 +46,10 @@ namespace Assets_Editor
 
         public static BitmapImage BitmapToBitmapImage(MemoryStream stream)
         {
+            if (stream == null)
+            {
+                return null;
+            }
             BitmapImage bitmap = new BitmapImage();
             bitmap.BeginInit();
             stream.Seek(0, System.IO.SeekOrigin.Begin);
