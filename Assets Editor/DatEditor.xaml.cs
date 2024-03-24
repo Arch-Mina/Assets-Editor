@@ -158,7 +158,7 @@ namespace Assets_Editor
                 if (item == null) return;
                 
                 DataObject data = new DataObject(SelectedSprites);
-                DragDrop.DoDragDrop(SprListView, data, DragDropEffects.Move);
+                DragDrop.DoDragDrop(SprListView, data, DragDropEffects.Copy);
             }
         }
         
@@ -564,7 +564,7 @@ namespace Assets_Editor
                 SpriteViewerGrid.ColumnDefinitions.Add(colDef);
             }
 
-            if (ObjectMenu.SelectedIndex == 0)
+            if (IsOutfitsMenuOpened())
             {
                 int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.Layers - 1 : 0;
                 int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
@@ -589,6 +589,12 @@ namespace Assets_Editor
                 }
             }
         }
+
+        private bool IsOutfitsMenuOpened()
+        {
+            return ObjectMenu.SelectedIndex == 0;
+        }
+
         private void SetImageInGrid(Grid grid, int gridWidth, int gridHeight, BitmapImage image, int id, int spriteId, int index)
         {
             // Get the row and column of the cell based on the ID number
@@ -628,45 +634,70 @@ namespace Assets_Editor
             List<ShowList> data = (List<ShowList>)e.Data.GetData(typeof(List<ShowList>));
             
             if (data == null) return;
-
-            var targetIndex = (int)((Image)sender).Tag;
-            var maxIndex = SpriteViewerGrid.Children.Count;
             
-            if (targetIndex >= maxIndex) return;
-
-
-            var maxSpriteWidth = 0;
-            var maxSpriteHeight = 0;
-
-            for (var i = 0; i < data.Count; i++)
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
-                var dataItem = data[i];
-                var gridIndex = targetIndex + i;
-                if (gridIndex >= maxIndex) break;
+                var frameIndex = (int)SprFramesSlider.Value;
+                var maxFrames = (int)SprFramesSlider.Maximum;
                 
-                var img = (Image)SpriteViewerGrid.Children[gridIndex];
-                img.Source = dataItem.Image;
-                img.ToolTip = dataItem.Id.ToString();
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.SpriteId[(int)img.Tag] = dataItem.Id;
-                maxSpriteWidth = Math.Max(maxSpriteWidth, (int)dataItem.Image.Width);
-                maxSpriteHeight = Math.Max(maxSpriteHeight, (int)dataItem.Image.Height);
+                for (var i = 0; i < data.Count; i++)
+                {
+                    var dataItem = data[i];
+                    var index = i + frameIndex;
+                    if (index > maxFrames) break;
+
+                    var frameGroup = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value];
+                    var targetIndex = GetSpriteIndex(frameGroup, 0,
+                        IsOutfitsMenuOpened() ? CurrentSprDir : 0, 0, 0, index);
+                    if (i == 0)
+                    {
+                        var img = (Image)SpriteViewerGrid.Children[0];
+                        img.Source = dataItem.Image;
+                        img.ToolTip = dataItem.Id.ToString();
+                    }
+                    
+                    frameGroup.SpriteInfo.SpriteId[targetIndex] = dataItem.Id;
+                }
             }
-                 
-                 
-            foreach (var column in SpriteViewerGrid.ColumnDefinitions)
+            else
             {
-                column.Width = new GridLength(Math.Max(maxSpriteWidth, column.Width.Value));
-            }
-            
-            foreach (var row in SpriteViewerGrid.RowDefinitions)
-            {
-                row.Height = new GridLength(Math.Max(maxSpriteHeight, row.Height.Value));
+                var targetSpriteIndex = (int)((Image)sender).Tag;
+                var gridSize = SpriteViewerGrid.Children.Count;
+
+                var maxSpriteWidth = 0;
+                var maxSpriteHeight = 0;
+
+                for (var i = 0; i < data.Count; i++)
+                {
+                    var dataItem = data[i];
+                    var gridIndex = targetSpriteIndex % gridSize + i;
+                    if (gridIndex >= gridSize) break;
+
+                    var img = (Image)SpriteViewerGrid.Children[gridIndex];
+                    img.Source = dataItem.Image;
+                    img.ToolTip = dataItem.Id.ToString();
+                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.SpriteId[(int)img.Tag] =
+                        dataItem.Id;
+                    maxSpriteWidth = Math.Max(maxSpriteWidth, (int)dataItem.Image.Width);
+                    maxSpriteHeight = Math.Max(maxSpriteHeight, (int)dataItem.Image.Height);
+                }
+
+
+                foreach (var column in SpriteViewerGrid.ColumnDefinitions)
+                {
+                    column.Width = new GridLength(Math.Max(maxSpriteWidth, column.Width.Value));
+                }
+
+                foreach (var row in SpriteViewerGrid.RowDefinitions)
+                {
+                    row.Height = new GridLength(Math.Max(maxSpriteHeight, row.Height.Value));
+                }
             }
 
             e.Handled = true;
         }
 
-        public  int GetSpriteIndex(FrameGroup frameGroup, int layers, int patternX, int patternY, int patternZ, int frames)
+        private int GetSpriteIndex(FrameGroup frameGroup, int layers, int patternX, int patternY, int patternZ, int frames)
         {
             var spriteInfo = frameGroup.SpriteInfo;
             int index = 0;
