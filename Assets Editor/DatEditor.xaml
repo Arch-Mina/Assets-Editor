@@ -421,8 +421,14 @@
                                             </Button>
                                         </Grid>
                                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                            <Label x:Name="SprFramesSliderCounter" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="{Binding Value, ElementName=SprFramesSlider, Converter={StaticResource ArithmeticConverter}, ConverterParameter=1}"/>
-                                            <Slider x:Name="SprFramesSlider" Width="170" IsSnapToTickEnabled="True" TickFrequency="1" ValueChanged="SprFramesSlider_ValueChanged" Margin="35,5,0,0" SmallChange="1" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                            <Label x:Name="SprFramesSliderCounter" HorizontalAlignment="Left"
+                                                   Margin="20,0,0,0" VerticalAlignment="Top"
+                                                   MinWidth="40" HorizontalContentAlignment="Left"
+                                                   Content="{Binding Value, ElementName=SprFramesSlider, Converter={StaticResource ArithmeticConverter}, ConverterParameter=1}" />
+                                            <Slider x:Name="SprFramesSlider" Width="170" IsSnapToTickEnabled="True"
+                                                    TickFrequency="1" ValueChanged="SprFramesSlider_ValueChanged"
+                                                    Margin="35,5,0,0" SmallChange="1" VerticalAlignment="Top"
+                                                    HorizontalAlignment="Left" />
                                         </StackPanel>
                                         <xctk:ColorPicker x:Name="SprBackgroundPicker" VerticalAlignment="Top" AdvancedTabHeader="False" ShowTabHeaders="False" SelectedColor="Gray" Width="200" Margin="0,15,0,10"/>
                                     </StackPanel>
