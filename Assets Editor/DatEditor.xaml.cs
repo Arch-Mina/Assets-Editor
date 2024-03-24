@@ -42,6 +42,7 @@ namespace Assets_Editor
         private Appearances exportObjects = new Appearances();
         private uint exportSprCounter = 0;
         private int importSprCounter = 0;
+        private List<ShowList> SelectedSprites = [];
         private Dictionary<uint, uint> importSprIdList = new Dictionary<uint, uint>();
         private class ImportSpriteInfo
         {
@@ -153,14 +154,30 @@ namespace Assets_Editor
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                ShowList data = (ShowList)SprListView.SelectedItem;
-                if (data != null && data.Image != null)
-                {
-                    SprListView.SelectedItem = data;
-                    DragDrop.DoDragDrop(SprListView, data, DragDropEffects.Copy);
-                }
+                var item = FindAncestorOrSelf<ListViewItem>((DependencyObject)e.OriginalSource);
+                if (item == null) return;
+                
+                DataObject data = new DataObject(SelectedSprites);
+                DragDrop.DoDragDrop(SprListView, data, DragDropEffects.Move);
             }
         }
+        
+        private static T FindAncestorOrSelf<T>(DependencyObject obj) where T : DependencyObject
+        {
+            while (obj != null)
+            {
+                if (obj is T tObj)
+                    return tObj;
+                obj = VisualTreeHelper.GetParent(obj);
+            }
+            return null;
+        }
+        
+        private void SprListView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            SelectedSprites = SprListView.SelectedItems.Cast<ShowList>().ToList();
+        }
+        
         private void SprListViewSelectedIndex_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (SprListView.IsLoaded && e.NewValue != null)
@@ -608,23 +625,45 @@ namespace Assets_Editor
         }
         private void Spr_Drop(object sender, DragEventArgs e)
         {
-            Image img = e.Source as Image;
-            ShowList data = (ShowList)e.Data.GetData(typeof(ShowList));
-            img.Source = data.Image;
-            img.Width = data.Image.Width;
-            img.Height = data.Image.Height;
-            foreach (ColumnDefinition column in SpriteViewerGrid.ColumnDefinitions)
+            List<ShowList> data = (List<ShowList>)e.Data.GetData(typeof(List<ShowList>));
+            
+            if (data == null) return;
+
+            var targetIndex = (int)((Image)sender).Tag;
+            var maxIndex = SpriteViewerGrid.Children.Count;
+            
+            if (targetIndex >= maxIndex) return;
+
+
+            var maxSpriteWidth = 0;
+            var maxSpriteHeight = 0;
+
+            for (var i = 0; i < data.Count; i++)
             {
-                column.Width = new GridLength(img.Width);
+                var dataItem = data[i];
+                var gridIndex = targetIndex + i;
+                if (gridIndex >= maxIndex) break;
+                
+                var img = (Image)SpriteViewerGrid.Children[gridIndex];
+                img.Source = dataItem.Image;
+                img.ToolTip = dataItem.Id.ToString();
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.SpriteId[(int)img.Tag] = dataItem.Id;
+                maxSpriteWidth = Math.Max(maxSpriteWidth, (int)dataItem.Image.Width);
+                maxSpriteHeight = Math.Max(maxSpriteHeight, (int)dataItem.Image.Height);
+            }
+                 
+                 
+            foreach (var column in SpriteViewerGrid.ColumnDefinitions)
+            {
+                column.Width = new GridLength(Math.Max(maxSpriteWidth, column.Width.Value));
+            }
+            
+            foreach (var row in SpriteViewerGrid.RowDefinitions)
+            {
+                row.Height = new GridLength(Math.Max(maxSpriteHeight, row.Height.Value));
             }
 
-            foreach (RowDefinition row in SpriteViewerGrid.RowDefinitions)
-            {
-                row.Height = new GridLength(img.Height);
-            }
-
-            img.ToolTip = data.Id.ToString();
-            CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.SpriteId[(int)img.Tag] = uint.Parse((string)img.ToolTip);
+            e.Handled = true;
         }
 
         public  int GetSpriteIndex(FrameGroup frameGroup, int layers, int patternX, int patternY, int patternZ, int frames)

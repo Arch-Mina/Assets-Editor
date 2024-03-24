@@ -564,6 +564,7 @@
                               VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True"
                               SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                               ScrollViewer.ScrollChanged="SprListView_ScrollChanged" MouseMove="SprListView_DragSpr"
+                              PreviewMouseLeftButtonDown="SprListView_PreviewMouseLeftButtonDown"
                               SelectedIndex="0" Width="207">
                         <ListView.Resources>
                             <ContextMenu x:Key="RowContextMenu">
