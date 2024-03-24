@@ -257,8 +257,8 @@ namespace Assets_Editor
                     MainWindow.AllSprList.Add(new ShowList() { Id = (uint)sprId });
 
                 }
-                _editor.SprListView.ItemsSource = null;
-                _editor.SprListView.ItemsSource = MainWindow.AllSprList;
+                
+                CollectionViewSource.GetDefaultView(_editor.SprListView.ItemsSource).Refresh();
             }
         }
 
@@ -277,8 +277,7 @@ namespace Assets_Editor
                     ObjectAppearance.FrameGroup[(int)i].SpriteInfo.SpriteId[(int)s] = (uint)sprId;
                 }
             }
-            _editor.SprListView.ItemsSource = null;
-            _editor.SprListView.ItemsSource = MainWindow.AllSprList;
+            CollectionViewSource.GetDefaultView(_editor.SprListView.ItemsSource).Refresh();
         }
 
         private void updateObjectAppearanceSprite(Appearance ObjectAppearance, ConcurrentDictionary<int, MemoryStream> list)
@@ -296,8 +295,8 @@ namespace Assets_Editor
                     ObjectAppearance.FrameGroup[(int)i].SpriteInfo.SpriteId[(int)s] = (uint)sprId;
                 }
             }
-            _editor.SprListView.ItemsSource = null;
-            _editor.SprListView.ItemsSource = MainWindow.AllSprList;
+            
+            CollectionViewSource.GetDefaultView(_editor.SprListView.ItemsSource).Refresh();
         }
 
         private void ObjectImport_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -372,8 +371,7 @@ namespace Assets_Editor
                         ObjectAppearance.FrameGroup[(int)i].SpriteInfo.SpriteId[(int)s] = (uint)sprId;
                     }
                 }
-                _editor.SprListView.ItemsSource = null;
-                _editor.SprListView.ItemsSource = MainWindow.AllSprList;
+                CollectionViewSource.GetDefaultView(_editor.SprListView.ItemsSource).Refresh();
                 SpriteInfo NewSpriteInfo = spriteInfo.Clone();
                 NewSpriteInfo.SpriteId.Clear();
                 int counter = 0;

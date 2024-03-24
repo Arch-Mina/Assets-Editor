@@ -17,6 +17,8 @@ using static Assets_Editor.MainWindow;
 using System.Runtime.InteropServices;
 using Efundies;
 using System.Linq;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Assets_Editor
 {
@@ -37,6 +39,8 @@ namespace Assets_Editor
         private int SprSheetHeight = 384;
         private int SprType = 0;
         private bool EmptyTiles = true;
+        private int focusedIndex = 0;
+        private BitmapSource emptyBitmapSource;
         public static ObservableCollection<ShowList> CustomSheetsList = new ObservableCollection<ShowList>();
         private Catalog CurrentSheet = null;
         private void CreateNewSheetImg(int sprType, bool modify)
@@ -67,18 +71,15 @@ namespace Assets_Editor
                 SpriteHeight = 64;
             }
 
-            List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
-            foreach (Image child in images)
-            {
-                SheetWrap.Children.Remove(child);
-            }
+            SheetWrap.Children.Clear();
 
             int stride = SpriteWidth * (96 / 8);
-            BitmapSource image = BitmapSource.Create(SpriteWidth, SpriteHeight, 96, 96, PixelFormats.Indexed8, new BitmapPalette(new List<Color> { Colors.White }), new byte[SpriteHeight * stride], stride);
+            emptyBitmapSource = BitmapSource.Create(SpriteWidth, SpriteHeight, 96, 96, PixelFormats.Indexed8,
+                new BitmapPalette(new List<Color> { Color.FromArgb(255, 255, 0, 255) }), new byte[SpriteHeight * stride], stride);
             int count = (SprSheetWidth / SpriteWidth * SprSheetHeight / SpriteHeight);
             for (int i = 0; i < count; i++)
             {
-                Image img = new Image
+                Border border = new Border
                 {
                     Width = SpriteWidth,
                     Height = SpriteHeight,
@@ -86,68 +87,212 @@ namespace Assets_Editor
                     VerticalAlignment = VerticalAlignment.Center,
                     AllowDrop = true
                 };
-                img.DragOver += Img_DragOverSheet;
-                img.Drop += Img_Drop;
-                img.Source = image;
+                border.Margin = new Thickness(1, 1, 0, 0);
+                border.MouseEnter += Border_MouseEnter;
+                border.MouseLeave += Border_MouseLeave;
+                border.MouseDown += Border_MouseDown;
+                border.DragEnter += Border_DragEnter;
+                border.DragLeave += Border_DragLeave;
+                border.Drop += Border_Drop;
+                border.Tag = i;
+                Image img = new Image
+                {
+                    Width = SpriteWidth,
+                    Height = SpriteHeight,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                };
+                
+                img.Source = emptyBitmapSource;
                 img.Tag = i;
-                img.Margin = new Thickness(1, 1, 0, 0);
-                RenderOptions.SetBitmapScalingMode(img, BitmapScalingMode.NearestNeighbor);
-                SheetWrap.Children.Add(img);
+                
+                border.Child = img;
+                RenderOptions.SetBitmapScalingMode(border, BitmapScalingMode.NearestNeighbor);
+                SheetWrap.Children.Add(border);
             }
             SheetWrap.Width = SprSheetWidth + 1 + (SprSheetWidth / SpriteWidth);
             SheetWrap.Height = SprSheetHeight + 1 + (SprSheetHeight / SpriteHeight);
         }
 
-        private void Img_Drop(object sender, DragEventArgs e)
+        private void Border_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (sender is not Border targetBorder) return;
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragDrop.DoDragDrop(targetBorder, targetBorder, DragDropEffects.Move);
+            }
+            
+        }
+
+        private void Border_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is not Border targetBorder) return;
+            focusedIndex = (int)targetBorder.Tag;
+            ApplyBorderFocus(targetBorder);
+        }
+
+        private void Border_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (sender is not Border targetBorder) return;
+            RemoveBorderFocus(targetBorder);
+        }
+
+        private void Border_DragEnter(object sender, DragEventArgs e)
+        {
+            if (sender is not Border targetBorder) return;
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                BitmapImage sourceBitmap = new BitmapImage(new Uri(files[0]));
-                List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
-                if (Math.Ceiling(sourceBitmap.Width) >= SprSheetWidth && Math.Ceiling(sourceBitmap.Height) >= SprSheetHeight)
+                if (files == null) return;
+            
+                int targetIndex = (int)targetBorder.Tag;
+                for (int i = 0; i < files.Length; i++)
                 {
-                    Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
-                    int sprCount = 0;
-                    int xCols = SpriteWidth == 32 ? 12 : 6;
-                    int yCols = SpriteHeight == 32 ? 12 : 6;
-                    for (int x = 0; x < yCols; x++)
+                    if (targetIndex + i < SheetWrap.Children.Count)
                     {
-                        for (int y = 0; y < xCols; y++)
+                        if (SheetWrap.Children[targetIndex + i] is Border border)
                         {
-                            Rectangle rect = new Rectangle(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
-                            Bitmap crop = original.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                            images[sprCount].Source = Utils.BitmapToBitmapImage(crop);
-                            sprCount++;
+                            ApplyBorderFocus(border);
                         }
                     }
-
                 }
-                else
-                {
-                    if (files.Length > 1)
-                    {
-                        for (int i = 0; i < files.Length; i++)
-                        {
-                            Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[i]), true);
-                            images[i].Source = Utils.BitmapToBitmapImage(original);
-                        }
-                    }
-                    else
-                    {
-                        Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
-                        Image img = e.Source as Image;
-                        img.Source = Utils.BitmapToBitmapImage(original);
-                    }
-                }
-                EmptyTiles = false;
+            }
+            else if (e.Data.GetData(e.Data.GetFormats()[0]) is Border border)
+            {
+                ApplyBorderDragging(targetBorder);
+                ApplyBorderDragging(border);
             }
         }
 
-        private void Img_DragOverSheet(object sender, DragEventArgs e)
+        private void Border_DragLeave(object sender, DragEventArgs e)
         {
-            e.Effects = DragDropEffects.Copy;
+            ClearBorders();
         }
+
+        private void ApplyBorderFocus(Border border)
+        {
+            border.BorderBrush = new SolidColorBrush(Colors.Blue);
+            border.BorderThickness = new Thickness(3);
+        }
+        
+        private void ApplyBorderDragging(Border border)
+        {
+            border.BorderBrush = new SolidColorBrush(Colors.DarkGreen);
+            border.BorderThickness = new Thickness(3);
+        }
+
+        private void RemoveBorderFocus(Border border)
+        {
+            border.BorderBrush = new SolidColorBrush(Colors.Transparent);
+            border.BorderThickness = new Thickness(0);
+        }
+
+        private void ClearBorders()
+        {
+            foreach (var child in SheetWrap.Children)
+            {
+                if (child is Border border)
+                {
+                    RemoveBorderFocus(border);
+                }
+            }
+        }
+        
+        private void OnPaste(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Clipboard.ContainsFileDropList())
+            {
+                var files = Clipboard.GetFileDropList();
+                MakeFilesAsSprites(files.Cast<string>().ToArray(), focusedIndex, null);
+                EmptyTiles = false;
+            }
+        }
+        
+        private void OnDelete(object sender, ExecutedRoutedEventArgs e)
+        {
+            List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
+            if (focusedIndex >= 0 && focusedIndex < images.Count)
+            {
+                images[focusedIndex].Source = emptyBitmapSource;
+            }
+        }
+
+        private void Border_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var targetSpriteIndex = 0;
+                if (sender is Border border)
+                {
+                    targetSpriteIndex = (int)border.Tag;
+                }
+                
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                MakeFilesAsSprites(files, targetSpriteIndex, e);
+                
+                EmptyTiles = false;
+                ClearBorders();
+            } else if (e.Data.GetData(e.Data.GetFormats()[0]) is Border sourceBorder)
+            {
+                if (sender is Border targetBorder)
+                {
+                    var sourceImage = Utils.GetLogicalChildCollection<Image>(sourceBorder)[0];
+                    var targetImage = Utils.GetLogicalChildCollection<Image>(targetBorder)[0];
+                    (targetImage.Source, sourceImage.Source) = (sourceImage.Source, targetImage.Source);
+                }
+                EmptyTiles = false;
+                ClearBorders();
+            }
+        }
+
+        private void MakeFilesAsSprites(string[] files, int targetImageIndex, DragEventArgs e)
+        {
+            BitmapImage sourceBitmap = new BitmapImage(new Uri(files[0]));
+            List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
+            if (Math.Ceiling(sourceBitmap.Width) >= SprSheetWidth &&
+                Math.Ceiling(sourceBitmap.Height) >= SprSheetHeight)
+            {
+                Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
+                int sprCount = targetImageIndex;
+                int xCols = SpriteWidth == 32 ? 12 : 6;
+                int yCols = SpriteHeight == 32 ? 12 : 6;
+                for (int x = 0; x < yCols; x++)
+                {
+                    for (int y = 0; y < xCols; y++)
+                    {
+                        Rectangle rect = new Rectangle(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
+                        Bitmap crop = original.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        if (sprCount < images.Count)
+                        {
+                            images[sprCount].Source = Utils.BitmapToBitmapImage(crop);
+                        }
+
+                        sprCount++;
+                    }
+                }
+            }
+            else
+            {
+                if (files.Length > 1)
+                {
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[i]), true);
+                        if (targetImageIndex + i < images.Count)
+                        {
+                            images[targetImageIndex + i].Source = Utils.BitmapToBitmapImage(original);
+                        }
+                    }
+                }
+                else
+                {
+                    Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
+                    Image img = e.Source as Image;
+                    img.Source = Utils.BitmapToBitmapImage(original);
+                }
+            }
+        }
+
         private void NewSheetDialogHost_OnDialogClosing(object sender, DialogClosingEventArgs eventArgs)
         {
             if (!Equals(eventArgs.Parameter, true)) return;
@@ -323,8 +468,7 @@ namespace Assets_Editor
                     }
                 }
                 SprStatusBar.MessageQueue.Enqueue($"New sheet saved.", null, null, null, false, true, TimeSpan.FromSeconds(3));
-                _editor.SprListView.ItemsSource = null;
-                _editor.SprListView.ItemsSource = MainWindow.AllSprList;
+                CollectionViewSource.GetDefaultView(_editor.SprListView.ItemsSource).Refresh();
             }
             else
                 SprStatusBar.MessageQueue.Enqueue($"Create a new sheet to import.", null, null, null, false, true, TimeSpan.FromSeconds(3));
@@ -335,27 +479,35 @@ namespace Assets_Editor
             if (SheetsList.SelectedIndex > -1)
             {               
                 ShowList showList = (ShowList)SheetsList.SelectedItem;
-                CurrentSheet = MainWindow.catalog.Find(x => x.File == showList.Name);
-                CreateNewSheetImg(CurrentSheet.SpriteType, true);
-                EmptyTiles = false;
-                List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
-                Bitmap original = Utils.BitmapImageToBitmap((BitmapImage)showList.Image);
+                if (showList == null)
+                    return;
+                EditSheetFor(showList);
+            }
+        }
 
-                int sprCount = 0;
-                int xCols = SpriteWidth == 32 ? 12 : 6;
-                int yCols = SpriteHeight == 32 ? 12 : 6;
-                for (int x = 0; x < yCols; x++)
+        private void EditSheetFor(ShowList showList)
+        {
+            CurrentSheet = MainWindow.catalog.Find(x => x.File == showList.Name);
+            CreateNewSheetImg(CurrentSheet.SpriteType, true);
+            EmptyTiles = false;
+            List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
+            Bitmap original = Utils.BitmapImageToBitmap((BitmapImage)showList.Image);
+
+            int sprCount = 0;
+            int xCols = SpriteWidth == 32 ? 12 : 6;
+            int yCols = SpriteHeight == 32 ? 12 : 6;
+            for (int x = 0; x < yCols; x++)
+            {
+                for (int y = 0; y < xCols; y++)
                 {
-                    for (int y = 0; y < xCols; y++)
-                    {
-                        Rectangle rect = new Rectangle(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
-                        Bitmap crop = new Bitmap(SpriteWidth, SpriteHeight);
-                        crop = original.Clone(rect, crop.PixelFormat);
-                        images[sprCount].Source = Utils.BitmapToBitmapImage(crop);
-                        sprCount++;
-                    }
+                    Rectangle rect = new Rectangle(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
+                    Bitmap crop = new Bitmap(SpriteWidth, SpriteHeight);
+                    crop = original.Clone(rect, crop.PixelFormat);
+                    images[sprCount].Source = Utils.BitmapToBitmapImage(crop);
+                    sprCount++;
                 }
             }
+            
         }
 
         private void CreateNewSheet_Click(object sender, RoutedEventArgs e)
@@ -402,6 +554,44 @@ namespace Assets_Editor
             }
             SheetsList.ItemsSource = SprEditor.CustomSheetsList;
 
+        }
+
+        public void OpenForSpriteId(int spriteId)
+        {
+            foreach (var catalog in MainWindow.catalog)
+            {
+                if (spriteId >= catalog.FirstSpriteid && spriteId <= catalog.LastSpriteid)
+                {
+                    string _sprPath = String.Format("{0}{1}", MainWindow._assetsPath, catalog.File);
+                    if (File.Exists(_sprPath))
+                    {
+                        ShowList foundEntry = SprEditor.CustomSheetsList.FirstOrDefault(showList => showList.Id == (uint)catalog.FirstSpriteid);
+                        if (foundEntry == null)
+                        {
+                            using System.Drawing.Bitmap SheetM = LZMA.DecompressFileLZMA(_sprPath);
+                            using Bitmap transparentBitmap = new Bitmap(SheetM.Width, SheetM.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                            using (Graphics g = Graphics.FromImage(transparentBitmap))
+                            {
+                                g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
+                                g.DrawImage(SheetM, 0, 0);
+
+                            }
+
+                            SprEditor.CustomSheetsList.Add(new ShowList() { Id = (uint)catalog.FirstSpriteid, Image = Utils.BitmapToBitmapImage(transparentBitmap), Name = catalog.File });
+                        }
+
+                    }
+                }
+            }
+            SheetsList.ItemsSource = SprEditor.CustomSheetsList;
+            SheetsList.SelectedIndex = 0;
+            if (SheetsList.SelectedIndex > -1)
+            {
+                ShowList showList = (ShowList)SheetsList.SelectedItem;
+                if (showList == null)
+                    return;
+                EditSheetFor(showList);
+            }
         }
     }
 }
