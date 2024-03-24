@@ -550,6 +550,13 @@
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="ImageArea" Height="32" Width="32" VerticalAlignment="Center" />
                             <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text="{Binding}" />
+                            <Button x:Name="SpriteListHelp" Style="{StaticResource MaterialDesignFlatAccentButton}"
+                                    ToolTip="Help" materialDesign:RippleAssist.IsDisabled="True"
+                                    Margin="20,0,0,0"
+                                    PreviewMouseLeftButtonDown="SpriteListHelp_PreviewMouseLeftButtonDown"
+                                    Content="{materialDesign:PackIcon HelpCircle}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center">
+                            </Button>
                         </StackPanel>
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>

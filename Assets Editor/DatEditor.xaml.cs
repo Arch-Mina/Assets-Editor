@@ -2088,5 +2088,14 @@ namespace Assets_Editor
             
             StatusBar.MessageQueue.Enqueue($"Successfully applied to {animationSpritePhases.Count} frames.", null, null, null, false, true, TimeSpan.FromSeconds(3));
         }
+
+        private void SpriteListHelp_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            const string message =
+                "You can drag and drop a single or multiple sprites at once onto a Texture. \n" +
+                "Normal dragging fills the current Texture's frame. \n" +
+                "Ctrl dragging fills all the frames.";
+            MessageBox.Show(message, "Sprite List Help", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
 }
