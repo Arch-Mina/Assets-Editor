@@ -2124,8 +2124,8 @@ namespace Assets_Editor
         {
             const string message =
                 "You can drag and drop a single or multiple sprites at once onto a Texture. \n" +
-                "Normal dragging fills the current Texture's frame. \n" +
-                "Ctrl dragging fills all the frames.";
+                "Normal dragging - treats sprites as elements of the current frame. \n" +
+                "Ctrl dragging - treats sprites as a sequence of frames.";
             MessageBox.Show(message, "Sprite List Help", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
