@@ -315,6 +315,7 @@ namespace Assets_Editor
             ForceSliderChange();
             SprFramesSlider.Maximum = (double)A_SprAnimation.Value - 1;
             AnimationTab.IsEnabled = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation != null;
+            SpriteFrameAnimationTab.IsEnabled = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation != null;
             if (A_SprAnimation.Value > 1)
             {
                 SprDefaultPhase.Value = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasDefaultStartPhase ? (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.DefaultStartPhase : 0;
@@ -777,7 +778,8 @@ namespace Assets_Editor
                 }
 
                 FixSpritesCount();
-                SpriteAnimationGroup.IsEnabled = A_SprAnimation.Value > 1 ? true : false;
+                SpriteAnimationGroup.IsEnabled = A_SprAnimation.Value > 1;
+                SpriteFrameAnimationGroup.IsEnabled = A_SprAnimation.Value > 1;
                 SprFramesSlider.Maximum = (double)A_SprAnimation.Value - 1;
             }
         }
@@ -2028,6 +2030,24 @@ namespace Assets_Editor
             SprEditor.CustomSheetsList.Clear();
             sprEditor.Show();
             sprEditor.OpenForSpriteId((int)showList.Id);
+        }
+
+        private void SprApplyForAll_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation == null) return;
+
+            var minDuration = (uint)SprPhaseMin.Value;
+            var maxDuration = (uint)SprPhaseMax.Value;
+            var animationSpritePhases = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo
+                .Animation.SpritePhase;
+            
+            foreach (var spritePhase in animationSpritePhases)
+            {
+                spritePhase.DurationMin = minDuration;
+                spritePhase.DurationMax = maxDuration;
+            }
+            
+            StatusBar.MessageQueue.Enqueue($"Successfully applied to {animationSpritePhases.Count} frames.", null, null, null, false, true, TimeSpan.FromSeconds(3));
         }
     }
 }

@@ -447,6 +447,10 @@
                                                     <Label Content="Loop Count:" Width="120"/>
                                                     <xctk:IntegerUpDown x:Name="SprLoopCount" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110" ValueChanged="SprLoopCount_ValueChanged"/>
                                                 </StackPanel>
+                                            </StackPanel>
+                                        </GroupBox>
+                                        <GroupBox x:Name="SpriteFrameAnimationGroup" Header="Frame Animation" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320" Margin="0,10,0,0">
+                                            <StackPanel Orientation="Vertical" x:Name="SpriteFrameAnimationTab" HorizontalAlignment="Center" VerticalAlignment="Stretch">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Label Content="Min Duration:" Width="120"/>
                                                     <xctk:IntegerUpDown x:Name="SprPhaseMin" Width="110" Minimum="0" Maximum="1000" ValueChanged="SprPhaseMin_ValueChanged"/>
@@ -455,6 +459,13 @@
                                                     <Label Content="Max Duration:" Width="120"/>
                                                     <xctk:IntegerUpDown x:Name="SprPhaseMax" Width="110" Minimum="0" Maximum="1000" ValueChanged="SprPhaseMax_ValueChanged"/>
                                                 </StackPanel>
+                                                <Grid Margin="0,5,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Button x:Name="SprApplyForAll" Content="Apply to all frames" Grid.Column="1"  Click="SprApplyForAll_Click"/>
+                                                </Grid>
                                             </StackPanel>
                                         </GroupBox>
                                         <StackPanel>
@@ -471,7 +482,7 @@
                                             <CheckBox x:Name="SprMount" Content="Mount" Height="20" Width="100" Click="SprMount_Click" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0" />
                                         </StackPanel>
                                     </StackPanel>
-                                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,30,5,0" Width="320">
+                                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,5,5,0" Width="320">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
                                             <Label Content="Groups:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
                                             <xctk:IntegerUpDown x:Name="A_SprGroups" Margin="0,0,0,0" Width="110" Minimum="1" Maximum="2" ValueChanged="A_Texture_ValueChanged" />
