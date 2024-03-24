@@ -560,16 +560,8 @@
                             </ContextMenu>
                         </ListView.Resources>
                         <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
+                            <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignGridViewItem}">
                                 <Setter Property="ContextMenu" Value="{StaticResource RowContextMenu}"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsFocused" Value="True">
-                                        <Setter Property="Background" Value="Transparent"></Setter>
-                                    </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="Transparent"></Setter>
-                                    </Trigger>
-                                </Style.Triggers>
                             </Style>
                         </ListView.ItemContainerStyle>
                         <ListView.View>
