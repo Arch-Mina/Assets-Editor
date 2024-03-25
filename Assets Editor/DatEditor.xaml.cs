@@ -42,6 +42,7 @@ namespace Assets_Editor
         private Appearances exportObjects = new Appearances();
         private uint exportSprCounter = 0;
         private int importSprCounter = 0;
+        private List<ShowList> SelectedSprites = [];
         private Dictionary<uint, uint> importSprIdList = new Dictionary<uint, uint>();
         private class ImportSpriteInfo
         {
@@ -153,14 +154,30 @@ namespace Assets_Editor
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                ShowList data = (ShowList)SprListView.SelectedItem;
-                if (data != null && data.Image != null)
-                {
-                    SprListView.SelectedItem = data;
-                    DragDrop.DoDragDrop(SprListView, data, DragDropEffects.Copy);
-                }
+                var item = FindAncestorOrSelf<ListViewItem>((DependencyObject)e.OriginalSource);
+                if (item == null) return;
+                
+                DataObject data = new DataObject(SelectedSprites);
+                DragDrop.DoDragDrop(SprListView, data, DragDropEffects.Copy);
             }
         }
+        
+        private static T FindAncestorOrSelf<T>(DependencyObject obj) where T : DependencyObject
+        {
+            while (obj != null)
+            {
+                if (obj is T tObj)
+                    return tObj;
+                obj = VisualTreeHelper.GetParent(obj);
+            }
+            return null;
+        }
+        
+        private void SprListView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            SelectedSprites = SprListView.SelectedItems.Cast<ShowList>().ToList();
+        }
+        
         private void SprListViewSelectedIndex_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (SprListView.IsLoaded && e.NewValue != null)
@@ -315,6 +332,7 @@ namespace Assets_Editor
             ForceSliderChange();
             SprFramesSlider.Maximum = (double)A_SprAnimation.Value - 1;
             AnimationTab.IsEnabled = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation != null;
+            SpriteFrameAnimationTab.IsEnabled = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation != null;
             if (A_SprAnimation.Value > 1)
             {
                 SprDefaultPhase.Value = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasDefaultStartPhase ? (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.DefaultStartPhase : 0;
@@ -546,7 +564,7 @@ namespace Assets_Editor
                 SpriteViewerGrid.ColumnDefinitions.Add(colDef);
             }
 
-            if (ObjectMenu.SelectedIndex == 0)
+            if (IsOutfitsMenuOpened())
             {
                 int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.Layers - 1 : 0;
                 int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
@@ -571,6 +589,12 @@ namespace Assets_Editor
                 }
             }
         }
+
+        private bool IsOutfitsMenuOpened()
+        {
+            return ObjectMenu.SelectedIndex == 0;
+        }
+
         private void SetImageInGrid(Grid grid, int gridWidth, int gridHeight, BitmapImage image, int id, int spriteId, int index)
         {
             // Get the row and column of the cell based on the ID number
@@ -607,26 +631,73 @@ namespace Assets_Editor
         }
         private void Spr_Drop(object sender, DragEventArgs e)
         {
-            Image img = e.Source as Image;
-            ShowList data = (ShowList)e.Data.GetData(typeof(ShowList));
-            img.Source = data.Image;
-            img.Width = data.Image.Width;
-            img.Height = data.Image.Height;
-            foreach (ColumnDefinition column in SpriteViewerGrid.ColumnDefinitions)
+            List<ShowList> data = (List<ShowList>)e.Data.GetData(typeof(List<ShowList>));
+            
+            if (data == null) return;
+            
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
-                column.Width = new GridLength(img.Width);
+                var frameIndex = (int)SprFramesSlider.Value;
+                var maxFrames = (int)SprFramesSlider.Maximum;
+                
+                for (var i = 0; i < data.Count; i++)
+                {
+                    var dataItem = data[i];
+                    var index = i + frameIndex;
+                    if (index > maxFrames) break;
+
+                    var frameGroup = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value];
+                    var targetIndex = GetSpriteIndex(frameGroup, 0,
+                        IsOutfitsMenuOpened() ? CurrentSprDir : 0, 0, 0, index);
+                    if (i == 0)
+                    {
+                        var img = (Image)SpriteViewerGrid.Children[0];
+                        img.Source = dataItem.Image;
+                        img.ToolTip = dataItem.Id.ToString();
+                    }
+                    
+                    frameGroup.SpriteInfo.SpriteId[targetIndex] = dataItem.Id;
+                }
+            }
+            else
+            {
+                var targetSpriteIndex = (int)((Image)sender).Tag;
+                var gridSize = SpriteViewerGrid.Children.Count;
+
+                var maxSpriteWidth = 0;
+                var maxSpriteHeight = 0;
+
+                for (var i = 0; i < data.Count; i++)
+                {
+                    var dataItem = data[i];
+                    var gridIndex = targetSpriteIndex % gridSize + i;
+                    if (gridIndex >= gridSize) break;
+
+                    var img = (Image)SpriteViewerGrid.Children[gridIndex];
+                    img.Source = dataItem.Image;
+                    img.ToolTip = dataItem.Id.ToString();
+                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.SpriteId[(int)img.Tag] =
+                        dataItem.Id;
+                    maxSpriteWidth = Math.Max(maxSpriteWidth, (int)dataItem.Image.Width);
+                    maxSpriteHeight = Math.Max(maxSpriteHeight, (int)dataItem.Image.Height);
+                }
+
+
+                foreach (var column in SpriteViewerGrid.ColumnDefinitions)
+                {
+                    column.Width = new GridLength(Math.Max(maxSpriteWidth, column.Width.Value));
+                }
+
+                foreach (var row in SpriteViewerGrid.RowDefinitions)
+                {
+                    row.Height = new GridLength(Math.Max(maxSpriteHeight, row.Height.Value));
+                }
             }
 
-            foreach (RowDefinition row in SpriteViewerGrid.RowDefinitions)
-            {
-                row.Height = new GridLength(img.Height);
-            }
-
-            img.ToolTip = data.Id.ToString();
-            CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.SpriteId[(int)img.Tag] = uint.Parse((string)img.ToolTip);
+            e.Handled = true;
         }
 
-        public  int GetSpriteIndex(FrameGroup frameGroup, int layers, int patternX, int patternY, int patternZ, int frames)
+        private int GetSpriteIndex(FrameGroup frameGroup, int layers, int patternX, int patternY, int patternZ, int frames)
         {
             var spriteInfo = frameGroup.SpriteInfo;
             int index = 0;
@@ -777,7 +848,8 @@ namespace Assets_Editor
                 }
 
                 FixSpritesCount();
-                SpriteAnimationGroup.IsEnabled = A_SprAnimation.Value > 1 ? true : false;
+                SpriteAnimationGroup.IsEnabled = A_SprAnimation.Value > 1;
+                SpriteFrameAnimationGroup.IsEnabled = A_SprAnimation.Value > 1;
                 SprFramesSlider.Maximum = (double)A_SprAnimation.Value - 1;
             }
         }
@@ -2028,6 +2100,33 @@ namespace Assets_Editor
             SprEditor.CustomSheetsList.Clear();
             sprEditor.Show();
             sprEditor.OpenForSpriteId((int)showList.Id);
+        }
+
+        private void SprApplyForAll_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation == null) return;
+
+            var minDuration = (uint)SprPhaseMin.Value;
+            var maxDuration = (uint)SprPhaseMax.Value;
+            var animationSpritePhases = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo
+                .Animation.SpritePhase;
+            
+            foreach (var spritePhase in animationSpritePhases)
+            {
+                spritePhase.DurationMin = minDuration;
+                spritePhase.DurationMax = maxDuration;
+            }
+            
+            StatusBar.MessageQueue.Enqueue($"Successfully applied to {animationSpritePhases.Count} frames.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+        }
+
+        private void SpriteListHelp_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            const string message =
+                "You can drag and drop a single or multiple sprites at once onto a Texture. \n" +
+                "Normal dragging - treats sprites as elements of the current frame. \n" +
+                "Ctrl dragging - treats sprites as a sequence of frames.";
+            MessageBox.Show(message, "Sprite List Help", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
