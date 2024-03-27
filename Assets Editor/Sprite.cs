@@ -534,6 +534,22 @@ namespace Assets_Editor
         public Dictionary<uint, Sprite> Sprites { get; set; }
         public ConcurrentDictionary<int, MemoryStream> SprLists { get; set; }
 
+        public SpriteStorage()
+        {
+            Sprites = new Dictionary<uint, Sprite>();
+            SprLists = new ConcurrentDictionary<int, MemoryStream>();
+            Transparency = false;
+            Sprite blankSpr = new Sprite
+            {
+                ID = 0,
+                CompressedPixels = Array.Empty<byte>(),
+            };
+            using Bitmap _bmp = blankSpr.GetBitmap();
+            _bmp.Save(blankSpr.MemoryStream, ImageFormat.Png);
+            blankSpr.CompressedPixels = null;
+            Sprites[0] = blankSpr;
+            SprLists[0] = blankSpr.MemoryStream;
+        }
         public SpriteStorage(string path, bool transparency, IProgress<int> reportProgress = null)
         {
             SprPath = path;

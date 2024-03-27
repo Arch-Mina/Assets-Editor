@@ -298,6 +298,11 @@ namespace Assets_Editor
                 SheetM.Dispose();
             }
 
+            if (SprLists[spriteId] == null)
+            {
+                Debug.WriteLine("Spr is null {0}, {1}", spriteId, CatalogInfo.FirstSpriteid);
+                return SprLists[0];
+            }
             return SprLists[spriteId];
         }
     }

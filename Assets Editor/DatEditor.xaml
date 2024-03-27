@@ -14,7 +14,32 @@
         <local:NullableColorToBrushConverter x:Key="NullableColorToBrushConverter" />
         <local:BooleanInverter x:Key="BooleanInverter"/>
     </Window.Resources>
-    <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+    <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch" IsHitTestVisible="{Binding ElementName=ComppileDialogHost, Path=IsOpen, Mode=OneWay, Converter={StaticResource BooleanInverter}}">
+        <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray" >
+            <materialDesign:DialogHost.DialogContent>
+                <GroupBox x:Name="CompileBox" Header="Export To Legacy" Width="350">
+                    <Grid >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Grid.Row="0">
+                            <Label Content="Converting Objects"/>
+                            <ProgressBar x:Name="LoadProgress1" Minimum="0" Maximum="100" Value="0" Width="210" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="1">
+                            <Label Content="Converting Sprites"/>
+                            <ProgressBar x:Name="LoadProgress2" Minimum="0" Maximum="100" Value="0" Width="210" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Click="CompileLegacy" Content="Export" Width="100" Margin="0,0,20,0"/>
+                            <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+            </materialDesign:DialogHost.DialogContent>
+        </materialDesign:DialogHost>
         <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -115,6 +140,11 @@
                             <MenuItem Header="Compile" Click="Compile_Click">
                                 <MenuItem.Icon>
                                     <materialDesign:PackIcon Kind="ContentSaveCogOutline" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Export to legacy" Click="CompileLegacy_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="FileDocumentArrowRight" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <!-- 

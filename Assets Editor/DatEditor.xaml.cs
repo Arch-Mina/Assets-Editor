@@ -5,12 +5,16 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -1361,6 +1365,357 @@ namespace Assets_Editor
             MainWindow.appearances.WriteTo(output);
             output.Close();
             StatusBar.MessageQueue.Enqueue($"Compiled.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+        }
+        public List<System.Drawing.Bitmap> SplitImage(System.Drawing.Bitmap originalImage)
+        {
+            List<System.Drawing.Bitmap> splitImages = new List<System.Drawing.Bitmap>();
+
+            int rows = originalImage.Height / 32;
+            int cols = originalImage.Width / 32;
+
+            for (int row = 0; row < rows; row++)
+            {
+                for (int col = 0; col < cols; col++)
+                {
+                    System.Drawing.Rectangle cloneRect = new System.Drawing.Rectangle(col * 32, row * 32, 32, 32);
+                    System.Drawing.Imaging.PixelFormat format = originalImage.PixelFormat;
+
+                    System.Drawing.Bitmap clonedSegment = originalImage.Clone(cloneRect, format);
+                    splitImages.Add(clonedSegment);
+                }
+            }
+
+            return splitImages;
+        }
+        public bool IsImageFullyTransparent(System.Drawing.Bitmap image)
+        {
+            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, image.Width, image.Height);
+            System.Drawing.Imaging.BitmapData bmpData = image.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, image.PixelFormat);
+
+            int bytes = Math.Abs(bmpData.Stride) * image.Height;
+            byte[] rgbValues = new byte[bytes];
+
+            Marshal.Copy(bmpData.Scan0, rgbValues, 0, bytes);
+
+            image.UnlockBits(bmpData);
+
+            for (int index = 0; index < rgbValues.Length; index += 4)
+            {
+                if (rgbValues[index + 3] != 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        private Appearance CreateBlankObject(uint id, APPEARANCE_TYPE type)
+        {
+            Appearance newObject = new Appearance();
+
+            newObject.Flags = new AppearanceFlags();
+
+            FrameGroup frameGroup = new FrameGroup();
+            frameGroup.SpriteInfo = new SpriteInfo();
+            frameGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
+
+            frameGroup.SpriteInfo.PatternWidth = 1;
+            frameGroup.SpriteInfo.PatternHeight = 1;
+            frameGroup.SpriteInfo.PatternSize = 32;
+
+            frameGroup.SpriteInfo.PatternLayers = 1;
+            frameGroup.SpriteInfo.PatternX = 1;
+            frameGroup.SpriteInfo.PatternY = 1;
+            frameGroup.SpriteInfo.PatternZ = 1;
+            frameGroup.SpriteInfo.PatternFrames = 1;
+
+            frameGroup.SpriteInfo.SpriteId.Add(0);
+
+            newObject.FrameGroup.Add(frameGroup);
+
+            newObject.AppearanceType = type;
+            newObject.Id = id;
+
+            return newObject;
+        }
+        public int GetSheetType(uint sprId)
+        {
+            foreach (MainWindow.Catalog sheet in MainWindow.catalog)
+            {
+                if (sheet.FirstSpriteid <= sprId && sheet.LastSpriteid >= sprId)
+                    return sheet.SpriteType;
+            }
+
+            return 0;
+        }
+        private void UpdateAppearanceObject(Appearance appearance, ConcurrentDictionary<string, uint> offset)
+        {
+            for (int i = 0; i < appearance.FrameGroup.Count; i++)
+            {
+                uint Width = 1;
+                uint Height = 1;
+                uint ExactSize = 32;
+                int sliceType = GetSheetType(appearance.FrameGroup[i].SpriteInfo.SpriteId[0]);
+                if (sliceType == 1)
+                {
+                    Width = 1;
+                    Height = 2;
+                }
+                else if (sliceType == 2)
+                {
+                    Width = 2;
+                    Height = 1;
+                }
+                else if (sliceType == 3)
+                {
+                    Width = 2;
+                    Height = 2;
+                }
+                if (Width > 1 || Height > 1)
+                {
+                    ExactSize = Math.Max(appearance.FrameGroup[i].SpriteInfo.BoundingBoxPerDirection[0].Width, appearance.FrameGroup[i].SpriteInfo.BoundingBoxPerDirection[0].Height);
+                }
+
+                appearance.FrameGroup[i].SpriteInfo.PatternX = appearance.FrameGroup[i].SpriteInfo.PatternWidth;
+                appearance.FrameGroup[i].SpriteInfo.PatternY = appearance.FrameGroup[i].SpriteInfo.PatternHeight;
+                appearance.FrameGroup[i].SpriteInfo.PatternWidth = Width;
+                appearance.FrameGroup[i].SpriteInfo.PatternHeight = Height;
+                appearance.FrameGroup[i].SpriteInfo.PatternSize = ExactSize;
+                appearance.FrameGroup[i].SpriteInfo.PatternLayers = appearance.FrameGroup[i].SpriteInfo.Layers;
+                appearance.FrameGroup[i].SpriteInfo.PatternZ = appearance.FrameGroup[i].SpriteInfo.PatternDepth;
+                if (appearance.FrameGroup[i].SpriteInfo.Animation != null)
+                    appearance.FrameGroup[i].SpriteInfo.PatternFrames = (uint)appearance.FrameGroup[i].SpriteInfo.Animation.SpritePhase.Count;
+                else
+                    appearance.FrameGroup[i].SpriteInfo.PatternFrames = 1;
+
+                List<uint> groupSpr = new List<uint>();
+
+                if (sliceType == 0)
+                {
+                    for (int j = 0; j < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; j++)
+                    {
+                        string sprName = appearance.FrameGroup[i].SpriteInfo.SpriteId[j].ToString();
+                        groupSpr.Add(offset[sprName + "_0"]);
+                    }
+                    appearance.FrameGroup[i].SpriteInfo.SpriteId.Clear();
+                    for (int j = 0; j < groupSpr.Count; j++)
+                    {
+                        appearance.FrameGroup[i].SpriteInfo.SpriteId.Add(groupSpr[j]);
+                    }
+                }
+                else if (sliceType == 1 || sliceType == 2)
+                {
+                    for (int j = 0; j < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; j++)
+                    {
+                        string sprName = appearance.FrameGroup[i].SpriteInfo.SpriteId[j].ToString();
+                        groupSpr.Add(offset[sprName + "_1"]);
+                        groupSpr.Add(offset[sprName + "_0"]);
+                    }
+                    appearance.FrameGroup[i].SpriteInfo.SpriteId.Clear();
+                    for (int j = 0; j < groupSpr.Count; j++)
+                    {
+                        appearance.FrameGroup[i].SpriteInfo.SpriteId.Add(groupSpr[j]);
+                    }
+
+                }
+                else if (sliceType == 3)
+                {
+                    for (int j = 0; j < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; j++)
+                    {
+                        string sprName = appearance.FrameGroup[i].SpriteInfo.SpriteId[j].ToString();
+                        groupSpr.Add(offset[sprName + "_3"]);
+                        groupSpr.Add(offset[sprName + "_2"]);
+                        groupSpr.Add(offset[sprName + "_1"]);
+                        groupSpr.Add(offset[sprName + "_0"]);
+                    }
+                    appearance.FrameGroup[i].SpriteInfo.SpriteId.Clear();
+                    for (int j = 0; j < groupSpr.Count; j++)
+                    {
+                        appearance.FrameGroup[i].SpriteInfo.SpriteId.Add(groupSpr[j]);
+                    }
+                }
+            }
+        }
+
+        private void CompileLegacy_Click(object sender, RoutedEventArgs e)
+        {
+            ComppileDialogHost.IsOpen = true;
+            CompileBox.IsEnabled = true;
+            LoadProgress1.Value = 0;
+            LoadProgress2.Value = 0;
+        }
+        private async void CompileLegacy(object sender, RoutedEventArgs e)
+        {
+            var progress = new Progress<int>(percent =>
+            {
+                LoadProgress1.Value = percent;
+            });
+            await ExportLegacy(progress);
+        }
+
+        private async Task ExportLegacy(IProgress<int> progress)
+        {
+            CompileBox.IsEnabled = false;
+            SpriteStorage tmpSprStorage = new SpriteStorage();
+            Appearances tmpAppearances = new Appearances();
+            ConcurrentDictionary<int, List<MemoryStream>> SlicedSprList = new ConcurrentDictionary<int, List<MemoryStream>>();
+            ConcurrentDictionary<string, uint> SpriteOffsetList = new ConcurrentDictionary<string, uint>();
+
+            await Task.Run(() =>
+            {
+                int percentageComplete = 0;
+                int currentPercentage = 0;
+                int FullProgress = MainWindow.catalog.Count;
+                var options = new ParallelOptions()
+                {
+                    MaxDegreeOfParallelism = Environment.ProcessorCount
+                };
+                int progressCount = 0;
+                Parallel.ForEach(MainWindow.catalog, options, (sheet, state) =>
+                {
+                    if (sheet.Type == "sprite")
+                    {
+                        string lzma = String.Format("{0}{1}", MainWindow._assetsPath, sheet.File);
+                        if (File.Exists(lzma) == false)
+                        {
+                            Debug.WriteLine("File Doesn't exists: " + sheet.File);
+                            return;
+                        }
+                        for (int i = sheet.FirstSpriteid; i <= sheet.LastSpriteid; i++)
+                        {
+                            System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(MainWindow.getSpriteStream(i));
+                            List<System.Drawing.Bitmap> slices = SplitImage(bitmap);
+                            SlicedSprList[i] = new List<MemoryStream>();
+                            for (int j = 0; j < slices.Count; j++)
+                            {
+                                if (IsImageFullyTransparent(slices[j]) == false)
+                                {
+                                    MemoryStream ms = new MemoryStream();
+                                    slices[j].Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                                    ms.Position = 0;
+                                    SlicedSprList[i].Add(ms);
+                                }
+                                else
+                                {
+                                    SlicedSprList[i].Add(null);
+                                }
+
+                            }
+                        }
+                        progressCount++;
+                        percentageComplete = (int)(progressCount * 100 / FullProgress);
+                        if (percentageComplete > currentPercentage)
+                        {
+                            progress?.Report(percentageComplete);
+                            currentPercentage = percentageComplete;
+                        }
+                    }
+                });
+
+                uint count = 1;
+                foreach (int key in SlicedSprList.Keys)
+                {
+                    List<MemoryStream> memoryStreams = SlicedSprList[key];
+                    int streamCounter = 0;
+                    foreach (MemoryStream stream in memoryStreams)
+                    {
+                        string sprName = key.ToString() + "_" + streamCounter.ToString();
+                        if (stream == null)
+                        {
+                            SpriteOffsetList[sprName] = 0;
+                        }
+                        else
+                        {
+                            tmpSprStorage.SprLists[(int)count] = stream;
+                            SpriteOffsetList[sprName] = count;
+                            count++;
+                        }
+                        streamCounter++;
+                    }
+                }
+
+
+                tmpAppearances = MainWindow.appearances.Clone();
+
+                uint ObjectCount = tmpAppearances.Object[^1].Id;
+                uint OutfitCount = tmpAppearances.Outfit[^1].Id;
+                uint EffectCount = tmpAppearances.Effect[^1].Id;
+                uint MissileCount = tmpAppearances.Missile[^1].Id;
+                for (uint i = 100; i <= ObjectCount; i++)
+                {
+                    Appearance appearance = tmpAppearances.Object.FirstOrDefault(a => a.Id == i);
+                    if (appearance == null)
+                    {
+                        Appearance newObject = CreateBlankObject(i, APPEARANCE_TYPE.AppearanceObject);
+                        tmpAppearances.Object.Add(newObject);
+                    }
+                    else
+                    {
+                        appearance.AppearanceType = APPEARANCE_TYPE.AppearanceObject;
+                        if (appearance.Flags.Hook != null)
+                        {
+                            if (appearance.Flags.Hook.Direction == HOOK_TYPE.South)
+                                appearance.Flags.HookSouth = true;
+
+                            if (appearance.Flags.Hook.Direction == HOOK_TYPE.East)
+                                appearance.Flags.HookEast = true;
+                        }
+                        UpdateAppearanceObject(appearance, SpriteOffsetList);
+                    }
+                }
+                for (uint i = 1; i <= OutfitCount; i++)
+                {
+                    Appearance appearance = tmpAppearances.Outfit.FirstOrDefault(a => a.Id == i);
+                    if (appearance == null)
+                    {
+                        Appearance newObject = CreateBlankObject(i, APPEARANCE_TYPE.AppearanceOutfit);
+                        tmpAppearances.Outfit.Add(newObject);
+                    }
+                    else
+                    {
+                        appearance.AppearanceType = APPEARANCE_TYPE.AppearanceOutfit;
+                        UpdateAppearanceObject(appearance, SpriteOffsetList);
+                    }
+                }
+                for (uint i = 1; i <= EffectCount; i++)
+                {
+                    Appearance appearance = tmpAppearances.Effect.FirstOrDefault(a => a.Id == i);
+                    if (appearance == null)
+                    {
+                        Appearance newObject = CreateBlankObject(i, APPEARANCE_TYPE.AppearanceEffect);
+                        tmpAppearances.Effect.Add(newObject);
+                    }
+                    else
+                    {
+                        appearance.AppearanceType = APPEARANCE_TYPE.AppearanceEffect;
+                        UpdateAppearanceObject(appearance, SpriteOffsetList);
+                    }
+                }
+                for (uint i = 1; i <= MissileCount; i++)
+                {
+                    Appearance appearance = tmpAppearances.Missile.FirstOrDefault(a => a.Id == i);
+                    if (appearance == null)
+                    {
+                        Appearance newObject = CreateBlankObject(i, APPEARANCE_TYPE.AppearanceMissile);
+                        tmpAppearances.Missile.Add(newObject);
+                    }
+                    else
+                    {
+                        appearance.AppearanceType = APPEARANCE_TYPE.AppearanceMissile;
+                        UpdateAppearanceObject(appearance, SpriteOffsetList);
+                    }
+                }
+
+                string datfile = MainWindow._assetsPath + "Tibia.dat";
+                LegacyAppearance.WriteLegacyDat(datfile, 0x42A3, tmpAppearances);
+                
+            });
+            var progress1 = new Progress<int>(percent =>
+            {
+                LoadProgress2.Value = percent;
+            });
+            string sprfile = MainWindow._assetsPath + "Tibia.spr";
+            await Sprite.CompileSpritesAsync(sprfile, tmpSprStorage, false, 0x53159CA9, progress1);
+            ComppileDialogHost.IsOpen = false;
         }
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
