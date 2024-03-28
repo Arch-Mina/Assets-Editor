@@ -46,7 +46,7 @@ namespace Assets_Editor
 
         public static BitmapImage BitmapToBitmapImage(MemoryStream stream)
         {
-            if (stream == null)
+            if(stream == null)
             {
                 return null;
             }
