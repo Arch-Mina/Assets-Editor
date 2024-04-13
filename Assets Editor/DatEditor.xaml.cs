@@ -682,8 +682,11 @@ namespace Assets_Editor
                     img.ToolTip = dataItem.Id.ToString();
                     CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.SpriteId[(int)img.Tag] =
                         dataItem.Id;
-                    maxSpriteWidth = Math.Max(maxSpriteWidth, (int)dataItem.Image.Width);
-                    maxSpriteHeight = Math.Max(maxSpriteHeight, (int)dataItem.Image.Height);
+                    if (dataItem.Image is not null)
+                    {
+                        maxSpriteWidth = Math.Max(maxSpriteWidth, (int)dataItem.Image.Width);
+                        maxSpriteHeight = Math.Max(maxSpriteHeight, (int)dataItem.Image.Height);
+                    }
                 }
 
 
