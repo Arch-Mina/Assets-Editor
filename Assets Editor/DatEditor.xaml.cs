@@ -109,6 +109,7 @@ namespace Assets_Editor
                 ThingsMissile.Add(new ShowList() { Id = missile.Id});
             }
             SprListView.ItemsSource = MainWindow.AllSprList;
+            SprListView.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(SprListView_MouseLeftButtonDown), true);
             UpdateShowList(ObjectMenu.SelectedIndex);
         }
         private void UpdateShowList(int selection)
@@ -177,7 +178,7 @@ namespace Assets_Editor
             return null;
         }
         
-        private void SprListView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void SprListView_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             SelectedSprites = SprListView.SelectedItems.Cast<ShowList>().ToList();
         }
