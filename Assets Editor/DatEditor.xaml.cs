@@ -807,13 +807,12 @@ namespace Assets_Editor
                 if (A_SprGroups.Value == 1 && CurrentObjectAppearance.FrameGroup.Count == 2)
                 {
                     CurrentObjectAppearance.FrameGroup.RemoveAt(1);
-                    CurrentObjectAppearance.FrameGroup[0].FixedFrameGroup = FIXED_FRAME_GROUP.OutfitMoving;
                 }
                 else if (A_SprGroups.Value == 2 && CurrentObjectAppearance.FrameGroup.Count == 1)
                 {
                     FrameGroup newFrameGroup = CurrentObjectAppearance.FrameGroup[0].Clone();
+                    newFrameGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitMoving;
                     CurrentObjectAppearance.FrameGroup.Add(newFrameGroup);
-                    CurrentObjectAppearance.FrameGroup[0].FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
                 }
             }
             else if (frameworkElement.Name == "A_SprLayers")
