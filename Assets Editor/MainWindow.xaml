@@ -19,7 +19,7 @@
             <Label Content="Outfits:"/>
             <Label Content="Effects:"/>
             <Label Content="Missiles:"/>
-            <CheckBox x:Name="SprTransparent" Content="Transparent" Visibility="Hidden"></CheckBox>
+            <CheckBox x:Name="SprTransparent" Content="Transparent" Visibility="Hidden"/>
         </StackPanel>
         <StackPanel Margin="219,92,0,0" HorizontalAlignment="Left">
             <Label x:Name="ObjectsCount"/>
@@ -30,7 +30,7 @@
         <Button x:Name="LoadAssets" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,220,0,0" IsEnabled="False" Click="LoadAssets_Click" >
             <Button.Content>
                 <StackPanel>
-                    <TextBlock Text="Load Assets" HorizontalAlignment="Center"></TextBlock>
+                    <TextBlock Text="Load Assets" HorizontalAlignment="Center"/>
                     <ProgressBar x:Name="LoadProgress" Minimum="0" Maximum="100" Value="0" Width="200" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-10,0,-10,0" Height="8" />
                 </StackPanel>
             </Button.Content>
