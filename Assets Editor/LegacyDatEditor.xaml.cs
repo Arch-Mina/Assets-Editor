@@ -1654,6 +1654,11 @@ namespace Assets_Editor
             aboutWindow.Show();
         }
 
+        private void ShowLogger(object sender, RoutedEventArgs e)
+        {
+            MainWindow.logView.Show();
+        }
+
     }
     public class ArithmeticConverter : IValueConverter
     {

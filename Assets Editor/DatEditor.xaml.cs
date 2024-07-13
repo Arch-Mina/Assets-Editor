@@ -2486,5 +2486,9 @@ namespace Assets_Editor
                 "Ctrl dragging - treats sprites as a sequence of frames.";
             MessageBox.Show(message, "Sprite List Help", MessageBoxButton.OK, MessageBoxImage.Information);
         }
+        private void ShowLogger(object sender, RoutedEventArgs e)
+        {
+            MainWindow.logView.Show();
+        }
     }
 }
