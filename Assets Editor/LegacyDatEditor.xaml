@@ -303,6 +303,7 @@
                                                 <ComboBoxItem Content="Tibia Coins"/>
                                                 <ComboBoxItem Content="Creature Products"/>
                                                 <ComboBoxItem Content="Quiver"/>
+                                                <ComboBoxItem Content="SoulCores"/>
                                             </ComboBox>
                                         </StackPanel>
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
