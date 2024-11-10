@@ -258,6 +258,7 @@ namespace Tibia.Protobuf.Appearances {
     [pbr::OriginalName("ITEM_CATEGORY_BACKPACK")] Backpack = 28,
     [pbr::OriginalName("ITEM_CATEGORY_ONEHANDWEAPON")] Onehandweapon = 29,
     [pbr::OriginalName("ITEM_CATEGORY_ARROW")] Arrow = 30,
+    [pbr::OriginalName("ITEM_CATEGORY_SOULCORES")] SoulCores = 31,
   }
 
   public enum VOCATION {
