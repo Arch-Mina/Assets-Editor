@@ -62,7 +62,7 @@ namespace Tibia.Protobuf.Appearances {
             "cGVhcmFuY2VGbGFncxIMCgRuYW1lGAQgASgJEhMKC2Rlc2NyaXB0aW9uGAUg",
             "ASgJEkQKD2FwcGVhcmFuY2VfdHlwZRgGIAEoDjIrLnRpYmlhLnByb3RvYnVm",
             "LmFwcGVhcmFuY2VzLkFQUEVBUkFOQ0VfVFlQRRITCgtzcHJpdGVfZGF0YRgH",
-            "IAMoDCLLDwoPQXBwZWFyYW5jZUZsYWdzEjwKBGJhbmsYASABKAsyLi50aWJp",
+            "IAMoDCKpEAoPQXBwZWFyYW5jZUZsYWdzEjwKBGJhbmsYASABKAsyLi50aWJp",
             "YS5wcm90b2J1Zi5hcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ0JhbmsSDAoE",
             "Y2xpcBgCIAEoCBIOCgZib3R0b20YAyABKAgSCwoDdG9wGAQgASgIEhEKCWNv",
             "bnRhaW5lchgFIAEoCBISCgpjdW11bGF0aXZlGAYgASgIEg4KBnVzYWJsZRgH",
@@ -105,79 +105,83 @@ namespace Tibia.Protobuf.Appearances {
             "GDIgASgIEhwKFHJldmVyc2VfYWRkb25zX3NvdXRoGDMgASgIEhwKFHJldmVy",
             "c2VfYWRkb25zX25vcnRoGDQgASgIEg8KB3dlYXJvdXQYNSABKAgSEwoLY2xv",
             "Y2tleHBpcmUYNiABKAgSDgoGZXhwaXJlGDcgASgIEhIKCmV4cGlyZXN0b3AY",
-            "OCABKAgSFQoNZGVjb19pdGVtX2tpdBg5IAEoCBISCgpob29rX3NvdXRoGDog",
-            "ASgIEhEKCWhvb2tfZWFzdBg7IAEoCCInChJBcHBlYXJhbmNlRmxhZ0JhbmsS",
-            "EQoJd2F5cG9pbnRzGAEgASgNIi4KE0FwcGVhcmFuY2VGbGFnV3JpdGUSFwoP",
-            "bWF4X3RleHRfbGVuZ3RoGAEgASgNIjcKF0FwcGVhcmFuY2VGbGFnV3JpdGVP",
-            "bmNlEhwKFG1heF90ZXh0X2xlbmd0aF9vbmNlGAEgASgNIjgKE0FwcGVhcmFu",
-            "Y2VGbGFnTGlnaHQSEgoKYnJpZ2h0bmVzcxgBIAEoDRINCgVjb2xvchgCIAEo",
-            "DSIpChRBcHBlYXJhbmNlRmxhZ0hlaWdodBIRCgllbGV2YXRpb24YASABKA0i",
-            "KwoTQXBwZWFyYW5jZUZsYWdTaGlmdBIJCgF4GAEgASgNEgkKAXkYAiABKA0i",
-            "JQoVQXBwZWFyYW5jZUZsYWdDbG90aGVzEgwKBHNsb3QYASABKA0iWAobQXBw",
-            "ZWFyYW5jZUZsYWdEZWZhdWx0QWN0aW9uEjkKBmFjdGlvbhgBIAEoDjIpLnRp",
-            "YmlhLnByb3RvYnVmLmFwcGVhcmFuY2VzLlBMQVlFUl9BQ1RJT04iqwIKFEFw",
-            "cGVhcmFuY2VGbGFnTWFya2V0EjsKCGNhdGVnb3J5GAEgASgOMikudGliaWEu",
-            "cHJvdG9idWYuYXBwZWFyYW5jZXMuSVRFTV9DQVRFR09SWRIaChJ0cmFkZV9h",
-            "c19vYmplY3RfaWQYAiABKA0SGQoRc2hvd19hc19vYmplY3RfaWQYAyABKA0S",
-            "QgoUcmVzdHJpY3RfdG9fdm9jYXRpb24YBSADKA4yJC50aWJpYS5wcm90b2J1",
-            "Zi5hcHBlYXJhbmNlcy5WT0NBVElPThIVCg1taW5pbXVtX2xldmVsGAYgASgN",
-            "EgwKBG5hbWUYByABKAkSNgoIdm9jYXRpb24YCCABKA4yJC50aWJpYS5wcm90",
-            "b2J1Zi5hcHBlYXJhbmNlcy5WT0NBVElPTiKlAQoRQXBwZWFyYW5jZUZsYWdO",
-            "UEMSDAoEbmFtZRgBIAEoCRIQCghsb2NhdGlvbhgCIAEoCRISCgpzYWxlX3By",
-            "aWNlGAMgASgNEhEKCWJ1eV9wcmljZRgEIAEoDRIfChdjdXJyZW5jeV9vYmpl",
-            "Y3RfdHlwZV9pZBgFIAEoDRIoCiBjdXJyZW5jeV9xdWVzdF9mbGFnX2Rpc3Bs",
-            "YXlfbmFtZRgGIAEoCSImChVBcHBlYXJhbmNlRmxhZ0F1dG9tYXASDQoFY29s",
-            "b3IYASABKA0iTgoSQXBwZWFyYW5jZUZsYWdIb29rEjgKCWRpcmVjdGlvbhgB",
-            "IAEoDjIlLnRpYmlhLnByb3RvYnVmLmFwcGVhcmFuY2VzLkhPT0tfVFlQRSIk",
-            "ChZBcHBlYXJhbmNlRmxhZ0xlbnNoZWxwEgoKAmlkGAEgASgNIj0KHUFwcGVh",
-            "cmFuY2VGbGFnQ2hhbmdlZFRvRXhwaXJlEhwKFGZvcm1lcl9vYmplY3RfdHlw",
-            "ZWlkGAEgASgNIjMKGEFwcGVhcmFuY2VGbGFnQ3ljbG9wZWRpYRIXCg9jeWNs",
-            "b3BlZGlhX3R5cGUYASABKA0iRQojQXBwZWFyYW5jZUZsYWdVcGdyYWRlQ2xh",
-            "c3NpZmljYXRpb24SHgoWdXBncmFkZV9jbGFzc2lmaWNhdGlvbhgBIAEoDSLT",
-            "AQobU3BlY2lhbE1lYW5pbmdBcHBlYXJhbmNlSWRzEhQKDGdvbGRfY29pbl9p",
-            "ZBgBIAEoDRIYChBwbGF0aW51bV9jb2luX2lkGAIgASgNEhcKD2NyeXN0YWxf",
-            "Y29pbl9pZBgDIAEoDRIVCg10aWJpYV9jb2luX2lkGAQgASgNEhkKEXN0YW1w",
-            "ZWRfbGV0dGVyX2lkGAUgASgNEhcKD3N1cHBseV9zdGFzaF9pZBgGIAEoDRIg",
-            "ChhzdGFuZGFyZF9yZXdhcmRfY2hlc3RfaWQYByABKA0iLQoKQ29vcmRpbmF0",
-            "ZRIJCgF4GAEgASgNEgkKAXkYAiABKA0SCQoBehgDIAEoDSqBAQoRRklYRURf",
-            "RlJBTUVfR1JPVVASIQodRklYRURfRlJBTUVfR1JPVVBfT1VURklUX0lETEUQ",
-            "ABIjCh9GSVhFRF9GUkFNRV9HUk9VUF9PVVRGSVRfTU9WSU5HEAESJAogRklY",
-            "RURfRlJBTUVfR1JPVVBfT0JKRUNUX0lOSVRJQUwQAiqUAQoNUExBWUVSX0FD",
-            "VElPThIWChJQTEFZRVJfQUNUSU9OX05PTkUQABIWChJQTEFZRVJfQUNUSU9O",
-            "X0xPT0sQARIVChFQTEFZRVJfQUNUSU9OX1VTRRACEhYKElBMQVlFUl9BQ1RJ",
-            "T05fT1BFThADEiQKIFBMQVlFUl9BQ1RJT05fQVVUT1dBTEtfSElHSExJR0hU",
-            "EAQq3wYKDUlURU1fQ0FURUdPUlkSGAoUSVRFTV9DQVRFR09SWV9BUk1PUlMQ",
-            "ARIZChVJVEVNX0NBVEVHT1JZX0FNVUxFVFMQAhIXChNJVEVNX0NBVEVHT1JZ",
-            "X0JPT1RTEAMSHAoYSVRFTV9DQVRFR09SWV9DT05UQUlORVJTEAQSHAoYSVRF",
-            "TV9DQVRFR09SWV9ERUNPUkFUSU9OEAUSFgoSSVRFTV9DQVRFR09SWV9GT09E",
-            "EAYSHgoaSVRFTV9DQVRFR09SWV9IRUxNRVRTX0hBVFMQBxIWChJJVEVNX0NB",
-            "VEVHT1JZX0xFR1MQCBIYChRJVEVNX0NBVEVHT1JZX09USEVSUxAJEhkKFUlU",
-            "RU1fQ0FURUdPUllfUE9USU9OUxAKEhcKE0lURU1fQ0FURUdPUllfUklOR1MQ",
-            "CxIXChNJVEVNX0NBVEVHT1JZX1JVTkVTEAwSGQoVSVRFTV9DQVRFR09SWV9T",
-            "SElFTERTEA0SFwoTSVRFTV9DQVRFR09SWV9UT09MUxAOEhsKF0lURU1fQ0FU",
-            "RUdPUllfVkFMVUFCTEVTEA8SHAoYSVRFTV9DQVRFR09SWV9BTU1VTklUSU9O",
-            "EBASFgoSSVRFTV9DQVRFR09SWV9BWEVTEBESFwoTSVRFTV9DQVRFR09SWV9D",
-            "TFVCUxASEiIKHklURU1fQ0FURUdPUllfRElTVEFOQ0VfV0VBUE9OUxATEhgK",
-            "FElURU1fQ0FURUdPUllfU1dPUkRTEBQSHAoYSVRFTV9DQVRFR09SWV9XQU5E",
-            "U19ST0RTEBUSIQodSVRFTV9DQVRFR09SWV9QUkVNSVVNX1NDUk9MTFMQFhId",
-            "ChlJVEVNX0NBVEVHT1JZX1RJQklBX0NPSU5TEBcSIwofSVRFTV9DQVRFR09S",
-            "WV9DUkVBVFVSRV9QUk9EVUNUUxAYEhgKFElURU1fQ0FURUdPUllfUVVJVkVS",
-            "EBkSHwobSVRFTV9DQVRFR09SWV9UV09IQU5EV0VBUE9OEBoSGQoVSVRFTV9D",
-            "QVRFR09SWV9IRUxNRVRTEBsSGgoWSVRFTV9DQVRFR09SWV9CQUNLUEFDSxAc",
-            "Eh8KG0lURU1fQ0FURUdPUllfT05FSEFORFdFQVBPThAdEhcKE0lURU1fQ0FU",
-            "RUdPUllfQVJST1cQHiqlAQoIVk9DQVRJT04SGQoMVk9DQVRJT05fQU5ZEP//",
-            "/////////wESEQoNVk9DQVRJT05fTk9ORRAAEhMKD1ZPQ0FUSU9OX0tOSUdI",
-            "VBABEhQKEFZPQ0FUSU9OX1BBTEFESU4QAhIVChFWT0NBVElPTl9TT1JDRVJF",
-            "UhADEhIKDlZPQ0FUSU9OX0RSVUlEEAQSFQoRVk9DQVRJT05fUFJPTU9URUQQ",
-            "CiqDAQoTQU5JTUFUSU9OX0xPT1BfVFlQRRIpChxBTklNQVRJT05fTE9PUF9U",
-            "WVBFX1BJTkdQT05HEP///////////wESIAocQU5JTUFUSU9OX0xPT1BfVFlQ",
-            "RV9JTkZJTklURRAAEh8KG0FOSU1BVElPTl9MT09QX1RZUEVfQ09VTlRFRBAB",
-            "KjQKCUhPT0tfVFlQRRITCg9IT09LX1RZUEVfU09VVEgQARISCg5IT09LX1RZ",
-            "UEVfRUFTVBACKlMKGEFOSU1BVElPTl9BTklNQVRJT05fTU9ERRIbChdBTklN",
-            "QVRJT05fQVNZTkNIUk9OSVpFRBAAEhoKFkFOSU1BVElPTl9TWU5DSFJPTkla",
-            "RUQQASpuCg9BUFBFQVJBTkNFX1RZUEUSFQoRQVBQRUFSQU5DRV9PQkpFQ1QQ",
-            "ARIVChFBUFBFQVJBTkNFX09VVEZJVBACEhUKEUFQUEVBUkFOQ0VfRUZGRUNU",
-            "EAMSFgoSQVBQRUFSQU5DRV9NSVNTSUxFEAQ="));
+            "OCABKAgSFQoNZGVjb19pdGVtX2tpdBg5IAEoCBISCgpob29rX3NvdXRoGEYg",
+            "ASgIEhEKCWhvb2tfZWFzdBhHIAEoCBJWChF0cmFuc3BhcmVuY3lsZXZlbBhI",
+            "IAEoCzI7LnRpYmlhLnByb3RvYnVmLmFwcGVhcmFuY2VzLkFwcGVhcmFuY2VG",
+            "bGFnVHJhbnNwYXJlbmN5TGV2ZWxKBAg6EEYiJwoSQXBwZWFyYW5jZUZsYWdC",
+            "YW5rEhEKCXdheXBvaW50cxgBIAEoDSIuChNBcHBlYXJhbmNlRmxhZ1dyaXRl",
+            "EhcKD21heF90ZXh0X2xlbmd0aBgBIAEoDSI3ChdBcHBlYXJhbmNlRmxhZ1dy",
+            "aXRlT25jZRIcChRtYXhfdGV4dF9sZW5ndGhfb25jZRgBIAEoDSI4ChNBcHBl",
+            "YXJhbmNlRmxhZ0xpZ2h0EhIKCmJyaWdodG5lc3MYASABKA0SDQoFY29sb3IY",
+            "AiABKA0iKQoUQXBwZWFyYW5jZUZsYWdIZWlnaHQSEQoJZWxldmF0aW9uGAEg",
+            "ASgNIisKE0FwcGVhcmFuY2VGbGFnU2hpZnQSCQoBeBgBIAEoDRIJCgF5GAIg",
+            "ASgNIiUKFUFwcGVhcmFuY2VGbGFnQ2xvdGhlcxIMCgRzbG90GAEgASgNIlgK",
+            "G0FwcGVhcmFuY2VGbGFnRGVmYXVsdEFjdGlvbhI5CgZhY3Rpb24YASABKA4y",
+            "KS50aWJpYS5wcm90b2J1Zi5hcHBlYXJhbmNlcy5QTEFZRVJfQUNUSU9OIqsC",
+            "ChRBcHBlYXJhbmNlRmxhZ01hcmtldBI7CghjYXRlZ29yeRgBIAEoDjIpLnRp",
+            "YmlhLnByb3RvYnVmLmFwcGVhcmFuY2VzLklURU1fQ0FURUdPUlkSGgoSdHJh",
+            "ZGVfYXNfb2JqZWN0X2lkGAIgASgNEhkKEXNob3dfYXNfb2JqZWN0X2lkGAMg",
+            "ASgNEkIKFHJlc3RyaWN0X3RvX3ZvY2F0aW9uGAUgAygOMiQudGliaWEucHJv",
+            "dG9idWYuYXBwZWFyYW5jZXMuVk9DQVRJT04SFQoNbWluaW11bV9sZXZlbBgG",
+            "IAEoDRIMCgRuYW1lGAcgASgJEjYKCHZvY2F0aW9uGAggASgOMiQudGliaWEu",
+            "cHJvdG9idWYuYXBwZWFyYW5jZXMuVk9DQVRJT04ipQEKEUFwcGVhcmFuY2VG",
+            "bGFnTlBDEgwKBG5hbWUYASABKAkSEAoIbG9jYXRpb24YAiABKAkSEgoKc2Fs",
+            "ZV9wcmljZRgDIAEoDRIRCglidXlfcHJpY2UYBCABKA0SHwoXY3VycmVuY3lf",
+            "b2JqZWN0X3R5cGVfaWQYBSABKA0SKAogY3VycmVuY3lfcXVlc3RfZmxhZ19k",
+            "aXNwbGF5X25hbWUYBiABKAkiJgoVQXBwZWFyYW5jZUZsYWdBdXRvbWFwEg0K",
+            "BWNvbG9yGAEgASgNIk4KEkFwcGVhcmFuY2VGbGFnSG9vaxI4CglkaXJlY3Rp",
+            "b24YASABKA4yJS50aWJpYS5wcm90b2J1Zi5hcHBlYXJhbmNlcy5IT09LX1RZ",
+            "UEUiJAoWQXBwZWFyYW5jZUZsYWdMZW5zaGVscBIKCgJpZBgBIAEoDSI9Ch1B",
+            "cHBlYXJhbmNlRmxhZ0NoYW5nZWRUb0V4cGlyZRIcChRmb3JtZXJfb2JqZWN0",
+            "X3R5cGVpZBgBIAEoDSIzChhBcHBlYXJhbmNlRmxhZ0N5Y2xvcGVkaWESFwoP",
+            "Y3ljbG9wZWRpYV90eXBlGAEgASgNIkUKI0FwcGVhcmFuY2VGbGFnVXBncmFk",
+            "ZUNsYXNzaWZpY2F0aW9uEh4KFnVwZ3JhZGVfY2xhc3NpZmljYXRpb24YASAB",
+            "KA0iMAofQXBwZWFyYW5jZUZsYWdUcmFuc3BhcmVuY3lMZXZlbBINCgVsZXZl",
+            "bBgBIAEoDSLTAQobU3BlY2lhbE1lYW5pbmdBcHBlYXJhbmNlSWRzEhQKDGdv",
+            "bGRfY29pbl9pZBgBIAEoDRIYChBwbGF0aW51bV9jb2luX2lkGAIgASgNEhcK",
+            "D2NyeXN0YWxfY29pbl9pZBgDIAEoDRIVCg10aWJpYV9jb2luX2lkGAQgASgN",
+            "EhkKEXN0YW1wZWRfbGV0dGVyX2lkGAUgASgNEhcKD3N1cHBseV9zdGFzaF9p",
+            "ZBgGIAEoDRIgChhzdGFuZGFyZF9yZXdhcmRfY2hlc3RfaWQYByABKA0iLQoK",
+            "Q29vcmRpbmF0ZRIJCgF4GAEgASgNEgkKAXkYAiABKA0SCQoBehgDIAEoDSqB",
+            "AQoRRklYRURfRlJBTUVfR1JPVVASIQodRklYRURfRlJBTUVfR1JPVVBfT1VU",
+            "RklUX0lETEUQABIjCh9GSVhFRF9GUkFNRV9HUk9VUF9PVVRGSVRfTU9WSU5H",
+            "EAESJAogRklYRURfRlJBTUVfR1JPVVBfT0JKRUNUX0lOSVRJQUwQAiqUAQoN",
+            "UExBWUVSX0FDVElPThIWChJQTEFZRVJfQUNUSU9OX05PTkUQABIWChJQTEFZ",
+            "RVJfQUNUSU9OX0xPT0sQARIVChFQTEFZRVJfQUNUSU9OX1VTRRACEhYKElBM",
+            "QVlFUl9BQ1RJT05fT1BFThADEiQKIFBMQVlFUl9BQ1RJT05fQVVUT1dBTEtf",
+            "SElHSExJR0hUEAQq/AYKDUlURU1fQ0FURUdPUlkSGAoUSVRFTV9DQVRFR09S",
+            "WV9BUk1PUlMQARIZChVJVEVNX0NBVEVHT1JZX0FNVUxFVFMQAhIXChNJVEVN",
+            "X0NBVEVHT1JZX0JPT1RTEAMSHAoYSVRFTV9DQVRFR09SWV9DT05UQUlORVJT",
+            "EAQSHAoYSVRFTV9DQVRFR09SWV9ERUNPUkFUSU9OEAUSFgoSSVRFTV9DQVRF",
+            "R09SWV9GT09EEAYSHgoaSVRFTV9DQVRFR09SWV9IRUxNRVRTX0hBVFMQBxIW",
+            "ChJJVEVNX0NBVEVHT1JZX0xFR1MQCBIYChRJVEVNX0NBVEVHT1JZX09USEVS",
+            "UxAJEhkKFUlURU1fQ0FURUdPUllfUE9USU9OUxAKEhcKE0lURU1fQ0FURUdP",
+            "UllfUklOR1MQCxIXChNJVEVNX0NBVEVHT1JZX1JVTkVTEAwSGQoVSVRFTV9D",
+            "QVRFR09SWV9TSElFTERTEA0SFwoTSVRFTV9DQVRFR09SWV9UT09MUxAOEhsK",
+            "F0lURU1fQ0FURUdPUllfVkFMVUFCTEVTEA8SHAoYSVRFTV9DQVRFR09SWV9B",
+            "TU1VTklUSU9OEBASFgoSSVRFTV9DQVRFR09SWV9BWEVTEBESFwoTSVRFTV9D",
+            "QVRFR09SWV9DTFVCUxASEiIKHklURU1fQ0FURUdPUllfRElTVEFOQ0VfV0VB",
+            "UE9OUxATEhgKFElURU1fQ0FURUdPUllfU1dPUkRTEBQSHAoYSVRFTV9DQVRF",
+            "R09SWV9XQU5EU19ST0RTEBUSIQodSVRFTV9DQVRFR09SWV9QUkVNSVVNX1ND",
+            "Uk9MTFMQFhIdChlJVEVNX0NBVEVHT1JZX1RJQklBX0NPSU5TEBcSIwofSVRF",
+            "TV9DQVRFR09SWV9DUkVBVFVSRV9QUk9EVUNUUxAYEhgKFElURU1fQ0FURUdP",
+            "UllfUVVJVkVSEBkSHwobSVRFTV9DQVRFR09SWV9UV09IQU5EV0VBUE9OEBoS",
+            "GQoVSVRFTV9DQVRFR09SWV9IRUxNRVRTEBsSGgoWSVRFTV9DQVRFR09SWV9C",
+            "QUNLUEFDSxAcEh8KG0lURU1fQ0FURUdPUllfT05FSEFORFdFQVBPThAdEhcK",
+            "E0lURU1fQ0FURUdPUllfQVJST1cQHhIbChdJVEVNX0NBVEVHT1JZX1NPVUxD",
+            "T1JFUxAfKqUBCghWT0NBVElPThIZCgxWT0NBVElPTl9BTlkQ////////////",
+            "ARIRCg1WT0NBVElPTl9OT05FEAASEwoPVk9DQVRJT05fS05JR0hUEAESFAoQ",
+            "Vk9DQVRJT05fUEFMQURJThACEhUKEVZPQ0FUSU9OX1NPUkNFUkVSEAMSEgoO",
+            "Vk9DQVRJT05fRFJVSUQQBBIVChFWT0NBVElPTl9QUk9NT1RFRBAKKoMBChNB",
+            "TklNQVRJT05fTE9PUF9UWVBFEikKHEFOSU1BVElPTl9MT09QX1RZUEVfUElO",
+            "R1BPTkcQ////////////ARIgChxBTklNQVRJT05fTE9PUF9UWVBFX0lORklO",
+            "SVRFEAASHwobQU5JTUFUSU9OX0xPT1BfVFlQRV9DT1VOVEVEEAEqNAoJSE9P",
+            "S19UWVBFEhMKD0hPT0tfVFlQRV9TT1VUSBABEhIKDkhPT0tfVFlQRV9FQVNU",
+            "EAIqUwoYQU5JTUFUSU9OX0FOSU1BVElPTl9NT0RFEhsKF0FOSU1BVElPTl9B",
+            "U1lOQ0hST05JWkVEEAASGgoWQU5JTUFUSU9OX1NZTkNIUk9OSVpFRBABKm4K",
+            "D0FQUEVBUkFOQ0VfVFlQRRIVChFBUFBFQVJBTkNFX09CSkVDVBABEhUKEUFQ",
+            "UEVBUkFOQ0VfT1VURklUEAISFQoRQVBQRUFSQU5DRV9FRkZFQ1QQAxIWChJB",
+            "UFBFQVJBTkNFX01JU1NJTEUQBA=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Tibia.Protobuf.Appearances.FIXED_FRAME_GROUP), typeof(global::Tibia.Protobuf.Appearances.PLAYER_ACTION), typeof(global::Tibia.Protobuf.Appearances.ITEM_CATEGORY), typeof(global::Tibia.Protobuf.Appearances.VOCATION), typeof(global::Tibia.Protobuf.Appearances.ANIMATION_LOOP_TYPE), typeof(global::Tibia.Protobuf.Appearances.HOOK_TYPE), typeof(global::Tibia.Protobuf.Appearances.ANIMATION_ANIMATION_MODE), typeof(global::Tibia.Protobuf.Appearances.APPEARANCE_TYPE), }, null, new pbr::GeneratedClrTypeInfo[] {
@@ -188,7 +192,7 @@ namespace Tibia.Protobuf.Appearances {
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.SpriteInfo), global::Tibia.Protobuf.Appearances.SpriteInfo.Parser, new[]{ "PatternWidth", "PatternHeight", "PatternDepth", "Layers", "SpriteId", "BoundingSquare", "Animation", "IsOpaque", "BoundingBoxPerDirection", "PatternSize", "PatternLayers", "PatternX", "PatternY", "PatternZ", "PatternFrames", "IsAnimation" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.FrameGroup), global::Tibia.Protobuf.Appearances.FrameGroup.Parser, new[]{ "FixedFrameGroup", "Id", "SpriteInfo" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.Appearance), global::Tibia.Protobuf.Appearances.Appearance.Parser, new[]{ "Id", "FrameGroup", "Flags", "Name", "Description", "AppearanceType", "SpriteData" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlags), global::Tibia.Protobuf.Appearances.AppearanceFlags.Parser, new[]{ "Bank", "Clip", "Bottom", "Top", "Container", "Cumulative", "Usable", "Forceuse", "Multiuse", "Write", "WriteOnce", "Liquidpool", "Unpass", "Unmove", "Unsight", "Avoid", "NoMovementAnimation", "Take", "Liquidcontainer", "Hang", "Hook", "Rotate", "Light", "DontHide", "Translucent", "Shift", "Height", "LyingObject", "AnimateAlways", "Automap", "Lenshelp", "Fullbank", "IgnoreLook", "Clothes", "DefaultAction", "Market", "Wrap", "Unwrap", "Topeffect", "Npcsaledata", "Changedtoexpire", "Corpse", "PlayerCorpse", "Cyclopediaitem", "Ammo", "ShowOffSocket", "Reportable", "Upgradeclassification", "ReverseAddonsEast", "ReverseAddonsWest", "ReverseAddonsSouth", "ReverseAddonsNorth", "Wearout", "Clockexpire", "Expire", "Expirestop", "DecoItemKit", "HookSouth", "HookEast" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlags), global::Tibia.Protobuf.Appearances.AppearanceFlags.Parser, new[]{ "Bank", "Clip", "Bottom", "Top", "Container", "Cumulative", "Usable", "Forceuse", "Multiuse", "Write", "WriteOnce", "Liquidpool", "Unpass", "Unmove", "Unsight", "Avoid", "NoMovementAnimation", "Take", "Liquidcontainer", "Hang", "Hook", "Rotate", "Light", "DontHide", "Translucent", "Shift", "Height", "LyingObject", "AnimateAlways", "Automap", "Lenshelp", "Fullbank", "IgnoreLook", "Clothes", "DefaultAction", "Market", "Wrap", "Unwrap", "Topeffect", "Npcsaledata", "Changedtoexpire", "Corpse", "PlayerCorpse", "Cyclopediaitem", "Ammo", "ShowOffSocket", "Reportable", "Upgradeclassification", "ReverseAddonsEast", "ReverseAddonsWest", "ReverseAddonsSouth", "ReverseAddonsNorth", "Wearout", "Clockexpire", "Expire", "Expirestop", "DecoItemKit", "HookSouth", "HookEast", "Transparencylevel" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagBank), global::Tibia.Protobuf.Appearances.AppearanceFlagBank.Parser, new[]{ "Waypoints" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagWrite), global::Tibia.Protobuf.Appearances.AppearanceFlagWrite.Parser, new[]{ "MaxTextLength" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagWriteOnce), global::Tibia.Protobuf.Appearances.AppearanceFlagWriteOnce.Parser, new[]{ "MaxTextLengthOnce" }, null, null, null, null),
@@ -205,6 +209,7 @@ namespace Tibia.Protobuf.Appearances {
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagChangedToExpire), global::Tibia.Protobuf.Appearances.AppearanceFlagChangedToExpire.Parser, new[]{ "FormerObjectTypeid" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagCyclopedia), global::Tibia.Protobuf.Appearances.AppearanceFlagCyclopedia.Parser, new[]{ "CyclopediaType" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagUpgradeClassification), global::Tibia.Protobuf.Appearances.AppearanceFlagUpgradeClassification.Parser, new[]{ "UpgradeClassification" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagTransparencyLevel), global::Tibia.Protobuf.Appearances.AppearanceFlagTransparencyLevel.Parser, new[]{ "Level" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.SpecialMeaningAppearanceIds), global::Tibia.Protobuf.Appearances.SpecialMeaningAppearanceIds.Parser, new[]{ "GoldCoinId", "PlatinumCoinId", "CrystalCoinId", "TibiaCoinId", "StampedLetterId", "SupplyStashId", "StandardRewardChestId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.Coordinate), global::Tibia.Protobuf.Appearances.Coordinate.Parser, new[]{ "X", "Y", "Z" }, null, null, null, null)
           }));
@@ -258,7 +263,7 @@ namespace Tibia.Protobuf.Appearances {
     [pbr::OriginalName("ITEM_CATEGORY_BACKPACK")] Backpack = 28,
     [pbr::OriginalName("ITEM_CATEGORY_ONEHANDWEAPON")] Onehandweapon = 29,
     [pbr::OriginalName("ITEM_CATEGORY_ARROW")] Arrow = 30,
-    [pbr::OriginalName("ITEM_CATEGORY_SOULCORES")] SoulCores = 31,
+    [pbr::OriginalName("ITEM_CATEGORY_SOULCORES")] Soulcores = 31,
   }
 
   public enum VOCATION {
@@ -3277,6 +3282,7 @@ namespace Tibia.Protobuf.Appearances {
       decoItemKit_ = other.decoItemKit_;
       hookSouth_ = other.hookSouth_;
       hookEast_ = other.hookEast_;
+      transparencylevel_ = other.transparencylevel_ != null ? other.transparencylevel_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -4445,7 +4451,7 @@ namespace Tibia.Protobuf.Appearances {
     }
 
     /// <summary>Field number for the "hook_south" field.</summary>
-    public const int HookSouthFieldNumber = 58;
+    public const int HookSouthFieldNumber = 70;
     private readonly static bool HookSouthDefaultValue = false;
 
     private bool hookSouth_;
@@ -4469,7 +4475,7 @@ namespace Tibia.Protobuf.Appearances {
     }
 
     /// <summary>Field number for the "hook_east" field.</summary>
-    public const int HookEastFieldNumber = 59;
+    public const int HookEastFieldNumber = 71;
     private readonly static bool HookEastDefaultValue = false;
 
     private bool hookEast_;
@@ -4490,6 +4496,17 @@ namespace Tibia.Protobuf.Appearances {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearHookEast() {
       _hasBits1 &= ~1024;
+    }
+
+    /// <summary>Field number for the "transparencylevel" field.</summary>
+    public const int TransparencylevelFieldNumber = 72;
+    private global::Tibia.Protobuf.Appearances.AppearanceFlagTransparencyLevel transparencylevel_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Tibia.Protobuf.Appearances.AppearanceFlagTransparencyLevel Transparencylevel {
+      get { return transparencylevel_; }
+      set {
+        transparencylevel_ = value;
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4564,6 +4581,7 @@ namespace Tibia.Protobuf.Appearances {
       if (DecoItemKit != other.DecoItemKit) return false;
       if (HookSouth != other.HookSouth) return false;
       if (HookEast != other.HookEast) return false;
+      if (!object.Equals(Transparencylevel, other.Transparencylevel)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -4629,6 +4647,7 @@ namespace Tibia.Protobuf.Appearances {
       if (HasDecoItemKit) hash ^= DecoItemKit.GetHashCode();
       if (HasHookSouth) hash ^= HookSouth.GetHashCode();
       if (HasHookEast) hash ^= HookEast.GetHashCode();
+      if (transparencylevel_ != null) hash ^= Transparencylevel.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -4871,12 +4890,16 @@ namespace Tibia.Protobuf.Appearances {
         output.WriteBool(DecoItemKit);
       }
       if (HasHookSouth) {
-        output.WriteRawTag(208, 3);
+        output.WriteRawTag(176, 4);
         output.WriteBool(HookSouth);
       }
       if (HasHookEast) {
-        output.WriteRawTag(216, 3);
+        output.WriteRawTag(184, 4);
         output.WriteBool(HookEast);
+      }
+      if (transparencylevel_ != null) {
+        output.WriteRawTag(194, 4);
+        output.WriteMessage(Transparencylevel);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -5113,12 +5136,16 @@ namespace Tibia.Protobuf.Appearances {
         output.WriteBool(DecoItemKit);
       }
       if (HasHookSouth) {
-        output.WriteRawTag(208, 3);
+        output.WriteRawTag(176, 4);
         output.WriteBool(HookSouth);
       }
       if (HasHookEast) {
-        output.WriteRawTag(216, 3);
+        output.WriteRawTag(184, 4);
         output.WriteBool(HookEast);
+      }
+      if (transparencylevel_ != null) {
+        output.WriteRawTag(194, 4);
+        output.WriteMessage(Transparencylevel);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -5303,6 +5330,9 @@ namespace Tibia.Protobuf.Appearances {
       }
       if (HasHookEast) {
         size += 2 + 1;
+      }
+      if (transparencylevel_ != null) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(Transparencylevel);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -5534,6 +5564,12 @@ namespace Tibia.Protobuf.Appearances {
       }
       if (other.HasHookEast) {
         HookEast = other.HookEast;
+      }
+      if (other.transparencylevel_ != null) {
+        if (transparencylevel_ == null) {
+          Transparencylevel = new global::Tibia.Protobuf.Appearances.AppearanceFlagTransparencyLevel();
+        }
+        Transparencylevel.MergeFrom(other.Transparencylevel);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -5822,12 +5858,19 @@ namespace Tibia.Protobuf.Appearances {
             DecoItemKit = input.ReadBool();
             break;
           }
-          case 464: {
+          case 560: {
             HookSouth = input.ReadBool();
             break;
           }
-          case 472: {
+          case 568: {
             HookEast = input.ReadBool();
+            break;
+          }
+          case 578: {
+            if (transparencylevel_ == null) {
+              Transparencylevel = new global::Tibia.Protobuf.Appearances.AppearanceFlagTransparencyLevel();
+            }
+            input.ReadMessage(Transparencylevel);
             break;
           }
         }
@@ -6117,12 +6160,19 @@ namespace Tibia.Protobuf.Appearances {
             DecoItemKit = input.ReadBool();
             break;
           }
-          case 464: {
+          case 560: {
             HookSouth = input.ReadBool();
             break;
           }
-          case 472: {
+          case 568: {
             HookEast = input.ReadBool();
+            break;
+          }
+          case 578: {
+            if (transparencylevel_ == null) {
+              Transparencylevel = new global::Tibia.Protobuf.Appearances.AppearanceFlagTransparencyLevel();
+            }
+            input.ReadMessage(Transparencylevel);
             break;
           }
         }
@@ -9735,6 +9785,193 @@ namespace Tibia.Protobuf.Appearances {
 
   }
 
+  public sealed partial class AppearanceFlagTransparencyLevel : pb::IMessage<AppearanceFlagTransparencyLevel>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<AppearanceFlagTransparencyLevel> _parser = new pb::MessageParser<AppearanceFlagTransparencyLevel>(() => new AppearanceFlagTransparencyLevel());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<AppearanceFlagTransparencyLevel> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Tibia.Protobuf.Appearances.AppearancesReflection.Descriptor.MessageTypes[24]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagTransparencyLevel() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagTransparencyLevel(AppearanceFlagTransparencyLevel other) : this() {
+      _hasBits0 = other._hasBits0;
+      level_ = other.level_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagTransparencyLevel Clone() {
+      return new AppearanceFlagTransparencyLevel(this);
+    }
+
+    /// <summary>Field number for the "level" field.</summary>
+    public const int LevelFieldNumber = 1;
+    private readonly static uint LevelDefaultValue = 0;
+
+    private uint level_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint Level {
+      get { if ((_hasBits0 & 1) != 0) { return level_; } else { return LevelDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        level_ = value;
+      }
+    }
+    /// <summary>Gets whether the "level" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasLevel {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "level" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearLevel() {
+      _hasBits0 &= ~1;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as AppearanceFlagTransparencyLevel);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(AppearanceFlagTransparencyLevel other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Level != other.Level) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (HasLevel) hash ^= Level.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (HasLevel) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(Level);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (HasLevel) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(Level);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (HasLevel) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Level);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(AppearanceFlagTransparencyLevel other) {
+      if (other == null) {
+        return;
+      }
+      if (other.HasLevel) {
+        Level = other.Level;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Level = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Level = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
   public sealed partial class SpecialMeaningAppearanceIds : pb::IMessage<SpecialMeaningAppearanceIds>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -9748,7 +9985,7 @@ namespace Tibia.Protobuf.Appearances {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Tibia.Protobuf.Appearances.AppearancesReflection.Descriptor.MessageTypes[24]; }
+      get { return global::Tibia.Protobuf.Appearances.AppearancesReflection.Descriptor.MessageTypes[25]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -10229,7 +10466,7 @@ namespace Tibia.Protobuf.Appearances {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Tibia.Protobuf.Appearances.AppearancesReflection.Descriptor.MessageTypes[25]; }
+      get { return global::Tibia.Protobuf.Appearances.AppearancesReflection.Descriptor.MessageTypes[26]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

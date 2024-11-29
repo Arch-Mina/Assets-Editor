@@ -48,11 +48,35 @@ namespace Assets_Editor
         private int importSprCounter = 0;
         private List<ShowList> SelectedSprites = [];
         private Dictionary<uint, uint> importSprIdList = new Dictionary<uint, uint>();
+        private List<CatalogTransparency> transparentSheets = new List<CatalogTransparency>();
         private class ImportSpriteInfo
         {
             public MemoryStream Stream { get; set; }
             public int OriginalIndex { get; set; }
             public System.Drawing.Size Size { get; set; }
+        }
+
+        public class CatalogTransparency
+        {
+            public MainWindow.Catalog Catalog { get; set; }
+            public List<uint> SpriteIds { get; set; }
+            public byte AlphaValue { get; set; }
+            public APPEARANCE_TYPE ObjectType { get; set; }
+            public uint ObjectId { get; set; }
+            public byte BaseAlpha { get; set; }
+
+            public CatalogTransparency(MainWindow.Catalog catalog, List<uint> spriteIds, byte alphaValue, APPEARANCE_TYPE objectType, uint objectId)
+            {
+                Catalog = catalog;
+                SpriteIds = spriteIds;
+                AlphaValue = alphaValue;
+                ObjectType = objectType;
+                ObjectId = objectId;
+            }
+
+            public CatalogTransparency()
+            {
+            }
         }
 
         protected override void OnClosed(EventArgs e)
@@ -531,6 +555,8 @@ namespace Assets_Editor
             A_FlagNPCData.ItemsSource = null;
             A_FlagNPCData.ItemsSource = NpcDataList;
             A_FullInfo.Text = CurrentObjectAppearance.ToString();
+            A_FlagTransparency.IsChecked = CurrentObjectAppearance.Flags.Transparencylevel != null;
+            A_FlagTransparencyLevel.Value = (CurrentObjectAppearance.Flags.Transparencylevel != null && CurrentObjectAppearance.Flags.Transparencylevel.HasLevel) ? (int)CurrentObjectAppearance.Flags.Transparencylevel.Level : 0;
         }
         private void A_FlagLightColorPickerChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
@@ -1273,6 +1299,34 @@ namespace Assets_Editor
                 }
             }
 
+            if ((bool)A_FlagTransparency.IsChecked)
+            {
+                CurrentObjectAppearance.Flags.Transparencylevel = new AppearanceFlagTransparencyLevel
+                {
+                    Level = (uint)A_FlagTransparencyLevel.Value
+                };
+            }
+            else CurrentObjectAppearance.Flags.Transparencylevel = null;
+
+            Appearance oldAppearance = null;
+
+            if (ObjectMenu.SelectedIndex == 0)
+                oldAppearance = MainWindow.appearances.Outfit.FirstOrDefault(a => a.Id == CurrentObjectAppearance.Id);
+            else if (ObjectMenu.SelectedIndex == 1)
+                oldAppearance = MainWindow.appearances.Object.FirstOrDefault(a => a.Id == CurrentObjectAppearance.Id);
+            else if (ObjectMenu.SelectedIndex == 2)
+                oldAppearance = MainWindow.appearances.Effect.FirstOrDefault(a => a.Id == CurrentObjectAppearance.Id);
+            else if (ObjectMenu.SelectedIndex == 3)
+                oldAppearance = MainWindow.appearances.Missile.FirstOrDefault(a => a.Id == CurrentObjectAppearance.Id);
+
+            if (oldAppearance != null)
+            {
+                uint oldTransparency = (oldAppearance.Flags.Transparencylevel != null && oldAppearance.Flags.Transparencylevel.HasLevel) ? oldAppearance.Flags.Transparencylevel.Level : 0;
+                uint currentTransparency = (bool)A_FlagTransparency.IsChecked ? (uint)A_FlagTransparencyLevel.Value : 0;
+                if (oldTransparency != currentTransparency)
+                    SetObjectTransparency(CurrentObjectAppearance, (byte)oldTransparency);
+            }
+
             if (ObjectMenu.SelectedIndex == 0)
                 MainWindow.appearances.Outfit[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
             else if (ObjectMenu.SelectedIndex == 1)
@@ -1328,6 +1382,7 @@ namespace Assets_Editor
                     ThingsMissile = new ObservableCollection<ShowList>(ThingsMissile.OrderBy(item => item.Id));
                 }
             }
+
             AnimateSelectedListItem(showList);
 
             StatusBar.MessageQueue.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
@@ -1386,7 +1441,7 @@ namespace Assets_Editor
         {
             File.Copy(System.IO.Path.Combine(MainWindow._assetsPath , "catalog-content.json"), System.IO.Path.Combine(MainWindow._assetsPath, "catalog-content.json-bak"), true);
             File.Copy(MainWindow._datPath, MainWindow._datPath + "-bak", true);
-
+            ProcessTransparentSheets();
             using (StreamWriter file = File.CreateText(MainWindow._assetsPath + "\\catalog-content.json"))
             {
                 JsonSerializer serializer = new JsonSerializer
@@ -2544,6 +2599,240 @@ namespace Assets_Editor
         private void ShowLogger(object sender, RoutedEventArgs e)
         {
             MainWindow.logView.Show();
+        }
+
+        private void SetObjectTransparency(Appearance appearance, byte baseAlpha)
+        {
+            var existingEntries = transparentSheets.Where(ct => ct.ObjectType == appearance.AppearanceType && ct.ObjectId == appearance.Id).ToList();
+
+            bool add = false;
+            if (existingEntries.Any())
+            {
+                if (baseAlpha != existingEntries.First().BaseAlpha)
+                    add = true;
+
+                foreach (var existing in existingEntries)
+                {
+                    transparentSheets.Remove(existing);
+                }
+            }
+            else
+            {
+                add = true;
+            }
+
+            if (add)
+            {
+                Dictionary<MainWindow.Catalog, List<uint>> catalogSpriteIdMap = new Dictionary<MainWindow.Catalog, List<uint>>();
+                foreach (var frameGroup in appearance.FrameGroup)
+                {
+                    foreach (uint spriteId in frameGroup.SpriteInfo.SpriteId)
+                    {
+                        MainWindow.Catalog catalog = GetSheetData(spriteId);
+
+                        if (catalog != null)
+                        {
+                            if (!catalogSpriteIdMap.ContainsKey(catalog))
+                            {
+                                catalogSpriteIdMap[catalog] = new List<uint>();
+                            }
+                            catalogSpriteIdMap[catalog].Add(spriteId);
+                        }
+                        else
+                        {
+                            MainWindow.Log("Catalog not found for sprite ID " + spriteId + ".");
+                        }
+                    }
+                }
+
+                foreach (var kvp in catalogSpriteIdMap)
+                {
+                    MainWindow.Catalog catalog = kvp.Key;
+                    List<uint> spriteIds = kvp.Value;
+
+                    CatalogTransparency modification = new CatalogTransparency()
+                    {
+                        Catalog = catalog,
+                        SpriteIds = spriteIds,
+                        AlphaValue = (byte)appearance.Flags.Transparencylevel.Level,
+                        BaseAlpha = baseAlpha,
+                        ObjectType = appearance.AppearanceType,
+                        ObjectId = appearance.Id
+                    };
+
+                    transparentSheets.Add(modification);
+                }
+
+            }
+        }
+
+        private void ProcessTransparentSheets()
+        {
+            Dictionary<MainWindow.Catalog, Dictionary<uint, byte>> catalogModifications = new Dictionary<MainWindow.Catalog, Dictionary<uint, byte>>();
+
+            foreach (var modification in transparentSheets)
+            {
+                MainWindow.Catalog catalog = modification.Catalog;
+
+                if (!catalogModifications.ContainsKey(catalog))
+                {
+                    catalogModifications[catalog] = new Dictionary<uint, byte>();
+                }
+
+                foreach (uint spriteId in modification.SpriteIds)
+                {
+                    catalogModifications[catalog][spriteId] = modification.AlphaValue;
+                }
+            }
+
+            foreach (var catalogEntry in catalogModifications)
+            {
+                MainWindow.Catalog catalog = catalogEntry.Key;
+                Dictionary<uint, byte> spriteAlphaValues = catalogEntry.Value;
+
+                string _sprPath = String.Format("{0}{1}", MainWindow._assetsPath, catalog.File);
+
+                System.Drawing.Bitmap bmpImage = LZMA.DecompressFileLZMA(_sprPath);
+
+                ChangeSpritesAlpha(bmpImage, spriteAlphaValues, catalog.SpriteType, catalog.FirstSpriteid);
+
+                string dirPath = MainWindow._assetsPath;
+                LZMA.ExportLzmaFile(bmpImage, ref dirPath);
+
+                MainWindow.Catalog CurrentCatalog = MainWindow.catalog.Find(x => x.File == catalog.File);
+                CurrentCatalog.File = dirPath;
+                
+                bmpImage.Dispose();
+            }
+            MainWindow.Log("All sprite modifications have been processed.");
+        }
+
+        public MainWindow.Catalog GetSheetData(uint sprId)
+        {
+            foreach (MainWindow.Catalog sheet in MainWindow.catalog)
+            {
+                if (sheet.FirstSpriteid <= sprId && sheet.LastSpriteid >= sprId)
+                    return sheet;
+            }
+
+            return null;
+        }
+
+        public void ChangeSpritesAlpha(System.Drawing.Bitmap bmpImage, Dictionary<uint, byte> spriteAlphaValues, int spriteType, int firstSpriteId)
+        {
+            int spriteWidth, spriteHeight, spritesPerRow, spritesPerColumn;
+
+            switch (spriteType)
+            {
+                case 0:
+                    spriteWidth = 32;
+                    spriteHeight = 32;
+                    spritesPerRow = 12;
+                    spritesPerColumn = 12;
+                    break;
+                case 1:
+                    spriteWidth = 32;
+                    spriteHeight = 64;
+                    spritesPerRow = 12;
+                    spritesPerColumn = 6;
+                    break;
+                case 2:
+                    spriteWidth = 64;
+                    spriteHeight = 32;
+                    spritesPerRow = 6;
+                    spritesPerColumn = 12;
+                    break;
+                case 3:
+                    spriteWidth = 64;
+                    spriteHeight = 64;
+                    spritesPerRow = 6;
+                    spritesPerColumn = 6;
+                    break;
+                default:
+                    throw new ArgumentException("Invalid sprite type.");
+            }
+
+            System.Drawing.Bitmap bmpWithAlpha = ConvertToFormat32bppArgb(bmpImage);
+
+            System.Drawing.Imaging.BitmapData bmpData = bmpWithAlpha.LockBits(
+                new System.Drawing.Rectangle(0, 0, bmpWithAlpha.Width, bmpWithAlpha.Height),
+                System.Drawing.Imaging.ImageLockMode.ReadWrite,
+                bmpWithAlpha.PixelFormat
+            );
+
+            int bytesPerPixel = System.Drawing.Image.GetPixelFormatSize(bmpWithAlpha.PixelFormat) / 8;
+            int height = bmpWithAlpha.Height;
+            int stride = bmpData.Stride;
+            byte[] pixels = new byte[stride * height];
+
+            Marshal.Copy(bmpData.Scan0, pixels, 0, pixels.Length);
+
+            foreach (var entry in spriteAlphaValues)
+            {
+                uint spriteId = entry.Key;
+                byte newAlpha = entry.Value;
+
+                int spriteIndex = (int)(spriteId - firstSpriteId);
+                if (spriteIndex < 0 || spriteIndex >= spritesPerRow * spritesPerColumn)
+                {
+                    continue;
+                }
+
+                int row = spriteIndex / spritesPerRow;
+                int column = spriteIndex % spritesPerRow;
+
+                System.Drawing.Rectangle spriteRect = new System.Drawing.Rectangle(
+                    column * spriteWidth,
+                    row * spriteHeight,
+                    spriteWidth,
+                    spriteHeight
+                );
+
+                ChangeAlphaInRegion(pixels, stride, bytesPerPixel, spriteRect, newAlpha);
+            }
+
+            Marshal.Copy(pixels, 0, bmpData.Scan0, pixels.Length);
+
+            bmpWithAlpha.UnlockBits(bmpData);
+
+            if (bmpImage != bmpWithAlpha)
+            {
+                bmpImage.Dispose();
+                bmpImage = bmpWithAlpha;
+            }
+        }
+        private void ChangeAlphaInRegion(byte[] pixels, int stride, int bytesPerPixel, System.Drawing.Rectangle region, byte newAlpha)
+        {
+            for (int y = region.Top; y < region.Bottom; y++)
+            {
+                int yPos = y * stride;
+                for (int x = region.Left; x < region.Right; x++)
+                {
+                    int position = yPos + x * bytesPerPixel;
+
+                    byte blue = pixels[position];
+                    byte green = pixels[position + 1];
+                    byte red = pixels[position + 2];
+
+                    if (!(red == 255 && green == 0 && blue == 255))
+                    {
+                        pixels[position + 3] = newAlpha;
+                    }
+                }
+            }
+        }
+
+        private System.Drawing.Bitmap ConvertToFormat32bppArgb(System.Drawing.Bitmap bmp)
+        {
+            if (bmp.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+                return bmp;
+
+            System.Drawing.Bitmap newBitmap = new System.Drawing.Bitmap(bmp.Width, bmp.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newBitmap))
+            {
+                g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height);
+            }
+            return newBitmap;
         }
     }
 }
