@@ -131,6 +131,11 @@
                                     <materialDesign:PackIcon Kind="LayersSearchOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
+                            <MenuItem Header="Logger" Click="ShowLogger">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="MathLog" />
+                                </MenuItem.Icon>
+                            </MenuItem>
                         </MenuItem>
                         <MenuItem Header="_About">
                             <MenuItem Header="About" Click="About_Click">
@@ -298,6 +303,7 @@
                                                 <ComboBoxItem Content="Tibia Coins"/>
                                                 <ComboBoxItem Content="Creature Products"/>
                                                 <ComboBoxItem Content="Quiver"/>
+                                                <ComboBoxItem Content="SoulCores"/>
                                             </ComboBox>
                                         </StackPanel>
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">

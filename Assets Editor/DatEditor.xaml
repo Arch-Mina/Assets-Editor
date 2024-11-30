@@ -159,6 +159,11 @@
                                     <materialDesign:PackIcon Kind="LayersSearchOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
+                            <MenuItem Header="Logger" Click="ShowLogger">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="MathLog" />
+                                </MenuItem.Icon>
+                            </MenuItem>
                         </MenuItem>
                         <MenuItem Header="_About">
                             <MenuItem Header="About" Click="About_Click">
@@ -182,6 +187,11 @@
                                             <Label Content="Appearance Id:" Width="100" Padding="0,0,0,0" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                             <xctk:IntegerUpDown x:Name="A_FlagId" Margin="30,0,0,0" Width="100" Minimum="1"/>
                                             <Button x:Name="A_FlagIdCheck" Margin="35,0,0,0" Height="20" Content="{materialDesign:PackIcon Check}" ToolTip="Validate Id" PreviewMouseLeftButtonDown="A_FlagIdCheck_PreviewMouseLeftButtonDown"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
+                                            <CheckBox x:Name="A_FlagTransparency" Content="Transparency" Width="130" Margin="0,0,0,5" Padding="4,0,0,0"/>
+                                            <Label Content="Level:" Width="100" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagTransparencyLevel" Margin="0,0,0,0" Width="80" Minimum="0" Maximum="255"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
                                             <CheckBox x:Name="A_FlagGround" Content="Ground" Width="130" Margin="0,0,0,5" Padding="4,0,0,0"/>
@@ -338,6 +348,7 @@
                                                 <ComboBoxItem Content="Tibia Coins"/>
                                                 <ComboBoxItem Content="Creature Products"/>
                                                 <ComboBoxItem Content="Quiver"/>
+                                                <ComboBoxItem Content="SoulCores"/>
                                             </ComboBox>
                                         </StackPanel>
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">

@@ -1,0 +1,20 @@
+﻿<Window x:Class="Assets_Editor.LogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Assets_Editor"
+        mc:Ignorable="d"
+        Title="LogView" Height="450" Width="800">
+    <Grid>
+        <ListView Name="LogListView">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Time" DisplayMemberBinding="{Binding Timestamp}"/>
+                    <GridViewColumn Header="Level" DisplayMemberBinding="{Binding Level}"/>
+                    <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Message}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Window>

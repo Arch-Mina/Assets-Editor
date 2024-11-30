@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
+using static Assets_Editor.LogView;
 
 namespace Assets_Editor
 {
@@ -34,6 +35,7 @@ namespace Assets_Editor
         public static Dictionary<uint, Sprite> sprites = new Dictionary<uint, Sprite>();
         public static SpriteStorage MainSprStorage;
         readonly BackgroundWorker worker = new BackgroundWorker();
+        public static LogView logView = new LogView();
         public MainWindow()
         {
             InitializeComponent();
@@ -41,6 +43,11 @@ namespace Assets_Editor
             worker.ProgressChanged += Worker_ProgressChanged;
             worker.DoWork += Worker_DoWork;
             worker.RunWorkerCompleted += Worker_Completed;
+            logView.Closing += (sender, e) =>
+            {
+                e.Cancel = true;
+                logView.Hide();
+            };
         }
 
         public class Catalog
@@ -304,6 +311,16 @@ namespace Assets_Editor
                 return SprLists[0];
             }
             return SprLists[spriteId];
+        }
+        public static void Log(string message, string level = "Info")
+        {
+            var entry = new LogEntry
+            {
+                Timestamp = DateTime.Now,
+                Level = level,
+                Message = message
+            };
+            logView.AddLogEntry(entry);
         }
     }
 }

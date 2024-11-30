@@ -447,6 +447,12 @@ namespace Assets_Editor
 
         public static void WriteAppearance1098(BinaryWriter w, Appearance item)
         {
+            if (item.Flags == null)
+            {
+                item.Flags = new();
+                MainWindow.Log("Export to 1098: missing flags for client id " + item.Id);
+            }
+
             if (item.Flags.Bank != null)
             {
                 w.Write((byte)AppearanceFlag1098.Ground);
