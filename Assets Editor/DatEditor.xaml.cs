@@ -436,212 +436,122 @@ namespace Assets_Editor
                 MainWindow.Log("Missing flags for appearance id " + CurrentObjectAppearance.Id);
             }
             A_FlagId.Value = (int)CurrentObjectAppearance.Id;
-            if (CurrentObjectAppearance == null || CurrentObjectAppearance.Flags == null)
+            A_FlagGround.IsChecked = CurrentObjectAppearance.Flags.Bank != null;
+            A_FlagGroundSpeed.Value = (CurrentObjectAppearance.Flags.Bank != null && CurrentObjectAppearance.Flags.Bank.HasWaypoints) ? (int)CurrentObjectAppearance.Flags.Bank.Waypoints : 0;
+            A_FlagClip.IsChecked = CurrentObjectAppearance.Flags.Clip;
+            A_FlagBottom.IsChecked = CurrentObjectAppearance.Flags.Bottom;
+            A_FlagTop.IsChecked = CurrentObjectAppearance.Flags.Top;
+            A_FlagContainer.IsChecked = CurrentObjectAppearance.Flags.Container;
+            A_FlagCumulative.IsChecked = CurrentObjectAppearance.Flags.Cumulative;
+            A_FlagUsable.IsChecked = CurrentObjectAppearance.Flags.Usable;
+            A_FlagForceuse.IsChecked = CurrentObjectAppearance.Flags.Forceuse;
+            A_FlagMultiuse.IsChecked = CurrentObjectAppearance.Flags.Multiuse;
+            A_FlagWrite.IsChecked = CurrentObjectAppearance.Flags.Write != null;
+            A_FlagMaxTextLength.Value = (CurrentObjectAppearance.Flags.Write != null && CurrentObjectAppearance.Flags.Write.HasMaxTextLength) ? (int)CurrentObjectAppearance.Flags.Write.MaxTextLength : 0;
+            A_FlagWriteOnce.IsChecked = CurrentObjectAppearance.Flags.WriteOnce != null;
+            A_FlagMaxTextLengthOnce.Value = (CurrentObjectAppearance.Flags.WriteOnce != null && CurrentObjectAppearance.Flags.WriteOnce.HasMaxTextLengthOnce) ? (int)CurrentObjectAppearance.Flags.WriteOnce.MaxTextLengthOnce : 0;
+            A_FlagLiquidpool.IsChecked = CurrentObjectAppearance.Flags.HasLiquidpool;
+            A_FlagUnpass.IsChecked = CurrentObjectAppearance.Flags.HasUnpass;
+            A_FlagUnmove.IsChecked = CurrentObjectAppearance.Flags.HasUnmove;
+            A_FlagUnsight.IsChecked = CurrentObjectAppearance.Flags.HasUnsight;
+            A_FlagAvoid.IsChecked = CurrentObjectAppearance.Flags.HasAvoid;
+            A_FlagNoMoveAnimation.IsChecked = CurrentObjectAppearance.Flags.HasNoMovementAnimation;
+            A_FlagTake.IsChecked = CurrentObjectAppearance.Flags.HasTake;
+            A_FlagLiquidcontainer.IsChecked = CurrentObjectAppearance.Flags.HasLiquidcontainer;
+            A_FlagHang.IsChecked = CurrentObjectAppearance.Flags.HasHang;
+            A_FlagHook.IsChecked = CurrentObjectAppearance.Flags.Hook != null;
+            A_FlagHookType.SelectedIndex = (CurrentObjectAppearance.Flags.Hook != null && CurrentObjectAppearance.Flags.Hook.HasDirection) ? (int)CurrentObjectAppearance.Flags.Hook.Direction - 1 : -1;
+            A_FlagRotate.IsChecked = CurrentObjectAppearance.Flags.HasRotate;
+            A_FlagLight.IsChecked = CurrentObjectAppearance.Flags.Light != null;
+            A_FlagLightBrightness.Value = (CurrentObjectAppearance.Flags.Light != null && CurrentObjectAppearance.Flags.Light.HasBrightness) ? (int)CurrentObjectAppearance.Flags.Light.Brightness : 0;
+            A_FlagLightColor.Value = (CurrentObjectAppearance.Flags.Light != null && CurrentObjectAppearance.Flags.Light.HasColor) ? (int)CurrentObjectAppearance.Flags.Light.Color : 0;
+            A_FlagDontHide.IsChecked = CurrentObjectAppearance.Flags.HasDontHide;
+            A_FlagTranslucent.IsChecked = CurrentObjectAppearance.Flags.HasTranslucent;
+            A_FlagShift.IsChecked = CurrentObjectAppearance.Flags.Shift != null;
+            A_FlagShiftX.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasX) ? (int)CurrentObjectAppearance.Flags.Shift.X : 0;
+            A_FlagShiftY.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasY) ? (int)CurrentObjectAppearance.Flags.Shift.Y : 0;
+            A_FlagHeight.IsChecked = CurrentObjectAppearance.Flags.Height != null;
+            A_FlagElevation.Value = (CurrentObjectAppearance.Flags.Height != null && CurrentObjectAppearance.Flags.Height.HasElevation) ? (int)CurrentObjectAppearance.Flags.Height.Elevation : 0;
+            A_FlagLyingObject.IsChecked = CurrentObjectAppearance.Flags.HasLyingObject;
+            A_FlagAnimateAlways.IsChecked = CurrentObjectAppearance.Flags.HasAnimateAlways;
+            A_FlagAutomap.IsChecked = CurrentObjectAppearance.Flags.Automap != null;
+            A_FlagAutomapColor.Value = (CurrentObjectAppearance.Flags.Automap != null && CurrentObjectAppearance.Flags.Automap.HasColor) ? (int)CurrentObjectAppearance.Flags.Automap.Color : 0;
+            A_FlagLenshelp.IsChecked = CurrentObjectAppearance.Flags.Lenshelp != null;
+            A_FlagLenshelpId.SelectedIndex = (CurrentObjectAppearance.Flags.Lenshelp != null && CurrentObjectAppearance.Flags.Lenshelp.HasId) ? (int)CurrentObjectAppearance.Flags.Lenshelp.Id - 1100 : -1;
+            A_FlagFullGround.IsChecked = CurrentObjectAppearance.Flags.HasFullbank;
+            A_FlagIgnoreLook.IsChecked = CurrentObjectAppearance.Flags.HasIgnoreLook;
+            A_FlagClothes.IsChecked = (CurrentObjectAppearance.Flags.Clothes != null && CurrentObjectAppearance.Flags.Clothes.HasSlot) ? true : false;
+            A_FlagClothesSlot.SelectedIndex = (CurrentObjectAppearance.Flags.Clothes != null && CurrentObjectAppearance.Flags.Clothes.HasSlot) ? (int)CurrentObjectAppearance.Flags.Clothes.Slot : -1;
+            A_FlagDefaultAction.IsChecked = CurrentObjectAppearance.Flags.DefaultAction != null;
+            A_FlagDefaultActionType.SelectedIndex = (CurrentObjectAppearance.Flags.DefaultAction != null && CurrentObjectAppearance.Flags.DefaultAction.HasAction) ? (int)CurrentObjectAppearance.Flags.DefaultAction.Action : -1;
+            A_FlagMarket.IsChecked = CurrentObjectAppearance.Flags.Market != null;
+            A_FlagMarketCategory.SelectedIndex = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasCategory) ? (int)CurrentObjectAppearance.Flags.Market.Category - 1 : -1;
+            A_FlagMarketTrade.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasTradeAsObjectId) ? (int)CurrentObjectAppearance.Flags.Market.TradeAsObjectId : 0;
+            A_FlagMarketShow.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasShowAsObjectId) ? (int)CurrentObjectAppearance.Flags.Market.ShowAsObjectId : 0;
+            A_FlagProfessionAny.IsChecked = false;
+            A_FlagProfessionNone.IsChecked = false;
+            A_FlagProfessionKnight.IsChecked = false;
+            A_FlagProfessionPaladin.IsChecked = false;
+            A_FlagProfessionSorcerer.IsChecked = false;
+            A_FlagProfessionDruid.IsChecked = false;
+            A_FlagProfessionPromoted.IsChecked = false;
+            if (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.RestrictToVocation.Count > 0)
             {
-                // Handle the case where CurrentObjectAppearance or Flags is null
-                // You can either set default values or skip setting these properties
-                A_FlagGround.IsChecked = false;
-                A_FlagGroundSpeed.Value = 0;
-                A_FlagClip.IsChecked = false;
-                A_FlagBottom.IsChecked = false;
-                A_FlagTop.IsChecked = false;
-                A_FlagContainer.IsChecked = false;
-                A_FlagCumulative.IsChecked = false;
-                A_FlagUsable.IsChecked = false;
-                A_FlagForceuse.IsChecked = false;
-                A_FlagMultiuse.IsChecked = false;
-                A_FlagWrite.IsChecked = false;
-                A_FlagMaxTextLength.Value = 0;
-                A_FlagWriteOnce.IsChecked = false;
-                A_FlagMaxTextLengthOnce.Value = 0;
-                A_FlagLiquidpool.IsChecked = false;
-                A_FlagUnpass.IsChecked = false;
-                A_FlagUnmove.IsChecked = false;
-                A_FlagUnsight.IsChecked = false;
-                A_FlagAvoid.IsChecked = false;
-                A_FlagNoMoveAnimation.IsChecked = false;
-                A_FlagTake.IsChecked = false;
-                A_FlagLiquidcontainer.IsChecked = false;
-                A_FlagHang.IsChecked = false;
-                A_FlagHook.IsChecked = false;
-                A_FlagHookType.SelectedIndex = -1;
-                A_FlagRotate.IsChecked = false;
-                A_FlagLight.IsChecked = false;
-                A_FlagLightBrightness.Value = 0;
-                A_FlagLightColor.Value = 0;
-                A_FlagDontHide.IsChecked = false;
-                A_FlagTranslucent.IsChecked = false;
-                A_FlagShift.IsChecked = false;
-                A_FlagShiftX.Value = 0;
-                A_FlagShiftY.Value = 0;
-                A_FlagHeight.IsChecked = false;
-                A_FlagElevation.Value = 0;
-                A_FlagLyingObject.IsChecked = false;
-                A_FlagAnimateAlways.IsChecked = false;
-                A_FlagAutomap.IsChecked = false;
-                A_FlagAutomapColor.Value = 0;
-                A_FlagLenshelp.IsChecked = false;
-                A_FlagLenshelpId.SelectedIndex = -1;
-                A_FlagFullGround.IsChecked = false;
-                A_FlagIgnoreLook.IsChecked = false;
-                A_FlagClothes.IsChecked = false;
-                A_FlagClothesSlot.SelectedIndex = -1;
-                A_FlagDefaultAction.IsChecked = false;
-                A_FlagDefaultActionType.SelectedIndex = -1;
-                A_FlagMarket.IsChecked = false;
-                A_FlagMarketCategory.SelectedIndex = -1;
-                A_FlagMarketTrade.Value = 0;
-                A_FlagMarketShow.Value = 0;
-                A_FlagProfessionAny.IsChecked = false;
-                A_FlagProfessionNone.IsChecked = false;
-                A_FlagProfessionKnight.IsChecked = false;
-                A_FlagProfessionPaladin.IsChecked = false;
-                A_FlagProfessionSorcerer.IsChecked = false;
-                A_FlagProfessionDruid.IsChecked = false;
-                A_FlagProfessionPromoted.IsChecked = false;
-
-                A_FlagMarketlevel.Value = 0;
-                A_FlagWrap.IsChecked = false;
-                A_FlagUnwrap.IsChecked = false;
-                A_FlagDecoItemKit.IsChecked = false;
-                A_FlagTopeffect.IsChecked = false;
-                A_FlagChangedToExpire.IsChecked = false;
-                A_FlagChangedToExpireId.Value = 0;
-                A_FlagCorpse.IsChecked = false;
-                A_FlagCyclopedia.IsChecked = false;
-                A_FlagCyclopediaItem.Value = 0;
-                A_FlagAmmo.IsChecked = false;
-                A_FlagShowOffSocket.IsChecked = false;
-                A_FlagReportable.IsChecked = false;
-                A_FlagReverseAddonEast.IsChecked = false;
-                A_FlagReverseAddonWest.IsChecked = false;
-                A_FlagReverseAddonNorth.IsChecked = false;
-                A_FlagReverseAddonSouth.IsChecked = false;
-                A_FlagWearOut.IsChecked = false;
-                A_FlagClockExpire.IsChecked = false;
-                A_FlagExpire.IsChecked = false;
-                A_FlagExpireStop.IsChecked = false;
-                A_FlagUpgradeClassification.IsChecked = false;
-                A_FlagUpgradeClassificationAmount.Value = 0;
-
-                NpcDataList.Clear();
-                A_FlagNPC.IsChecked = false;
-            }
-            else
-            {
-                A_FlagGround.IsChecked = CurrentObjectAppearance.Flags.Bank != null;
-                A_FlagGroundSpeed.Value = (CurrentObjectAppearance.Flags.Bank != null && CurrentObjectAppearance.Flags.Bank.HasWaypoints) ? (int)CurrentObjectAppearance.Flags.Bank.Waypoints : 0;
-                A_FlagClip.IsChecked = CurrentObjectAppearance.Flags.Clip;
-                A_FlagBottom.IsChecked = CurrentObjectAppearance.Flags.Bottom;
-                A_FlagTop.IsChecked = CurrentObjectAppearance.Flags.Top;
-                A_FlagContainer.IsChecked = CurrentObjectAppearance.Flags.Container;
-                A_FlagCumulative.IsChecked = CurrentObjectAppearance.Flags.Cumulative;
-                A_FlagUsable.IsChecked = CurrentObjectAppearance.Flags.Usable;
-                A_FlagForceuse.IsChecked = CurrentObjectAppearance.Flags.Forceuse;
-                A_FlagMultiuse.IsChecked = CurrentObjectAppearance.Flags.Multiuse;
-                A_FlagWrite.IsChecked = CurrentObjectAppearance.Flags.Write != null;
-                A_FlagMaxTextLength.Value = (CurrentObjectAppearance.Flags.Write != null && CurrentObjectAppearance.Flags.Write.HasMaxTextLength) ? (int)CurrentObjectAppearance.Flags.Write.MaxTextLength : 0;
-                A_FlagWriteOnce.IsChecked = CurrentObjectAppearance.Flags.WriteOnce != null;
-                A_FlagMaxTextLengthOnce.Value = (CurrentObjectAppearance.Flags.WriteOnce != null && CurrentObjectAppearance.Flags.WriteOnce.HasMaxTextLengthOnce) ? (int)CurrentObjectAppearance.Flags.WriteOnce.MaxTextLengthOnce : 0;
-                A_FlagLiquidpool.IsChecked = CurrentObjectAppearance.Flags.HasLiquidpool;
-                A_FlagUnpass.IsChecked = CurrentObjectAppearance.Flags.HasUnpass;
-                A_FlagUnmove.IsChecked = CurrentObjectAppearance.Flags.HasUnmove;
-                A_FlagUnsight.IsChecked = CurrentObjectAppearance.Flags.HasUnsight;
-                A_FlagAvoid.IsChecked = CurrentObjectAppearance.Flags.HasAvoid;
-                A_FlagNoMoveAnimation.IsChecked = CurrentObjectAppearance.Flags.HasNoMovementAnimation;
-                A_FlagTake.IsChecked = CurrentObjectAppearance.Flags.HasTake;
-                A_FlagLiquidcontainer.IsChecked = CurrentObjectAppearance.Flags.HasLiquidcontainer;
-                A_FlagHang.IsChecked = CurrentObjectAppearance.Flags.HasHang;
-                A_FlagHook.IsChecked = CurrentObjectAppearance.Flags.Hook != null;
-                A_FlagHookType.SelectedIndex = (CurrentObjectAppearance.Flags.Hook != null && CurrentObjectAppearance.Flags.Hook.HasDirection) ? (int)CurrentObjectAppearance.Flags.Hook.Direction - 1 : -1;
-                A_FlagRotate.IsChecked = CurrentObjectAppearance.Flags.HasRotate;
-                A_FlagLight.IsChecked = CurrentObjectAppearance.Flags.Light != null;
-                A_FlagLightBrightness.Value = (CurrentObjectAppearance.Flags.Light != null && CurrentObjectAppearance.Flags.Light.HasBrightness) ? (int)CurrentObjectAppearance.Flags.Light.Brightness : 0;
-                A_FlagLightColor.Value = (CurrentObjectAppearance.Flags.Light != null && CurrentObjectAppearance.Flags.Light.HasColor) ? (int)CurrentObjectAppearance.Flags.Light.Color : 0;
-                A_FlagDontHide.IsChecked = CurrentObjectAppearance.Flags.HasDontHide;
-                A_FlagTranslucent.IsChecked = CurrentObjectAppearance.Flags.HasTranslucent;
-                A_FlagShift.IsChecked = CurrentObjectAppearance.Flags.Shift != null;
-                A_FlagShiftX.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasX) ? (int)CurrentObjectAppearance.Flags.Shift.X : 0;
-                A_FlagShiftY.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasY) ? (int)CurrentObjectAppearance.Flags.Shift.Y : 0;
-                A_FlagHeight.IsChecked = CurrentObjectAppearance.Flags.Height != null;
-                A_FlagElevation.Value = (CurrentObjectAppearance.Flags.Height != null && CurrentObjectAppearance.Flags.Height.HasElevation) ? (int)CurrentObjectAppearance.Flags.Height.Elevation : 0;
-                A_FlagLyingObject.IsChecked = CurrentObjectAppearance.Flags.HasLyingObject;
-                A_FlagAnimateAlways.IsChecked = CurrentObjectAppearance.Flags.HasAnimateAlways;
-                A_FlagAutomap.IsChecked = CurrentObjectAppearance.Flags.Automap != null;
-                A_FlagAutomapColor.Value = (CurrentObjectAppearance.Flags.Automap != null && CurrentObjectAppearance.Flags.Automap.HasColor) ? (int)CurrentObjectAppearance.Flags.Automap.Color : 0;
-                A_FlagLenshelp.IsChecked = CurrentObjectAppearance.Flags.Lenshelp != null;
-                A_FlagLenshelpId.SelectedIndex = (CurrentObjectAppearance.Flags.Lenshelp != null && CurrentObjectAppearance.Flags.Lenshelp.HasId) ? (int)CurrentObjectAppearance.Flags.Lenshelp.Id - 1100 : -1;
-                A_FlagFullGround.IsChecked = CurrentObjectAppearance.Flags.HasFullbank;
-                A_FlagIgnoreLook.IsChecked = CurrentObjectAppearance.Flags.HasIgnoreLook;
-                A_FlagClothes.IsChecked = (CurrentObjectAppearance.Flags.Clothes != null && CurrentObjectAppearance.Flags.Clothes.HasSlot) ? true : false;
-                A_FlagClothesSlot.SelectedIndex = (CurrentObjectAppearance.Flags.Clothes != null && CurrentObjectAppearance.Flags.Clothes.HasSlot) ? (int)CurrentObjectAppearance.Flags.Clothes.Slot : -1;
-                A_FlagDefaultAction.IsChecked = CurrentObjectAppearance.Flags.DefaultAction != null;
-                A_FlagDefaultActionType.SelectedIndex = (CurrentObjectAppearance.Flags.DefaultAction != null && CurrentObjectAppearance.Flags.DefaultAction.HasAction) ? (int)CurrentObjectAppearance.Flags.DefaultAction.Action : -1;
-                A_FlagMarket.IsChecked = CurrentObjectAppearance.Flags.Market != null;
-                A_FlagMarketCategory.SelectedIndex = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasCategory) ? (int)CurrentObjectAppearance.Flags.Market.Category - 1 : -1;
-                A_FlagMarketTrade.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasTradeAsObjectId) ? (int)CurrentObjectAppearance.Flags.Market.TradeAsObjectId : 0;
-                A_FlagMarketShow.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasShowAsObjectId) ? (int)CurrentObjectAppearance.Flags.Market.ShowAsObjectId : 0;
-                
-
-                if (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.RestrictToVocation.Count > 0)
+                foreach (var profession in CurrentObjectAppearance.Flags.Market.RestrictToVocation)
                 {
-                    foreach (var profession in CurrentObjectAppearance.Flags.Market.RestrictToVocation)
-                    {
-                        if (profession == VOCATION.Any)
-                            A_FlagProfessionAny.IsChecked = true;
-                        else if (profession == VOCATION.None)
-                            A_FlagProfessionNone.IsChecked = true;
-                        else if (profession == VOCATION.Knight)
-                            A_FlagProfessionKnight.IsChecked = true;
-                        else if (profession == VOCATION.Paladin)
-                            A_FlagProfessionPaladin.IsChecked = true;
-                        else if (profession == VOCATION.Sorcerer)
-                            A_FlagProfessionSorcerer.IsChecked = true;
-                        else if (profession == VOCATION.Druid)
-                            A_FlagProfessionDruid.IsChecked = true;
-                        else if (profession == VOCATION.Promoted)
-                            A_FlagProfessionPromoted.IsChecked = true;
-                    }
+                    if (profession == VOCATION.Any)
+                        A_FlagProfessionAny.IsChecked = true;
+                    else if (profession == VOCATION.None)
+                        A_FlagProfessionNone.IsChecked = true;
+                    else if (profession == VOCATION.Knight)
+                        A_FlagProfessionKnight.IsChecked = true;
+                    else if (profession == VOCATION.Paladin)
+                        A_FlagProfessionPaladin.IsChecked = true;
+                    else if (profession == VOCATION.Sorcerer)
+                        A_FlagProfessionSorcerer.IsChecked = true;
+                    else if (profession == VOCATION.Druid)
+                        A_FlagProfessionDruid.IsChecked = true;
+                    else if (profession == VOCATION.Promoted)
+                        A_FlagProfessionPromoted.IsChecked = true;
                 }
-
-                A_FlagMarketlevel.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasMinimumLevel) ? (int)CurrentObjectAppearance.Flags.Market.MinimumLevel : 0;
-                A_FlagWrap.IsChecked = CurrentObjectAppearance.Flags.HasWrap;
-                A_FlagUnwrap.IsChecked = CurrentObjectAppearance.Flags.HasUnwrap;
-                A_FlagDecoItemKit.IsChecked = CurrentObjectAppearance.Flags.HasDecoItemKit;
-                A_FlagTopeffect.IsChecked = CurrentObjectAppearance.Flags.HasTop;
-                A_FlagChangedToExpire.IsChecked = CurrentObjectAppearance.Flags.Changedtoexpire != null;
-                A_FlagChangedToExpireId.Value = (CurrentObjectAppearance.Flags.Changedtoexpire != null && CurrentObjectAppearance.Flags.Changedtoexpire.HasFormerObjectTypeid) ? (int)CurrentObjectAppearance.Flags.Changedtoexpire.FormerObjectTypeid : 0;
-                A_FlagCorpse.IsChecked = CurrentObjectAppearance.Flags.Corpse;
-                A_FlagCyclopedia.IsChecked = CurrentObjectAppearance.Flags.Cyclopediaitem != null;
-                A_FlagCyclopediaItem.Value = (CurrentObjectAppearance.Flags.Cyclopediaitem != null && CurrentObjectAppearance.Flags.Cyclopediaitem.HasCyclopediaType) ? (int)CurrentObjectAppearance.Flags.Cyclopediaitem.CyclopediaType : 0;
-                A_FlagAmmo.IsChecked = CurrentObjectAppearance.Flags.HasAmmo;
-                A_FlagShowOffSocket.IsChecked = CurrentObjectAppearance.Flags.ShowOffSocket;
-                A_FlagReportable.IsChecked = CurrentObjectAppearance.Flags.Reportable;
-                A_FlagReverseAddonEast.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsEast;
-                A_FlagReverseAddonWest.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsWest;
-                A_FlagReverseAddonNorth.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsNorth;
-                A_FlagReverseAddonSouth.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsSouth;
-                A_FlagWearOut.IsChecked = CurrentObjectAppearance.Flags.Wearout;
-                A_FlagClockExpire.IsChecked = CurrentObjectAppearance.Flags.Clockexpire;
-                A_FlagExpire.IsChecked = CurrentObjectAppearance.Flags.Expire;
-                A_FlagExpireStop.IsChecked = CurrentObjectAppearance.Flags.Expirestop;
-                A_FlagUpgradeClassification.IsChecked = CurrentObjectAppearance.Flags.Upgradeclassification != null;
-                A_FlagUpgradeClassificationAmount.Value = (CurrentObjectAppearance.Flags.Upgradeclassification != null && CurrentObjectAppearance.Flags.Upgradeclassification.HasUpgradeClassification) ? (int)CurrentObjectAppearance.Flags.Upgradeclassification.UpgradeClassification : 0;
-
-                NpcDataList.Clear();
-
-                if (CurrentObjectAppearance.Flags.Npcsaledata.Count > 0)
-                {
-                    A_FlagNPC.IsChecked = true;
-                    foreach (var npcdata in CurrentObjectAppearance.Flags.Npcsaledata)
-                        NpcDataList.Add(npcdata);
-                }
-                else
-                    A_FlagNPC.IsChecked = false;
             }
-
+            A_FlagMarketlevel.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasMinimumLevel) ? (int)CurrentObjectAppearance.Flags.Market.MinimumLevel : 0;
             A_FlagName.Text = CurrentObjectAppearance.HasName ? CurrentObjectAppearance.Name : null;
             A_FlagDescription.Text = CurrentObjectAppearance.HasDescription ? CurrentObjectAppearance.Description : null;
+            A_FlagWrap.IsChecked = CurrentObjectAppearance.Flags.HasWrap;
+            A_FlagUnwrap.IsChecked = CurrentObjectAppearance.Flags.HasUnwrap;
+            A_FlagDecoItemKit.IsChecked = CurrentObjectAppearance.Flags.HasDecoItemKit;
+            A_FlagTopeffect.IsChecked = CurrentObjectAppearance.Flags.HasTop;
+            A_FlagChangedToExpire.IsChecked = CurrentObjectAppearance.Flags.Changedtoexpire != null;
+            A_FlagChangedToExpireId.Value = (CurrentObjectAppearance.Flags.Changedtoexpire != null && CurrentObjectAppearance.Flags.Changedtoexpire.HasFormerObjectTypeid) ? (int)CurrentObjectAppearance.Flags.Changedtoexpire.FormerObjectTypeid : 0;
+            A_FlagCorpse.IsChecked = CurrentObjectAppearance.Flags.Corpse;
+            A_FlagCyclopedia.IsChecked = CurrentObjectAppearance.Flags.Cyclopediaitem != null;
+            A_FlagCyclopediaItem.Value = (CurrentObjectAppearance.Flags.Cyclopediaitem != null && CurrentObjectAppearance.Flags.Cyclopediaitem.HasCyclopediaType) ? (int)CurrentObjectAppearance.Flags.Cyclopediaitem.CyclopediaType : 0;
+            A_FlagAmmo.IsChecked = CurrentObjectAppearance.Flags.HasAmmo;
+            A_FlagShowOffSocket.IsChecked = CurrentObjectAppearance.Flags.ShowOffSocket;
+            A_FlagReportable.IsChecked = CurrentObjectAppearance.Flags.Reportable;
+            A_FlagReverseAddonEast.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsEast;
+            A_FlagReverseAddonWest.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsWest;
+            A_FlagReverseAddonNorth.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsNorth;
+            A_FlagReverseAddonSouth.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsSouth;
+            A_FlagWearOut.IsChecked = CurrentObjectAppearance.Flags.Wearout;
+            A_FlagClockExpire.IsChecked = CurrentObjectAppearance.Flags.Clockexpire;
+            A_FlagExpire.IsChecked = CurrentObjectAppearance.Flags.Expire;
+            A_FlagExpireStop.IsChecked = CurrentObjectAppearance.Flags.Expirestop;
+            A_FlagUpgradeClassification.IsChecked = CurrentObjectAppearance.Flags.Upgradeclassification != null;
+            A_FlagUpgradeClassificationAmount.Value = (CurrentObjectAppearance.Flags.Upgradeclassification != null && CurrentObjectAppearance.Flags.Upgradeclassification.HasUpgradeClassification) ? (int)CurrentObjectAppearance.Flags.Upgradeclassification.UpgradeClassification : 0;
+
+            NpcDataList.Clear();
+
+            if (CurrentObjectAppearance.Flags.Npcsaledata.Count > 0)
+            {
+                A_FlagNPC.IsChecked = true;
+                foreach (var npcdata in CurrentObjectAppearance.Flags.Npcsaledata)
+                    NpcDataList.Add(npcdata);
+            }
+            else
+                A_FlagNPC.IsChecked = false;
+
             A_FlagNPCData.ItemsSource = null;
             A_FlagNPCData.ItemsSource = NpcDataList;
             A_FullInfo.Text = CurrentObjectAppearance.ToString();
@@ -2402,7 +2312,7 @@ namespace Assets_Editor
                     foreach (Appearance appearance in appearances.Outfit)
                     {
                         appearance.SpriteData.Clear();
-
+                        
                         if (!MainWindow.appearances.Outfit.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
                         {
                             appearance.Id = (uint)appearance.Id;
@@ -2411,7 +2321,6 @@ namespace Assets_Editor
                         {
                             appearance.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
                         }
-
                         MainWindow.appearances.Outfit.Add(appearance.Clone());
                         ThingsOutfit.Add(new ShowList() { Id = appearance.Id });
                     }
@@ -2419,7 +2328,6 @@ namespace Assets_Editor
                     foreach (Appearance appearance in appearances.Object)
                     {
                         appearance.SpriteData.Clear();
-
                         if (!MainWindow.appearances.Object.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
                         {
                             appearance.Id = (uint)appearance.Id;
@@ -2427,7 +2335,6 @@ namespace Assets_Editor
                         {
                             appearance.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
                         }
-
                         MainWindow.appearances.Object.Add(appearance.Clone());
                         ThingsItem.Add(new ShowList() { Id = appearance.Id });
                     }
@@ -2435,8 +2342,7 @@ namespace Assets_Editor
                     foreach (Appearance appearance in appearances.Effect)
                     {
                         appearance.SpriteData.Clear();
-
-                        if (!MainWindow.appearances.Effect.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
+                                                if (!MainWindow.appearances.Effect.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
                         {
                             appearance.Id = (uint)appearance.Id;
                         }
@@ -2444,7 +2350,6 @@ namespace Assets_Editor
                         {
                             appearance.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
                         }
-
                         MainWindow.appearances.Effect.Add(appearance.Clone());
                         ThingsEffect.Add(new ShowList() { Id = appearance.Id });
                     }
@@ -2452,7 +2357,6 @@ namespace Assets_Editor
                     foreach (Appearance appearance in appearances.Missile)
                     {
                         appearance.SpriteData.Clear();
-
                         if (!MainWindow.appearances.Missile.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
                         {
                             appearance.Id = (uint)appearance.Id;
@@ -2461,7 +2365,6 @@ namespace Assets_Editor
                         {
                             appearance.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
                         }
-
                         MainWindow.appearances.Missile.Add(appearance.Clone());
                         ThingsMissile.Add(new ShowList() { Id = appearance.Id });
                     }
