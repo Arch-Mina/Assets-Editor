@@ -2328,6 +2328,7 @@ namespace Assets_Editor
                     foreach (Appearance appearance in appearances.Object)
                     {
                         appearance.SpriteData.Clear();
+
                         if (!MainWindow.appearances.Object.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
                         {
                             appearance.Id = (uint)appearance.Id;
@@ -2335,6 +2336,16 @@ namespace Assets_Editor
                         {
                             appearance.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
                         }
+
+                        if (appearance.Flags.Market != null && appearance.Flags.Market.HasTradeAsObjectId)
+                            appearance.Flags.Market.TradeAsObjectId = appearance.Id;
+
+                        if (appearance.Flags.Market != null && appearance.Flags.Market.HasShowAsObjectId)
+                            appearance.Flags.Market.ShowAsObjectId = appearance.Id;
+
+                        if(appearance.Flags.Cyclopediaitem != null && appearance.Flags.Cyclopediaitem.HasCyclopediaType)
+                            appearance.Flags.Cyclopediaitem.CyclopediaType = appearance.Id;
+
                         MainWindow.appearances.Object.Add(appearance.Clone());
                         ThingsItem.Add(new ShowList() { Id = appearance.Id });
                     }
@@ -2342,7 +2353,7 @@ namespace Assets_Editor
                     foreach (Appearance appearance in appearances.Effect)
                     {
                         appearance.SpriteData.Clear();
-                                                if (!MainWindow.appearances.Effect.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
+                        if (!MainWindow.appearances.Effect.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
                         {
                             appearance.Id = (uint)appearance.Id;
                         }
