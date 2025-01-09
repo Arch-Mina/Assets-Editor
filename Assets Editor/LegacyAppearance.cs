@@ -629,43 +629,50 @@ namespace Assets_Editor
 
             for (int i = 0; i < item.FrameGroup.Count; i++)
             {
-                if (item.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
-                    w.Write((byte)item.FrameGroup[i].FixedFrameGroup);
+                FrameGroup frameGroup = item.FrameGroup[i];
 
-                byte Width = (byte)item.FrameGroup[i].SpriteInfo.PatternWidth;
-                byte Height = (byte)item.FrameGroup[i].SpriteInfo.PatternHeight;
+                if (item.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
+                    w.Write((byte)frameGroup.FixedFrameGroup);
+
+
+                SpriteInfo spriteInfo = frameGroup.SpriteInfo;
+                byte Width = (byte)spriteInfo.PatternWidth;
+                byte Height = (byte)spriteInfo.PatternHeight;
 
                 w.Write(Width);
                 w.Write(Height);
 
                 if (Width > 1 || Height > 1)
-                    w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternSize);
+                    w.Write((byte)spriteInfo.PatternSize);
 
-                w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternLayers);
-                w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternX);
-                w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternY);
-                w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternZ);
-                w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternFrames);
+                w.Write((byte)spriteInfo.PatternLayers);
+                w.Write((byte)spriteInfo.PatternX);
+                w.Write((byte)spriteInfo.PatternY);
+                w.Write((byte)spriteInfo.PatternZ);
+                w.Write((byte)spriteInfo.PatternFrames);
 
-                if (item.FrameGroup[i].SpriteInfo.PatternFrames > 1)
+                if (spriteInfo.PatternFrames > 1)
                 {
-                    w.Write(Convert.ToByte(item.FrameGroup[i].SpriteInfo.Animation.AnimationMode));
-                    w.Write(item.FrameGroup[i].SpriteInfo.Animation.LoopCount);
-                    w.Write((byte)item.FrameGroup[i].SpriteInfo.Animation.DefaultStartPhase);
+                    w.Write(Convert.ToByte(spriteInfo.Animation.AnimationMode));
+                    w.Write(spriteInfo.Animation.LoopCount);
+                    w.Write((byte)spriteInfo.Animation.DefaultStartPhase);
 
-                    for (int k = 0; k < item.FrameGroup[i].SpriteInfo.Animation.SpritePhase.Count; k++)
+                    for (int k = 0; k < spriteInfo.Animation.SpritePhase.Count; k++)
                     {
-                        w.Write(item.FrameGroup[i].SpriteInfo.Animation.SpritePhase[k].DurationMin);
-                        w.Write(item.FrameGroup[i].SpriteInfo.Animation.SpritePhase[k].DurationMax);
+                        w.Write(spriteInfo.Animation.SpritePhase[k].DurationMin);
+                        w.Write(spriteInfo.Animation.SpritePhase[k].DurationMax);
                     }
                 }
 
-                for (var x = 0; x < item.FrameGroup[i].SpriteInfo.SpriteId.Count; x++)
+                uint NumSprites = (spriteInfo.PatternWidth * spriteInfo.PatternHeight * spriteInfo.PatternLayers * spriteInfo.PatternX * spriteInfo.PatternY * spriteInfo.PatternZ * spriteInfo.PatternFrames);
+                for (var x = 0; x < NumSprites; x++)
                 {
-                    w.Write(item.FrameGroup[i].SpriteInfo.SpriteId[x]);
+                    if (x < spriteInfo.SpriteId.Count)
+                        w.Write(spriteInfo.SpriteId[x]);
+                    else
+                        w.Write((uint)0);
                 }
             }
-
         }
 
         public static int GetSpriteIndex(FrameGroup frameGroup, int width, int height, int layers, int patternX, int patternY, int patternZ, int frames)
