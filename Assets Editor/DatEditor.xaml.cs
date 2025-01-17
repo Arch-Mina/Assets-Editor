@@ -2693,7 +2693,7 @@ namespace Assets_Editor
                     {
                         Catalog = catalog,
                         SpriteIds = spriteIds,
-                        AlphaValue = (byte)appearance.Flags.Transparencylevel.Level,
+                        AlphaValue = (appearance.Flags.Transparencylevel != null && appearance.Flags.Transparencylevel.HasLevel) ? (byte)appearance.Flags.Transparencylevel.Level : (byte)255,
                         BaseAlpha = baseAlpha,
                         ObjectType = appearance.AppearanceType,
                         ObjectId = appearance.Id
@@ -2852,8 +2852,8 @@ namespace Assets_Editor
                     byte blue = pixels[position];
                     byte green = pixels[position + 1];
                     byte red = pixels[position + 2];
-
-                    if (!(red == 255 && green == 0 && blue == 255))
+                    byte alpha = pixels[position + 3];
+                    if (!(red == 255 && green == 0 && blue == 255) && !(red == 0 && green == 0 && blue == 0 && alpha == 0))
                     {
                         pixels[position + 3] = newAlpha;
                     }
