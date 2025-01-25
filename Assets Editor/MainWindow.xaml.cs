@@ -50,6 +50,12 @@ namespace Assets_Editor
             };
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            System.Windows.Application.Current.Shutdown();
+        }
+
         public class Catalog
         {
             public Catalog()
