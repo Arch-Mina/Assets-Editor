@@ -2312,15 +2312,7 @@ namespace Assets_Editor
                     foreach (Appearance appearance in appearances.Outfit)
                     {
                         appearance.SpriteData.Clear();
-                        
-                        if (!MainWindow.appearances.Outfit.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
-                        {
-                            appearance.Id = (uint)appearance.Id;
-                        }
-                        else
-                        {
-                            appearance.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
-                        }
+                        appearance.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
                         MainWindow.appearances.Outfit.Add(appearance.Clone());
                         ThingsOutfit.Add(new ShowList() { Id = appearance.Id });
                     }
@@ -2328,24 +2320,7 @@ namespace Assets_Editor
                     foreach (Appearance appearance in appearances.Object)
                     {
                         appearance.SpriteData.Clear();
-
-                        if (!MainWindow.appearances.Object.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
-                        {
-                            appearance.Id = (uint)appearance.Id;
-                        } else
-                        {
-                            appearance.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
-                        }
-
-                        if (appearance.Flags.Market != null && appearance.Flags.Market.HasTradeAsObjectId)
-                            appearance.Flags.Market.TradeAsObjectId = appearance.Id;
-
-                        if (appearance.Flags.Market != null && appearance.Flags.Market.HasShowAsObjectId)
-                            appearance.Flags.Market.ShowAsObjectId = appearance.Id;
-
-                        if(appearance.Flags.Cyclopediaitem != null && appearance.Flags.Cyclopediaitem.HasCyclopediaType)
-                            appearance.Flags.Cyclopediaitem.CyclopediaType = appearance.Id;
-
+                        appearance.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
                         MainWindow.appearances.Object.Add(appearance.Clone());
                         ThingsItem.Add(new ShowList() { Id = appearance.Id });
                     }
@@ -2353,14 +2328,7 @@ namespace Assets_Editor
                     foreach (Appearance appearance in appearances.Effect)
                     {
                         appearance.SpriteData.Clear();
-                        if (!MainWindow.appearances.Effect.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
-                        {
-                            appearance.Id = (uint)appearance.Id;
-                        }
-                        else
-                        {
-                            appearance.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
-                        }
+                        appearance.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
                         MainWindow.appearances.Effect.Add(appearance.Clone());
                         ThingsEffect.Add(new ShowList() { Id = appearance.Id });
                     }
@@ -2368,14 +2336,7 @@ namespace Assets_Editor
                     foreach (Appearance appearance in appearances.Missile)
                     {
                         appearance.SpriteData.Clear();
-                        if (!MainWindow.appearances.Missile.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
-                        {
-                            appearance.Id = (uint)appearance.Id;
-                        }
-                        else
-                        {
-                            appearance.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
-                        }
+                        appearance.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
                         MainWindow.appearances.Missile.Add(appearance.Clone());
                         ThingsMissile.Add(new ShowList() { Id = appearance.Id });
                     }
