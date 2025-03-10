@@ -83,8 +83,14 @@
                     <CheckBox x:Name="A_FlagUnwrap" Content="Unwrap" Margin="0,5,0,0" Width="140"/>
                     <CheckBox x:Name="A_FlagTopeffect" Content="Top Effect" Margin="0,5,0,0" Width="140"/>
                     <CheckBox x:Name="A_FlagAnimated" Content="Animated" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagCorpse" Content="Corpse" Margin="0,5,0,0" Width="140"/>
+            
                 </WrapPanel>
             </GroupBox>
+            <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                <Label Content="Category:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <ComboBox x:Name="SearchMarketCategory" Width="200" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3"/>
+            </StackPanel>
             <Button x:Name="SearchItem" Content="Search" Width="100" ToolTip="Save" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="SearchItem_PreviewMouseLeftButtonDown" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0"/>
         </StackPanel>
     </Grid>

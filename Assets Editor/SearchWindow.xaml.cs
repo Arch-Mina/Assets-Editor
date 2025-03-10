@@ -28,6 +28,13 @@ namespace Assets_Editor
         {
             InitializeComponent();
             _editor = editor;
+            
+            // Copiar items do ComboBox do LegacyDatEditor
+            var marketCategories = (_editor.A_FlagMarketCategory.Items as IEnumerable).OfType<ComboBoxItem>();
+            foreach(var category in marketCategories)
+            {
+                SearchMarketCategory.Items.Add(new ComboBoxItem() { Content = category.Content });
+            }
         }
         private void ItemListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
@@ -72,6 +79,9 @@ namespace Assets_Editor
         private void SearchItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             ItemListView.Items.Clear();
+
+            var selectedCategory = (ComboBoxItem)SearchMarketCategory.SelectedItem;
+            string selectedMarketCategory = selectedCategory?.Content.ToString();
 
             foreach (Appearance item in MainWindow.appearances.Object)
             {
@@ -196,7 +206,17 @@ namespace Assets_Editor
                 if (A_FlagAnimated.IsChecked == true && item.FrameGroup[0].SpriteInfo.PatternFrames == 1)
                     continue;
 
-                    ItemListView.Items.Add(new ShowList() { Id = item.Id});
+                if (A_FlagCorpse.IsChecked == true && !item.Flags.Corpse)
+                    continue;
+                    
+                // Verify market category
+                if (selectedMarketCategory != null)
+                {
+                    if (item.Flags.Market == null || item.Flags.Market.Category.ToString() != selectedMarketCategory)
+                        continue;
+                }
+
+                ItemListView.Items.Add(new ShowList() { Id = item.Id});
             }
         }
     }

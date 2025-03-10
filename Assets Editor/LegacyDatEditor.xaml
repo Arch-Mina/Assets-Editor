@@ -284,7 +284,7 @@
                                                 <ComboBoxItem Content="Containers"/>
                                                 <ComboBoxItem Content="Decoration"/>
                                                 <ComboBoxItem Content="Food"/>
-                                                <ComboBoxItem Content="Helmets Hats"/>
+                                                <ComboBoxItem Content="HelmetsHats"/>
                                                 <ComboBoxItem Content="Legs"/>
                                                 <ComboBoxItem Content="Others"/>
                                                 <ComboBoxItem Content="Potions"/>
@@ -296,12 +296,12 @@
                                                 <ComboBoxItem Content="Ammunition"/>
                                                 <ComboBoxItem Content="Axes"/>
                                                 <ComboBoxItem Content="Clubs"/>
-                                                <ComboBoxItem Content="Distance Weapons"/>
+                                                <ComboBoxItem Content="DistanceWeapons"/>
                                                 <ComboBoxItem Content="Swords"/>
-                                                <ComboBoxItem Content="Wands Rods"/>
-                                                <ComboBoxItem Content="Premium Scrolls"/>
-                                                <ComboBoxItem Content="Tibia Coins"/>
-                                                <ComboBoxItem Content="Creature Products"/>
+                                                <ComboBoxItem Content="WandsRods"/>
+                                                <ComboBoxItem Content="PremiumScrolls"/>
+                                                <ComboBoxItem Content="TibiaCoins"/>
+                                                <ComboBoxItem Content="CreatureProducts"/>
                                                 <ComboBoxItem Content="Quiver"/>
                                                 <ComboBoxItem Content="SoulCores"/>
                                             </ComboBox>
