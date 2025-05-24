@@ -23,6 +23,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using Tibia.Protobuf.Appearances;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
 namespace Assets_Editor
 {
@@ -766,7 +767,7 @@ namespace Assets_Editor
             e.Handled = true;
         }
 
-        private int GetSpriteIndex(FrameGroup frameGroup, int layers, int patternX, int patternY, int patternZ, int frames)
+        public static int GetSpriteIndex(FrameGroup frameGroup, int layers, int patternX, int patternY, int patternZ, int frames)
         {
             var spriteInfo = frameGroup.SpriteInfo;
             int index = 0;
@@ -1649,6 +1650,7 @@ namespace Assets_Editor
             LoadProgress1.Value = 0;
             LoadProgress2.Value = 0;
         }
+
         private async void CompileLegacy(object sender, RoutedEventArgs e)
         {
             var progress = new Progress<int>(percent =>
@@ -1656,6 +1658,113 @@ namespace Assets_Editor
                 LoadProgress1.Value = percent;
             });
             await ExportLegacy(progress);
+        }
+
+        private void CompileToImages_Click(object sender, RoutedEventArgs e)
+        {
+            CompileToImagesDialogHost.IsOpen = true;
+            CompileToImagesBox.IsEnabled = true;
+            ImgExportProgress.Value = 0;
+            Appearances a = MainWindow.appearances;
+            ExportItemsProgressText.Text = $"0/{a.Object.Count}";
+            ExportOutfitsProgressText.Text = $"0/{a.Outfit.Count}";
+            ExportEffectsProgressText.Text = $"0/{a.Effect.Count}";
+            ExportMissilesProgressText.Text = $"0/{a.Missile.Count}";
+        }
+
+        private async void CompileAsImages(object sender, RoutedEventArgs e)
+        {
+            var progress = new Progress<int>(percent => {
+                LoadProgress1.Value = percent;
+            });
+            
+            await ExportAsImages(progress);
+        }
+
+        private void ExportAsImageDirectoryPicker_Click(object sender, RoutedEventArgs e)
+        {
+            using var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.Description = "Select the directory to export objects.";
+            dialog.ShowNewFolderButton = true;
+
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
+                MainWindow._imgExportPath = dialog.SelectedPath;
+                ExportImageDirectoryTextBox.Text = MainWindow._imgExportPath;
+            }
+        }
+
+        private async Task ExportAsImages(IProgress<int> progress) {
+            // lock the ui before exporting
+            CompileToImagesBox.IsEnabled = false;
+
+            Appearances tmpAppearances = new();
+
+            // access the copy of appearances index
+            tmpAppearances = MainWindow.appearances.Clone();
+            var tasks = new List<Task>();
+
+            // count the total amount of items to process
+            int totalItems = 0;
+            if (ExportItemsCheckBox.IsChecked == true) totalItems += tmpAppearances.Object.Count;
+            if (ExportOutfitsCheckBox.IsChecked == true) totalItems += tmpAppearances.Outfit.Count;
+            if (ExportEffectsCheckBox.IsChecked == true) totalItems += tmpAppearances.Effect.Count;
+            if (ExportMissilesCheckBox.IsChecked == true) totalItems += tmpAppearances.Missile.Count;
+
+            // processed items counter
+            int processedItems = 0;
+
+            // report progress to the UI
+            void ReportProgress() {
+                int percentage = (int)((double)processedItems / totalItems * 100);
+                ImgExportProgress.Value = percentage;
+            }
+
+            // helper function to avoid code duplication
+            void EnqueueExportTask(bool? isChecked, string subDirectory, IList<Appearance> objects, Action<string, Appearance> exportAction, Action<int, int> progressUpdateAction) {
+                if (isChecked == true) {
+                    tasks.Add(Task.Run(() => {
+                        string exportPath = Path.Combine(MainWindow._imgExportPath, subDirectory);
+                        Directory.CreateDirectory(exportPath);
+                        int loopProgress = 0;
+                        int totalObjects = objects.Count;
+                        foreach (var obj in objects) {
+                            exportAction(exportPath, obj);
+                            Interlocked.Increment(ref processedItems);
+                            ++loopProgress;
+                            Dispatcher.Invoke(() => {
+                                progressUpdateAction(loopProgress, totalObjects);
+                                ReportProgress();
+                            });
+                        }
+                    }));
+                }
+            }
+
+            // items
+            EnqueueExportTask(ExportItemsCheckBox.IsChecked, "items", tmpAppearances.Object, ImageExporter.SaveItemAsGIF, (loopProgress, totalObjects) => {
+                ExportItemsProgressText.Text = $"{loopProgress}/{totalObjects}";
+            });
+
+            // outfits
+            EnqueueExportTask(ExportOutfitsCheckBox.IsChecked, "outfits", tmpAppearances.Outfit, ImageExporter.SaveOutfitAsImages, (loopProgress, totalObjects) => {
+                ExportOutfitsProgressText.Text = $"{loopProgress}/{totalObjects}";
+            });
+
+            // effects
+            EnqueueExportTask(ExportEffectsCheckBox.IsChecked, "effects", tmpAppearances.Effect, ImageExporter.SaveEffectAsGIF, (loopProgress, totalObjects) => {
+                ExportEffectsProgressText.Text = $"{loopProgress}/{totalObjects}";
+            });
+
+            // missiles
+            EnqueueExportTask(ExportMissilesCheckBox.IsChecked, "missiles", tmpAppearances.Missile, ImageExporter.SaveMissileAsGIF, (loopProgress, totalObjects) => {
+                ExportMissilesProgressText.Text = $"{loopProgress}/{totalObjects}";
+            });
+
+            // Wait for all tasks to complete
+            await Task.WhenAll(tasks);
+
+            // close the window after successful export
+            CompileToImagesDialogHost.IsOpen = false;
         }
 
         private async Task ExportLegacy(IProgress<int> progress)
