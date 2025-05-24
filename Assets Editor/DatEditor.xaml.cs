@@ -1725,17 +1725,22 @@ namespace Assets_Editor
                     tasks.Add(Task.Run(() => {
                         string exportPath = Path.Combine(MainWindow._imgExportPath, subDirectory);
                         Directory.CreateDirectory(exportPath);
-                        int loopProgress = 0;
                         int totalObjects = objects.Count;
-                        foreach (var obj in objects) {
+                        int loopProgress = 0;
+
+                        Parallel.ForEach(objects, () => 0, (obj, state, localProgress) =>
+                        {
                             exportAction(exportPath, obj);
                             Interlocked.Increment(ref processedItems);
-                            ++loopProgress;
+                            localProgress++;
                             Dispatcher.Invoke(() => {
-                                progressUpdateAction(loopProgress, totalObjects);
+                                int currentProgress = Interlocked.Add(ref loopProgress, 1);
+                                progressUpdateAction(currentProgress, totalObjects);
                                 ReportProgress();
                             });
-                        }
+                            return localProgress;
+                        },
+                        localProgress => { /* no final action needed for local progress */ });
                     }));
                 }
             }

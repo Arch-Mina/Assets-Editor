@@ -5,7 +5,6 @@ using System.IO;
 using Tibia.Protobuf.Appearances;
 using System;
 using ImageMagick;
-using System.Windows.Media.Media3D;
 
 namespace Assets_Editor;
 
@@ -79,14 +78,14 @@ public static class ImageExporter {
                                     // create a bitmap
                                     var imageFrame = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)spriteInfo.SpriteId[spriteIndex]));
                                     Bitmap bitmap = new(imageFrame.StreamSource);
-                                    Bitmap magentaBitmap = new(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
-                                    using (Graphics g = Graphics.FromImage(magentaBitmap)) {
+                                    Bitmap transparentBitmap = new(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
+                                    using (Graphics g = Graphics.FromImage(transparentBitmap)) {
                                         g.Clear(Color.Transparent);
                                         g.DrawImage(bitmap, 0, 0, bitmap.Width, bitmap.Height);
                                     }
                                     bitmap.Dispose();
 
-                                    frames.Add((magentaBitmap, 100));
+                                    frames.Add((transparentBitmap, 100));
                                 } catch (Exception ex) {
                                     MainWindow.Log($"Failed to save image {frameGroup.Id} {height} {depth} {width} {frame} {layers} for object {appearance.Id}: {ex.Message}");
                                 }
@@ -114,6 +113,7 @@ public static class ImageExporter {
     /// <param name="exportPath">path where the item is supposed to be exported</param>
     /// <param name="appearance">item to be exported</param>
     private static void SaveItemAsGIFLoot(string exportPath, Appearance appearance) {
+
         // framegroup id - always 2
         foreach (var frameGroup in appearance.FrameGroup) {
             var spriteInfo = frameGroup.SpriteInfo;
@@ -121,12 +121,13 @@ public static class ImageExporter {
             // frames in a GIF
             List<(Bitmap, uint)> frames = [];
 
-            uint currentFrame = 0;
+            int currentFrame = 0;
             uint frameCount = SafeGetAnimationFrameCount(frameGroup);
 
             // if the stackable item is animated, play the animation but keep it within 200ms
             // before jumping to next state
             uint currentSequenceDuration = 0;
+            uint timePerPhase = 500; // this is the framerate stackable items have on wikis
 
             // layer count - always 1
             for (int layers = 0; layers < spriteInfo.Layers; ++layers) {
@@ -136,28 +137,49 @@ public static class ImageExporter {
                 for (int depth = 0; depth < spriteInfo.PatternDepth; ++depth) {
 
                     // filename
-                    // add _depth only when the item has multiple depth layers
-                    // add _loot - this is a preview for all states of this item
-                    string fileName = $"{(depth > 0 ? ("_" + depth) : "")}_loot.gif";
+                    // loot.gif - this is a preview for all states of this item
+                    // loot_depth.gif only when the item has multiple depth layers
+                    string fileName = $"loot{(depth > 0 ? ("_" + depth) : "")}.gif";
 
                     // width and height correspond item state
                     // examples:
                     // currently held fluid 0 - empty, 1 - water
                     // current stack state: 0 - 1 coin, 4 - 5 coins, 5 - 10 coins, 6 - 25 coins)
-                    for (int width = 0; width < spriteInfo.PatternWidth; ++width) {
-                        for (int height = 0; height < spriteInfo.PatternHeight; ++height) {
+                    // HEIGHT HAS TO BE FIRST HERE, OTHERWISE THE FRAMES WILL ANIMATE IN WRONG ORDER
+                    for (int height = 0; height < spriteInfo.PatternHeight; ++height) {
+                        for (int width = 0; width < spriteInfo.PatternWidth; ++width) {
+                            currentSequenceDuration = 0;
+
                             if (frameCount > 1) {
                                 // stackable/fluid + animated
+                                try {
+                                    while (currentSequenceDuration < timePerPhase) {
+                                        // the position of the sprite in the spriteinfo array of sprite ids
+                                        int spriteIndex = DatEditor.GetSpriteIndex(frameGroup, layers, width, height, depth, currentFrame % (int)frameCount);
+
+                                        // create a bitmap
+                                        var imageFrame = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)spriteInfo.SpriteId[spriteIndex]));
+                                        Bitmap bitmap = new(imageFrame.StreamSource);
+                                        Bitmap transparentBitmap = new(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
+                                        using (Graphics g = Graphics.FromImage(transparentBitmap)) {
+                                            g.Clear(Color.Transparent);
+                                            g.DrawImage(bitmap, 0, 0, bitmap.Width, bitmap.Height);
+                                        }
+                                        bitmap.Dispose();
+
+                                        uint frameDuration = Math.Min(timePerPhase - currentSequenceDuration, SafeGetFrameDuration(frameGroup, spriteIndex));
+                                        currentSequenceDuration += frameDuration;
+                                        frames.Add((transparentBitmap, frameDuration));
+
+                                        // move to next frame
+                                        ++currentFrame;
+                                    }
+                                } catch (Exception ex) {
+                                    MainWindow.Log($"Failed to save image {frameGroup.Id} {height} {depth} {width} {currentFrame % (int) frameCount} {layers} for object {appearance.Id}: {ex.Message}");
+                                }
                             } else {
                                 // just stackable/fluid
-
-                            }
-
-                            // frameCount
-
-
-                            /*
-                                                             for (int frame = 0; frame <= SafeGetAnimationFrameCount(frameGroup); ++frame) {
+                                for (int frame = 0; frame <= SafeGetAnimationFrameCount(frameGroup); ++frame) {
                                     try {
                                         // the position of the sprite in the spriteinfo array of sprite ids
                                         int spriteIndex = DatEditor.GetSpriteIndex(frameGroup, layers, width, height, depth, frame);
@@ -165,28 +187,24 @@ public static class ImageExporter {
                                         // create a bitmap
                                         var imageFrame = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)spriteInfo.SpriteId[spriteIndex]));
                                         Bitmap bitmap = new(imageFrame.StreamSource);
-                                        Bitmap magentaBitmap = new(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
-                                        using (Graphics g = Graphics.FromImage(magentaBitmap)) {
+                                        Bitmap transparentBitmap = new(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
+                                        using (Graphics g = Graphics.FromImage(transparentBitmap)) {
                                             g.Clear(Color.Transparent);
                                             g.DrawImage(bitmap, 0, 0, bitmap.Width, bitmap.Height);
                                         }
                                         bitmap.Dispose();
-
-                                        frames.Add((magentaBitmap, 100));
+                                        
+                                        frames.Add((transparentBitmap, timePerPhase));
                                     } catch (Exception ex) {
                                         MainWindow.Log($"Failed to save image {frameGroup.Id} {height} {depth} {width} {frame} {layers} for object {appearance.Id}: {ex.Message}");
                                     }
                                 }
-                             */
-
-
+                            }
                         }
-
-
-
-                        // write a GIF file
-                        SaveFramesAsGIF(frames, Path.Combine(exportPath, fileName));
                     }
+
+                    // write a GIF file
+                    SaveFramesAsGIF(frames, Path.Combine(exportPath, fileName));
                 }
             }
         }
@@ -203,10 +221,9 @@ public static class ImageExporter {
 
         SaveItemAsGIFBasic(itemPath, appearance);
 
-        // if stackable or liquid, save it as 
+        // if stackable or liquid, save it as an animation that loops through its all states
         if (appearance.Flags.Cumulative || appearance.Flags.Liquidcontainer || appearance.Flags.Liquidpool) {
-            // UNFINISHED
-            //SaveItemAsGIFLoot(itemPath, appearance);
+            SaveItemAsGIFLoot(itemPath, appearance);
         }
     }
 
