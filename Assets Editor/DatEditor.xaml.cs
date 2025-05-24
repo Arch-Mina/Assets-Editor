@@ -1,5 +1,4 @@
-﻿using Efundies;
-using Google.Protobuf;
+﻿using Google.Protobuf;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -766,7 +765,7 @@ namespace Assets_Editor
             e.Handled = true;
         }
 
-        private int GetSpriteIndex(FrameGroup frameGroup, int layers, int patternX, int patternY, int patternZ, int frames)
+        public static int GetSpriteIndex(FrameGroup frameGroup, int layers, int patternX, int patternY, int patternZ, int frames)
         {
             var spriteInfo = frameGroup.SpriteInfo;
             int index = 0;
@@ -1649,6 +1648,7 @@ namespace Assets_Editor
             LoadProgress1.Value = 0;
             LoadProgress2.Value = 0;
         }
+
         private async void CompileLegacy(object sender, RoutedEventArgs e)
         {
             var progress = new Progress<int>(percent =>
@@ -1656,6 +1656,166 @@ namespace Assets_Editor
                 LoadProgress1.Value = percent;
             });
             await ExportLegacy(progress);
+        }
+
+        private void CompileToImages_Click(object sender, RoutedEventArgs e)
+        {
+            CompileToImagesDialogHost.IsOpen = true;
+            CompileToImagesBox.IsEnabled = true;
+            ImgExportProgress.Value = 0;
+            Appearances a = MainWindow.appearances;
+
+            // there is a problem with making this show actual export count
+            // a.Object is a list, not map so there is no direct way to iterate through ids unless pre-allocated
+            // because of that, this text displays total amount of objects scanned and processed instead
+            // for example assets that have 30000 items can have ids as high as 50000
+            // this would make the progress text stop at roughly 60%
+            // this could be replaced with a progress bar in the future
+            ExportItemsProgressText.Text = $"0/{a.Object.Count}";
+            ExportOutfitsProgressText.Text = $"0/{a.Outfit.Count}";
+            ExportEffectsProgressText.Text = $"0/{a.Effect.Count}";
+            ExportMissilesProgressText.Text = $"0/{a.Missile.Count}";
+
+            // controls for exporting
+            uint maxItems = a.Object.Max(obj => obj.Id);
+            uint maxOutfits = a.Outfit.Max(obj => obj.Id);
+            uint maxEffects = a.Effect.Max(obj => obj.Id);
+            uint maxMissiles = a.Missile.Max(obj => obj.Id);
+
+            // control for starting id
+            ExportItemsMinId.Maximum = (int)maxItems;
+            ExportOutfitsMinId.Maximum = (int)maxOutfits;
+            ExportEffectsMinId.Maximum = (int)maxEffects;
+            ExportMissilesMinId.Maximum = (int)maxMissiles;
+
+            // starting id default values
+            ExportItemsMinId.Value = 100;
+            ExportOutfitsMinId.Value = 1;
+            ExportEffectsMinId.Value = 1;
+            ExportMissilesMinId.Value = 1;
+
+            // control for final id
+            ExportItemsMaxId.Maximum = (int)maxItems;
+            ExportOutfitsMaxId.Maximum = (int)maxOutfits;
+            ExportEffectsMaxId.Maximum = (int)maxEffects;
+            ExportMissilesMaxId.Maximum = (int)maxMissiles;
+
+            // final id default values
+            ExportItemsMaxId.Value = (int)maxItems;
+            ExportOutfitsMaxId.Value = (int)maxOutfits;
+            ExportEffectsMaxId.Value = (int)maxEffects;
+            ExportMissilesMaxId.Value = (int)maxMissiles;
+        }
+        
+        private async void CompileAsImages(object sender, RoutedEventArgs e)
+        {
+            // cut max fields if max < min
+            (int min, int max) GetMinMax(Xceed.Wpf.Toolkit.IntegerUpDown minControl, Xceed.Wpf.Toolkit.IntegerUpDown maxControl, int defaultValue) {
+                int min = minControl.Value ?? defaultValue;
+                int max = maxControl.Value ?? defaultValue;
+                maxControl.Value = Math.Max(min, max); // Ensure max >= min
+                return (min, Math.Max(min, max));
+            }
+            var itemScope = GetMinMax(ExportItemsMinId, ExportItemsMaxId, 100);
+            var outfitScope = GetMinMax(ExportOutfitsMinId, ExportOutfitsMaxId, 1);
+            var effectScope = GetMinMax(ExportEffectsMinId, ExportEffectsMaxId, 1);
+            var missileScope = GetMinMax(ExportMissilesMinId, ExportMissilesMaxId, 1);
+
+            await ExportAsImages(itemScope, outfitScope, effectScope, missileScope);
+        }
+
+        private void ExportAsImageDirectoryPicker_Click(object sender, RoutedEventArgs e)
+        {
+            using var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.Description = "Select the directory to export objects.";
+            dialog.ShowNewFolderButton = true;
+
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
+                MainWindow._imgExportPath = dialog.SelectedPath;
+                ExportImageDirectoryTextBox.Text = MainWindow._imgExportPath;
+            }
+        }
+
+        private async Task ExportAsImages((int min, int max) itemScope, (int min, int max) outfitScope, (int min, int max) effectScope, (int min, int max) missileScope) {
+            // lock the ui before exporting
+            CompileToImagesBox.IsEnabled = false;
+
+            Appearances tmpAppearances = new();
+
+            // access the copy of appearances index
+            tmpAppearances = MainWindow.appearances.Clone();
+            var tasks = new List<Task>();
+
+            // count the total amount of items to process
+            int totalItems = 0;
+            if (ExportItemsCheckBox.IsChecked == true) totalItems += 1 + itemScope.max - itemScope.min; // +1 because n - n = 0
+            if (ExportOutfitsCheckBox.IsChecked == true) totalItems += 1 + outfitScope.max - outfitScope.min;
+            if (ExportEffectsCheckBox.IsChecked == true) totalItems += 1 + effectScope.max - effectScope.min;
+            if (ExportMissilesCheckBox.IsChecked == true) totalItems += 1 + missileScope.max - missileScope.min;
+
+            // processed items counter
+            int processedItems = 0;
+
+            // report progress to the UI
+            void ReportProgress() {
+                int percentage = (int)((double)processedItems / totalItems * 100);
+                ImgExportProgress.Value = percentage;
+            }
+
+            // helper function to avoid code duplication
+            void EnqueueExportTask(bool? isChecked, string subDirectory, IList<Appearance> objects, (int min, int max) scope, Action<string, Appearance> exportAction, Action<int, int> progressUpdateAction) {
+                if (isChecked == true) {
+                    tasks.Add(Task.Run(() => {
+                        string exportPath = Path.Combine(MainWindow._imgExportPath, subDirectory);
+                        Directory.CreateDirectory(exportPath);
+                        int totalObjects = objects.Count;
+                        int loopProgress = 0;
+
+                        Parallel.ForEach(objects, () => 0, (obj, state, localProgress) =>
+                        {
+                            if (obj.Id >= scope.min && obj.Id <= scope.max) {
+                                exportAction(exportPath, obj);
+                            }
+                            Interlocked.Increment(ref processedItems);
+                            localProgress++;
+                            Dispatcher.Invoke(() => {
+                                int currentProgress = Interlocked.Add(ref loopProgress, 1);
+                                progressUpdateAction(currentProgress, totalObjects);
+                                ReportProgress();
+                            });
+
+                            return localProgress;
+                        },
+                        localProgress => { /* no final action needed for local progress */ });
+                    }));
+                }
+            }
+
+            // items
+            EnqueueExportTask(ExportItemsCheckBox.IsChecked, "items", tmpAppearances.Object, itemScope, ImageExporter.SaveItemAsGIF, (loopProgress, totalObjects) => {
+                ExportItemsProgressText.Text = $"{loopProgress}/{totalObjects}";
+            });
+
+            // outfits
+            EnqueueExportTask(ExportOutfitsCheckBox.IsChecked, "outfits", tmpAppearances.Outfit, outfitScope, ImageExporter.SaveOutfitAsImages, (loopProgress, totalObjects) => {
+                ExportOutfitsProgressText.Text = $"{loopProgress}/{totalObjects}";
+            });
+
+            // effects
+            EnqueueExportTask(ExportEffectsCheckBox.IsChecked, "effects", tmpAppearances.Effect, effectScope, ImageExporter.SaveEffectAsGIF, (loopProgress, totalObjects) => {
+                ExportEffectsProgressText.Text = $"{loopProgress}/{totalObjects}";
+            });
+
+            // missiles
+            EnqueueExportTask(ExportMissilesCheckBox.IsChecked, "missiles", tmpAppearances.Missile, missileScope, ImageExporter.SaveMissileAsGIF, (loopProgress, totalObjects) => {
+                ExportMissilesProgressText.Text = $"{loopProgress}/{totalObjects}";
+            });
+
+            // Wait for all tasks to complete
+            await Task.WhenAll(tasks);
+
+            // close the window after successful export
+            CompileToImagesDialogHost.IsOpen = false;
         }
 
         private async Task ExportLegacy(IProgress<int> progress)

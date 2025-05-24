@@ -26,6 +26,7 @@ namespace Assets_Editor
         public static  string _assetsPath = "";
         public static string _datPath = "";
         public static string _sprPath = "";
+        public static string _imgExportPath = "";
         public static ushort ObjectCount { get; set; }
         public static ushort OutfitCount { get; set; }
         public static ushort EffectCount { get; set; }
