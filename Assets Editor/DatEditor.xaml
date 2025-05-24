@@ -47,7 +47,7 @@
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="40"/>
-                            <RowDefinition Height="90"/>
+                            <RowDefinition Height="160"/>
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="60"/>
                             <RowDefinition Height="40"/>
@@ -57,21 +57,45 @@
                             <ProgressBar x:Name="ImgExportProgress" Minimum="0" Maximum="100" Value="0" Width="210" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" Margin="5,0">
+                            <StackPanel Orientation="Horizontal" Margin="5,5">
                                 <CheckBox x:Name="ExportItemsCheckBox" Content="Items" Margin="5,0"/>
                                 <TextBlock x:Name="ExportItemsProgressText" Text="0/0" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <StackPanel Orientation="Horizontal" Margin="5,0">
+                                    <Label Content="Min ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportItemsMinId" Width="80" Minimum="100" Margin="5,0"/>
+                                    <Label Content="Max ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportItemsMaxId" Width="80" Minimum="100" Margin="5,0"/>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,0">
+                            <StackPanel Orientation="Horizontal" Margin="5,5">
                                 <CheckBox x:Name="ExportOutfitsCheckBox" Content="Outfits" Margin="5,0"/>
                                 <TextBlock x:Name="ExportOutfitsProgressText" Text="0/0" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <StackPanel Orientation="Horizontal" Margin="5,0">
+                                    <Label Content="Min ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportOutfitsMinId" Width="80" Minimum="1" Margin="5,0"/>
+                                    <Label Content="Max ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportOutfitsMaxId" Width="80" Minimum="1" Margin="5,0"/>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,0">
+                            <StackPanel Orientation="Horizontal" Margin="5,5">
                                 <CheckBox x:Name="ExportEffectsCheckBox" Content="Effects" Margin="5,0"/>
                                 <TextBlock x:Name="ExportEffectsProgressText" Text="0/0" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <StackPanel Orientation="Horizontal" Margin="5,0">
+                                    <Label Content="Min ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportEffectsMinId" Width="80" Minimum="1" Margin="5,0"/>
+                                    <Label Content="Max ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportEffectsMaxId" Width="80" Minimum="1" Margin="5,0"/>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,0">
+                            <StackPanel Orientation="Horizontal" Margin="5,5">
                                 <CheckBox x:Name="ExportMissilesCheckBox" Content="Missiles" Margin="5,0"/>
                                 <TextBlock x:Name="ExportMissilesProgressText" Text="0/0" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <StackPanel Orientation="Horizontal" Margin="5,0">
+                                    <Label Content="Min ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportMissilesMinId" Width="80" Minimum="1" Margin="5,0"/>
+                                    <Label Content="Max ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportMissilesMaxId" Width="80" Minimum="1" Margin="5,0"/>
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
