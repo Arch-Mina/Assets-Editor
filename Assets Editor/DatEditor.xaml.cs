@@ -1748,10 +1748,10 @@ namespace Assets_Editor
 
             // count the total amount of items to process
             int totalItems = 0;
-            if (ExportItemsCheckBox.IsChecked == true) totalItems += 1 + itemScope.max - itemScope.min; // +1 because n - n = 0
-            if (ExportOutfitsCheckBox.IsChecked == true) totalItems += 1 + outfitScope.max - outfitScope.min;
-            if (ExportEffectsCheckBox.IsChecked == true) totalItems += 1 + effectScope.max - effectScope.min;
-            if (ExportMissilesCheckBox.IsChecked == true) totalItems += 1 + missileScope.max - missileScope.min;
+            if (ExportItemsCheckBox.IsChecked == true) totalItems += tmpAppearances.Object.Count;
+            if (ExportOutfitsCheckBox.IsChecked == true) totalItems += tmpAppearances.Outfit.Count;
+            if (ExportEffectsCheckBox.IsChecked == true) totalItems += tmpAppearances.Effect.Count;
+            if (ExportMissilesCheckBox.IsChecked == true) totalItems += tmpAppearances.Missile.Count;
 
             // processed items counter
             int processedItems = 0;
