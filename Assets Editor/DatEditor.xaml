@@ -397,7 +397,7 @@
                                             </ComboBox>
                                         </StackPanel>
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                            <CheckBox x:Name="A_FlagMarket" Content="Market" Width="160" Margin="0,0,0,5" Padding="4,0,0,0"/>
+                                            <CheckBox x:Name="A_FlagMarket" Content="Market" Checked="A_FlagMarket_Checked" Width="160" Margin="0,0,0,5" Padding="4,0,0,0"/>
                                             <Label Content="Category:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                             <ComboBox x:Name="A_FlagMarketCategory" Width="90" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
                                                 <ComboBoxItem Content="Armors"/>
@@ -406,7 +406,7 @@
                                                 <ComboBoxItem Content="Containers"/>
                                                 <ComboBoxItem Content="Decoration"/>
                                                 <ComboBoxItem Content="Food"/>
-                                                <ComboBoxItem Content="Helmets Hats"/>
+                                                <ComboBoxItem Content="HelmetsHats"/>
                                                 <ComboBoxItem Content="Legs"/>
                                                 <ComboBoxItem Content="Others"/>
                                                 <ComboBoxItem Content="Potions"/>
@@ -418,12 +418,12 @@
                                                 <ComboBoxItem Content="Ammunition"/>
                                                 <ComboBoxItem Content="Axes"/>
                                                 <ComboBoxItem Content="Clubs"/>
-                                                <ComboBoxItem Content="Distance Weapons"/>
+                                                <ComboBoxItem Content="DistanceWeapons"/>
                                                 <ComboBoxItem Content="Swords"/>
-                                                <ComboBoxItem Content="Wands Rods"/>
-                                                <ComboBoxItem Content="Premium Scrolls"/>
-                                                <ComboBoxItem Content="Tibia Coins"/>
-                                                <ComboBoxItem Content="Creature Products"/>
+                                                <ComboBoxItem Content="WandsRods"/>
+                                                <ComboBoxItem Content="PremiumScrolls"/>
+                                                <ComboBoxItem Content="TibiaCoins"/>
+                                                <ComboBoxItem Content="CreatureProducts"/>
                                                 <ComboBoxItem Content="Quiver"/>
                                                 <ComboBoxItem Content="SoulCores"/>
                                             </ComboBox>
@@ -481,7 +481,7 @@
                                         <CheckBox x:Name="A_FlagExpire" Content="Expire" Margin="0,5,0,0"/>
                                         <CheckBox x:Name="A_FlagExpireStop" Content="Expire stop" Margin="0,5,0,0"/>
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
-                                            <CheckBox x:Name="A_FlagCyclopedia" Content="Cyclopedia" Width="180" Margin="0,-1,0,0" Padding="4,0,0,0"/>
+                                            <CheckBox x:Name="A_FlagCyclopedia" Content="Cyclopedia" Checked="A_FlagCyclopedia_Checked" Width="180" Margin="0,-1,0,0" Padding="4,0,0,0"/>
                                             <Label Content="Type:" Width="60" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                             <xctk:IntegerUpDown x:Name="A_FlagCyclopediaItem" Margin="0,0,0,0" Width="80"/>
                                         </StackPanel>
