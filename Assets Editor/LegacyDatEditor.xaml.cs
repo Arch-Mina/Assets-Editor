@@ -62,6 +62,19 @@ namespace Assets_Editor
                 Color myRgbColor = Utils.Get8Bit(x);
                 A_FlagAutomapColorPicker.AvailableColors.Add(new Xceed.Wpf.Toolkit.ColorItem(System.Windows.Media.Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
             }
+            ObservableCollection<Xceed.Wpf.Toolkit.ColorItem> outfitColors = new ObservableCollection<Xceed.Wpf.Toolkit.ColorItem>();
+            SprLayerHeadPicker.AvailableColors = outfitColors;
+            SprLayerHeadPicker.AvailableColors.Clear();
+
+            for (int x = 0; x <= 132; x++)
+            {
+                System.Drawing.Color myRgbColor = Utils.GetOutfitColor(x);
+                outfitColors.Add(new Xceed.Wpf.Toolkit.ColorItem(System.Windows.Media.Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
+            }
+            SprLayerHeadPicker.AvailableColors = outfitColors;
+            SprLayerBodyPicker.AvailableColors = outfitColors;
+            SprLayerLegsPicker.AvailableColors = outfitColors;
+            SprLayerFeetPicker.AvailableColors = outfitColors;
         }
         private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
         {
@@ -437,7 +450,66 @@ namespace Assets_Editor
         {
             A_FlagMarketProfession.SelectedIndex = -1;
         }
+        private void Randomize_Click(object sender, RoutedEventArgs e)
+        {
+            Random rnd = new Random();
+            SprLayerHeadPicker.SelectedColor = SprLayerHeadPicker.AvailableColors[rnd.Next(0, SprLayerHeadPicker.AvailableColors.Count)].Color;
+            SprLayerBodyPicker.SelectedColor = SprLayerBodyPicker.AvailableColors[rnd.Next(0, SprLayerBodyPicker.AvailableColors.Count)].Color;
+            SprLayerLegsPicker.SelectedColor = SprLayerLegsPicker.AvailableColors[rnd.Next(0, SprLayerLegsPicker.AvailableColors.Count)].Color;
+            SprLayerFeetPicker.SelectedColor = SprLayerFeetPicker.AvailableColors[rnd.Next(0, SprLayerFeetPicker.AvailableColors.Count)].Color;
+        }
 
+        protected void Colorize(System.Drawing.Bitmap imageTemplate, System.Drawing.Bitmap imageOutfit, Color head, Color body, Color legs, Color feet)
+        {
+            for (int i = 0; i < imageTemplate.Height; i++)
+            {
+                for (int j = 0; j < imageTemplate.Width; j++)
+                {
+                    System.Drawing.Color templatePixel = imageTemplate.GetPixel(j, i);
+                    System.Drawing.Color outfitPixel = imageOutfit.GetPixel(j, i);
+
+                    if (templatePixel == outfitPixel)
+                        continue;
+
+                    int rt = templatePixel.R;
+                    int gt = templatePixel.G;
+                    int bt = templatePixel.B;
+                    int ro = outfitPixel.R;
+                    int go = outfitPixel.G;
+                    int bo = outfitPixel.B;
+
+                    if (rt > 0 && gt > 0 && bt == 0) // yellow == head
+                    {
+                        ColorizePixel(ref ro, ref go, ref bo, head);
+                    }
+                    else if (rt > 0 && gt == 0 && bt == 0) // red == body
+                    {
+                        ColorizePixel(ref ro, ref go, ref bo, body);
+                    }
+                    else if (rt == 0 && gt > 0 && bt == 0) // green == legs
+                    {
+                        ColorizePixel(ref ro, ref go, ref bo, legs);
+                    }
+                    else if (rt == 0 && gt == 0 && bt > 0) // blue == feet
+                    {
+                        ColorizePixel(ref ro, ref go, ref bo, feet);
+                    }
+                    else
+                    {
+                        continue; // if nothing changed, skip the change of pixel
+                    }
+
+                    imageOutfit.SetPixel(j, i, System.Drawing.Color.FromArgb(ro, go, bo));
+                }
+            }
+        }
+
+        protected void ColorizePixel(ref int r, ref int g, ref int b, Color colorPart)
+        {
+            r = (r + colorPart.R) / 2;
+            g = (g + colorPart.G) / 2;
+            b = (b + colorPart.B) / 2;
+        }
         private void SprFramesSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             FrameGroup frameGroup = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value];
@@ -477,21 +549,73 @@ namespace Assets_Editor
 
             if (CurrentObjectAppearance.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
             {
-                int counter = 1;
-                int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternLayers - 1 : 0;
-                int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternZ - 1 : 0;
-                int addon = frameGroup.SpriteInfo.PatternY > 1 ? (int)SprAddonSlider.Value : 0;
-                for (int h = (int)frameGroup.SpriteInfo.PatternHeight - 1; h >= 0; h--)
+                if ((bool)SprBlendLayers.IsChecked == false)
                 {
-                    for (int w = (int)frameGroup.SpriteInfo.PatternWidth - 1; w >= 0; w--)
+                    int counter = 1;
+                    int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternLayers - 1 : 0;
+                    int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternZ - 1 : 0;
+                    int addon = frameGroup.SpriteInfo.PatternY > 1 ? (int)SprAddonSlider.Value : 0;
+                    for (int h = (int)frameGroup.SpriteInfo.PatternHeight - 1; h >= 0; h--)
                     {
-                        int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), addon, mount, (int)SprFramesSlider.Value);
-                        int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                        SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), counter, spriteId, index);
-                        counter++;
+                        for (int w = (int)frameGroup.SpriteInfo.PatternWidth - 1; w >= 0; w--)
+                        {
+                            int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), addon, mount, (int)SprFramesSlider.Value);
+                            int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
+                            SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), counter, spriteId, index);
+                            counter++;
+                        }
                     }
                 }
+                else
+                {
+                    int counter = 1;
+                    for (int h = (int)frameGroup.SpriteInfo.PatternHeight - 1; h >= 0; h--)
+                    {
+                        for (int w = (int)frameGroup.SpriteInfo.PatternWidth - 1; w >= 0; w--)
+                        {
+                            int baseIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), 0, 0, (int)SprFramesSlider.Value);
+                            int baseSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseIndex];
+                            System.Drawing.Bitmap baseBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)baseSpriteId));
+                            if (frameGroup.SpriteInfo.PatternLayers > 1)
+                            {
+                                int baseLayerIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 1, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), 0, 0, (int)SprFramesSlider.Value);
+                                int baseLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseLayerIndex];
+                                System.Drawing.Bitmap baseLayerBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)baseLayerSpriteId));
+                                Colorize(baseLayerBitmap, baseBitmap, SprLayerHeadPicker.SelectedColor.Value, SprLayerBodyPicker.SelectedColor.Value, SprLayerLegsPicker.SelectedColor.Value, SprLayerFeetPicker.SelectedColor.Value);
+                            }
+                            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(baseBitmap))
+                            {
+                                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
 
+                                if ((bool)SprFullAddons.IsChecked)
+                                {
+                                    for (int x = 1; x <= (int)SprAddonSlider.Maximum; x++)
+                                    {
+                                        int addonIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), x, 0, (int)SprFramesSlider.Value);
+                                        int addonSpriteId = (int)frameGroup.SpriteInfo.SpriteId[addonIndex];
+                                        System.Drawing.Bitmap addonBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)addonSpriteId));
+
+                                        int addonLayerIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 1, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), x, 0, (int)SprFramesSlider.Value);
+                                        int addonLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[addonLayerIndex];
+                                        System.Drawing.Bitmap addonLayerBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)addonLayerSpriteId));
+
+                                        Colorize(addonLayerBitmap, addonBitmap, SprLayerHeadPicker.SelectedColor.Value, SprLayerBodyPicker.SelectedColor.Value, SprLayerLegsPicker.SelectedColor.Value, SprLayerFeetPicker.SelectedColor.Value);
+                                        g.DrawImage(addonBitmap, new System.Drawing.Point(0, 0));
+
+                                    }
+                                }
+                            }
+
+
+
+                            MemoryStream memoryStream = new MemoryStream();
+                            baseBitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+                            SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(memoryStream), counter, 0, 0);
+                            counter++;
+                        }
+                    }
+
+                }
             }
             else
             {
@@ -516,6 +640,41 @@ namespace Assets_Editor
                 }
             }
 
+        }
+        private void SprOutfitChanged(object sender, RoutedEventArgs e)
+        {
+            ForceSliderChange();
+        }
+
+        private void SprLayerPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (isPageLoaded)
+                ForceSliderChange();
+        }
+        private void OutfitXml(object sender, RoutedEventArgs e)
+        {
+            int typeValue = (int)CurrentObjectAppearance.Id;
+            int headValue = 0;
+            int bodyValue = 0;
+            int legsValue = 0;
+            int feetValue = 0;
+            int corpseValue = 0;
+
+            foreach (var color in SprLayerHeadPicker.AvailableColors)
+            {
+                if (color.Color.Value.ToString() == SprLayerHeadPicker.SelectedColor.ToString())
+                    headValue = int.Parse(color.Name);
+                if (color.Color.Value.ToString() == SprLayerBodyPicker.SelectedColor.ToString())
+                    bodyValue = int.Parse(color.Name);
+                if (color.Color.Value.ToString() == SprLayerLegsPicker.SelectedColor.ToString())
+                    legsValue = int.Parse(color.Name);
+                if (color.Color.Value.ToString() == SprLayerFeetPicker.SelectedColor.ToString())
+                    feetValue = int.Parse(color.Name);
+            }
+
+            string xml = $"<look type=\"{typeValue}\" head=\"{headValue}\" body=\"{bodyValue}\" legs=\"{legsValue}\" feet=\"{feetValue}\" corpse=\"{corpseValue}\"/>";
+            Clipboard.SetText(xml);
+            StatusBar.MessageQueue.Enqueue($"xml copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
         private void SetImageInGrid(Grid grid, int gridHeight, BitmapImage image, int id, int spriteId, int index)
         {

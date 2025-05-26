@@ -7,7 +7,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="DatEditor" Height="860" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}" Loaded="Window_Loaded"
+        Title="DatEditor" Height="880" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}" Loaded="Window_Loaded"
         Style="{StaticResource MaterialDesignWindow}">
     <Window.Resources>
         <local:ArithmeticConverter x:Key="ArithmeticConverter" />
@@ -316,7 +316,7 @@
                                             <Label Content="Brightness:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                             <xctk:IntegerUpDown x:Name="A_FlagLightBrightness" Margin="0,0,0,0" Width="50" Minimum="0" Maximum="10"/>
                                             <Label Content="Color:" Width="35" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                            <xctk:ColorPicker x:Name="A_FlagLightColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" Width="30" SelectedColorChanged="A_FlagLightColorPickerChanged"/>
+                                            <xctk:ColorPicker x:Name="A_FlagLightColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" MaxDropDownWidth="510" ShowTabHeaders="False" Width="30" SelectedColorChanged="A_FlagLightColorPickerChanged"/>
                                             <xctk:IntegerUpDown x:Name="A_FlagLightColor" Margin="15,0,0,0" Width="50" Minimum="0" Maximum="215" ValueChanged="A_FlagLightColor_ValueChanged"/>
                                         </StackPanel>
                                         <CheckBox x:Name="A_FlagDontHide" Content="Dont Hide" Margin="0,5,0,0"/>
@@ -344,7 +344,7 @@
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="22" Margin="0,5,0,0">
                                             <CheckBox x:Name="A_FlagAutomap" Content="Auto Map" Width="160" Margin="0,-1,0,5" Padding="4,0,0,0"/>
                                             <Label Content="Color:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                            <xctk:ColorPicker x:Name="A_FlagAutomapColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" Width="30" SelectedColorChanged="A_FlagAutomapColorPickerChanged"/>
+                                            <xctk:ColorPicker x:Name="A_FlagAutomapColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" MaxDropDownWidth="510" Width="30" SelectedColorChanged="A_FlagAutomapColorPickerChanged"/>
                                             <xctk:IntegerUpDown x:Name="A_FlagAutomapColor" Margin="10,0,0,0" Width="50" Minimum="0" Maximum="215" ValueChanged="A_FlagAutomapColor_ValueChanged"/>
                                         </StackPanel>
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
@@ -538,6 +538,18 @@
                                                 <materialDesign:PackIcon Kind="ArrowLeftDropCircle" HorizontalAlignment="Center" ToolTip="Modify"/>
                                             </Button>
                                         </Grid>
+                                        <StackPanel Orientation="Horizontal" Margin="0 10 0 0" HorizontalAlignment="Center">
+                                            <ToggleButton x:Name="SprBlendLayers" Style="{StaticResource MaterialDesignFlatPrimaryToggleButton}" Width="35" Height="35" ToolTip="Blend Layers" Margin="0 -5 5 0" Checked="SprOutfitChanged" Unchecked="SprOutfitChanged">
+                                                <materialDesign:PackIcon Width="20" Height="20" Kind="LinkVariant" />
+                                            </ToggleButton>
+                                            <CheckBox x:Name="SprFullAddons" materialDesign:CheckBoxAssist.CheckBoxSize="30" ToolTip="Show Full Addons" Margin="0 0 5 0" Checked="SprOutfitChanged" Unchecked="SprOutfitChanged"/>
+                                            <xctk:ColorPicker x:Name="SprLayerHeadPicker" VerticalAlignment="Center" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" MaxDropDownWidth="420" SelectedColor="Gray" Width="23" SelectedColorChanged="SprLayerPicker_SelectedColorChanged"/>
+                                            <xctk:ColorPicker x:Name="SprLayerBodyPicker" VerticalAlignment="Center" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" MaxDropDownWidth="420" SelectedColor="Gray" Width="23" SelectedColorChanged="SprLayerPicker_SelectedColorChanged"/>
+                                            <xctk:ColorPicker x:Name="SprLayerLegsPicker" VerticalAlignment="Center" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" MaxDropDownWidth="420" SelectedColor="Gray" Width="23" SelectedColorChanged="SprLayerPicker_SelectedColorChanged"/>
+                                            <xctk:ColorPicker x:Name="SprLayerFeetPicker" VerticalAlignment="Center" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" MaxDropDownWidth="420" SelectedColor="Gray" Width="23" SelectedColorChanged="SprLayerPicker_SelectedColorChanged"/>
+                                            <Button Content="R" ToolTip="Randomize" VerticalAlignment="Center" Width="40" Height="25" Margin="5 0 0 0" Click="Randomize_Click"/>
+                                            <Button ToolTip="Copy Xml" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon ContentCopy}" Width="35" Height="30" VerticalAlignment="Center" Margin="5 0 0 0" Click="OutfitXml"/>
+                                        </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                                             <Label x:Name="SprFramesSliderCounter" HorizontalAlignment="Left"
                                                    Margin="20,0,0,0" VerticalAlignment="Top"
@@ -548,7 +560,7 @@
                                                     Margin="35,5,0,0" SmallChange="1" VerticalAlignment="Top"
                                                     HorizontalAlignment="Left" />
                                         </StackPanel>
-                                        <xctk:ColorPicker x:Name="SprBackgroundPicker" VerticalAlignment="Top" AdvancedTabHeader="False" ShowTabHeaders="False" SelectedColor="Gray" Width="200" Margin="0,15,0,10"/>
+                                        <xctk:ColorPicker x:Name="SprBackgroundPicker" VerticalAlignment="Top" AdvancedTabHeader="False" ShowTabHeaders="False" SelectedColor="Gray" Width="200" Margin="0,15,0,10" ColorMode ="ColorCanvas"/>
                                     </StackPanel>
                                     <StackPanel Width="320" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                                         <GroupBox x:Name="SpriteAnimationGroup" Header="Sprite Animation" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320">

@@ -24,7 +24,111 @@ namespace Assets_Editor
             };
             return RgbColor;
         }
+        public static System.Drawing.Color GetOutfitColor(int color)
+        {
+            const int HSI_SI_VALUES = 7;
+            const int HSI_H_STEPS = 19;
 
+            if (color >= HSI_H_STEPS * HSI_SI_VALUES)
+                color = 0;
+
+            float loc1 = 0, loc2 = 0, loc3 = 0;
+            if (color % HSI_H_STEPS != 0)
+            {
+                loc1 = color % HSI_H_STEPS * 1.0f / 18.0f;
+                loc2 = 1;
+                loc3 = 1;
+
+                switch (color / HSI_H_STEPS)
+                {
+                    case 0:
+                        loc2 = 0.25f;
+                        loc3 = 1.00f;
+                        break;
+                    case 1:
+                        loc2 = 0.25f;
+                        loc3 = 0.75f;
+                        break;
+                    case 2:
+                        loc2 = 0.50f;
+                        loc3 = 0.75f;
+                        break;
+                    case 3:
+                        loc2 = 0.667f;
+                        loc3 = 0.75f;
+                        break;
+                    case 4:
+                        loc2 = 1.00f;
+                        loc3 = 1.00f;
+                        break;
+                    case 5:
+                        loc2 = 1.00f;
+                        loc3 = 0.75f;
+                        break;
+                    case 6:
+                        loc2 = 1.00f;
+                        loc3 = 0.50f;
+                        break;
+                }
+            }
+            else
+            {
+                loc1 = 0;
+                loc2 = 0;
+                loc3 = 1 - (float)color / HSI_H_STEPS / HSI_SI_VALUES;
+            }
+
+            if (loc3 == 0)
+                return System.Drawing.Color.FromArgb(0, 0, 0);
+
+            if (loc2 == 0)
+            {
+                int loc7 = (int)(loc3 * 255);
+                return System.Drawing.Color.FromArgb(loc7, loc7, loc7);
+            }
+
+            float red = 0, green = 0, blue = 0;
+
+            // Color calculation logic
+            if (loc1 < 1.0 / 6.0)
+            {
+                red = loc3;
+                blue = loc3 * (1 - loc2);
+                green = blue + (loc3 - blue) * 6 * loc1;
+            }
+            else if (loc1 < 2.0 / 6.0)
+            {
+                green = loc3;
+                blue = loc3 * (1 - loc2);
+                red = green - (loc3 - blue) * (6 * loc1 - 1);
+            }
+            else if (loc1 < 3.0 / 6.0)
+            {
+                green = loc3;
+                red = loc3 * (1 - loc2);
+                blue = red + (loc3 - red) * (6 * loc1 - 2);
+            }
+            else if (loc1 < 4.0 / 6.0)
+            {
+                blue = loc3;
+                red = loc3 * (1 - loc2);
+                green = blue - (loc3 - red) * (6 * loc1 - 3);
+            }
+            else if (loc1 < 5.0 / 6.0)
+            {
+                blue = loc3;
+                green = loc3 * (1 - loc2);
+                red = green + (loc3 - green) * (6 * loc1 - 4);
+            }
+            else
+            {
+                red = loc3;
+                green = loc3 * (1 - loc2);
+                blue = red - (loc3 - green) * (6 * loc1 - 5);
+            }
+
+            return System.Drawing.Color.FromArgb((int)(red * 255), (int)(green * 255), (int)(blue * 255));
+        }
         public static childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
@@ -176,5 +280,34 @@ namespace Assets_Editor
 
             return null;
         }
+        public class Outfit
+        {
+            public Outfit(ushort type, byte head, byte body, byte legs, byte feet, byte addons)
+            {
+                Type = type;
+                Head = head;
+                Body = body;
+                Legs = legs;
+                Feet = feet;
+                Addons = addons;
+            }
+
+            public Outfit() : this(0, 0, 0, 0, 0, 0)
+            {
+            }
+            public ushort Type { get; set; }
+
+            public byte Head { get; set; }
+
+            public byte Body { get; set; }
+
+            public byte Legs { get; set; }
+
+            public byte Feet { get; set; }
+
+            public byte Addons { get; set; }
+        }
+
     }
 }
+
