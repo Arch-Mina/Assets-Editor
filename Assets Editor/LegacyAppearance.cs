@@ -72,7 +72,33 @@ namespace Assets_Editor
         public ushort MissileCount;
         public Appearances Appearances;
 
-        public void ReadLegacyDat(string file)
+        public static readonly Dictionary<int, Func<BinaryReader, APPEARANCE_TYPE, Appearance>> LegacyRead = new Dictionary<int, Func<BinaryReader, APPEARANCE_TYPE, Appearance>>
+                                                                                           {
+                                                                                               {1098, ReadAppearance1098}
+                                                                                           };
+        public static readonly Dictionary<int, Action<BinaryWriter, Appearance>> LegacyWrite = new Dictionary<int, Action<BinaryWriter, Appearance>>
+                                                                                            {
+                                                                                                {1098, WriteAppearance1098}
+                                                                                            };
+
+        public static void ReadLegacyInfo(string file, ref uint sign, ref ushort items, ref ushort outfits, ref ushort effects, ref ushort missiles)
+        {
+            using var stream = File.OpenRead(file);
+            using var r = new BinaryReader(stream);
+            try
+            {
+                sign = r.ReadUInt32();
+                items = r.ReadUInt16();
+                outfits = r.ReadUInt16();
+                effects = r.ReadUInt16();
+                missiles = r.ReadUInt16();
+            }
+            catch
+            {
+                throw new Exception("Couldn't load dat file");
+            }
+        }
+        public void ReadLegacyDat(string file, int version)
         {
             using var stream = File.OpenRead(file);
             using var r = new BinaryReader(stream);
@@ -86,28 +112,28 @@ namespace Assets_Editor
 
                 for (int i = 100; i <= ObjectCount; i++)
                 {
-                    var appearance = ReadAppearance1098(r, APPEARANCE_TYPE.AppearanceObject);
+                    var appearance = ReadAppearance(r, APPEARANCE_TYPE.AppearanceObject, version);
                     appearance.Id = (uint)i;
                     Appearances.Object.Add(appearance);
                 }
 
                 for (int i = 1; i <= OutfitCount; i++)
                 {
-                    var appearance = ReadAppearance1098(r, APPEARANCE_TYPE.AppearanceOutfit);
+                    var appearance = ReadAppearance(r, APPEARANCE_TYPE.AppearanceOutfit, version);
                     appearance.Id = (uint)i;
                     Appearances.Outfit.Add(appearance);
                 }
 
                 for (int i = 1; i <= EffectCount; i++)
                 {
-                    var appearance = ReadAppearance1098(r, APPEARANCE_TYPE.AppearanceEffect);
+                    var appearance = ReadAppearance(r, APPEARANCE_TYPE.AppearanceEffect, version);
                     appearance.Id = (uint)i;
                     Appearances.Effect.Add(appearance);
                 }
 
                 for (int i = 1; i <= MissileCount; i++)
                 {
-                    var appearance = ReadAppearance1098(r, APPEARANCE_TYPE.AppearanceMissile);
+                    var appearance = ReadAppearance(r, APPEARANCE_TYPE.AppearanceMissile, version);
                     appearance.Id = (uint)i;
                     Appearances.Missile.Add(appearance);
                 }
@@ -118,7 +144,58 @@ namespace Assets_Editor
             }
         }
 
-        private Appearance ReadAppearance1098(BinaryReader r, APPEARANCE_TYPE type)
+        private Appearance ReadAppearance(BinaryReader r, APPEARANCE_TYPE type, int version)
+        {
+            var readAppearance = LegacyRead[version];
+            var appearance = readAppearance(r, type);
+            return appearance;
+        }
+
+        public static bool WriteLegacyDat(string fn, uint signature, Appearances appearances, int version)
+        {
+            try
+            {
+                var datFile = new FileStream(fn, FileMode.Create, FileAccess.Write);
+                using (var w = new BinaryWriter(datFile))
+                {
+                    w.Write(signature);
+                    w.Write((ushort)(appearances.Object.Count + 99));
+                    w.Write((ushort)appearances.Outfit.Count);
+                    w.Write((ushort)appearances.Effect.Count);
+                    w.Write((ushort)appearances.Missile.Count);
+
+                    foreach (Appearance appearance in appearances.Object)
+                    {
+                        LegacyAppearance.WriteAppearance(w, appearance, version);
+                    }
+                    foreach (Appearance appearance in appearances.Outfit)
+                    {
+                        LegacyAppearance.WriteAppearance(w, appearance, version);
+                    }
+                    foreach (Appearance appearance in appearances.Effect)
+                    {
+                        LegacyAppearance.WriteAppearance(w, appearance, version);
+                    }
+                    foreach (Appearance appearance in appearances.Missile)
+                    {
+                        LegacyAppearance.WriteAppearance(w, appearance, version);
+                    }
+
+                    return true;
+                }
+            }
+            catch (UnauthorizedAccessException exception)
+            {
+                return false;
+            }
+        }
+        private static void WriteAppearance(BinaryWriter w, Appearance item, int version)
+        {
+            var writeAppearance = LegacyWrite[version];
+            writeAppearance(w, item);
+        }
+
+        private static Appearance ReadAppearance1098(BinaryReader r, APPEARANCE_TYPE type)
         {
             Appearance appearance = new Appearance();
             appearance.AppearanceType = type;
@@ -445,7 +522,7 @@ namespace Assets_Editor
             }
         }
 
-        public static void WriteAppearance1098(BinaryWriter w, Appearance item)
+        private static void WriteAppearance1098(BinaryWriter w, Appearance item)
         {
             if (item.Flags == null)
             {

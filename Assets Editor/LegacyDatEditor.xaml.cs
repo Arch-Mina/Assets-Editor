@@ -1217,7 +1217,7 @@ namespace Assets_Editor
 
             if (isDatEditable && isSprEditable)
             {
-                LegacyAppearance.WriteLegacyDat(datfile, MainWindow.DatSignature, MainWindow.appearances);
+                LegacyAppearance.WriteLegacyDat(datfile, MainWindow.DatSignature, MainWindow.appearances, MainWindow.serverSetting.Version);
                 var progress = new Progress<int>(percent =>
                 {
                     LoadProgress.Value = percent;

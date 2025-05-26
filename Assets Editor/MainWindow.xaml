@@ -9,25 +9,40 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Style="{StaticResource MaterialDesignWindow}">
     <Grid>
-        <Label Content="Assets Folder:" HorizontalAlignment="Left" Margin="42,50,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="AssetsPath" HorizontalAlignment="Left" Margin="135,50,0,0" VerticalAlignment="Top" Width="330" IsEnabled="False"/>
-        <Button Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" Margin="468,37,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="55" Width="55" Click="SelectAssetsFolder">
-            <materialDesign:PackIcon  Kind="CardSearch" Height="40" Width="40" />
-        </Button>
-        <StackPanel Margin="159,92,0,0" HorizontalAlignment="Left" >
-            <Label Content="Objects:"/>
-            <Label Content="Outfits:"/>
-            <Label Content="Effects:"/>
-            <Label Content="Missiles:"/>
-            <CheckBox x:Name="SprTransparent" Content="Transparent" Visibility="Hidden"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="150"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Label Content="Assets Folder:" VerticalAlignment="Center" Width="100"/>
+            <TextBox x:Name="AssetsPath" VerticalAlignment="Center" Width="330" IsEnabled="False"/>
+            <Button Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" VerticalAlignment="Top" Height="55" Width="55" Click="SelectAssetsFolder">
+                <materialDesign:PackIcon  Kind="CardSearch" Height="40" Width="40" />
+            </Button>
         </StackPanel>
-        <StackPanel Margin="219,92,0,0" HorizontalAlignment="Left">
-            <Label x:Name="ObjectsCount"/>
-            <Label x:Name="OutfitsCount"/>
-            <Label x:Name="EffectsCount"/>
-            <Label x:Name="MissilesCount"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Label Content="Saved Setting:" Width="100"/>
+            <ComboBox x:Name="A_SavedVersion" Width="120" BorderThickness="1,1,1,1" SelectedIndex="0" Padding="6,1,5,3" IsReadOnly="True" VerticalAlignment="Top" SelectionChanged="A_SavedVersion_SelectionChanged"/>
         </StackPanel>
-        <Button x:Name="LoadAssets" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,220,0,0" IsEnabled="False" Click="LoadAssets_Click" >
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
+            <StackPanel HorizontalAlignment="Left" >
+                <Label Content="Objects:"/>
+                <Label Content="Outfits:"/>
+                <Label Content="Effects:"/>
+                <Label Content="Missiles:"/>
+                <CheckBox x:Name="SprTransparent" Content="Transparent" Visibility="Hidden" Checked="SprTransparent_Changed" Unchecked="SprTransparent_Changed"></CheckBox>
+                <ComboBox x:Name="A_ClientVersion" Width="80" BorderThickness="1,1,1,1" SelectedIndex="1" Padding="6,1,5,3" IsReadOnly="True" Visibility="Hidden" SelectionChanged="A_ClientVersion_SelectionChanged"/>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Left">
+                <Label x:Name="ObjectsCount"/>
+                <Label x:Name="OutfitsCount"/>
+                <Label x:Name="EffectsCount"/>
+                <Label x:Name="MissilesCount"/>
+            </StackPanel>
+        </StackPanel>
+        <Button Grid.Row="3" x:Name="LoadAssets" HorizontalAlignment="Center" VerticalAlignment="Top" IsEnabled="False" Click="LoadAssets_Click">
             <Button.Content>
                 <StackPanel>
                     <TextBlock Text="Load Assets" HorizontalAlignment="Center"/>

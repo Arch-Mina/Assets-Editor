@@ -82,7 +82,7 @@ namespace Assets_Editor
                         string _datPath = String.Format("{0}{1}", _assetsPath, "Tibia.dat");
                         string _sprPath = String.Format("{0}{1}", _assetsPath, "Tibia.spr");
                         LegacyAppearance Dat = new LegacyAppearance();
-                        Dat.ReadLegacyDat(_datPath);
+                        Dat.ReadLegacyDat(_datPath, MainWindow.serverSetting.Version);
                         ImportAppearances = Dat.Appearances;
 
                         bool transparency = false;
