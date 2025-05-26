@@ -53,9 +53,6 @@
 ### thundergiant rotating in and walking
 `/outfit.php?type=994&direction=2&walk=3&animated=1`
 
-### thundergiant rotating in place (with idle animation)
-`/outfit.php?type=994&direction=2&walk=4&animated=1`
-
 ### 96x96 image of rotworm
 `/outfit.php?type=26&direction=2&size=1`
 
