@@ -6,6 +6,8 @@
 # Installation
 1. Select this folder as export path for "export as images" in asset editor
 2. Add it to your website
+3. Enable gd extension in your php.ini
+4. restart/reload your web server
 
 # Item examples
 **The generator for item images supports only client ids!**
