@@ -39,6 +39,7 @@ namespace Assets_Editor
         public Settings SettingsList = new Settings();
         public static OTBReader ServerOTB = new OTBReader();
         public static LogView logView = new LogView();
+        public static DatStructure datStructure = new DatStructure();
         public MainWindow()
         {
             InitializeComponent();
@@ -47,9 +48,11 @@ namespace Assets_Editor
             worker.DoWork += Worker_DoWork;
             worker.RunWorkerCompleted += Worker_Completed;
             LoadEditorSettings();
-            foreach (var key in LegacyAppearance.LegacyRead)
+            var dat = new DatStructure();
+            var allVersions = dat.GetAllVersions();
+            foreach (var version in allVersions)
             {
-                A_ClientVersion.Items.Add(key.Key);
+                A_ClientVersion.Items.Add(version.Number);
             }
             logView.Closing += (sender, e) =>
             {
@@ -163,19 +166,16 @@ namespace Assets_Editor
 
         private void LoadLegacyDat()
         {
-            uint Signature = 0;
-            ushort ObjectCount = 0;
-            ushort OutfitCount = 0;
-            ushort EffectCount = 0;
-            ushort MissileCount = 0;
-            LegacyAppearance.ReadLegacyInfo(_datPath, ref Signature, ref ObjectCount, ref OutfitCount, ref EffectCount, ref MissileCount);
-
-            DatSignature = Signature;
-            ObjectsCount.Content = ObjectCount;
-            OutfitsCount.Content = OutfitCount;
-            EffectsCount.Content = EffectCount;
-            MissilesCount.Content = MissileCount;
-
+            using var stream = File.OpenRead(_datPath);
+            using var r = new BinaryReader(stream);
+            {
+                DatInfo info = DatStructure.ReadAppearanceInfo(r);
+                DatSignature = info.Signature;
+                ObjectsCount.Content = info.ObjectCount;
+                OutfitsCount.Content = info.OutfitCount;
+                EffectsCount.Content = info.EffectCount;
+                MissilesCount.Content = info.MissileCount;
+            }
         }
         private void LoadLegacySpr()
         {

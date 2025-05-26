@@ -2125,7 +2125,7 @@ namespace Assets_Editor
                 }
 
                 string datfile = MainWindow._assetsPath + "Tibia.dat";
-                LegacyAppearance.WriteLegacyDat(datfile, 0x42A3, tmpAppearances);
+                LegacyAppearance.WriteLegacyDat(datfile, 0x42A3, tmpAppearances, 1098);
                 
             });
             var progress1 = new Progress<int>(percent =>

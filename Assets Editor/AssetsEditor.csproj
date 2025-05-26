@@ -46,6 +46,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Appearances.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Settings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
