@@ -191,22 +191,24 @@ namespace Assets_Editor
                 int offset = (int)panel.VerticalOffset;
                 for (int i = 0; i < ObjListView.Items.Count; i++)
                 {
+                    Appearance appearance = null;
                     ShowList item = (ShowList)ObjListView.Items[i];
                     if (i >= offset && i < Math.Min(offset + 20, ObjListView.Items.Count))
                     {
                         if (ObjectMenu.SelectedIndex == 0)
-                            ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Outfit[i], MainWindow.MainSprStorage));
+                            appearance = MainWindow.appearances.Outfit[i];
                         else if (ObjectMenu.SelectedIndex == 1)
-                            ThingsItem[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Object[i], MainWindow.MainSprStorage));
+                            appearance = MainWindow.appearances.Object[i];
                         else if (ObjectMenu.SelectedIndex == 2)
-                            ThingsEffect[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Effect[i], MainWindow.MainSprStorage));
+                            appearance = MainWindow.appearances.Effect[i];
                         else if (ObjectMenu.SelectedIndex == 3)
-                            ThingsMissile[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Missile[i], MainWindow.MainSprStorage));
+                            appearance = MainWindow.appearances.Missile[i];
 
                         AnimateSelectedListItem(item);
                     }
                     else
                     {
+                        item.StopAnimation();
                         if (ObjectMenu.SelectedIndex == 0)
                             ThingsOutfit[i].Image = null;
                         else if (ObjectMenu.SelectedIndex == 1)
@@ -215,11 +217,6 @@ namespace Assets_Editor
                             ThingsEffect[i].Image = null;
                         else if (ObjectMenu.SelectedIndex == 3)
                             ThingsMissile[i].Image = null;
-
-                        if (item.Storyboard != null)
-                        {
-                            item.Storyboard.Stop();
-                        }
                     }
                 }
             }
@@ -1702,30 +1699,6 @@ namespace Assets_Editor
                 CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMax = (uint)SprPhaseMax.Value;
         }
 
-        private void StartSpriteAnimation(Image imageControl, TimeSpan frameRate, ShowList showList, IEnumerable<BitmapImage> imageFrames)
-        {
-            if (imageControl == null) throw new ArgumentNullException(nameof(imageControl));
-
-            var animation = new ObjectAnimationUsingKeyFrames();
-            TimeSpan currentTime = TimeSpan.Zero;
-
-            foreach (BitmapImage imageFrame in imageFrames)
-            {
-                var keyFrame = new DiscreteObjectKeyFrame(imageFrame, currentTime);
-                animation.KeyFrames.Add(keyFrame);
-                currentTime += frameRate;
-            }
-
-            Storyboard.SetTarget(animation, imageControl);
-            Storyboard.SetTargetProperty(animation, new PropertyPath(Image.SourceProperty));
-
-            var storyboard = new Storyboard();
-            storyboard.Children.Add(animation);
-            storyboard.RepeatBehavior = RepeatBehavior.Forever;
-            storyboard.Begin();
-            showList.Storyboard = storyboard;
-        }
-
         public void AnimateSelectedListItem(ShowList showList)
         {
             // Find the ListViewItem for the selected item
@@ -1736,7 +1709,7 @@ namespace Assets_Editor
                 var imageControl = Utils.FindVisualChild<Image>(listViewItem);
                 if (imageControl != null)
                 {
-                    List<BitmapImage> imageFrames = new List<BitmapImage>();
+                    showList.Images.Clear();
 
                     Appearance appearance = null;
 
@@ -1749,15 +1722,13 @@ namespace Assets_Editor
                     else if (ObjectMenu.SelectedIndex == 3)
                         appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
 
-                    TimeSpan frameRate = TimeSpan.FromMilliseconds(200);
-
                     for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.PatternFrames; i++)
                     {
                         BitmapImage imageFrame = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearance, MainWindow.MainSprStorage, i));
-                        imageFrames.Add(imageFrame);
+                        showList.Images.Add(imageFrame);
                     }
 
-                    StartSpriteAnimation(imageControl, frameRate, showList, imageFrames);
+                    showList.StartAnimation();
                 }
             }
         }

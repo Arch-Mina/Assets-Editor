@@ -254,16 +254,17 @@ namespace Assets_Editor
                     ShowList item = (ShowList)ObjListView.Items[i];
                     if (i >= offset && i < Math.Min(offset + 20, ObjListView.Items.Count))
                     {
+                        Appearance appearance = null;
                         try
                         {
                             if (ObjectMenu.SelectedIndex == 0)
-                                ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)MainWindow.appearances.Outfit[i].FrameGroup[0].SpriteInfo.SpriteId[0]));
+                                appearance = MainWindow.appearances.Outfit[i];
                             else if (ObjectMenu.SelectedIndex == 1)
-                                ThingsItem[i].Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)MainWindow.appearances.Object[i].FrameGroup[0].SpriteInfo.SpriteId[0]));
+                                appearance = MainWindow.appearances.Object[i];
                             else if (ObjectMenu.SelectedIndex == 2)
-                                ThingsEffect[i].Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)MainWindow.appearances.Effect[i].FrameGroup[0].SpriteInfo.SpriteId[0]));
+                                appearance = MainWindow.appearances.Effect[i];
                             else if (ObjectMenu.SelectedIndex == 3)
-                                ThingsMissile[i].Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)MainWindow.appearances.Missile[i].FrameGroup[0].SpriteInfo.SpriteId[0]));
+                                appearance = MainWindow.appearances.Missile[i];
                         }
                         catch (Exception)
                         {
@@ -273,6 +274,7 @@ namespace Assets_Editor
                     }
                     else
                     {
+                        item.StopAnimation();
                         if (ObjectMenu.SelectedIndex == 0)
                             ThingsOutfit[i].Image = null;
                         else if (ObjectMenu.SelectedIndex == 1)
@@ -281,12 +283,6 @@ namespace Assets_Editor
                             ThingsEffect[i].Image = null;
                         else if (ObjectMenu.SelectedIndex == 3)
                             ThingsMissile[i].Image = null;
-
-                        if (item.Storyboard != null)
-                        {
-                            item.Storyboard.Stop();
-                        }
-
                     }
                 }
             }
@@ -2836,31 +2832,6 @@ namespace Assets_Editor
             }
         }
 
-
-        private void StartSpriteAnimation(Image imageControl, TimeSpan frameRate, ShowList showList, IEnumerable<BitmapImage> imageFrames)
-        {
-            if (imageControl == null) throw new ArgumentNullException(nameof(imageControl));
-
-            var animation = new ObjectAnimationUsingKeyFrames();
-            TimeSpan currentTime = TimeSpan.Zero;
-
-            foreach (BitmapImage imageFrame in imageFrames)
-            {
-                var keyFrame = new DiscreteObjectKeyFrame(imageFrame, currentTime);
-                animation.KeyFrames.Add(keyFrame);
-                currentTime += frameRate;
-            }
-
-            Storyboard.SetTarget(animation, imageControl);
-            Storyboard.SetTargetProperty(animation, new PropertyPath(Image.SourceProperty));
-
-            var storyboard = new Storyboard();
-            storyboard.Children.Add(animation);
-            storyboard.RepeatBehavior = RepeatBehavior.Forever;
-            storyboard.Begin();
-            showList.Storyboard = storyboard;
-        }
-
         private void AnimateSelectedListItem(ShowList showList)
         {
             // Find the ListViewItem for the selected item
@@ -2871,7 +2842,7 @@ namespace Assets_Editor
                 var imageControl = Utils.FindVisualChild<Image>(listViewItem);
                 if (imageControl != null)
                 {
-                    List<BitmapImage> imageFrames = new List<BitmapImage>();
+                    showList.Images.Clear();
 
                     Appearance appearance = null;
 
@@ -2884,15 +2855,13 @@ namespace Assets_Editor
                     else if (ObjectMenu.SelectedIndex == 3)
                         appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
 
-                    TimeSpan frameRate = TimeSpan.FromMilliseconds(200);
-
                     try
                     {
                         for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.SpriteId.Count; i++)
                         {
                             int index = GetSpriteIndex(appearance.FrameGroup[0], 0, (ObjectMenu.SelectedIndex == 0 || ObjectMenu.SelectedIndex == 2) ? (int)Math.Min(2, appearance.FrameGroup[0].SpriteInfo.PatternWidth - 1) : 0, ObjectMenu.SelectedIndex == 2 ? (int)Math.Min(1, appearance.FrameGroup[0].SpriteInfo.PatternHeight - 1) : 0, 0, i);
                             BitmapImage imageFrame = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)appearance.FrameGroup[0].SpriteInfo.SpriteId[index]));
-                            imageFrames.Add(imageFrame);
+                            showList.Images.Add(imageFrame);
                         }
                     }
                     catch
@@ -2900,7 +2869,7 @@ namespace Assets_Editor
                         MainWindow.Log("Error animation for sprite " + appearance.Id + ", crash prevented.");
                     }
 
-                    StartSpriteAnimation(imageControl, frameRate, showList, imageFrames);
+                    showList.StartAnimation();
                 }
             }
         }
