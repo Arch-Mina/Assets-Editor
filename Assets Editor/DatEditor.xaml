@@ -13,6 +13,7 @@
         <local:ArithmeticConverter x:Key="ArithmeticConverter" />
         <local:NullableColorToBrushConverter x:Key="NullableColorToBrushConverter" />
         <local:BooleanInverter x:Key="BooleanInverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
     <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch" IsHitTestVisible="{Binding ElementName=ComppileDialogHost, Path=IsOpen, Mode=OneWay, Converter={StaticResource BooleanInverter}}">
         <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray" >
@@ -144,6 +145,13 @@
                                         <Setter Property="Visibility" Value="Collapsed" />
                                     </Style>
                                 </GridView.ColumnHeaderContainerStyle>
+                                <GridViewColumn Header="Exported" Width="20">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Ellipse Width="7" Height="7" Fill="Blue" ToolTip="Export List" Visibility="{Binding Exported, Converter={StaticResource BoolToVis}, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
                                 <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
                                 <GridViewColumn Header="Sprite" Width="90">
                                     <GridViewColumn.CellTemplate>

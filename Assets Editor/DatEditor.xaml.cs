@@ -2709,7 +2709,12 @@ namespace Assets_Editor
                         {
                             exportObjects.Outfit.Add(appearance);
                             AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") + 1;
-
+                        }
+                        else
+                        {
+                            var remove = exportObjects.Outfit.First(a => a.Id == appearance.Id);
+                            exportObjects.Outfit.Remove(remove);
+                            AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") - 1;
                         }
                     }
                     else if (ObjectMenu.SelectedIndex == 1)
@@ -2720,6 +2725,12 @@ namespace Assets_Editor
                             exportObjects.Object.Add(appearance);
                             AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") + 1;
                         }
+                        else
+                        {
+                            var remove = exportObjects.Object.First(a => a.Id == appearance.Id);
+                            exportObjects.Object.Remove(remove);
+                            AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") - 1;
+                        }
                     }
                     else if (ObjectMenu.SelectedIndex == 2)
                     {
@@ -2729,7 +2740,13 @@ namespace Assets_Editor
                             exportObjects.Effect.Add(appearance);
                             AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") + 1;
                         }
-                        
+                        else
+                        {
+                            var remove = exportObjects.Effect.First(a => a.Id == appearance.Id);
+                            exportObjects.Effect.Remove(remove);
+                            AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") - 1;
+                        }
+
                     }
                     else if (ObjectMenu.SelectedIndex == 3)
                     {
@@ -2739,7 +2756,13 @@ namespace Assets_Editor
                             exportObjects.Missile.Add(appearance);
                             AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") + 1;
                         }
-                        
+                        else
+                        {
+                            var remove = exportObjects.Missile.First(a => a.Id == appearance.Id);
+                            exportObjects.Missile.Remove(remove);
+                            AddExportObjectCounter.Badge = int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") - 1;
+                        }
+
                     }
 
                     for (int i = 0; i < appearance.FrameGroup.Count; i++)
@@ -2752,6 +2775,7 @@ namespace Assets_Editor
                             exportSprCounter++;
                         }
                     }
+                    AnimateSelectedListItem(item);
                 }
             }
         }
@@ -2774,6 +2798,7 @@ namespace Assets_Editor
                 AddExportObjectCounter.Badge = 0;
                 exportSprCounter = 0;
                 exportObjects = new Appearances();
+                ObjListView_ScrollChanged(ObjListView, null!);
                 StatusBar.MessageQueue.Enqueue($"Successfully exported objects.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
@@ -2783,6 +2808,7 @@ namespace Assets_Editor
             AddExportObjectCounter.Badge = 0;
             exportSprCounter = 0;
             exportObjects = new Appearances();
+            ObjListView_ScrollChanged(ObjListView, null!);
         }
 
         private void A_FlagIdCheck_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2845,15 +2871,27 @@ namespace Assets_Editor
                     showList.Images.Clear();
 
                     Appearance appearance = null;
-
+                    bool exported = false;
                     if (ObjectMenu.SelectedIndex == 0)
+                    {
                         appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == showList.Id);
+                        exported = exportObjects.Outfit.Any(a => a.Id == appearance.Id);
+                    }
                     else if (ObjectMenu.SelectedIndex == 1)
+                    {
                         appearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == showList.Id);
+                        exported = exportObjects.Object.Any(a => a.Id == appearance.Id);
+                    }
                     else if (ObjectMenu.SelectedIndex == 2)
+                    {
                         appearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == showList.Id);
+                        exported = exportObjects.Effect.Any(a => a.Id == appearance.Id);
+                    }
                     else if (ObjectMenu.SelectedIndex == 3)
+                    {
                         appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
+                        exported = exportObjects.Missile.Any(a => a.Id == appearance.Id);
+                    }
 
                     try
                     {
@@ -2870,6 +2908,7 @@ namespace Assets_Editor
                     }
 
                     showList.StartAnimation();
+                    showList.Exported = exported;
                 }
             }
         }

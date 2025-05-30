@@ -19,6 +19,7 @@ namespace Assets_Editor
         private Timer animationTimer;
         private int currentFrameIndex;
         private const double frameInterval = 100;
+        private bool exported;
         public uint Id
         {
             get => id;
@@ -65,6 +66,18 @@ namespace Assets_Editor
                 {
                     image = value;
                     NotifyPropertyChanged(nameof(image));
+                }
+            }
+        }
+        public bool Exported
+        {
+            get => exported;
+            set
+            {
+                if (exported != value)
+                {
+                    exported = value;
+                    NotifyPropertyChanged(nameof(exported));
                 }
             }
         }
