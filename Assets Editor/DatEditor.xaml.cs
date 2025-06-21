@@ -1072,6 +1072,8 @@ namespace Assets_Editor
 
         private void ObjectSave_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            BoxPerDirection.CommitEdit(DataGridEditingUnit.Cell, true);  
+            BoxPerDirection.CommitEdit(DataGridEditingUnit.Row, true);
             if (!string.IsNullOrWhiteSpace(A_FlagName.Text))
                 CurrentObjectAppearance.Name = A_FlagName.Text;
 
