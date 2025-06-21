@@ -1074,6 +1074,14 @@ namespace Assets_Editor
         {
             BoxPerDirection.CommitEdit(DataGridEditingUnit.Cell, true);  
             BoxPerDirection.CommitEdit(DataGridEditingUnit.Row, true);
+            if (A_SprBounding.Value.HasValue)  
+            {  
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingSquare = (uint)A_SprBounding.Value.Value;  
+            }  
+            else  
+            {  
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.ClearBoundingSquare();  
+            }
             if (!string.IsNullOrWhiteSpace(A_FlagName.Text))
                 CurrentObjectAppearance.Name = A_FlagName.Text;
 
