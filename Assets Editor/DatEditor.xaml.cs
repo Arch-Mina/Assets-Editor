@@ -979,7 +979,7 @@ namespace Assets_Editor
             {
                 CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Clear();
                 foreach (var box in BoundingBoxList)
-                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Add(box);
+                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Add(new Box() { X = box.X, Y = box.Y, Width = box.Width, Height = box.Height });
             }
         }
         private void FixSpritesCount()
@@ -1068,10 +1068,23 @@ namespace Assets_Editor
                 SpriteFrameAnimationGroup.IsEnabled = A_SprAnimation.Value > 1;
                 SprFramesSlider.Maximum = (double)A_SprAnimation.Value - 1;
             }
+            else if (frameworkElement.Name == "A_SprBounding")
+            {
+                if (A_SprBounding.Value.HasValue && A_SprBounding.Value != 0)
+                {
+                    spriteInfo.BoundingSquare = (uint)A_SprBounding.Value;
+                }
+                else
+                {
+                    spriteInfo.ClearBoundingSquare();
+                }
+            }
         }
 
         private void ObjectSave_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            BoxPerDirection.CommitEdit(DataGridEditingUnit.Cell, true);
+            BoxPerDirection.CommitEdit(DataGridEditingUnit.Row, true);
             if (!string.IsNullOrWhiteSpace(A_FlagName.Text))
                 CurrentObjectAppearance.Name = A_FlagName.Text;
 
@@ -3194,5 +3207,17 @@ namespace Assets_Editor
             }
             return newBitmap;
         }
+
+        private void BoxPerDirection_Delete(object sender, RoutedEventArgs e)
+        {
+            if (BoxPerDirection.SelectedItem is Box box)
+            {
+                BoundingBoxList.Remove(box);
+                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Clear();
+                foreach (var boxItem in BoundingBoxList)
+                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Add(boxItem);
+            }
+        }
+
     }
 }

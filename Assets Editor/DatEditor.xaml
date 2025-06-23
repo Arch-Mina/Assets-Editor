@@ -659,7 +659,12 @@
                                     </StackPanel>
                                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Margin="5,25,5,0">
                                         <Label Content="Bounding box per direction"/>
-                                        <DataGrid x:Name="BoxPerDirection" Height="200" HorizontalAlignment="Left" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" RowEditEnding="BoxPerDirection_RowEditEnding" CanUserSortColumns="False">
+                                        <DataGrid x:Name="BoxPerDirection" Height="200" HorizontalAlignment="Left" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" RowEditEnding="BoxPerDirection_RowEditEnding" CanUserSortColumns="False" CanUserDeleteRows="False">
+                                            <DataGrid.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Delete Row" Click="BoxPerDirection_Delete"/>
+                                                </ContextMenu>
+                                            </DataGrid.ContextMenu>
                                             <DataGrid.ColumnHeaderStyle>
                                                 <Style TargetType="DataGridColumnHeader">
                                                     <Setter Property="FontSize" Value="10"/>
