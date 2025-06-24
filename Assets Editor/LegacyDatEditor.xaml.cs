@@ -129,7 +129,7 @@ namespace Assets_Editor
                     ObjListView.ItemsSource = ThingsEffect;
                 else if (selection == 3)
                     ObjListView.ItemsSource = ThingsMissile;
-                    
+
                 ObjListView.SelectedIndex = 0;
             }
         }
