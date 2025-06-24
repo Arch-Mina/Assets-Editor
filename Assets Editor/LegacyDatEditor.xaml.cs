@@ -129,7 +129,9 @@ namespace Assets_Editor
                     ObjListView.ItemsSource = ThingsEffect;
                 else if (selection == 3)
                     ObjListView.ItemsSource = ThingsMissile;
-
+                ObjListView.SelectedIndex = 0;
+            }
+        }
         private void SprListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             VirtualizingStackPanel panel = Utils.FindVisualChild<VirtualizingStackPanel>(SprListView);
