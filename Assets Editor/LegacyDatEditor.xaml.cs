@@ -113,39 +113,23 @@ namespace Assets_Editor
             SprListView.ItemsSource = MainWindow.AllSprList;
             UpdateShowList(ObjectMenu.SelectedIndex);
         }
-        private void UpdateShowList(int selection, uint? preserveId = null)
+        public void UpdateShowList(int selection)
         {
             if (ObjListView != null)
             {
                 ObjListViewSelectedIndex.Minimum = 1;
                 if (selection == 0)
-                    ObjListView.ItemsSource = ThingsOutfit.OrderBy(x => x.Id);
+                    ObjListView.ItemsSource = ThingsOutfit;
                 else if (selection == 1)
                 {
-                    ObjListView.ItemsSource = ThingsItem.OrderBy(x => x.Id);
+                    ObjListView.ItemsSource = ThingsItem;
                     ObjListViewSelectedIndex.Minimum = 100;
                 }
                 else if (selection == 2)
-                    ObjListView.ItemsSource = ThingsEffect.OrderBy(x => x.Id);
+                    ObjListView.ItemsSource = ThingsEffect;
                 else if (selection == 3)
-                    ObjListView.ItemsSource = ThingsMissile.OrderBy(x => x.Id);
-                if (preserveId.HasValue)  
-                {  
-                    foreach (ShowList item in ObjListView.Items)  
-                    {  
-                        if (item.Id == preserveId.Value)  
-                        {  
-                            ObjListView.SelectedItem = item;  
-                             
-                            ObjListView.ScrollIntoView(item);  
-                            
-                            return;  
-                        }  
-                    }  
-                }
-                ObjListView.SelectedIndex = 0;
-            }
-        }
+                    ObjListView.ItemsSource = ThingsMissile;
+
         private void SprListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             VirtualizingStackPanel panel = Utils.FindVisualChild<VirtualizingStackPanel>(SprListView);
@@ -1154,7 +1138,6 @@ namespace Assets_Editor
 
             ShowList showList = ObjListView.SelectedItem as ShowList;
             AnimateSelectedListItem(showList);
-            UpdateShowList(ObjectMenu.SelectedIndex, CurrentObjectAppearance.Id);
 
             StatusBar.MessageQueue.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
@@ -1530,7 +1513,6 @@ namespace Assets_Editor
                     }
 
                 }
-                CollectionViewSource.GetDefaultView(ObjListView.ItemsSource).Refresh();
                 ObjListView.SelectedItem = ObjListView.Items[^1];
                 StatusBar.MessageQueue.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
