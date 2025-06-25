@@ -148,23 +148,37 @@ namespace Assets_Editor
             SprListView.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(SprListView_MouseLeftButtonDown), true);
             UpdateShowList(ObjectMenu.SelectedIndex);
         }
-        private void UpdateShowList(int selection)
+        private void UpdateShowList(int selection, uint? preserveId = null)
         {
             if (ObjListView != null)
             {
                 ObjListViewSelectedIndex.Minimum = 1;
                 if (selection == 0)
-                    ObjListView.ItemsSource = ThingsOutfit;
+                    ObjListView.ItemsSource = ThingsOutfit.OrderBy(x => x.Id);
                 else if (selection == 1)
                 {
-                    ObjListView.ItemsSource = ThingsItem;
+                    ObjListView.ItemsSource = ThingsItem.OrderBy(x => x.Id);
                     ObjListViewSelectedIndex.Minimum = 100;
                 }
                 else if (selection == 2)
-                    ObjListView.ItemsSource = ThingsEffect;
+                    ObjListView.ItemsSource = ThingsEffect.OrderBy(x => x.Id);
                 else if (selection == 3)
-                    ObjListView.ItemsSource = ThingsMissile;
-
+                    ObjListView.ItemsSource = ThingsMissile.OrderBy(x => x.Id);
+            
+                if (preserveId.HasValue) 
+                {  
+                    foreach (ShowList item in ObjListView.Items)  
+                    {  
+                        if (item.Id == preserveId.Value)  
+                        {  
+                            ObjListView.SelectedItem = item;  
+                            
+                            ObjListView.ScrollIntoView(item);  
+                            
+                            return;  
+                        }  
+                    }  
+                } 
                 ObjListView.SelectedIndex = 0;
             }
         }
@@ -1543,7 +1557,7 @@ namespace Assets_Editor
                     ThingsMissile = new ObservableCollection<ShowList>(ThingsMissile.OrderBy(item => item.Id));
                 }
             }
-
+            UpdateShowList(ObjectMenu.SelectedIndex, CurrentObjectAppearance.Id);
             AnimateSelectedListItem(showList);
 
             StatusBar.MessageQueue.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
@@ -2246,6 +2260,7 @@ namespace Assets_Editor
                 ThingsMissile.Add(new ShowList() { Id = newObject.Id });
 
             }
+            CollectionViewSource.GetDefaultView(ObjListView.ItemsSource).Refresh();
             ObjListView.SelectedItem = ObjListView.Items[^1];
 
             StatusBar.MessageQueue.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
