@@ -2309,6 +2309,7 @@ namespace Assets_Editor
                     }
 
                 }
+                CollectionViewSource.GetDefaultView(ObjListView.ItemsSource).Refresh();
                 ObjListView.SelectedItem = ObjListView.Items[^1];
                 StatusBar.MessageQueue.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
@@ -2317,42 +2318,89 @@ namespace Assets_Editor
         private void DeleteObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             List<ShowList> selectedItems = ObjListView.SelectedItems.Cast<ShowList>().ToList();
-            if (selectedItems.Any())
+            if (!selectedItems.Any()) return;
+
+            try
             {
-                ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
-                int currentIndex = ObjListView.SelectedIndex;
+                // Find the smallest ID that will be deleted
+                uint minDeletedId = selectedItems.Min(item => item.Id);
+
+                // Find the previous ID (largest ID smaller than the deleted one)
+                uint? targetId = null;
+
+                if (ObjectMenu.SelectedIndex == 0)
+                    targetId = ThingsOutfit.Where(item => item.Id < minDeletedId && !selectedItems.Contains(item))
+                                        .OrderByDescending(item => item.Id)
+                                        .FirstOrDefault()?.Id;
+                else if (ObjectMenu.SelectedIndex == 1)
+                    targetId = ThingsItem.Where(item => item.Id < minDeletedId && !selectedItems.Contains(item))
+                                        .OrderByDescending(item => item.Id)
+                                        .FirstOrDefault()?.Id;
+                else if (ObjectMenu.SelectedIndex == 2)
+                    targetId = ThingsEffect.Where(item => item.Id < minDeletedId && !selectedItems.Contains(item))
+                                        .OrderByDescending(item => item.Id)
+                                        .FirstOrDefault()?.Id;
+                else if (ObjectMenu.SelectedIndex == 3)
+                    targetId = ThingsMissile.Where(item => item.Id < minDeletedId && !selectedItems.Contains(item))
+                                            .OrderByDescending(item => item.Id)
+                                            .FirstOrDefault()?.Id;
+
+                // Disable events temporarily to avoid selection changes
+                ObjListView.SelectionChanged -= ObjListView_SelectionChanged;
+
                 foreach (var item in selectedItems)
                 {
-                    Appearance DelObject = new Appearance();
                     if (ObjectMenu.SelectedIndex == 0)
                     {
-                        DelObject = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id);
-                        MainWindow.appearances.Outfit.Remove(DelObject);
-                        ThingsOutfit.Remove(item);
+                        var delObject = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id);
+                        if (delObject != null)
+                        {
+                            MainWindow.appearances.Outfit.Remove(delObject);
+                            ThingsOutfit.Remove(item);
+                        }
                     }
                     else if (ObjectMenu.SelectedIndex == 1)
                     {
-                        DelObject = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id);
-                        MainWindow.appearances.Object.Remove(DelObject);
-                        ThingsItem.Remove(item);
+                        var delObject = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id);
+                        if (delObject != null)
+                        {
+                            MainWindow.appearances.Object.Remove(delObject);
+                            ThingsItem.Remove(item);
+                        }
                     }
                     else if (ObjectMenu.SelectedIndex == 2)
                     {
-                        DelObject = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id);
-                        MainWindow.appearances.Effect.Remove(DelObject);
-                        ThingsEffect.Remove(item);
-
+                        var delObject = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id);
+                        if (delObject != null)
+                        {
+                            MainWindow.appearances.Effect.Remove(delObject);
+                            ThingsEffect.Remove(item);
+                        }
                     }
                     else if (ObjectMenu.SelectedIndex == 3)
                     {
-                        DelObject = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id);
-                        MainWindow.appearances.Missile.Remove(DelObject);
-                        ThingsMissile.Remove(item);
-
+                        var delObject = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id);
+                        if (delObject != null)
+                        {
+                            MainWindow.appearances.Missile.Remove(delObject);
+                            ThingsMissile.Remove(item);
+                        }
                     }
                 }
-                ObjListView.SelectedIndex = Math.Min(currentIndex, ObjListView.Items.Count - 1);
+
+                // Re-enable events to restore selection behavior
+                ObjListView.SelectionChanged += ObjListView_SelectionChanged;
+
+                // Update the list while preserving the previous ID
+                UpdateShowList(ObjectMenu.SelectedIndex, targetId);
+
                 StatusBar.MessageQueue.Enqueue($"Successfully deleted {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
+            catch (Exception ex)
+            {
+                MainWindow.Log($"Error during object deletion: {ex.Message}", "Error");
+                ObjListView.SelectionChanged += ObjListView_SelectionChanged;
+                UpdateShowList(ObjectMenu.SelectedIndex);
             }
         }
 
@@ -2717,6 +2765,7 @@ namespace Assets_Editor
                         ThingsMissile.Add(new ShowList() { Id = appearance.Id });
                     }
                 }
+                UpdateShowList(ObjectMenu.SelectedIndex);
             }
         }
 
@@ -2900,42 +2949,53 @@ namespace Assets_Editor
 
                     Appearance appearance = null;
                     bool exported = false;
+                    
                     if (ObjectMenu.SelectedIndex == 0)
                     {
                         appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == showList.Id);
-                        exported = exportObjects.Outfit.Any(a => a.Id == appearance.Id);
+                        exported = appearance != null && exportObjects.Outfit.Any(a => a.Id == appearance.Id);
                     }
                     else if (ObjectMenu.SelectedIndex == 1)
                     {
                         appearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == showList.Id);
-                        exported = exportObjects.Object.Any(a => a.Id == appearance.Id);
+                        exported = appearance != null && exportObjects.Object.Any(a => a.Id == appearance.Id);
                     }
                     else if (ObjectMenu.SelectedIndex == 2)
                     {
                         appearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == showList.Id);
-                        exported = exportObjects.Effect.Any(a => a.Id == appearance.Id);
+                        exported = appearance != null && exportObjects.Effect.Any(a => a.Id == appearance.Id);
                     }
                     else if (ObjectMenu.SelectedIndex == 3)
                     {
                         appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
-                        exported = exportObjects.Missile.Any(a => a.Id == appearance.Id);
+                        exported = appearance != null && exportObjects.Missile.Any(a => a.Id == appearance.Id);
                     }
-
-                    try
+                    
+                    // Complete verification before processing
+                    if (appearance != null && 
+                        appearance.FrameGroup != null && 
+                        appearance.FrameGroup.Count > 0 && 
+                        appearance.FrameGroup[0] != null &&
+                        appearance.FrameGroup[0].SpriteInfo != null && 
+                        appearance.FrameGroup[0].SpriteInfo.SpriteId != null && 
+                        appearance.FrameGroup[0].SpriteInfo.SpriteId.Count > 0)
                     {
-                        for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.SpriteId.Count; i++)
+                        try
                         {
-                            int index = GetSpriteIndex(appearance.FrameGroup[0], 0, (ObjectMenu.SelectedIndex == 0 || ObjectMenu.SelectedIndex == 2) ? (int)Math.Min(2, appearance.FrameGroup[0].SpriteInfo.PatternWidth - 1) : 0, ObjectMenu.SelectedIndex == 2 ? (int)Math.Min(1, appearance.FrameGroup[0].SpriteInfo.PatternHeight - 1) : 0, 0, i);
-                            BitmapImage imageFrame = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)appearance.FrameGroup[0].SpriteInfo.SpriteId[index]));
-                            showList.Images.Add(imageFrame);
+                            for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.SpriteId.Count; i++)
+                            {
+                                int index = GetSpriteIndex(appearance.FrameGroup[0], 0, (ObjectMenu.SelectedIndex == 0 || ObjectMenu.SelectedIndex == 2) ? (int)Math.Min(2, appearance.FrameGroup[0].SpriteInfo.PatternWidth - 1) : 0, ObjectMenu.SelectedIndex == 2 ? (int)Math.Min(1, appearance.FrameGroup[0].SpriteInfo.PatternHeight - 1) : 0, 0, i);
+                                BitmapImage imageFrame = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)appearance.FrameGroup[0].SpriteInfo.SpriteId[index]));
+                                showList.Images.Add(imageFrame);
+                            }
+                            showList.StartAnimation();
+                        }
+                        catch (Exception ex)
+                        {
+                            MainWindow.Log($"Error animation for sprite {appearance.Id}: {ex.Message}", "Error");
                         }
                     }
-                    catch
-                    {
-                        MainWindow.Log("Error animation for sprite " + appearance.Id + ", crash prevented.");
-                    }
-
-                    showList.StartAnimation();
+                    
                     showList.Exported = exported;
                 }
             }
