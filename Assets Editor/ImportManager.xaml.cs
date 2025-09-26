@@ -100,19 +100,19 @@ namespace Assets_Editor
                         }
 
                     });
-                    foreach (var outfit in ImportAppearances.Outfit)
+                    foreach (var outfit in ImportAppearances.Outfit.OrderBy(x => x.Id))
                     {
                         ThingsOutfit.Add(new ShowList() { Id = outfit.Id });
                     }
-                    foreach (var item in ImportAppearances.Object)
+                    foreach (var item in ImportAppearances.Object.OrderBy(x => x.Id))
                     {
                         ThingsItem.Add(new ShowList() { Id = item.Id });
                     }
-                    foreach (var effect in ImportAppearances.Effect)
+                    foreach (var effect in ImportAppearances.Effect.OrderBy(x => x.Id))
                     {
                         ThingsEffect.Add(new ShowList() { Id = effect.Id });
                     }
-                    foreach (var missile in ImportAppearances.Missile)
+                    foreach (var missile in ImportAppearances.Missile.OrderBy(x => x.Id))
                     {
                         ThingsMissile.Add(new ShowList() { Id = missile.Id });
                     }
