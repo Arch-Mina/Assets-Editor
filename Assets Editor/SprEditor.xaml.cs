@@ -400,7 +400,7 @@ namespace Assets_Editor
                     File = "",
                     SpriteType = SprType,
                     FirstSpriteid = AllSprList.Count,
-                    LastSpriteid = AllSprList.Count + images.Count,
+                    LastSpriteid = AllSprList.Count + images.Count - 1,
                     Area = 0
                 };
 
@@ -462,7 +462,7 @@ namespace Assets_Editor
 
                 if (CurrentSheet == null)
                 {
-                    for (int i = sprInfo.FirstSpriteid; i < sprInfo.LastSpriteid; i++)
+                    for (int i = sprInfo.FirstSpriteid; i <= sprInfo.LastSpriteid; i++)
                     {
                         AllSprList.Add(new ShowList() { Id = (uint)i });
                     }
