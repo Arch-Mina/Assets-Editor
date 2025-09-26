@@ -462,7 +462,7 @@ namespace Assets_Editor
 
                 if (CurrentSheet == null)
                 {
-                    for (int i = sprInfo.FirstSpriteid; i < sprInfo.LastSpriteid; i++)
+                    for (int i = sprInfo.FirstSpriteid; i <= sprInfo.LastSpriteid; i++)
                     {
                         AllSprList.Add(new ShowList() { Id = (uint)i });
                     }
