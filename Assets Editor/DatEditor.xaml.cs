@@ -563,6 +563,49 @@ namespace Assets_Editor
             A_FlagUpgradeClassification.IsChecked = CurrentObjectAppearance.Flags.Upgradeclassification != null;
             A_FlagUpgradeClassificationAmount.Value = (CurrentObjectAppearance.Flags.Upgradeclassification != null && CurrentObjectAppearance.Flags.Upgradeclassification.HasUpgradeClassification) ? (int)CurrentObjectAppearance.Flags.Upgradeclassification.UpgradeClassification : 0;
 
+            A_FlagSkillWheelGem.IsChecked = CurrentObjectAppearance.Flags.SkillwheelGem != null;
+            A_FlagGemQualityId.Value = (CurrentObjectAppearance.Flags.SkillwheelGem != null && CurrentObjectAppearance.Flags.SkillwheelGem.HasGemQualityId) ? (int)CurrentObjectAppearance.Flags.SkillwheelGem.GemQualityId : 0;
+            A_FlagGemVocationId.Value = (CurrentObjectAppearance.Flags.SkillwheelGem != null && CurrentObjectAppearance.Flags.SkillwheelGem.HasVocationId) ? (int)CurrentObjectAppearance.Flags.SkillwheelGem.VocationId : 0;
+
+            A_FlagDualWielding.IsChecked = CurrentObjectAppearance.Flags.HasDualWielding;
+            A_FlagMinimumLevel.Value = CurrentObjectAppearance.Flags.HasMinimumLevel ? (int)CurrentObjectAppearance.Flags.MinimumLevel : 0;
+            
+            A_FlagImbueable.IsChecked = CurrentObjectAppearance.Flags.Imbueable != null;
+            A_FlagImbueableSlotCount.Value = (CurrentObjectAppearance.Flags.Imbueable != null && CurrentObjectAppearance.Flags.Imbueable.HasSlotCount) ? (int)CurrentObjectAppearance.Flags.Imbueable.SlotCount : 0;
+
+            A_FlagProficiency.IsChecked = CurrentObjectAppearance.Flags.Proficiency != null;
+            A_FlagProficiencyId.Value = (CurrentObjectAppearance.Flags.Proficiency != null && CurrentObjectAppearance.Flags.Proficiency.HasProficiencyId) ? (int)CurrentObjectAppearance.Flags.Proficiency.ProficiencyId : 0;
+
+            A_FlagWeaponType.SelectedIndex = CurrentObjectAppearance.Flags.HasWeaponType ? (int)CurrentObjectAppearance.Flags.WeaponType : 0;
+
+            if(CurrentObjectAppearance.Flags.RestrictToVocation != null)
+            {
+                A_FlagRestrictVocAny.IsChecked = false;
+                A_FlagRestrictVocNone.IsChecked = false;
+                A_FlagRestrictVocKnight.IsChecked = false;
+                A_FlagRestrictVocPaladin.IsChecked = false;
+                A_FlagRestrictVocSorcerer.IsChecked = false;
+                A_FlagRestrictVocDruid.IsChecked = false;
+                A_FlagRestrictVocPromoted.IsChecked = false;
+                foreach (var profession in CurrentObjectAppearance.Flags.RestrictToVocation)
+                {
+                    if (profession == VOCATION.Any)
+                        A_FlagRestrictVocAny.IsChecked = true;
+                    else if (profession == VOCATION.None)
+                        A_FlagRestrictVocNone.IsChecked = true;
+                    else if (profession == VOCATION.Knight)
+                        A_FlagRestrictVocKnight.IsChecked = true;
+                    else if (profession == VOCATION.Paladin)
+                        A_FlagRestrictVocPaladin.IsChecked = true;
+                    else if (profession == VOCATION.Sorcerer)
+                        A_FlagRestrictVocSorcerer.IsChecked = true;
+                    else if (profession == VOCATION.Druid)
+                        A_FlagRestrictVocDruid.IsChecked = true;
+                    else if (profession == VOCATION.Promoted)
+                        A_FlagRestrictVocPromoted.IsChecked = true;
+                }
+            }
+
             NpcDataList.Clear();
 
             if (CurrentObjectAppearance.Flags.Npcsaledata.Count > 0)
@@ -1481,7 +1524,61 @@ namespace Assets_Editor
                     Level = (uint)A_FlagTransparencyLevel.Value
                 };
             }
-            else CurrentObjectAppearance.Flags.Transparencylevel = null;
+            else 
+                CurrentObjectAppearance.Flags.Transparencylevel = null;
+
+            if ((bool)A_FlagSkillWheelGem.IsChecked)
+            {
+                CurrentObjectAppearance.Flags.SkillwheelGem = new AppearanceFlagSkillWheelGem
+                {
+                    GemQualityId = (uint)A_FlagGemQualityId.Value,
+                    VocationId = (uint)A_FlagGemVocationId.Value
+                };
+            }
+            else
+                CurrentObjectAppearance.Flags.SkillwheelGem = null;
+
+            if ((bool)A_FlagDualWielding.IsChecked)
+                CurrentObjectAppearance.Flags.DualWielding = true;
+            else if (CurrentObjectAppearance.Flags.HasDualWielding)
+                CurrentObjectAppearance.Flags.ClearDualWielding();
+
+            if ((bool)A_FlagImbueable.IsChecked)
+                CurrentObjectAppearance.Flags.Imbueable = new AppearanceFlagImbueable
+                {
+                    SlotCount = (uint)A_FlagImbueableSlotCount.Value
+                };
+            else
+                CurrentObjectAppearance.Flags.Imbueable = null;
+
+            if ((bool)A_FlagProficiency.IsChecked)
+                CurrentObjectAppearance.Flags.Proficiency = new AppearanceFlagProficiency
+                {
+                    ProficiencyId = (uint)A_FlagProficiencyId.Value
+                };
+            else
+                CurrentObjectAppearance.Flags.Proficiency = null;
+
+            if (A_FlagMinimumLevel.Value > 0)
+                CurrentObjectAppearance.Flags.MinimumLevel = (uint)A_FlagMinimumLevel.Value;
+            else if (CurrentObjectAppearance.Flags.HasMinimumLevel)
+                CurrentObjectAppearance.Flags.ClearMinimumLevel();
+
+            if (A_FlagWeaponType.SelectedIndex > 0)
+                CurrentObjectAppearance.Flags.WeaponType = (WEAPON_TYPE)A_FlagWeaponType.SelectedIndex;
+            else if (CurrentObjectAppearance.Flags.HasWeaponType)
+                CurrentObjectAppearance.Flags.ClearWeaponType();
+
+            CurrentObjectAppearance.Flags.RestrictToVocation.Clear();
+            if ((bool)A_FlagRestrictVocAny.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Any);
+            if ((bool)A_FlagRestrictVocNone.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.None);
+            if ((bool)A_FlagRestrictVocKnight.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Knight);
+            if ((bool)A_FlagRestrictVocPaladin.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Paladin);
+            if ((bool)A_FlagRestrictVocSorcerer.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Sorcerer);
+            if ((bool)A_FlagRestrictVocDruid.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Druid);
+            if ((bool)A_FlagRestrictVocMonk.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Druid);
+            if ((bool)A_FlagRestrictVocPromoted.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Promoted);
+
 
             Appearance oldAppearance = null;
 

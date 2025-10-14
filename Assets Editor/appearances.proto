@@ -125,7 +125,14 @@ message AppearanceFlags {
     optional bool expire = 55;
     optional bool expirestop = 56;
     optional bool deco_item_kit = 57;
-    reserved 58 to 69;;
+    optional AppearanceFlagSkillWheelGem skillwheel_gem = 58;
+    optional bool dual_wielding = 59;
+    optional AppearanceFlagImbueable imbueable = 60;
+    optional AppearanceFlagProficiency proficiency = 61;
+    repeated VOCATION restrict_to_vocation = 62;
+    optional uint32 minimum_level = 63;
+    optional WEAPON_TYPE weapon_type = 64;
+    reserved 65 to 69;;
     optional bool hook_south = 70;
     optional bool hook_east = 71;
     optional AppearanceFlagTransparencyLevel transparencylevel = 72;
@@ -220,6 +227,20 @@ message SpecialMeaningAppearanceIds {
     optional uint32 stamped_letter_id = 5;
     optional uint32 supply_stash_id = 6;
     optional uint32 standard_reward_chest_id = 7;
+    optional uint32 blank_imbuement_scroll_id = 8;
+}
+
+message AppearanceFlagImbueable {
+  optional uint32 slot_count = 1;
+}
+
+message AppearanceFlagSkillWheelGem {
+  optional uint32 gem_quality_id = 1;
+  optional uint32 vocation_id = 2;
+}
+
+message AppearanceFlagProficiency {
+  optional uint32 proficiency_id = 1;
 }
 
 enum FIXED_FRAME_GROUP {
@@ -268,12 +289,8 @@ enum ITEM_CATEGORY {
     ITEM_CATEGORY_TIBIA_COINS = 23;
     ITEM_CATEGORY_CREATURE_PRODUCTS = 24;
     ITEM_CATEGORY_QUIVER = 25;
-    ITEM_CATEGORY_TWOHANDWEAPON = 26;
-    ITEM_CATEGORY_HELMETS = 27;
-    ITEM_CATEGORY_BACKPACK = 28;
-    ITEM_CATEGORY_ONEHANDWEAPON = 29;
-    ITEM_CATEGORY_ARROW = 30;
-    ITEM_CATEGORY_SOULCORES = 31;
+    ITEM_CATEGORY_SOUL_CORES = 26;
+    ITEM_CATEGORY_FIST_WEAPONS = 27;
 }
 
 enum VOCATION {
@@ -283,6 +300,7 @@ enum VOCATION {
     VOCATION_PALADIN = 2;
     VOCATION_SORCERER = 3;
     VOCATION_DRUID = 4;
+    VOCATION_MONK = 5;
     VOCATION_PROMOTED = 10;
 }
 
@@ -307,4 +325,16 @@ enum APPEARANCE_TYPE {
     APPEARANCE_OUTFIT = 2;
     APPEARANCE_EFFECT = 3;
     APPEARANCE_MISSILE = 4;
+}
+
+enum WEAPON_TYPE {
+  WEAPON_TYPE_NOWEAPON = 0;
+  WEAPON_TYPE_SWORD = 1;
+  WEAPON_TYPE_AXE = 2;
+  WEAPON_TYPE_CLUB = 3;
+  WEAPON_TYPE_FIST = 4;
+  WEAPON_TYPE_BOW = 5;
+  WEAPON_TYPE_CROSSBOW = 6;
+  WEAPON_TYPE_WAND_ROD = 7;
+  WEAPON_TYPE_THROW = 8;
 }

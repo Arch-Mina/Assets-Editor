@@ -434,6 +434,7 @@
                                                 <ComboBoxItem Content="Creature Products"/>
                                                 <ComboBoxItem Content="Quiver"/>
                                                 <ComboBoxItem Content="SoulCores"/>
+                                                <ComboBoxItem Content="FistWeapons"/>
                                             </ComboBox>
                                         </StackPanel>
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
@@ -494,8 +495,63 @@
                                             <xctk:IntegerUpDown x:Name="A_FlagCyclopediaItem" Margin="0,0,0,0" Width="80"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                            <CheckBox x:Name="A_FlagNPC" Content="Npc Sale Data" Margin="0,5,0,0" Width="150"/>
-                                            <CheckBox x:Name="A_FlagAmmo" Content="Ammo" Margin="0,5,0,0" Width="150"/>
+                                            <CheckBox x:Name="A_FlagNPC" Content="Npc Sale Data" Margin="0,0,0,0" Width="150"/>
+                                            <CheckBox x:Name="A_FlagAmmo" Content="Ammo" Margin="0,0,0,0" Width="150"/>
+                                        </StackPanel>
+                                        <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                            <CheckBox x:Name="A_FlagSkillWheelGem" Content="WheelGem" Width="90" Margin="0,0,0,0" Padding="4,0,0,0"/>
+                                            <Label Content="Quality Id:" Width="60" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagGemQualityId" Margin="0,0,0,0" Width="60" Minimum="0"/>
+                                            <Label Content="Voc Id:" Width="40" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagGemVocationId" Margin="0,0,0,0" Width="60" Minimum="0"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <CheckBox x:Name="A_FlagDualWielding" Content="Dual Wielding" Margin="0,0,0,0" Width="150"/>
+                                        </StackPanel>
+                                        <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                            <CheckBox x:Name="A_FlagImbueable" Content="Imbueable" Width="165" Margin="0,-1,0,0" Padding="4,0,0,0"/>
+                                            <Label Content="Slot Count:" Width="75" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagImbueableSlotCount" Margin="0,0,0,0" Width="80" Minimum="0"/>
+                                        </StackPanel>
+                                        <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                            <CheckBox x:Name="A_FlagProficiency" Content="Proficiency" Width="165" Margin="0,-1,0,0" Padding="4,0,0,0"/>
+                                            <Label Content="Proficiency Id:" Width="85" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagProficiencyId" Margin="0,0,0,0" Width="70" Minimum="0"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <Label Content="Minimum Level:" Width="110" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagMinimumLevel" Margin="0,0,0,0" Width="100" Minimum="0"/>
+                                        </StackPanel>
+                                        <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                            <Label Content="Weapon Type:" Width="110" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <ComboBox x:Name="A_FlagWeaponType" Width="100" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
+                                                <ComboBoxItem Content="No Weapon"/>
+                                                <ComboBoxItem Content="Sword"/>
+                                                <ComboBoxItem Content="Axe"/>
+                                                <ComboBoxItem Content="Club"/>
+                                                <ComboBoxItem Content="Fist"/>
+                                                <ComboBoxItem Content="Bow"/>
+                                                <ComboBoxItem Content="CrossBow"/>
+                                                <ComboBoxItem Content="Wand/Rod"/>
+                                                <ComboBoxItem Content="Throw"/>
+                                            </ComboBox>
+                                        </StackPanel>
+                                        <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="40" Margin="0,5,0,0">
+                                            <Label Content="Restrict Vocation:" Width="110" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <ComboBox x:Name="A_FlagRestrictVocation" Width="100" BorderThickness="1,1,1,1" SelectedIndex="0" Height="40" Padding="6,1,5,3" IsReadOnly="True">
+                                                <ComboBoxItem>
+                                                    <StackPanel Orientation="Vertical">
+                                                        <CheckBox x:Name="A_FlagRestrictVocAny" Content="Any"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocNone" Content="None"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocKnight" Content="Knight"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocPaladin" Content="Paladin"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocSorcerer" Content="Sorcerer"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocDruid" Content="Druid"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocMonk" Content="Monk"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocPromoted" Content="Promoted"/>
+                                                    </StackPanel>
+                                                </ComboBoxItem>
+                                            </ComboBox>
                                         </StackPanel>
                                         <DataGrid x:Name="A_FlagNPCData" Height="153" HorizontalAlignment="Left" Margin="0,5,0,0" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="true" CanUserResizeRows="False" FontSize="11">
                                             <DataGrid.ColumnHeaderStyle>

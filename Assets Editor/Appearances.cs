@@ -62,7 +62,7 @@ namespace Tibia.Protobuf.Appearances {
             "cGVhcmFuY2VGbGFncxIMCgRuYW1lGAQgASgJEhMKC2Rlc2NyaXB0aW9uGAUg",
             "ASgJEkQKD2FwcGVhcmFuY2VfdHlwZRgGIAEoDjIrLnRpYmlhLnByb3RvYnVm",
             "LmFwcGVhcmFuY2VzLkFQUEVBUkFOQ0VfVFlQRRITCgtzcHJpdGVfZGF0YRgH",
-            "IAMoDCKpEAoPQXBwZWFyYW5jZUZsYWdzEjwKBGJhbmsYASABKAsyLi50aWJp",
+            "IAMoDCK+EwoPQXBwZWFyYW5jZUZsYWdzEjwKBGJhbmsYASABKAsyLi50aWJp",
             "YS5wcm90b2J1Zi5hcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ0JhbmsSDAoE",
             "Y2xpcBgCIAEoCBIOCgZib3R0b20YAyABKAgSCwoDdG9wGAQgASgIEhEKCWNv",
             "bnRhaW5lchgFIAEoCBISCgpjdW11bGF0aXZlGAYgASgIEg4KBnVzYWJsZRgH",
@@ -105,10 +105,19 @@ namespace Tibia.Protobuf.Appearances {
             "GDIgASgIEhwKFHJldmVyc2VfYWRkb25zX3NvdXRoGDMgASgIEhwKFHJldmVy",
             "c2VfYWRkb25zX25vcnRoGDQgASgIEg8KB3dlYXJvdXQYNSABKAgSEwoLY2xv",
             "Y2tleHBpcmUYNiABKAgSDgoGZXhwaXJlGDcgASgIEhIKCmV4cGlyZXN0b3AY",
-            "OCABKAgSFQoNZGVjb19pdGVtX2tpdBg5IAEoCBISCgpob29rX3NvdXRoGEYg",
+            "OCABKAgSFQoNZGVjb19pdGVtX2tpdBg5IAEoCBJPCg5za2lsbHdoZWVsX2dl",
+            "bRg6IAEoCzI3LnRpYmlhLnByb3RvYnVmLmFwcGVhcmFuY2VzLkFwcGVhcmFu",
+            "Y2VGbGFnU2tpbGxXaGVlbEdlbRIVCg1kdWFsX3dpZWxkaW5nGDsgASgIEkYK",
+            "CWltYnVlYWJsZRg8IAEoCzIzLnRpYmlhLnByb3RvYnVmLmFwcGVhcmFuY2Vz",
+            "LkFwcGVhcmFuY2VGbGFnSW1idWVhYmxlEkoKC3Byb2ZpY2llbmN5GD0gASgL",
+            "MjUudGliaWEucHJvdG9idWYuYXBwZWFyYW5jZXMuQXBwZWFyYW5jZUZsYWdQ",
+            "cm9maWNpZW5jeRJCChRyZXN0cmljdF90b192b2NhdGlvbhg+IAMoDjIkLnRp",
+            "YmlhLnByb3RvYnVmLmFwcGVhcmFuY2VzLlZPQ0FUSU9OEhUKDW1pbmltdW1f",
+            "bGV2ZWwYPyABKA0SPAoLd2VhcG9uX3R5cGUYQCABKA4yJy50aWJpYS5wcm90",
+            "b2J1Zi5hcHBlYXJhbmNlcy5XRUFQT05fVFlQRRISCgpob29rX3NvdXRoGEYg",
             "ASgIEhEKCWhvb2tfZWFzdBhHIAEoCBJWChF0cmFuc3BhcmVuY3lsZXZlbBhI",
             "IAEoCzI7LnRpYmlhLnByb3RvYnVmLmFwcGVhcmFuY2VzLkFwcGVhcmFuY2VG",
-            "bGFnVHJhbnNwYXJlbmN5TGV2ZWxKBAg6EEYiJwoSQXBwZWFyYW5jZUZsYWdC",
+            "bGFnVHJhbnNwYXJlbmN5TGV2ZWxKBAhBEEYiJwoSQXBwZWFyYW5jZUZsYWdC",
             "YW5rEhEKCXdheXBvaW50cxgBIAEoDSIuChNBcHBlYXJhbmNlRmxhZ1dyaXRl",
             "EhcKD21heF90ZXh0X2xlbmd0aBgBIAEoDSI3ChdBcHBlYXJhbmNlRmxhZ1dy",
             "aXRlT25jZRIcChRtYXhfdGV4dF9sZW5ndGhfb25jZRgBIAEoDSI4ChNBcHBl",
@@ -137,54 +146,62 @@ namespace Tibia.Protobuf.Appearances {
             "Y3ljbG9wZWRpYV90eXBlGAEgASgNIkUKI0FwcGVhcmFuY2VGbGFnVXBncmFk",
             "ZUNsYXNzaWZpY2F0aW9uEh4KFnVwZ3JhZGVfY2xhc3NpZmljYXRpb24YASAB",
             "KA0iMAofQXBwZWFyYW5jZUZsYWdUcmFuc3BhcmVuY3lMZXZlbBINCgVsZXZl",
-            "bBgBIAEoDSLTAQobU3BlY2lhbE1lYW5pbmdBcHBlYXJhbmNlSWRzEhQKDGdv",
+            "bBgBIAEoDSL2AQobU3BlY2lhbE1lYW5pbmdBcHBlYXJhbmNlSWRzEhQKDGdv",
             "bGRfY29pbl9pZBgBIAEoDRIYChBwbGF0aW51bV9jb2luX2lkGAIgASgNEhcK",
             "D2NyeXN0YWxfY29pbl9pZBgDIAEoDRIVCg10aWJpYV9jb2luX2lkGAQgASgN",
             "EhkKEXN0YW1wZWRfbGV0dGVyX2lkGAUgASgNEhcKD3N1cHBseV9zdGFzaF9p",
-            "ZBgGIAEoDRIgChhzdGFuZGFyZF9yZXdhcmRfY2hlc3RfaWQYByABKA0iLQoK",
-            "Q29vcmRpbmF0ZRIJCgF4GAEgASgNEgkKAXkYAiABKA0SCQoBehgDIAEoDSqB",
-            "AQoRRklYRURfRlJBTUVfR1JPVVASIQodRklYRURfRlJBTUVfR1JPVVBfT1VU",
-            "RklUX0lETEUQABIjCh9GSVhFRF9GUkFNRV9HUk9VUF9PVVRGSVRfTU9WSU5H",
-            "EAESJAogRklYRURfRlJBTUVfR1JPVVBfT0JKRUNUX0lOSVRJQUwQAiqUAQoN",
-            "UExBWUVSX0FDVElPThIWChJQTEFZRVJfQUNUSU9OX05PTkUQABIWChJQTEFZ",
-            "RVJfQUNUSU9OX0xPT0sQARIVChFQTEFZRVJfQUNUSU9OX1VTRRACEhYKElBM",
-            "QVlFUl9BQ1RJT05fT1BFThADEiQKIFBMQVlFUl9BQ1RJT05fQVVUT1dBTEtf",
-            "SElHSExJR0hUEAQq/AYKDUlURU1fQ0FURUdPUlkSGAoUSVRFTV9DQVRFR09S",
-            "WV9BUk1PUlMQARIZChVJVEVNX0NBVEVHT1JZX0FNVUxFVFMQAhIXChNJVEVN",
-            "X0NBVEVHT1JZX0JPT1RTEAMSHAoYSVRFTV9DQVRFR09SWV9DT05UQUlORVJT",
-            "EAQSHAoYSVRFTV9DQVRFR09SWV9ERUNPUkFUSU9OEAUSFgoSSVRFTV9DQVRF",
-            "R09SWV9GT09EEAYSHgoaSVRFTV9DQVRFR09SWV9IRUxNRVRTX0hBVFMQBxIW",
-            "ChJJVEVNX0NBVEVHT1JZX0xFR1MQCBIYChRJVEVNX0NBVEVHT1JZX09USEVS",
-            "UxAJEhkKFUlURU1fQ0FURUdPUllfUE9USU9OUxAKEhcKE0lURU1fQ0FURUdP",
-            "UllfUklOR1MQCxIXChNJVEVNX0NBVEVHT1JZX1JVTkVTEAwSGQoVSVRFTV9D",
-            "QVRFR09SWV9TSElFTERTEA0SFwoTSVRFTV9DQVRFR09SWV9UT09MUxAOEhsK",
-            "F0lURU1fQ0FURUdPUllfVkFMVUFCTEVTEA8SHAoYSVRFTV9DQVRFR09SWV9B",
-            "TU1VTklUSU9OEBASFgoSSVRFTV9DQVRFR09SWV9BWEVTEBESFwoTSVRFTV9D",
-            "QVRFR09SWV9DTFVCUxASEiIKHklURU1fQ0FURUdPUllfRElTVEFOQ0VfV0VB",
-            "UE9OUxATEhgKFElURU1fQ0FURUdPUllfU1dPUkRTEBQSHAoYSVRFTV9DQVRF",
-            "R09SWV9XQU5EU19ST0RTEBUSIQodSVRFTV9DQVRFR09SWV9QUkVNSVVNX1ND",
-            "Uk9MTFMQFhIdChlJVEVNX0NBVEVHT1JZX1RJQklBX0NPSU5TEBcSIwofSVRF",
-            "TV9DQVRFR09SWV9DUkVBVFVSRV9QUk9EVUNUUxAYEhgKFElURU1fQ0FURUdP",
-            "UllfUVVJVkVSEBkSHwobSVRFTV9DQVRFR09SWV9UV09IQU5EV0VBUE9OEBoS",
-            "GQoVSVRFTV9DQVRFR09SWV9IRUxNRVRTEBsSGgoWSVRFTV9DQVRFR09SWV9C",
-            "QUNLUEFDSxAcEh8KG0lURU1fQ0FURUdPUllfT05FSEFORFdFQVBPThAdEhcK",
-            "E0lURU1fQ0FURUdPUllfQVJST1cQHhIbChdJVEVNX0NBVEVHT1JZX1NPVUxD",
-            "T1JFUxAfKqUBCghWT0NBVElPThIZCgxWT0NBVElPTl9BTlkQ////////////",
-            "ARIRCg1WT0NBVElPTl9OT05FEAASEwoPVk9DQVRJT05fS05JR0hUEAESFAoQ",
-            "Vk9DQVRJT05fUEFMQURJThACEhUKEVZPQ0FUSU9OX1NPUkNFUkVSEAMSEgoO",
-            "Vk9DQVRJT05fRFJVSUQQBBIVChFWT0NBVElPTl9QUk9NT1RFRBAKKoMBChNB",
-            "TklNQVRJT05fTE9PUF9UWVBFEikKHEFOSU1BVElPTl9MT09QX1RZUEVfUElO",
-            "R1BPTkcQ////////////ARIgChxBTklNQVRJT05fTE9PUF9UWVBFX0lORklO",
-            "SVRFEAASHwobQU5JTUFUSU9OX0xPT1BfVFlQRV9DT1VOVEVEEAEqNAoJSE9P",
-            "S19UWVBFEhMKD0hPT0tfVFlQRV9TT1VUSBABEhIKDkhPT0tfVFlQRV9FQVNU",
-            "EAIqUwoYQU5JTUFUSU9OX0FOSU1BVElPTl9NT0RFEhsKF0FOSU1BVElPTl9B",
-            "U1lOQ0hST05JWkVEEAASGgoWQU5JTUFUSU9OX1NZTkNIUk9OSVpFRBABKm4K",
-            "D0FQUEVBUkFOQ0VfVFlQRRIVChFBUFBFQVJBTkNFX09CSkVDVBABEhUKEUFQ",
-            "UEVBUkFOQ0VfT1VURklUEAISFQoRQVBQRUFSQU5DRV9FRkZFQ1QQAxIWChJB",
-            "UFBFQVJBTkNFX01JU1NJTEUQBA=="));
+            "ZBgGIAEoDRIgChhzdGFuZGFyZF9yZXdhcmRfY2hlc3RfaWQYByABKA0SIQoZ",
+            "YmxhbmtfaW1idWVtZW50X3Njcm9sbF9pZBgIIAEoDSItChdBcHBlYXJhbmNl",
+            "RmxhZ0ltYnVlYWJsZRISCgpzbG90X2NvdW50GAEgASgNIkoKG0FwcGVhcmFu",
+            "Y2VGbGFnU2tpbGxXaGVlbEdlbRIWCg5nZW1fcXVhbGl0eV9pZBgBIAEoDRIT",
+            "Cgt2b2NhdGlvbl9pZBgCIAEoDSIzChlBcHBlYXJhbmNlRmxhZ1Byb2ZpY2ll",
+            "bmN5EhYKDnByb2ZpY2llbmN5X2lkGAEgASgNIi0KCkNvb3JkaW5hdGUSCQoB",
+            "eBgBIAEoDRIJCgF5GAIgASgNEgkKAXoYAyABKA0qgQEKEUZJWEVEX0ZSQU1F",
+            "X0dST1VQEiEKHUZJWEVEX0ZSQU1FX0dST1VQX09VVEZJVF9JRExFEAASIwof",
+            "RklYRURfRlJBTUVfR1JPVVBfT1VURklUX01PVklORxABEiQKIEZJWEVEX0ZS",
+            "QU1FX0dST1VQX09CSkVDVF9JTklUSUFMEAIqlAEKDVBMQVlFUl9BQ1RJT04S",
+            "FgoSUExBWUVSX0FDVElPTl9OT05FEAASFgoSUExBWUVSX0FDVElPTl9MT09L",
+            "EAESFQoRUExBWUVSX0FDVElPTl9VU0UQAhIWChJQTEFZRVJfQUNUSU9OX09Q",
+            "RU4QAxIkCiBQTEFZRVJfQUNUSU9OX0FVVE9XQUxLX0hJR0hMSUdIVBAEKosG",
+            "Cg1JVEVNX0NBVEVHT1JZEhgKFElURU1fQ0FURUdPUllfQVJNT1JTEAESGQoV",
+            "SVRFTV9DQVRFR09SWV9BTVVMRVRTEAISFwoTSVRFTV9DQVRFR09SWV9CT09U",
+            "UxADEhwKGElURU1fQ0FURUdPUllfQ09OVEFJTkVSUxAEEhwKGElURU1fQ0FU",
+            "RUdPUllfREVDT1JBVElPThAFEhYKEklURU1fQ0FURUdPUllfRk9PRBAGEh4K",
+            "GklURU1fQ0FURUdPUllfSEVMTUVUU19IQVRTEAcSFgoSSVRFTV9DQVRFR09S",
+            "WV9MRUdTEAgSGAoUSVRFTV9DQVRFR09SWV9PVEhFUlMQCRIZChVJVEVNX0NB",
+            "VEVHT1JZX1BPVElPTlMQChIXChNJVEVNX0NBVEVHT1JZX1JJTkdTEAsSFwoT",
+            "SVRFTV9DQVRFR09SWV9SVU5FUxAMEhkKFUlURU1fQ0FURUdPUllfU0hJRUxE",
+            "UxANEhcKE0lURU1fQ0FURUdPUllfVE9PTFMQDhIbChdJVEVNX0NBVEVHT1JZ",
+            "X1ZBTFVBQkxFUxAPEhwKGElURU1fQ0FURUdPUllfQU1NVU5JVElPThAQEhYK",
+            "EklURU1fQ0FURUdPUllfQVhFUxAREhcKE0lURU1fQ0FURUdPUllfQ0xVQlMQ",
+            "EhIiCh5JVEVNX0NBVEVHT1JZX0RJU1RBTkNFX1dFQVBPTlMQExIYChRJVEVN",
+            "X0NBVEVHT1JZX1NXT1JEUxAUEhwKGElURU1fQ0FURUdPUllfV0FORFNfUk9E",
+            "UxAVEiEKHUlURU1fQ0FURUdPUllfUFJFTUlVTV9TQ1JPTExTEBYSHQoZSVRF",
+            "TV9DQVRFR09SWV9USUJJQV9DT0lOUxAXEiMKH0lURU1fQ0FURUdPUllfQ1JF",
+            "QVRVUkVfUFJPRFVDVFMQGBIYChRJVEVNX0NBVEVHT1JZX1FVSVZFUhAZEhwK",
+            "GElURU1fQ0FURUdPUllfU09VTF9DT1JFUxAaEh4KGklURU1fQ0FURUdPUllf",
+            "RklTVF9XRUFQT05TEBsquAEKCFZPQ0FUSU9OEhkKDFZPQ0FUSU9OX0FOWRD/",
+            "//////////8BEhEKDVZPQ0FUSU9OX05PTkUQABITCg9WT0NBVElPTl9LTklH",
+            "SFQQARIUChBWT0NBVElPTl9QQUxBRElOEAISFQoRVk9DQVRJT05fU09SQ0VS",
+            "RVIQAxISCg5WT0NBVElPTl9EUlVJRBAEEhEKDVZPQ0FUSU9OX01PTksQBRIV",
+            "ChFWT0NBVElPTl9QUk9NT1RFRBAKKoMBChNBTklNQVRJT05fTE9PUF9UWVBF",
+            "EikKHEFOSU1BVElPTl9MT09QX1RZUEVfUElOR1BPTkcQ////////////ARIg",
+            "ChxBTklNQVRJT05fTE9PUF9UWVBFX0lORklOSVRFEAASHwobQU5JTUFUSU9O",
+            "X0xPT1BfVFlQRV9DT1VOVEVEEAEqNAoJSE9PS19UWVBFEhMKD0hPT0tfVFlQ",
+            "RV9TT1VUSBABEhIKDkhPT0tfVFlQRV9FQVNUEAIqUwoYQU5JTUFUSU9OX0FO",
+            "SU1BVElPTl9NT0RFEhsKF0FOSU1BVElPTl9BU1lOQ0hST05JWkVEEAASGgoW",
+            "QU5JTUFUSU9OX1NZTkNIUk9OSVpFRBABKm4KD0FQUEVBUkFOQ0VfVFlQRRIV",
+            "ChFBUFBFQVJBTkNFX09CSkVDVBABEhUKEUFQUEVBUkFOQ0VfT1VURklUEAIS",
+            "FQoRQVBQRUFSQU5DRV9FRkZFQ1QQAxIWChJBUFBFQVJBTkNFX01JU1NJTEUQ",
+            "BCrfAQoLV0VBUE9OX1RZUEUSGAoUV0VBUE9OX1RZUEVfTk9XRUFQT04QABIV",
+            "ChFXRUFQT05fVFlQRV9TV09SRBABEhMKD1dFQVBPTl9UWVBFX0FYRRACEhQK",
+            "EFdFQVBPTl9UWVBFX0NMVUIQAxIUChBXRUFQT05fVFlQRV9GSVNUEAQSEwoP",
+            "V0VBUE9OX1RZUEVfQk9XEAUSGAoUV0VBUE9OX1RZUEVfQ1JPU1NCT1cQBhIY",
+            "ChRXRUFQT05fVFlQRV9XQU5EX1JPRBAHEhUKEVdFQVBPTl9UWVBFX1RIUk9X",
+            "EAg="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Tibia.Protobuf.Appearances.FIXED_FRAME_GROUP), typeof(global::Tibia.Protobuf.Appearances.PLAYER_ACTION), typeof(global::Tibia.Protobuf.Appearances.ITEM_CATEGORY), typeof(global::Tibia.Protobuf.Appearances.VOCATION), typeof(global::Tibia.Protobuf.Appearances.ANIMATION_LOOP_TYPE), typeof(global::Tibia.Protobuf.Appearances.HOOK_TYPE), typeof(global::Tibia.Protobuf.Appearances.ANIMATION_ANIMATION_MODE), typeof(global::Tibia.Protobuf.Appearances.APPEARANCE_TYPE), }, null, new pbr::GeneratedClrTypeInfo[] {
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Tibia.Protobuf.Appearances.FIXED_FRAME_GROUP), typeof(global::Tibia.Protobuf.Appearances.PLAYER_ACTION), typeof(global::Tibia.Protobuf.Appearances.ITEM_CATEGORY), typeof(global::Tibia.Protobuf.Appearances.VOCATION), typeof(global::Tibia.Protobuf.Appearances.ANIMATION_LOOP_TYPE), typeof(global::Tibia.Protobuf.Appearances.HOOK_TYPE), typeof(global::Tibia.Protobuf.Appearances.ANIMATION_ANIMATION_MODE), typeof(global::Tibia.Protobuf.Appearances.APPEARANCE_TYPE), typeof(global::Tibia.Protobuf.Appearances.WEAPON_TYPE), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.Appearances), global::Tibia.Protobuf.Appearances.Appearances.Parser, new[]{ "Object", "Outfit", "Effect", "Missile", "SpecialMeaningAppearanceIds" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.SpritePhase), global::Tibia.Protobuf.Appearances.SpritePhase.Parser, new[]{ "DurationMin", "DurationMax" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.SpriteAnimation), global::Tibia.Protobuf.Appearances.SpriteAnimation.Parser, new[]{ "DefaultStartPhase", "Synchronized", "RandomStartPhase", "LoopType", "LoopCount", "SpritePhase", "AnimationMode" }, null, null, null, null),
@@ -192,7 +209,7 @@ namespace Tibia.Protobuf.Appearances {
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.SpriteInfo), global::Tibia.Protobuf.Appearances.SpriteInfo.Parser, new[]{ "PatternWidth", "PatternHeight", "PatternDepth", "Layers", "SpriteId", "BoundingSquare", "Animation", "IsOpaque", "BoundingBoxPerDirection", "PatternSize", "PatternLayers", "PatternX", "PatternY", "PatternZ", "PatternFrames", "IsAnimation" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.FrameGroup), global::Tibia.Protobuf.Appearances.FrameGroup.Parser, new[]{ "FixedFrameGroup", "Id", "SpriteInfo" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.Appearance), global::Tibia.Protobuf.Appearances.Appearance.Parser, new[]{ "Id", "FrameGroup", "Flags", "Name", "Description", "AppearanceType", "SpriteData" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlags), global::Tibia.Protobuf.Appearances.AppearanceFlags.Parser, new[]{ "Bank", "Clip", "Bottom", "Top", "Container", "Cumulative", "Usable", "Forceuse", "Multiuse", "Write", "WriteOnce", "Liquidpool", "Unpass", "Unmove", "Unsight", "Avoid", "NoMovementAnimation", "Take", "Liquidcontainer", "Hang", "Hook", "Rotate", "Light", "DontHide", "Translucent", "Shift", "Height", "LyingObject", "AnimateAlways", "Automap", "Lenshelp", "Fullbank", "IgnoreLook", "Clothes", "DefaultAction", "Market", "Wrap", "Unwrap", "Topeffect", "Npcsaledata", "Changedtoexpire", "Corpse", "PlayerCorpse", "Cyclopediaitem", "Ammo", "ShowOffSocket", "Reportable", "Upgradeclassification", "ReverseAddonsEast", "ReverseAddonsWest", "ReverseAddonsSouth", "ReverseAddonsNorth", "Wearout", "Clockexpire", "Expire", "Expirestop", "DecoItemKit", "HookSouth", "HookEast", "Transparencylevel" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlags), global::Tibia.Protobuf.Appearances.AppearanceFlags.Parser, new[]{ "Bank", "Clip", "Bottom", "Top", "Container", "Cumulative", "Usable", "Forceuse", "Multiuse", "Write", "WriteOnce", "Liquidpool", "Unpass", "Unmove", "Unsight", "Avoid", "NoMovementAnimation", "Take", "Liquidcontainer", "Hang", "Hook", "Rotate", "Light", "DontHide", "Translucent", "Shift", "Height", "LyingObject", "AnimateAlways", "Automap", "Lenshelp", "Fullbank", "IgnoreLook", "Clothes", "DefaultAction", "Market", "Wrap", "Unwrap", "Topeffect", "Npcsaledata", "Changedtoexpire", "Corpse", "PlayerCorpse", "Cyclopediaitem", "Ammo", "ShowOffSocket", "Reportable", "Upgradeclassification", "ReverseAddonsEast", "ReverseAddonsWest", "ReverseAddonsSouth", "ReverseAddonsNorth", "Wearout", "Clockexpire", "Expire", "Expirestop", "DecoItemKit", "SkillwheelGem", "DualWielding", "Imbueable", "Proficiency", "RestrictToVocation", "MinimumLevel", "WeaponType", "HookSouth", "HookEast", "Transparencylevel" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagBank), global::Tibia.Protobuf.Appearances.AppearanceFlagBank.Parser, new[]{ "Waypoints" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagWrite), global::Tibia.Protobuf.Appearances.AppearanceFlagWrite.Parser, new[]{ "MaxTextLength" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagWriteOnce), global::Tibia.Protobuf.Appearances.AppearanceFlagWriteOnce.Parser, new[]{ "MaxTextLengthOnce" }, null, null, null, null),
@@ -210,7 +227,10 @@ namespace Tibia.Protobuf.Appearances {
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagCyclopedia), global::Tibia.Protobuf.Appearances.AppearanceFlagCyclopedia.Parser, new[]{ "CyclopediaType" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagUpgradeClassification), global::Tibia.Protobuf.Appearances.AppearanceFlagUpgradeClassification.Parser, new[]{ "UpgradeClassification" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagTransparencyLevel), global::Tibia.Protobuf.Appearances.AppearanceFlagTransparencyLevel.Parser, new[]{ "Level" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.SpecialMeaningAppearanceIds), global::Tibia.Protobuf.Appearances.SpecialMeaningAppearanceIds.Parser, new[]{ "GoldCoinId", "PlatinumCoinId", "CrystalCoinId", "TibiaCoinId", "StampedLetterId", "SupplyStashId", "StandardRewardChestId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.SpecialMeaningAppearanceIds), global::Tibia.Protobuf.Appearances.SpecialMeaningAppearanceIds.Parser, new[]{ "GoldCoinId", "PlatinumCoinId", "CrystalCoinId", "TibiaCoinId", "StampedLetterId", "SupplyStashId", "StandardRewardChestId", "BlankImbuementScrollId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagImbueable), global::Tibia.Protobuf.Appearances.AppearanceFlagImbueable.Parser, new[]{ "SlotCount" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagSkillWheelGem), global::Tibia.Protobuf.Appearances.AppearanceFlagSkillWheelGem.Parser, new[]{ "GemQualityId", "VocationId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.AppearanceFlagProficiency), global::Tibia.Protobuf.Appearances.AppearanceFlagProficiency.Parser, new[]{ "ProficiencyId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Tibia.Protobuf.Appearances.Coordinate), global::Tibia.Protobuf.Appearances.Coordinate.Parser, new[]{ "X", "Y", "Z" }, null, null, null, null)
           }));
     }
@@ -258,12 +278,8 @@ namespace Tibia.Protobuf.Appearances {
     [pbr::OriginalName("ITEM_CATEGORY_TIBIA_COINS")] TibiaCoins = 23,
     [pbr::OriginalName("ITEM_CATEGORY_CREATURE_PRODUCTS")] CreatureProducts = 24,
     [pbr::OriginalName("ITEM_CATEGORY_QUIVER")] Quiver = 25,
-    [pbr::OriginalName("ITEM_CATEGORY_TWOHANDWEAPON")] Twohandweapon = 26,
-    [pbr::OriginalName("ITEM_CATEGORY_HELMETS")] Helmets = 27,
-    [pbr::OriginalName("ITEM_CATEGORY_BACKPACK")] Backpack = 28,
-    [pbr::OriginalName("ITEM_CATEGORY_ONEHANDWEAPON")] Onehandweapon = 29,
-    [pbr::OriginalName("ITEM_CATEGORY_ARROW")] Arrow = 30,
-    [pbr::OriginalName("ITEM_CATEGORY_SOULCORES")] Soulcores = 31,
+    [pbr::OriginalName("ITEM_CATEGORY_SOUL_CORES")] SoulCores = 26,
+    [pbr::OriginalName("ITEM_CATEGORY_FIST_WEAPONS")] FistWeapons = 27,
   }
 
   public enum VOCATION {
@@ -273,6 +289,7 @@ namespace Tibia.Protobuf.Appearances {
     [pbr::OriginalName("VOCATION_PALADIN")] Paladin = 2,
     [pbr::OriginalName("VOCATION_SORCERER")] Sorcerer = 3,
     [pbr::OriginalName("VOCATION_DRUID")] Druid = 4,
+    [pbr::OriginalName("VOCATION_MONK")] Monk = 5,
     [pbr::OriginalName("VOCATION_PROMOTED")] Promoted = 10,
   }
 
@@ -297,6 +314,18 @@ namespace Tibia.Protobuf.Appearances {
     [pbr::OriginalName("APPEARANCE_OUTFIT")] AppearanceOutfit = 2,
     [pbr::OriginalName("APPEARANCE_EFFECT")] AppearanceEffect = 3,
     [pbr::OriginalName("APPEARANCE_MISSILE")] AppearanceMissile = 4,
+  }
+
+  public enum WEAPON_TYPE {
+    [pbr::OriginalName("WEAPON_TYPE_NOWEAPON")] Noweapon = 0,
+    [pbr::OriginalName("WEAPON_TYPE_SWORD")] Sword = 1,
+    [pbr::OriginalName("WEAPON_TYPE_AXE")] Axe = 2,
+    [pbr::OriginalName("WEAPON_TYPE_CLUB")] Club = 3,
+    [pbr::OriginalName("WEAPON_TYPE_FIST")] Fist = 4,
+    [pbr::OriginalName("WEAPON_TYPE_BOW")] Bow = 5,
+    [pbr::OriginalName("WEAPON_TYPE_CROSSBOW")] Crossbow = 6,
+    [pbr::OriginalName("WEAPON_TYPE_WAND_ROD")] WandRod = 7,
+    [pbr::OriginalName("WEAPON_TYPE_THROW")] Throw = 8,
   }
 
   #endregion
@@ -3280,6 +3309,13 @@ namespace Tibia.Protobuf.Appearances {
       expire_ = other.expire_;
       expirestop_ = other.expirestop_;
       decoItemKit_ = other.decoItemKit_;
+      skillwheelGem_ = other.skillwheelGem_ != null ? other.skillwheelGem_.Clone() : null;
+      dualWielding_ = other.dualWielding_;
+      imbueable_ = other.imbueable_ != null ? other.imbueable_.Clone() : null;
+      proficiency_ = other.proficiency_ != null ? other.proficiency_.Clone() : null;
+      restrictToVocation_ = other.restrictToVocation_.Clone();
+      minimumLevel_ = other.minimumLevel_;
+      weaponType_ = other.weaponType_;
       hookSouth_ = other.hookSouth_;
       hookEast_ = other.hookEast_;
       transparencylevel_ = other.transparencylevel_ != null ? other.transparencylevel_.Clone() : null;
@@ -4450,6 +4486,121 @@ namespace Tibia.Protobuf.Appearances {
       _hasBits1 &= ~256;
     }
 
+    /// <summary>Field number for the "skillwheel_gem" field.</summary>
+    public const int SkillwheelGemFieldNumber = 58;
+    private global::Tibia.Protobuf.Appearances.AppearanceFlagSkillWheelGem skillwheelGem_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Tibia.Protobuf.Appearances.AppearanceFlagSkillWheelGem SkillwheelGem {
+      get { return skillwheelGem_; }
+      set {
+        skillwheelGem_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "dual_wielding" field.</summary>
+    public const int DualWieldingFieldNumber = 59;
+    private readonly static bool DualWieldingDefaultValue = false;
+
+    private bool dualWielding_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool DualWielding {
+      get { if ((_hasBits1 & 512) != 0) { return dualWielding_; } else { return DualWieldingDefaultValue; } }
+      set {
+        _hasBits1 |= 512;
+        dualWielding_ = value;
+      }
+    }
+    /// <summary>Gets whether the "dual_wielding" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasDualWielding {
+      get { return (_hasBits1 & 512) != 0; }
+    }
+    /// <summary>Clears the value of the "dual_wielding" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearDualWielding() {
+      _hasBits1 &= ~512;
+    }
+
+    /// <summary>Field number for the "imbueable" field.</summary>
+    public const int ImbueableFieldNumber = 60;
+    private global::Tibia.Protobuf.Appearances.AppearanceFlagImbueable imbueable_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Tibia.Protobuf.Appearances.AppearanceFlagImbueable Imbueable {
+      get { return imbueable_; }
+      set {
+        imbueable_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "proficiency" field.</summary>
+    public const int ProficiencyFieldNumber = 61;
+    private global::Tibia.Protobuf.Appearances.AppearanceFlagProficiency proficiency_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Tibia.Protobuf.Appearances.AppearanceFlagProficiency Proficiency {
+      get { return proficiency_; }
+      set {
+        proficiency_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "restrict_to_vocation" field.</summary>
+    public const int RestrictToVocationFieldNumber = 62;
+    private static readonly pb::FieldCodec<global::Tibia.Protobuf.Appearances.VOCATION> _repeated_restrictToVocation_codec
+        = pb::FieldCodec.ForEnum(496, x => (int) x, x => (global::Tibia.Protobuf.Appearances.VOCATION) x);
+    private readonly pbc::RepeatedField<global::Tibia.Protobuf.Appearances.VOCATION> restrictToVocation_ = new pbc::RepeatedField<global::Tibia.Protobuf.Appearances.VOCATION>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Tibia.Protobuf.Appearances.VOCATION> RestrictToVocation {
+      get { return restrictToVocation_; }
+    }
+
+    /// <summary>Field number for the "minimum_level" field.</summary>
+    public const int MinimumLevelFieldNumber = 63;
+    private readonly static uint MinimumLevelDefaultValue = 0;
+
+    private uint minimumLevel_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint MinimumLevel {
+      get { if ((_hasBits1 & 1024) != 0) { return minimumLevel_; } else { return MinimumLevelDefaultValue; } }
+      set {
+        _hasBits1 |= 1024;
+        minimumLevel_ = value;
+      }
+    }
+    /// <summary>Gets whether the "minimum_level" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasMinimumLevel {
+      get { return (_hasBits1 & 1024) != 0; }
+    }
+    /// <summary>Clears the value of the "minimum_level" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearMinimumLevel() {
+      _hasBits1 &= ~1024;
+    }
+
+    /// <summary>Field number for the "weapon_type" field.</summary>
+    public const int WeaponTypeFieldNumber = 64;
+    private readonly static global::Tibia.Protobuf.Appearances.WEAPON_TYPE WeaponTypeDefaultValue = global::Tibia.Protobuf.Appearances.WEAPON_TYPE.Noweapon;
+
+    private global::Tibia.Protobuf.Appearances.WEAPON_TYPE weaponType_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Tibia.Protobuf.Appearances.WEAPON_TYPE WeaponType {
+      get { if ((_hasBits1 & 2048) != 0) { return weaponType_; } else { return WeaponTypeDefaultValue; } }
+      set {
+        _hasBits1 |= 2048;
+        weaponType_ = value;
+      }
+    }
+    /// <summary>Gets whether the "weapon_type" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasWeaponType {
+      get { return (_hasBits1 & 2048) != 0; }
+    }
+    /// <summary>Clears the value of the "weapon_type" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearWeaponType() {
+      _hasBits1 &= ~2048;
+    }
+
     /// <summary>Field number for the "hook_south" field.</summary>
     public const int HookSouthFieldNumber = 70;
     private readonly static bool HookSouthDefaultValue = false;
@@ -4457,21 +4608,21 @@ namespace Tibia.Protobuf.Appearances {
     private bool hookSouth_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HookSouth {
-      get { if ((_hasBits1 & 512) != 0) { return hookSouth_; } else { return HookSouthDefaultValue; } }
+      get { if ((_hasBits1 & 4096) != 0) { return hookSouth_; } else { return HookSouthDefaultValue; } }
       set {
-        _hasBits1 |= 512;
+        _hasBits1 |= 4096;
         hookSouth_ = value;
       }
     }
     /// <summary>Gets whether the "hook_south" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasHookSouth {
-      get { return (_hasBits1 & 512) != 0; }
+      get { return (_hasBits1 & 4096) != 0; }
     }
     /// <summary>Clears the value of the "hook_south" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearHookSouth() {
-      _hasBits1 &= ~512;
+      _hasBits1 &= ~4096;
     }
 
     /// <summary>Field number for the "hook_east" field.</summary>
@@ -4481,21 +4632,21 @@ namespace Tibia.Protobuf.Appearances {
     private bool hookEast_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HookEast {
-      get { if ((_hasBits1 & 1024) != 0) { return hookEast_; } else { return HookEastDefaultValue; } }
+      get { if ((_hasBits1 & 8192) != 0) { return hookEast_; } else { return HookEastDefaultValue; } }
       set {
-        _hasBits1 |= 1024;
+        _hasBits1 |= 8192;
         hookEast_ = value;
       }
     }
     /// <summary>Gets whether the "hook_east" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasHookEast {
-      get { return (_hasBits1 & 1024) != 0; }
+      get { return (_hasBits1 & 8192) != 0; }
     }
     /// <summary>Clears the value of the "hook_east" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearHookEast() {
-      _hasBits1 &= ~1024;
+      _hasBits1 &= ~8192;
     }
 
     /// <summary>Field number for the "transparencylevel" field.</summary>
@@ -4579,6 +4730,13 @@ namespace Tibia.Protobuf.Appearances {
       if (Expire != other.Expire) return false;
       if (Expirestop != other.Expirestop) return false;
       if (DecoItemKit != other.DecoItemKit) return false;
+      if (!object.Equals(SkillwheelGem, other.SkillwheelGem)) return false;
+      if (DualWielding != other.DualWielding) return false;
+      if (!object.Equals(Imbueable, other.Imbueable)) return false;
+      if (!object.Equals(Proficiency, other.Proficiency)) return false;
+      if(!restrictToVocation_.Equals(other.restrictToVocation_)) return false;
+      if (MinimumLevel != other.MinimumLevel) return false;
+      if (WeaponType != other.WeaponType) return false;
       if (HookSouth != other.HookSouth) return false;
       if (HookEast != other.HookEast) return false;
       if (!object.Equals(Transparencylevel, other.Transparencylevel)) return false;
@@ -4645,6 +4803,13 @@ namespace Tibia.Protobuf.Appearances {
       if (HasExpire) hash ^= Expire.GetHashCode();
       if (HasExpirestop) hash ^= Expirestop.GetHashCode();
       if (HasDecoItemKit) hash ^= DecoItemKit.GetHashCode();
+      if (skillwheelGem_ != null) hash ^= SkillwheelGem.GetHashCode();
+      if (HasDualWielding) hash ^= DualWielding.GetHashCode();
+      if (imbueable_ != null) hash ^= Imbueable.GetHashCode();
+      if (proficiency_ != null) hash ^= Proficiency.GetHashCode();
+      hash ^= restrictToVocation_.GetHashCode();
+      if (HasMinimumLevel) hash ^= MinimumLevel.GetHashCode();
+      if (HasWeaponType) hash ^= WeaponType.GetHashCode();
       if (HasHookSouth) hash ^= HookSouth.GetHashCode();
       if (HasHookEast) hash ^= HookEast.GetHashCode();
       if (transparencylevel_ != null) hash ^= Transparencylevel.GetHashCode();
@@ -4888,6 +5053,31 @@ namespace Tibia.Protobuf.Appearances {
       if (HasDecoItemKit) {
         output.WriteRawTag(200, 3);
         output.WriteBool(DecoItemKit);
+      }
+      if (skillwheelGem_ != null) {
+        output.WriteRawTag(210, 3);
+        output.WriteMessage(SkillwheelGem);
+      }
+      if (HasDualWielding) {
+        output.WriteRawTag(216, 3);
+        output.WriteBool(DualWielding);
+      }
+      if (imbueable_ != null) {
+        output.WriteRawTag(226, 3);
+        output.WriteMessage(Imbueable);
+      }
+      if (proficiency_ != null) {
+        output.WriteRawTag(234, 3);
+        output.WriteMessage(Proficiency);
+      }
+      restrictToVocation_.WriteTo(output, _repeated_restrictToVocation_codec);
+      if (HasMinimumLevel) {
+        output.WriteRawTag(248, 3);
+        output.WriteUInt32(MinimumLevel);
+      }
+      if (HasWeaponType) {
+        output.WriteRawTag(128, 4);
+        output.WriteEnum((int) WeaponType);
       }
       if (HasHookSouth) {
         output.WriteRawTag(176, 4);
@@ -5135,6 +5325,31 @@ namespace Tibia.Protobuf.Appearances {
         output.WriteRawTag(200, 3);
         output.WriteBool(DecoItemKit);
       }
+      if (skillwheelGem_ != null) {
+        output.WriteRawTag(210, 3);
+        output.WriteMessage(SkillwheelGem);
+      }
+      if (HasDualWielding) {
+        output.WriteRawTag(216, 3);
+        output.WriteBool(DualWielding);
+      }
+      if (imbueable_ != null) {
+        output.WriteRawTag(226, 3);
+        output.WriteMessage(Imbueable);
+      }
+      if (proficiency_ != null) {
+        output.WriteRawTag(234, 3);
+        output.WriteMessage(Proficiency);
+      }
+      restrictToVocation_.WriteTo(ref output, _repeated_restrictToVocation_codec);
+      if (HasMinimumLevel) {
+        output.WriteRawTag(248, 3);
+        output.WriteUInt32(MinimumLevel);
+      }
+      if (HasWeaponType) {
+        output.WriteRawTag(128, 4);
+        output.WriteEnum((int) WeaponType);
+      }
       if (HasHookSouth) {
         output.WriteRawTag(176, 4);
         output.WriteBool(HookSouth);
@@ -5324,6 +5539,25 @@ namespace Tibia.Protobuf.Appearances {
       }
       if (HasDecoItemKit) {
         size += 2 + 1;
+      }
+      if (skillwheelGem_ != null) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(SkillwheelGem);
+      }
+      if (HasDualWielding) {
+        size += 2 + 1;
+      }
+      if (imbueable_ != null) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(Imbueable);
+      }
+      if (proficiency_ != null) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(Proficiency);
+      }
+      size += restrictToVocation_.CalculateSize(_repeated_restrictToVocation_codec);
+      if (HasMinimumLevel) {
+        size += 2 + pb::CodedOutputStream.ComputeUInt32Size(MinimumLevel);
+      }
+      if (HasWeaponType) {
+        size += 2 + pb::CodedOutputStream.ComputeEnumSize((int) WeaponType);
       }
       if (HasHookSouth) {
         size += 2 + 1;
@@ -5558,6 +5792,34 @@ namespace Tibia.Protobuf.Appearances {
       }
       if (other.HasDecoItemKit) {
         DecoItemKit = other.DecoItemKit;
+      }
+      if (other.skillwheelGem_ != null) {
+        if (skillwheelGem_ == null) {
+          SkillwheelGem = new global::Tibia.Protobuf.Appearances.AppearanceFlagSkillWheelGem();
+        }
+        SkillwheelGem.MergeFrom(other.SkillwheelGem);
+      }
+      if (other.HasDualWielding) {
+        DualWielding = other.DualWielding;
+      }
+      if (other.imbueable_ != null) {
+        if (imbueable_ == null) {
+          Imbueable = new global::Tibia.Protobuf.Appearances.AppearanceFlagImbueable();
+        }
+        Imbueable.MergeFrom(other.Imbueable);
+      }
+      if (other.proficiency_ != null) {
+        if (proficiency_ == null) {
+          Proficiency = new global::Tibia.Protobuf.Appearances.AppearanceFlagProficiency();
+        }
+        Proficiency.MergeFrom(other.Proficiency);
+      }
+      restrictToVocation_.Add(other.restrictToVocation_);
+      if (other.HasMinimumLevel) {
+        MinimumLevel = other.MinimumLevel;
+      }
+      if (other.HasWeaponType) {
+        WeaponType = other.WeaponType;
       }
       if (other.HasHookSouth) {
         HookSouth = other.HookSouth;
@@ -5856,6 +6118,44 @@ namespace Tibia.Protobuf.Appearances {
           }
           case 456: {
             DecoItemKit = input.ReadBool();
+            break;
+          }
+          case 466: {
+            if (skillwheelGem_ == null) {
+              SkillwheelGem = new global::Tibia.Protobuf.Appearances.AppearanceFlagSkillWheelGem();
+            }
+            input.ReadMessage(SkillwheelGem);
+            break;
+          }
+          case 472: {
+            DualWielding = input.ReadBool();
+            break;
+          }
+          case 482: {
+            if (imbueable_ == null) {
+              Imbueable = new global::Tibia.Protobuf.Appearances.AppearanceFlagImbueable();
+            }
+            input.ReadMessage(Imbueable);
+            break;
+          }
+          case 490: {
+            if (proficiency_ == null) {
+              Proficiency = new global::Tibia.Protobuf.Appearances.AppearanceFlagProficiency();
+            }
+            input.ReadMessage(Proficiency);
+            break;
+          }
+          case 498:
+          case 496: {
+            restrictToVocation_.AddEntriesFrom(input, _repeated_restrictToVocation_codec);
+            break;
+          }
+          case 504: {
+            MinimumLevel = input.ReadUInt32();
+            break;
+          }
+          case 512: {
+            WeaponType = (global::Tibia.Protobuf.Appearances.WEAPON_TYPE) input.ReadEnum();
             break;
           }
           case 560: {
@@ -6158,6 +6458,44 @@ namespace Tibia.Protobuf.Appearances {
           }
           case 456: {
             DecoItemKit = input.ReadBool();
+            break;
+          }
+          case 466: {
+            if (skillwheelGem_ == null) {
+              SkillwheelGem = new global::Tibia.Protobuf.Appearances.AppearanceFlagSkillWheelGem();
+            }
+            input.ReadMessage(SkillwheelGem);
+            break;
+          }
+          case 472: {
+            DualWielding = input.ReadBool();
+            break;
+          }
+          case 482: {
+            if (imbueable_ == null) {
+              Imbueable = new global::Tibia.Protobuf.Appearances.AppearanceFlagImbueable();
+            }
+            input.ReadMessage(Imbueable);
+            break;
+          }
+          case 490: {
+            if (proficiency_ == null) {
+              Proficiency = new global::Tibia.Protobuf.Appearances.AppearanceFlagProficiency();
+            }
+            input.ReadMessage(Proficiency);
+            break;
+          }
+          case 498:
+          case 496: {
+            restrictToVocation_.AddEntriesFrom(ref input, _repeated_restrictToVocation_codec);
+            break;
+          }
+          case 504: {
+            MinimumLevel = input.ReadUInt32();
+            break;
+          }
+          case 512: {
+            WeaponType = (global::Tibia.Protobuf.Appearances.WEAPON_TYPE) input.ReadEnum();
             break;
           }
           case 560: {
@@ -10010,6 +10348,7 @@ namespace Tibia.Protobuf.Appearances {
       stampedLetterId_ = other.stampedLetterId_;
       supplyStashId_ = other.supplyStashId_;
       standardRewardChestId_ = other.standardRewardChestId_;
+      blankImbuementScrollId_ = other.blankImbuementScrollId_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -10186,6 +10525,30 @@ namespace Tibia.Protobuf.Appearances {
       _hasBits0 &= ~64;
     }
 
+    /// <summary>Field number for the "blank_imbuement_scroll_id" field.</summary>
+    public const int BlankImbuementScrollIdFieldNumber = 8;
+    private readonly static uint BlankImbuementScrollIdDefaultValue = 0;
+
+    private uint blankImbuementScrollId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint BlankImbuementScrollId {
+      get { if ((_hasBits0 & 128) != 0) { return blankImbuementScrollId_; } else { return BlankImbuementScrollIdDefaultValue; } }
+      set {
+        _hasBits0 |= 128;
+        blankImbuementScrollId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "blank_imbuement_scroll_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasBlankImbuementScrollId {
+      get { return (_hasBits0 & 128) != 0; }
+    }
+    /// <summary>Clears the value of the "blank_imbuement_scroll_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearBlankImbuementScrollId() {
+      _hasBits0 &= ~128;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as SpecialMeaningAppearanceIds);
@@ -10206,6 +10569,7 @@ namespace Tibia.Protobuf.Appearances {
       if (StampedLetterId != other.StampedLetterId) return false;
       if (SupplyStashId != other.SupplyStashId) return false;
       if (StandardRewardChestId != other.StandardRewardChestId) return false;
+      if (BlankImbuementScrollId != other.BlankImbuementScrollId) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -10219,6 +10583,7 @@ namespace Tibia.Protobuf.Appearances {
       if (HasStampedLetterId) hash ^= StampedLetterId.GetHashCode();
       if (HasSupplyStashId) hash ^= SupplyStashId.GetHashCode();
       if (HasStandardRewardChestId) hash ^= StandardRewardChestId.GetHashCode();
+      if (HasBlankImbuementScrollId) hash ^= BlankImbuementScrollId.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -10263,6 +10628,10 @@ namespace Tibia.Protobuf.Appearances {
         output.WriteRawTag(56);
         output.WriteUInt32(StandardRewardChestId);
       }
+      if (HasBlankImbuementScrollId) {
+        output.WriteRawTag(64);
+        output.WriteUInt32(BlankImbuementScrollId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -10300,6 +10669,10 @@ namespace Tibia.Protobuf.Appearances {
         output.WriteRawTag(56);
         output.WriteUInt32(StandardRewardChestId);
       }
+      if (HasBlankImbuementScrollId) {
+        output.WriteRawTag(64);
+        output.WriteUInt32(BlankImbuementScrollId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -10329,6 +10702,9 @@ namespace Tibia.Protobuf.Appearances {
       }
       if (HasStandardRewardChestId) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(StandardRewardChestId);
+      }
+      if (HasBlankImbuementScrollId) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(BlankImbuementScrollId);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -10361,6 +10737,9 @@ namespace Tibia.Protobuf.Appearances {
       }
       if (other.HasStandardRewardChestId) {
         StandardRewardChestId = other.StandardRewardChestId;
+      }
+      if (other.HasBlankImbuementScrollId) {
+        BlankImbuementScrollId = other.BlankImbuementScrollId;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -10402,6 +10781,10 @@ namespace Tibia.Protobuf.Appearances {
           }
           case 56: {
             StandardRewardChestId = input.ReadUInt32();
+            break;
+          }
+          case 64: {
+            BlankImbuementScrollId = input.ReadUInt32();
             break;
           }
         }
@@ -10446,6 +10829,620 @@ namespace Tibia.Protobuf.Appearances {
             StandardRewardChestId = input.ReadUInt32();
             break;
           }
+          case 64: {
+            BlankImbuementScrollId = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  public sealed partial class AppearanceFlagImbueable : pb::IMessage<AppearanceFlagImbueable>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<AppearanceFlagImbueable> _parser = new pb::MessageParser<AppearanceFlagImbueable>(() => new AppearanceFlagImbueable());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<AppearanceFlagImbueable> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Tibia.Protobuf.Appearances.AppearancesReflection.Descriptor.MessageTypes[26]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagImbueable() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagImbueable(AppearanceFlagImbueable other) : this() {
+      _hasBits0 = other._hasBits0;
+      slotCount_ = other.slotCount_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagImbueable Clone() {
+      return new AppearanceFlagImbueable(this);
+    }
+
+    /// <summary>Field number for the "slot_count" field.</summary>
+    public const int SlotCountFieldNumber = 1;
+    private readonly static uint SlotCountDefaultValue = 0;
+
+    private uint slotCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint SlotCount {
+      get { if ((_hasBits0 & 1) != 0) { return slotCount_; } else { return SlotCountDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        slotCount_ = value;
+      }
+    }
+    /// <summary>Gets whether the "slot_count" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasSlotCount {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "slot_count" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearSlotCount() {
+      _hasBits0 &= ~1;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as AppearanceFlagImbueable);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(AppearanceFlagImbueable other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (SlotCount != other.SlotCount) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (HasSlotCount) hash ^= SlotCount.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (HasSlotCount) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(SlotCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (HasSlotCount) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(SlotCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (HasSlotCount) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(SlotCount);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(AppearanceFlagImbueable other) {
+      if (other == null) {
+        return;
+      }
+      if (other.HasSlotCount) {
+        SlotCount = other.SlotCount;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            SlotCount = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            SlotCount = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  public sealed partial class AppearanceFlagSkillWheelGem : pb::IMessage<AppearanceFlagSkillWheelGem>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<AppearanceFlagSkillWheelGem> _parser = new pb::MessageParser<AppearanceFlagSkillWheelGem>(() => new AppearanceFlagSkillWheelGem());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<AppearanceFlagSkillWheelGem> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Tibia.Protobuf.Appearances.AppearancesReflection.Descriptor.MessageTypes[27]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagSkillWheelGem() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagSkillWheelGem(AppearanceFlagSkillWheelGem other) : this() {
+      _hasBits0 = other._hasBits0;
+      gemQualityId_ = other.gemQualityId_;
+      vocationId_ = other.vocationId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagSkillWheelGem Clone() {
+      return new AppearanceFlagSkillWheelGem(this);
+    }
+
+    /// <summary>Field number for the "gem_quality_id" field.</summary>
+    public const int GemQualityIdFieldNumber = 1;
+    private readonly static uint GemQualityIdDefaultValue = 0;
+
+    private uint gemQualityId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint GemQualityId {
+      get { if ((_hasBits0 & 1) != 0) { return gemQualityId_; } else { return GemQualityIdDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        gemQualityId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "gem_quality_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasGemQualityId {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "gem_quality_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearGemQualityId() {
+      _hasBits0 &= ~1;
+    }
+
+    /// <summary>Field number for the "vocation_id" field.</summary>
+    public const int VocationIdFieldNumber = 2;
+    private readonly static uint VocationIdDefaultValue = 0;
+
+    private uint vocationId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint VocationId {
+      get { if ((_hasBits0 & 2) != 0) { return vocationId_; } else { return VocationIdDefaultValue; } }
+      set {
+        _hasBits0 |= 2;
+        vocationId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "vocation_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasVocationId {
+      get { return (_hasBits0 & 2) != 0; }
+    }
+    /// <summary>Clears the value of the "vocation_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearVocationId() {
+      _hasBits0 &= ~2;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as AppearanceFlagSkillWheelGem);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(AppearanceFlagSkillWheelGem other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (GemQualityId != other.GemQualityId) return false;
+      if (VocationId != other.VocationId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (HasGemQualityId) hash ^= GemQualityId.GetHashCode();
+      if (HasVocationId) hash ^= VocationId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (HasGemQualityId) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(GemQualityId);
+      }
+      if (HasVocationId) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(VocationId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (HasGemQualityId) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(GemQualityId);
+      }
+      if (HasVocationId) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(VocationId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (HasGemQualityId) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(GemQualityId);
+      }
+      if (HasVocationId) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(VocationId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(AppearanceFlagSkillWheelGem other) {
+      if (other == null) {
+        return;
+      }
+      if (other.HasGemQualityId) {
+        GemQualityId = other.GemQualityId;
+      }
+      if (other.HasVocationId) {
+        VocationId = other.VocationId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            GemQualityId = input.ReadUInt32();
+            break;
+          }
+          case 16: {
+            VocationId = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            GemQualityId = input.ReadUInt32();
+            break;
+          }
+          case 16: {
+            VocationId = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  public sealed partial class AppearanceFlagProficiency : pb::IMessage<AppearanceFlagProficiency>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<AppearanceFlagProficiency> _parser = new pb::MessageParser<AppearanceFlagProficiency>(() => new AppearanceFlagProficiency());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<AppearanceFlagProficiency> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Tibia.Protobuf.Appearances.AppearancesReflection.Descriptor.MessageTypes[28]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagProficiency() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagProficiency(AppearanceFlagProficiency other) : this() {
+      _hasBits0 = other._hasBits0;
+      proficiencyId_ = other.proficiencyId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public AppearanceFlagProficiency Clone() {
+      return new AppearanceFlagProficiency(this);
+    }
+
+    /// <summary>Field number for the "proficiency_id" field.</summary>
+    public const int ProficiencyIdFieldNumber = 1;
+    private readonly static uint ProficiencyIdDefaultValue = 0;
+
+    private uint proficiencyId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint ProficiencyId {
+      get { if ((_hasBits0 & 1) != 0) { return proficiencyId_; } else { return ProficiencyIdDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        proficiencyId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "proficiency_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasProficiencyId {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "proficiency_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearProficiencyId() {
+      _hasBits0 &= ~1;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as AppearanceFlagProficiency);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(AppearanceFlagProficiency other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (ProficiencyId != other.ProficiencyId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (HasProficiencyId) hash ^= ProficiencyId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (HasProficiencyId) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(ProficiencyId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (HasProficiencyId) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(ProficiencyId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (HasProficiencyId) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ProficiencyId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(AppearanceFlagProficiency other) {
+      if (other == null) {
+        return;
+      }
+      if (other.HasProficiencyId) {
+        ProficiencyId = other.ProficiencyId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            ProficiencyId = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            ProficiencyId = input.ReadUInt32();
+            break;
+          }
         }
       }
     }
@@ -10466,7 +11463,7 @@ namespace Tibia.Protobuf.Appearances {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Tibia.Protobuf.Appearances.AppearancesReflection.Descriptor.MessageTypes[26]; }
+      get { return global::Tibia.Protobuf.Appearances.AppearancesReflection.Descriptor.MessageTypes[29]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
