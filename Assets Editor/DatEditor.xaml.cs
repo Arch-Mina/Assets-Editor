@@ -164,7 +164,7 @@ namespace Assets_Editor
                     ObjListView.ItemsSource = ThingsEffect.OrderBy(x => x.Id);
                 else if (selection == 3)
                     ObjListView.ItemsSource = ThingsMissile.OrderBy(x => x.Id);
-            
+
                 if (preserveId.HasValue) 
                 {  
                     foreach (ShowList item in ObjListView.Items)  
@@ -272,13 +272,13 @@ namespace Assets_Editor
                         try
                         {
                             if (ObjectMenu.SelectedIndex == 0)
-                                appearance = MainWindow.appearances.Outfit[i];
+                                appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id);
                             else if (ObjectMenu.SelectedIndex == 1)
-                                appearance = MainWindow.appearances.Object[i];
+                                appearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id);
                             else if (ObjectMenu.SelectedIndex == 2)
-                                appearance = MainWindow.appearances.Effect[i];
+                                appearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id);
                             else if (ObjectMenu.SelectedIndex == 3)
-                                appearance = MainWindow.appearances.Missile[i];
+                                appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id);
                         }
                         catch (Exception)
                         {
@@ -289,14 +289,7 @@ namespace Assets_Editor
                     else
                     {
                         item.StopAnimation();
-                        if (ObjectMenu.SelectedIndex == 0)
-                            ThingsOutfit[i].Image = null;
-                        else if (ObjectMenu.SelectedIndex == 1)
-                            ThingsItem[i].Image = null;
-                        else if (ObjectMenu.SelectedIndex == 2)
-                            ThingsEffect[i].Image = null;
-                        else if (ObjectMenu.SelectedIndex == 3)
-                            ThingsMissile[i].Image = null;
+                        item.Image = null;
                     }
                 }
             }
