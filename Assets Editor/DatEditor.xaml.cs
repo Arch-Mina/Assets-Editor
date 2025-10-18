@@ -320,18 +320,21 @@ namespace Assets_Editor
         }
         private void ObjListView_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            if (ObjListView.SelectedItems.Count == 0 && e.RemovedItems.Count > 0)
+            {
+                ObjListView.SelectedItem = e.RemovedItems[0];
+            }
             ShowList showList = (ShowList)ObjListView.SelectedItem;
             if (showList != null)
             {
-                ObjListViewSelectedIndex.Value = (int)showList.Id;
                 if (ObjectMenu.SelectedIndex == 0)
-                    LoadSelectedObjectAppearances(MainWindow.appearances.Outfit[ObjListView.SelectedIndex]);
+                    LoadSelectedObjectAppearances(MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == showList.Id));
                 else if (ObjectMenu.SelectedIndex == 1)
-                    LoadSelectedObjectAppearances(MainWindow.appearances.Object[ObjListView.SelectedIndex]);
+                    LoadSelectedObjectAppearances(MainWindow.appearances.Object.FirstOrDefault(o => o.Id == showList.Id));
                 else if (ObjectMenu.SelectedIndex == 2)
-                    LoadSelectedObjectAppearances(MainWindow.appearances.Effect[ObjListView.SelectedIndex]);
+                    LoadSelectedObjectAppearances(MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == showList.Id));
                 else if (ObjectMenu.SelectedIndex == 3)
-                    LoadSelectedObjectAppearances(MainWindow.appearances.Missile[ObjListView.SelectedIndex]);
+                    LoadSelectedObjectAppearances(MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id));
 
                 if (ObjectMenu.SelectedIndex == 0)
                 {
@@ -1591,17 +1594,34 @@ namespace Assets_Editor
                 if (oldTransparency != currentTransparency)
                     SetObjectTransparency(CurrentObjectAppearance, (byte)oldTransparency);
             }
+            ShowList showList = ObjListView.SelectedItem as ShowList;
 
             if (ObjectMenu.SelectedIndex == 0)
-                MainWindow.appearances.Outfit[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
+            {
+                int index = MainWindow.appearances.Outfit.ToList().FindIndex(o => o.Id == showList.Id);
+                if (index >= 0)
+                    MainWindow.appearances.Outfit[index] = CurrentObjectAppearance.Clone();
+            }
             else if (ObjectMenu.SelectedIndex == 1)
-                MainWindow.appearances.Object[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
+            {
+                int index = MainWindow.appearances.Object.ToList().FindIndex(o => o.Id == showList.Id);
+                if (index >= 0)
+                    MainWindow.appearances.Object[index] = CurrentObjectAppearance.Clone();
+            }
             else if (ObjectMenu.SelectedIndex == 2)
-                MainWindow.appearances.Effect[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
+            {
+                int index = MainWindow.appearances.Effect.ToList().FindIndex(o => o.Id == showList.Id);
+                if (index >= 0)
+                    MainWindow.appearances.Effect[index] = CurrentObjectAppearance.Clone();
+            }
             else if (ObjectMenu.SelectedIndex == 3)
-                MainWindow.appearances.Missile[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
+            {
+                int index = MainWindow.appearances.Missile.ToList().FindIndex(o => o.Id == showList.Id);
+                if (index >= 0)
+                    MainWindow.appearances.Missile[index] = CurrentObjectAppearance.Clone();
+            }
 
-            ShowList showList = ObjListView.SelectedItem as ShowList;
+            
             if (showList.Id != CurrentObjectAppearance.Id)
             {
                 showList.Id = CurrentObjectAppearance.Id;
