@@ -2287,36 +2287,67 @@ namespace Assets_Editor
                 };
                 if (saveFileDialog.ShowDialog() == true)
                 {
+                    bool exportingSingle = selectedItems.Count == 1;
+                    string directoryPath = System.IO.Path.GetDirectoryName(saveFileDialog.FileName) ?? Environment.CurrentDirectory;
+                    string baseFileName = System.IO.Path.GetFileNameWithoutExtension(saveFileDialog.FileName)?.Trim();
+                    if (string.IsNullOrEmpty(baseFileName))
+                        baseFileName = exportingSingle ? selectedItems[0].Id.ToString() : "sprite";
+
                     foreach (var item in selectedItems)
                     {
-                        if (item.Image != null)
+                        var spriteStream = MainWindow.getSpriteStream((int)item.Id);
+                        if (spriteStream == null)
+                            continue;
+
+                        long originalPosition = spriteStream.CanSeek ? spriteStream.Position : 0;
+                        if (spriteStream.CanSeek)
+                            spriteStream.Position = 0;
+
+                        using System.Drawing.Image spriteImage = System.Drawing.Image.FromStream(spriteStream, useEmbeddedColorManagement: true, validateImageData: true);
+
+                        int width = spriteImage.Width;
+                        int height = spriteImage.Height;
+                        using System.Drawing.Bitmap targetImg = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(targetImg))
                         {
-                            System.Drawing.Bitmap targetImg = new System.Drawing.Bitmap((int)item.Image.Width, (int)item.Image.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                            System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(targetImg);
                             if (saveFileDialog.FilterIndex != 4)
                                 g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
-                            System.Drawing.Image image = System.Drawing.Image.FromStream(MainWindow.getSpriteStream((int)item.Id));
+
                             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-                            g.DrawImage(image, new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), System.Drawing.GraphicsUnit.Pixel);
-                            g.Dispose();
-                            string directoryPath = System.IO.Path.GetDirectoryName(saveFileDialog.FileName);
-                            switch (saveFileDialog.FilterIndex)
-                            {
-                                case 1:
-                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-                                    break;
-                                case 2:
-                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".gif", System.Drawing.Imaging.ImageFormat.Gif);
-                                    break;
-                                case 3:
-                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
-                                    break;
-                                case 4:
-                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".png", System.Drawing.Imaging.ImageFormat.Png);
-                                    break;
-                            }
-                            targetImg.Dispose();
+                            g.DrawImage(spriteImage, new System.Drawing.Rectangle(0, 0, width, height), new System.Drawing.Rectangle(0, 0, width, height), System.Drawing.GraphicsUnit.Pixel);
                         }
+
+                        string extension;
+                        System.Drawing.Imaging.ImageFormat imageFormat;
+                        switch (saveFileDialog.FilterIndex)
+                        {
+                            case 1:
+                                extension = ".bmp";
+                                imageFormat = System.Drawing.Imaging.ImageFormat.Bmp;
+                                break;
+                            case 2:
+                                extension = ".gif";
+                                imageFormat = System.Drawing.Imaging.ImageFormat.Gif;
+                                break;
+                            case 3:
+                                extension = ".jpg";
+                                imageFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
+                                break;
+                            default:
+                                extension = ".png";
+                                imageFormat = System.Drawing.Imaging.ImageFormat.Png;
+                                break;
+                        }
+
+                        string composedName = exportingSingle
+                            ? baseFileName + extension
+                            : $"{baseFileName}_{item.Id}{extension}";
+
+                        string targetPath = System.IO.Path.Combine(directoryPath, composedName);
+                        targetImg.Save(targetPath, imageFormat);
+
+                        if (spriteStream.CanSeek)
+                            spriteStream.Position = originalPosition;
                     }
                 }
             }
@@ -2419,6 +2450,7 @@ namespace Assets_Editor
                     }
 
                 }
+                CollectionViewSource.GetDefaultView(ObjListView.ItemsSource).Refresh();
                 ObjListView.SelectedItem = ObjListView.Items[^1];
                 StatusBar.MessageQueue.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
@@ -2427,42 +2459,90 @@ namespace Assets_Editor
         private void DeleteObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             List<ShowList> selectedItems = ObjListView.SelectedItems.Cast<ShowList>().ToList();
-            if (selectedItems.Any())
+            if (!selectedItems.Any()) return;
+
+            bool handlerDetached = false;
+            bool success = false;
+            uint? targetId = null;
+
+            try
             {
-                ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
-                int currentIndex = ObjListView.SelectedIndex;
+                uint minDeletedId = selectedItems.Min(item => item.Id);
+
+                if (ObjectMenu.SelectedIndex == 0)
+                    targetId = ThingsOutfit.Where(listItem => listItem.Id < minDeletedId && !selectedItems.Any(selected => selected.Id == listItem.Id)).OrderByDescending(listItem => listItem.Id).FirstOrDefault()?.Id;
+                else if (ObjectMenu.SelectedIndex == 1)
+                    targetId = ThingsItem.Where(listItem => listItem.Id < minDeletedId && !selectedItems.Any(selected => selected.Id == listItem.Id)).OrderByDescending(listItem => listItem.Id).FirstOrDefault()?.Id;
+                else if (ObjectMenu.SelectedIndex == 2)
+                    targetId = ThingsEffect.Where(listItem => listItem.Id < minDeletedId && !selectedItems.Any(selected => selected.Id == listItem.Id)).OrderByDescending(listItem => listItem.Id).FirstOrDefault()?.Id;
+                else if (ObjectMenu.SelectedIndex == 3)
+                    targetId = ThingsMissile.Where(listItem => listItem.Id < minDeletedId && !selectedItems.Any(selected => selected.Id == listItem.Id)).OrderByDescending(listItem => listItem.Id).FirstOrDefault()?.Id;
+
+                ObjListView.SelectionChanged -= ObjListView_SelectionChanged;
+                handlerDetached = true;
+
                 foreach (var item in selectedItems)
                 {
-                    Appearance DelObject = new Appearance();
                     if (ObjectMenu.SelectedIndex == 0)
                     {
-                        DelObject = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id);
-                        MainWindow.appearances.Outfit.Remove(DelObject);
-                        ThingsOutfit.Remove(item);
+                        var delObject = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id);
+                        if (delObject != null)
+                        {
+                            MainWindow.appearances.Outfit.Remove(delObject);
+                            ThingsOutfit.Remove(item);
+                        }
                     }
                     else if (ObjectMenu.SelectedIndex == 1)
                     {
-                        DelObject = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id);
-                        MainWindow.appearances.Object.Remove(DelObject);
-                        ThingsItem.Remove(item);
+                        var delObject = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id);
+                        if (delObject != null)
+                        {
+                            MainWindow.appearances.Object.Remove(delObject);
+                            ThingsItem.Remove(item);
+                        }
                     }
                     else if (ObjectMenu.SelectedIndex == 2)
                     {
-                        DelObject = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id);
-                        MainWindow.appearances.Effect.Remove(DelObject);
-                        ThingsEffect.Remove(item);
+                        var delObject = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id);
+                        if (delObject != null)
+                        {
+                            MainWindow.appearances.Effect.Remove(delObject);
+                            ThingsEffect.Remove(item);
+                        }
 
                     }
                     else if (ObjectMenu.SelectedIndex == 3)
                     {
-                        DelObject = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id);
-                        MainWindow.appearances.Missile.Remove(DelObject);
-                        ThingsMissile.Remove(item);
+                        var delObject = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id);
+                        if (delObject != null)
+                        {
+                            MainWindow.appearances.Missile.Remove(delObject);
+                            ThingsMissile.Remove(item);
+                        }
 
                     }
                 }
-                ObjListView.SelectedIndex = Math.Min(currentIndex, ObjListView.Items.Count - 1);
+
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                MainWindow.Log($"Error during object deletion: {ex.Message}", "Error");
+            }
+            finally
+            {
+                if (handlerDetached)
+                    ObjListView.SelectionChanged += ObjListView_SelectionChanged;
+            }
+
+            if (success)
+            {
+                UpdateShowList(ObjectMenu.SelectedIndex, targetId);
                 StatusBar.MessageQueue.Enqueue($"Successfully deleted {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
+            else
+            {
+                UpdateShowList(ObjectMenu.SelectedIndex);
             }
         }
 
@@ -2826,6 +2906,8 @@ namespace Assets_Editor
                         MainWindow.appearances.Missile.Add(appearance.Clone());
                         ThingsMissile.Add(new ShowList() { Id = appearance.Id });
                     }
+
+                    UpdateShowList(ObjectMenu.SelectedIndex);
                 }
             }
         }
@@ -3013,36 +3095,45 @@ namespace Assets_Editor
                     if (ObjectMenu.SelectedIndex == 0)
                     {
                         appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == showList.Id);
-                        exported = exportObjects.Outfit.Any(a => a.Id == appearance.Id);
+                        exported = appearance != null && exportObjects.Outfit.Any(a => a.Id == appearance.Id);
                     }
                     else if (ObjectMenu.SelectedIndex == 1)
                     {
                         appearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == showList.Id);
-                        exported = exportObjects.Object.Any(a => a.Id == appearance.Id);
+                        exported = appearance != null && exportObjects.Object.Any(a => a.Id == appearance.Id);
                     }
                     else if (ObjectMenu.SelectedIndex == 2)
                     {
                         appearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == showList.Id);
-                        exported = exportObjects.Effect.Any(a => a.Id == appearance.Id);
+                        exported = appearance != null && exportObjects.Effect.Any(a => a.Id == appearance.Id);
                     }
                     else if (ObjectMenu.SelectedIndex == 3)
                     {
                         appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
-                        exported = exportObjects.Missile.Any(a => a.Id == appearance.Id);
+                        exported = appearance != null && exportObjects.Missile.Any(a => a.Id == appearance.Id);
                     }
 
-                    try
+                    if (appearance != null &&
+                        appearance.FrameGroup != null &&
+                        appearance.FrameGroup.Count > 0 &&
+                        appearance.FrameGroup[0] != null &&
+                        appearance.FrameGroup[0].SpriteInfo != null &&
+                        appearance.FrameGroup[0].SpriteInfo.SpriteId != null &&
+                        appearance.FrameGroup[0].SpriteInfo.SpriteId.Count > 0)
                     {
-                        for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.SpriteId.Count; i++)
+                        try
                         {
-                            int index = GetSpriteIndex(appearance.FrameGroup[0], 0, (ObjectMenu.SelectedIndex == 0 || ObjectMenu.SelectedIndex == 2) ? (int)Math.Min(2, appearance.FrameGroup[0].SpriteInfo.PatternWidth - 1) : 0, ObjectMenu.SelectedIndex == 2 ? (int)Math.Min(1, appearance.FrameGroup[0].SpriteInfo.PatternHeight - 1) : 0, 0, i);
-                            BitmapImage imageFrame = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)appearance.FrameGroup[0].SpriteInfo.SpriteId[index]));
-                            showList.Images.Add(imageFrame);
+                            for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.SpriteId.Count; i++)
+                            {
+                                int index = GetSpriteIndex(appearance.FrameGroup[0], 0, (ObjectMenu.SelectedIndex == 0 || ObjectMenu.SelectedIndex == 2) ? (int)Math.Min(2, appearance.FrameGroup[0].SpriteInfo.PatternWidth - 1) : 0, ObjectMenu.SelectedIndex == 2 ? (int)Math.Min(1, appearance.FrameGroup[0].SpriteInfo.PatternHeight - 1) : 0, 0, i);
+                                BitmapImage imageFrame = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)appearance.FrameGroup[0].SpriteInfo.SpriteId[index]));
+                                showList.Images.Add(imageFrame);
+                            }
                         }
-                    }
-                    catch
-                    {
-                        MainWindow.Log("Error animation for sprite " + appearance.Id + ", crash prevented.");
+                        catch (Exception ex)
+                        {
+                            MainWindow.Log($"Error animation for sprite {appearance.Id}: {ex.Message}", "Error");
+                        }
                     }
 
                     showList.StartAnimation();

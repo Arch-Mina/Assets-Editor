@@ -10,12 +10,12 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -1245,36 +1245,69 @@ namespace Assets_Editor
                 };
                 if (saveFileDialog.ShowDialog() == true)
                 {
+                    bool exportingSingle = selectedItems.Count == 1;
+                    string directoryPath = System.IO.Path.GetDirectoryName(saveFileDialog.FileName) ?? Environment.CurrentDirectory;
+                    string baseFileName = System.IO.Path.GetFileNameWithoutExtension(saveFileDialog.FileName)?.Trim();
+                    if (string.IsNullOrEmpty(baseFileName))
+                        baseFileName = exportingSingle ? selectedItems[0].Id.ToString() : "sprite";
+
                     foreach (var item in selectedItems)
                     {
-                        if (item.Image != null)
+                        var spriteStream = MainWindow.MainSprStorage.getSpriteStream(item.Id);
+                        if (spriteStream == null)
+                            continue;
+
+                        long originalPosition = spriteStream.CanSeek ? spriteStream.Position : 0;
+                        if (spriteStream.CanSeek)
+                            spriteStream.Position = 0;
+
+                        using (var spriteImage = System.Drawing.Image.FromStream(spriteStream, useEmbeddedColorManagement: true, validateImageData: true))
                         {
-                            System.Drawing.Bitmap targetImg = new System.Drawing.Bitmap((int)item.Image.Width, (int)item.Image.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                            System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(targetImg);
-                            if(saveFileDialog.FilterIndex != 4)
-                                g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
-                            System.Drawing.Image image = System.Drawing.Image.FromStream(MainWindow.MainSprStorage.getSpriteStream(item.Id));
-                            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-                            g.DrawImage(image, new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), System.Drawing.GraphicsUnit.Pixel);
-                            g.Dispose();
-                            string directoryPath = System.IO.Path.GetDirectoryName(saveFileDialog.FileName);
-                            switch (saveFileDialog.FilterIndex)
+                            int width = spriteImage.Width;
+                            int height = spriteImage.Height;
+
+                            using (var targetImg = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                            using (var g = System.Drawing.Graphics.FromImage(targetImg))
                             {
-                                case 1:
-                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-                                    break;
-                                case 2:
-                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".gif", System.Drawing.Imaging.ImageFormat.Gif);
-                                    break;
-                                case 3:
-                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
-                                    break;
-                                case 4:
-                                    targetImg.Save(directoryPath + "\\" + item.Id.ToString() + ".png", System.Drawing.Imaging.ImageFormat.Png);
-                                    break;
+                                if (saveFileDialog.FilterIndex != 4)
+                                    g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
+
+                                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                                g.DrawImage(spriteImage, new System.Drawing.Rectangle(0, 0, width, height), new System.Drawing.Rectangle(0, 0, width, height), System.Drawing.GraphicsUnit.Pixel);
+
+                                string extension;
+                                System.Drawing.Imaging.ImageFormat imageFormat;
+                                switch (saveFileDialog.FilterIndex)
+                                {
+                                    case 1:
+                                        extension = ".bmp";
+                                        imageFormat = System.Drawing.Imaging.ImageFormat.Bmp;
+                                        break;
+                                    case 2:
+                                        extension = ".gif";
+                                        imageFormat = System.Drawing.Imaging.ImageFormat.Gif;
+                                        break;
+                                    case 3:
+                                        extension = ".jpg";
+                                        imageFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
+                                        break;
+                                    default:
+                                        extension = ".png";
+                                        imageFormat = System.Drawing.Imaging.ImageFormat.Png;
+                                        break;
+                                }
+
+                                string composedName = exportingSingle
+                                    ? baseFileName + extension
+                                    : $"{baseFileName}_{item.Id}{extension}";
+
+                                string targetPath = System.IO.Path.Combine(directoryPath, composedName);
+                                targetImg.Save(targetPath, imageFormat);
                             }
-                            targetImg.Dispose();
                         }
+
+                        if (spriteStream.CanSeek)
+                            spriteStream.Position = originalPosition;
                     }
                 }
             }

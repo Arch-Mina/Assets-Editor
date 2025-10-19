@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-
+using System.ComponentModel;
 using System.Windows.Media.Imaging;
+using System.Text;
 using System.Drawing;
 using System.Windows.Media;
 using Image = System.Windows.Controls.Image;
@@ -19,6 +20,7 @@ using Efundies;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Data;
+using Tibia.Protobuf.Appearances;
 
 namespace Assets_Editor
 {
@@ -252,7 +254,8 @@ namespace Assets_Editor
             if (Math.Ceiling(sourceBitmap.Width) >= SprSheetWidth &&
                 Math.Ceiling(sourceBitmap.Height) >= SprSheetHeight)
             {
-                Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
+                using var sourceBitmapRaw = new Bitmap(@files[0]);
+                using var original = Utils.ConvertBackgroundToMagenta(sourceBitmapRaw, true);
                 int sprCount = targetImageIndex;
                 int xCols = SpriteWidth == 32 ? 12 : 6;
                 int yCols = SpriteHeight == 32 ? 12 : 6;
@@ -261,7 +264,7 @@ namespace Assets_Editor
                     for (int y = 0; y < xCols; y++)
                     {
                         Rectangle rect = new Rectangle(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
-                        Bitmap crop = original.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        using Bitmap crop = original.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                         if (sprCount < images.Count)
                         {
                             images[sprCount].Source = Utils.BitmapToBitmapImage(crop);
@@ -277,7 +280,8 @@ namespace Assets_Editor
                 {
                     for (int i = 0; i < files.Length; i++)
                     {
-                        Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[i]), true);
+                        using var sourceBitmapRaw = new Bitmap(@files[i]);
+                        using var original = Utils.ConvertBackgroundToMagenta(sourceBitmapRaw, true);
                         if (targetImageIndex + i < images.Count)
                         {
                             images[targetImageIndex + i].Source = Utils.BitmapToBitmapImage(original);
@@ -286,9 +290,18 @@ namespace Assets_Editor
                 }
                 else
                 {
-                    Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
-                    Image img = e.Source as Image;
-                    img.Source = Utils.BitmapToBitmapImage(original);
+                    using var sourceBitmapRaw = new Bitmap(@files[0]);
+                    using var original = Utils.ConvertBackgroundToMagenta(sourceBitmapRaw, true);
+                    Image img = e?.Source as Image;
+                    if (img == null && targetImageIndex < images.Count)
+                    {
+                        img = images[targetImageIndex];
+                    }
+
+                    if (img != null)
+                    {
+                        img.Source = Utils.BitmapToBitmapImage(original);
+                    }
                 }
             }
         }
@@ -416,49 +429,58 @@ namespace Assets_Editor
                 int counter = 0;
                 foreach (Image child in images)
                 {
-
                     BitmapSource bitmapSource = Utils.BitmapFromControl(child, 96, 96, SpriteWidth, SpriteHeight);
                     PngBitmapEncoder png = new PngBitmapEncoder();
                     png.Frames.Add(BitmapFrame.Create(bitmapSource));
-                    MemoryStream stream = new MemoryStream();
-                    png.Save(stream);
-                    Bitmap imported = new Bitmap(stream);
-                    var lockedBitmap = new LockBitmap(imported);
-                    lockedBitmap.LockBits();
-                    for (int y = 0; y < imported.Height; y++)
+                    using MemoryStream encodedStream = new MemoryStream();
+                    png.Save(encodedStream);
+                    encodedStream.Position = 0;
+
+                    using (Bitmap imported = new Bitmap(encodedStream))
                     {
-                        for (int x = 0; x < imported.Width; x++)
+                        var lockedBitmap = new LockBitmap(imported);
+                        lockedBitmap.LockBits();
+                        for (int y = 0; y < imported.Height; y++)
                         {
-                            if (lockedBitmap.GetPixel(x, y) == System.Drawing.Color.FromArgb(255, 255, 0, 255))
+                            for (int x = 0; x < imported.Width; x++)
                             {
-                                lockedBitmap.SetPixel(x, y, System.Drawing.Color.FromArgb(0, 255, 0, 255));
+                                if (lockedBitmap.GetPixel(x, y) == System.Drawing.Color.FromArgb(255, 255, 0, 255))
+                                {
+                                    lockedBitmap.SetPixel(x, y, System.Drawing.Color.FromArgb(0, 255, 0, 255));
+                                }
                             }
                         }
+                        lockedBitmap.UnlockBits();
+
+                        var spriteStream = new MemoryStream();
+                        imported.Save(spriteStream, System.Drawing.Imaging.ImageFormat.Png);
+                        spriteStream.Position = 0;
+                        SprLists[sprInfo.FirstSpriteid + counter] = spriteStream;
                     }
-                    lockedBitmap.UnlockBits();
-                    stream = new MemoryStream();
-                    imported.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                    SprLists[sprInfo.FirstSpriteid + counter] = stream;
+
                     counter++;
                 }
-                Bitmap targetImg = GetBitmapFromTiles(images);
-                string dirPath = _assetsPath;
-                LZMA.ExportLzmaFile(targetImg, ref dirPath);
 
-                sprInfo.File = dirPath;
-                if (CurrentSheet != null)
-                    MainWindow.catalog.Remove(CurrentSheet);
-
-                MainWindow.catalog.Add(sprInfo);
-
-                ShowList foundEntry = SprEditor.CustomSheetsList.FirstOrDefault(showList => showList.Id == (uint)sprInfo.FirstSpriteid);
-
-                if (foundEntry != null)
+                using (Bitmap targetImg = GetBitmapFromTiles(images))
                 {
-                    SprEditor.CustomSheetsList.Remove(foundEntry);
-                }
+                    string dirPath = _assetsPath;
+                    LZMA.ExportLzmaFile(targetImg, ref dirPath);
 
-                SprEditor.CustomSheetsList.Add(new ShowList() { Id = (uint)sprInfo.FirstSpriteid, Image = Utils.BitmapToBitmapImage(targetImg), Name = sprInfo.File });
+                    sprInfo.File = dirPath;
+                    if (CurrentSheet != null)
+                        MainWindow.catalog.Remove(CurrentSheet);
+
+                    MainWindow.catalog.Add(sprInfo);
+
+                    ShowList foundEntry = SprEditor.CustomSheetsList.FirstOrDefault(showList => showList.Id == (uint)sprInfo.FirstSpriteid);
+
+                    if (foundEntry != null)
+                    {
+                        SprEditor.CustomSheetsList.Remove(foundEntry);
+                    }
+
+                    SprEditor.CustomSheetsList.Add(new ShowList() { Id = (uint)sprInfo.FirstSpriteid, Image = Utils.BitmapToBitmapImage(targetImg), Name = sprInfo.File });
+                }
 
                 if (CurrentSheet == null)
                 {
@@ -524,67 +546,343 @@ namespace Assets_Editor
             NewSheetDialogHost.IsOpen = true;
         }
 
+        private void EnsureSheetLoaded(MainWindow.Catalog catalog)
+        {
+            if (catalog == null || string.IsNullOrEmpty(catalog.File))
+                return;
+
+            string sprPath = Path.Combine(MainWindow._assetsPath, catalog.File);
+            if (!File.Exists(sprPath))
+                return;
+
+            if (SprEditor.CustomSheetsList.Any(showList => showList.Id == (uint)catalog.FirstSpriteid))
+                return;
+
+            using System.Drawing.Bitmap sheet = LZMA.DecompressFileLZMA(sprPath);
+            using Bitmap transparentBitmap = new Bitmap(sheet.Width, sheet.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(transparentBitmap))
+            {
+                g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
+                g.DrawImage(sheet, 0, 0);
+            }
+
+            SprEditor.CustomSheetsList.Add(new ShowList()
+            {
+                Id = (uint)catalog.FirstSpriteid,
+                Image = Utils.BitmapToBitmapImage(transparentBitmap),
+                Name = catalog.File
+            });
+        }
+
+        private static string NormalizeSearchString(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
+            var builder = new StringBuilder(value.Length);
+            foreach (char ch in value)
+            {
+                if (char.IsLetterOrDigit(ch))
+                    builder.Append(char.ToLowerInvariant(ch));
+            }
+
+            return builder.ToString();
+        }
+
+        private static bool MatchesSearch(string candidate, string normalizedSearch)
+        {
+            if (string.IsNullOrEmpty(normalizedSearch) || string.IsNullOrEmpty(candidate))
+                return false;
+
+            string normalizedCandidate = NormalizeSearchString(candidate);
+            return normalizedCandidate.Contains(normalizedSearch);
+        }
+
+        private static bool MatchesStringField(string value, string searchName, string normalizedSearch)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+
+            if (!string.IsNullOrWhiteSpace(searchName) && value.IndexOf(searchName, StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+
+            return MatchesSearch(value, normalizedSearch);
+        }
+
+        private static bool AppearanceMatchesSearch(Appearance appearance, string searchName, string normalizedSearch)
+        {
+            if (appearance == null)
+                return false;
+
+            if (MatchesStringField(appearance.Name, searchName, normalizedSearch))
+                return true;
+
+            if (MatchesStringField(appearance.Description, searchName, normalizedSearch))
+                return true;
+
+            var flags = appearance.Flags;
+            if (flags != null)
+            {
+                if (MatchesStringField(flags.Market?.Name, searchName, normalizedSearch))
+                    return true;
+
+                if (flags.Npcsaledata != null && flags.Npcsaledata.Any(npc => MatchesStringField(npc?.Name, searchName, normalizedSearch)))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static IEnumerable<uint> ExtractSpriteIds(Appearance appearance, string searchName, string normalizedSearch)
+        {
+            if (!AppearanceMatchesSearch(appearance, searchName, normalizedSearch))
+                yield break;
+
+            if (appearance.FrameGroup == null)
+                yield break;
+
+            foreach (var group in appearance.FrameGroup)
+            {
+                var spriteInfo = group?.SpriteInfo;
+                if (spriteInfo?.SpriteId == null)
+                    continue;
+
+                foreach (var spriteId in spriteInfo.SpriteId)
+                {
+                    yield return spriteId;
+                }
+            }
+        }
+
+        private static IEnumerable<uint> FindSpriteIdsByName(string searchName, string normalizedSearch)
+        {
+            if (MainWindow.appearances == null)
+                yield break;
+
+            if (MainWindow.appearances.Object != null)
+            {
+                foreach (var appearance in MainWindow.appearances.Object)
+                {
+                    foreach (var spriteId in ExtractSpriteIds(appearance, searchName, normalizedSearch))
+                        yield return spriteId;
+                }
+            }
+
+            if (MainWindow.appearances.Outfit != null)
+            {
+                foreach (var appearance in MainWindow.appearances.Outfit)
+                {
+                    foreach (var spriteId in ExtractSpriteIds(appearance, searchName, normalizedSearch))
+                        yield return spriteId;
+                }
+            }
+
+            if (MainWindow.appearances.Effect != null)
+            {
+                foreach (var appearance in MainWindow.appearances.Effect)
+                {
+                    foreach (var spriteId in ExtractSpriteIds(appearance, searchName, normalizedSearch))
+                        yield return spriteId;
+                }
+            }
+
+            if (MainWindow.appearances.Missile != null)
+            {
+                foreach (var appearance in MainWindow.appearances.Missile)
+                {
+                    foreach (var spriteId in ExtractSpriteIds(appearance, searchName, normalizedSearch))
+                        yield return spriteId;
+                }
+            }
+        }
+
+        private static bool CatalogMatchesSearch(MainWindow.Catalog catalog, string searchName, string normalizedSearch)
+        {
+            if (catalog == null || string.IsNullOrEmpty(catalog.File))
+                return false;
+
+            if (!string.IsNullOrWhiteSpace(searchName) && catalog.File.IndexOf(searchName, StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+
+            string fileName = Path.GetFileName(catalog.File) ?? string.Empty;
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(catalog.File) ?? string.Empty;
+
+            return MatchesSearch(catalog.File, normalizedSearch)
+                || MatchesSearch(fileName, normalizedSearch)
+                || MatchesSearch(fileNameWithoutExtension, normalizedSearch);
+        }
+
+        private static bool SheetNameMatches(string sheetName, string searchName, string normalizedSearch)
+        {
+            if (string.IsNullOrEmpty(sheetName))
+                return false;
+
+            if (!string.IsNullOrWhiteSpace(searchName) && sheetName.IndexOf(searchName, StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+
+            string fileName = Path.GetFileName(sheetName) ?? string.Empty;
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(sheetName) ?? string.Empty;
+
+            return MatchesSearch(sheetName, normalizedSearch)
+                || MatchesSearch(fileName, normalizedSearch)
+                || MatchesSearch(fileNameWithoutExtension, normalizedSearch);
+        }
+
         private void SearchSpr_Click(object sender, RoutedEventArgs e)
         {
+            int? searchId = A_SearchSprId.Value;
+            string searchName = A_SearchSprName.Text?.Trim();
+            bool hasName = !string.IsNullOrWhiteSpace(searchName);
+            string displaySearchName = searchName ?? string.Empty;
+            string normalizedSearchName = NormalizeSearchString(searchName);
 
-            foreach (var catalog in MainWindow.catalog)
+            uint? matchedSheetId = null;
+            HashSet<uint> matchedSheetIds = new HashSet<uint>();
+
+            if (searchId.HasValue)
             {
-                if (A_SearchSprId.Value >= catalog.FirstSpriteid && A_SearchSprId.Value <= catalog.LastSpriteid)
+                foreach (var catalog in MainWindow.catalog)
                 {
-                    string _sprPath = String.Format("{0}{1}", MainWindow._assetsPath, catalog.File);
-                    if (File.Exists(_sprPath))
+                    if (searchId.Value >= catalog.FirstSpriteid && searchId.Value <= catalog.LastSpriteid)
                     {
-                        ShowList foundEntry = SprEditor.CustomSheetsList.FirstOrDefault(showList => showList.Id == (uint)catalog.FirstSpriteid);
-                        if (foundEntry == null)
-                        {
-                            using System.Drawing.Bitmap SheetM = LZMA.DecompressFileLZMA(_sprPath);
-                            using Bitmap transparentBitmap = new Bitmap(SheetM.Width, SheetM.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                            using (Graphics g = Graphics.FromImage(transparentBitmap))
-                            {
-                                g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
-                                g.DrawImage(SheetM, 0, 0);
-
-                            }
-
-                            SprEditor.CustomSheetsList.Add(new ShowList() { Id = (uint)catalog.FirstSpriteid, Image = Utils.BitmapToBitmapImage(transparentBitmap), Name = catalog.File });
-                        }
-                        
+                        EnsureSheetLoaded(catalog);
+                        matchedSheetId = (uint)catalog.FirstSpriteid;
+                        matchedSheetIds.Add(matchedSheetId.Value);
                     }
                 }
             }
-            SheetsList.ItemsSource = SprEditor.CustomSheetsList;
 
+            if (hasName)
+            {
+                foreach (var catalog in MainWindow.catalog)
+                {
+                    if (CatalogMatchesSearch(catalog, searchName, normalizedSearchName))
+                    {
+                        EnsureSheetLoaded(catalog);
+                        matchedSheetId ??= (uint)catalog.FirstSpriteid;
+                        matchedSheetIds.Add((uint)catalog.FirstSpriteid);
+                    }
+                }
+
+                HashSet<uint> processedSpriteIds = new HashSet<uint>();
+                foreach (var spriteId in FindSpriteIdsByName(searchName, normalizedSearchName))
+                {
+                    if (!processedSpriteIds.Add(spriteId))
+                        continue;
+
+                    var catalog = MainWindow.catalog.FirstOrDefault(c => spriteId >= c.FirstSpriteid && spriteId <= c.LastSpriteid);
+                    if (catalog == null)
+                        continue;
+
+                    EnsureSheetLoaded(catalog);
+                    matchedSheetId ??= (uint)catalog.FirstSpriteid;
+                    matchedSheetIds.Add((uint)catalog.FirstSpriteid);
+                }
+            }
+
+            ICollectionView view = CollectionViewSource.GetDefaultView(SprEditor.CustomSheetsList);
+            if (hasName)
+            {
+                view.Filter = item =>
+                {
+                    if (item is not ShowList sheet)
+                        return false;
+
+                    if (matchedSheetIds.Contains(sheet.Id))
+                        return true;
+
+                    return SheetNameMatches(sheet.Name, searchName, normalizedSearchName);
+                };
+            }
+            else
+            {
+                view.Filter = null;
+            }
+
+            view.Refresh();
+            SheetsList.ItemsSource = view;
+
+            bool shouldFocusResult = hasName || searchId.HasValue;
+            var filteredSheets = view.Cast<object>().OfType<ShowList>().ToList();
+            if (shouldFocusResult && filteredSheets.Count > 0)
+            {
+                ShowList sheetToSelect = null;
+                uint? preferredSheetId = matchedSheetId;
+
+                if (!preferredSheetId.HasValue && matchedSheetIds.Count > 0)
+                {
+                    preferredSheetId = matchedSheetIds.First();
+                }
+
+                if (preferredSheetId.HasValue)
+                {
+                    sheetToSelect = filteredSheets.FirstOrDefault(sheet => sheet.Id == preferredSheetId.Value);
+                }
+
+                if (sheetToSelect != null)
+                {
+                    SheetsList.SelectedItem = sheetToSelect;
+                }
+                else
+                {
+                    SheetsList.SelectedIndex = 0;
+                }
+
+                SheetsList.ScrollIntoView(SheetsList.SelectedItem);
+            }
+            else if (hasName)
+            {
+                SprStatusBar.MessageQueue.Enqueue($"No sprite sheets found for \"{displaySearchName}\".", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
+        }
+
+        private void SearchBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                SearchSpr_Click(this, new RoutedEventArgs());
+                e.Handled = true;
+            }
         }
 
         public void OpenForSpriteId(int spriteId)
         {
+            uint? matchedSheetId = null;
             foreach (var catalog in MainWindow.catalog)
             {
                 if (spriteId >= catalog.FirstSpriteid && spriteId <= catalog.LastSpriteid)
                 {
-                    string _sprPath = String.Format("{0}{1}", MainWindow._assetsPath, catalog.File);
-                    if (File.Exists(_sprPath))
-                    {
-                        ShowList foundEntry = SprEditor.CustomSheetsList.FirstOrDefault(showList => showList.Id == (uint)catalog.FirstSpriteid);
-                        if (foundEntry == null)
-                        {
-                            using System.Drawing.Bitmap SheetM = LZMA.DecompressFileLZMA(_sprPath);
-                            using Bitmap transparentBitmap = new Bitmap(SheetM.Width, SheetM.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                            using (Graphics g = Graphics.FromImage(transparentBitmap))
-                            {
-                                g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
-                                g.DrawImage(SheetM, 0, 0);
-
-                            }
-
-                            SprEditor.CustomSheetsList.Add(new ShowList() { Id = (uint)catalog.FirstSpriteid, Image = Utils.BitmapToBitmapImage(transparentBitmap), Name = catalog.File });
-                        }
-
-                    }
+                    EnsureSheetLoaded(catalog);
+                    matchedSheetId = (uint)catalog.FirstSpriteid;
                 }
             }
-            SheetsList.ItemsSource = SprEditor.CustomSheetsList;
-            SheetsList.SelectedIndex = 0;
+            ICollectionView view = CollectionViewSource.GetDefaultView(SprEditor.CustomSheetsList);
+            view.Filter = null;
+            view.Refresh();
+            SheetsList.ItemsSource = view;
+
+            if (SheetsList.Items.Count == 0)
+                return;
+
+            ShowList sheetToSelect = null;
+            if (matchedSheetId.HasValue)
+            {
+                sheetToSelect = view.Cast<object>()
+                                     .OfType<ShowList>()
+                                     .FirstOrDefault(sheet => sheet.Id == matchedSheetId.Value);
+            }
+
+            if (sheetToSelect != null)
+            {
+                SheetsList.SelectedItem = sheetToSelect;
+            }
+            else
+            {
+                SheetsList.SelectedIndex = 0;
+            }
+
+            SheetsList.ScrollIntoView(SheetsList.SelectedItem);
+
             if (SheetsList.SelectedIndex > -1)
             {
                 ShowList showList = (ShowList)SheetsList.SelectedItem;
