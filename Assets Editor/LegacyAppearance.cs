@@ -89,19 +89,19 @@ namespace Assets_Editor
                     w.Write((ushort)appearances.Effect.Count);
                     w.Write((ushort)appearances.Missile.Count);
 
-                    foreach (Appearance appearance in appearances.Object)
+                    foreach (Appearance appearance in appearances.Object.OrderBy(a => a.Id))
                     {
                         DatStructure.WriteAppearance(w, appearance, versionInfo);
                     }
-                    foreach (Appearance appearance in appearances.Outfit)
+                    foreach (Appearance appearance in appearances.Outfit.OrderBy(a => a.Id))
                     {
                         DatStructure.WriteAppearance(w, appearance, versionInfo);
                     }
-                    foreach (Appearance appearance in appearances.Effect)
+                    foreach (Appearance appearance in appearances.Effect.OrderBy(a => a.Id))
                     {
                         DatStructure.WriteAppearance(w, appearance, versionInfo);
                     }
-                    foreach (Appearance appearance in appearances.Missile)
+                    foreach (Appearance appearance in appearances.Missile.OrderBy(a => a.Id))
                     {
                         DatStructure.WriteAppearance(w, appearance, versionInfo);
                     }

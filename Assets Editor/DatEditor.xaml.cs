@@ -2188,10 +2188,10 @@ namespace Assets_Editor
 
                 tmpAppearances = MainWindow.appearances.Clone();
 
-                uint ObjectCount = tmpAppearances.Object[^1].Id;
-                uint OutfitCount = tmpAppearances.Outfit[^1].Id;
-                uint EffectCount = tmpAppearances.Effect[^1].Id;
-                uint MissileCount = tmpAppearances.Missile[^1].Id;
+                uint ObjectCount = tmpAppearances.Object.Max(a => a.Id);
+                uint OutfitCount = tmpAppearances.Outfit.Max(a => a.Id);
+                uint EffectCount = tmpAppearances.Effect.Max(a => a.Id);
+                uint MissileCount = tmpAppearances.Missile.Max(a => a.Id);
                 for (uint i = 100; i <= ObjectCount; i++)
                 {
                     Appearance appearance = tmpAppearances.Object.FirstOrDefault(a => a.Id == i);
@@ -2346,26 +2346,26 @@ namespace Assets_Editor
 
             if (ObjectMenu.SelectedIndex == 0)
             {
-                newObject.Id = (uint)(MainWindow.appearances.Outfit[^1].Id + 1);
+                newObject.Id = (uint)(MainWindow.appearances.Outfit.Max(a => a.Id) + 1);
                 MainWindow.appearances.Outfit.Add(newObject);
                 ThingsOutfit.Add(new ShowList() { Id = newObject.Id });
             }
             else if (ObjectMenu.SelectedIndex == 1)
             {
-                newObject.Id = (uint)(MainWindow.appearances.Object[^1].Id + 1);
+                newObject.Id = (uint)(MainWindow.appearances.Object.Max(a => a.Id) + 1);
                 MainWindow.appearances.Object.Add(newObject);
                 ThingsItem.Add(new ShowList() { Id = newObject.Id });
             }
             else if (ObjectMenu.SelectedIndex == 2)
             {
-                newObject.Id = (uint)(MainWindow.appearances.Effect[^1].Id + 1);
+                newObject.Id = (uint)(MainWindow.appearances.Effect.Max(a => a.Id) + 1);
                 MainWindow.appearances.Effect.Add(newObject);
                 ThingsEffect.Add(new ShowList() { Id = newObject.Id });
 
             }
             else if (ObjectMenu.SelectedIndex == 3)
             {
-                newObject.Id = (uint)(MainWindow.appearances.Missile[^1].Id + 1);
+                newObject.Id = (uint)(MainWindow.appearances.Missile.Max(a => a.Id) + 1);
                 MainWindow.appearances.Missile.Add(newObject);
                 ThingsMissile.Add(new ShowList() { Id = newObject.Id });
 
@@ -2389,14 +2389,14 @@ namespace Assets_Editor
                     if (ObjectMenu.SelectedIndex == 0)
                     {
                         NewObject = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
+                        NewObject.Id = (uint)MainWindow.appearances.Outfit.Max(a => a.Id) + 1;
                         MainWindow.appearances.Outfit.Add(NewObject);
                         ThingsOutfit.Add(new ShowList() { Id = NewObject.Id });
                     }
                     else if (ObjectMenu.SelectedIndex == 1)
                     {
                         NewObject = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
+                        NewObject.Id = (uint)MainWindow.appearances.Object.Max(a => a.Id) + 1;
                         MainWindow.appearances.Object.Add(NewObject);
                         ThingsItem.Add(new ShowList() { Id = NewObject.Id });
 
@@ -2404,7 +2404,7 @@ namespace Assets_Editor
                     else if (ObjectMenu.SelectedIndex == 2)
                     {
                         NewObject = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
+                        NewObject.Id = (uint)MainWindow.appearances.Effect.Max(a => a.Id) + 1;
                         MainWindow.appearances.Effect.Add(NewObject);
                         ThingsEffect.Add(new ShowList() { Id = NewObject.Id });
 
@@ -2412,7 +2412,7 @@ namespace Assets_Editor
                     else if (ObjectMenu.SelectedIndex == 3)
                     {
                         NewObject = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
+                        NewObject.Id = (uint)MainWindow.appearances.Missile.Max(a => a.Id) + 1;
                         MainWindow.appearances.Missile.Add(NewObject);
                         ThingsMissile.Add(new ShowList() { Id = NewObject.Id });
 
@@ -2766,7 +2766,7 @@ namespace Assets_Editor
                         }
                         else
                         {
-                            appearance.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
+                            appearance.Id = (uint)MainWindow.appearances.Outfit.Max(a => a.Id) + 1;
                         }
                         MainWindow.appearances.Outfit.Add(appearance.Clone());
                         ThingsOutfit.Add(new ShowList() { Id = appearance.Id });
@@ -2781,7 +2781,7 @@ namespace Assets_Editor
                             appearance.Id = (uint)appearance.Id;
                         } else
                         {
-                            appearance.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
+                            appearance.Id = (uint)MainWindow.appearances.Object.Max(a => a.Id) + 1;
                         }
 
                         if (appearance.Flags.Market != null && appearance.Flags.Market.HasTradeAsObjectId)
@@ -2806,7 +2806,7 @@ namespace Assets_Editor
                         }
                         else
                         {
-                            appearance.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
+                            appearance.Id = (uint)MainWindow.appearances.Effect.Max(a => a.Id) + 1;
                         }
                         MainWindow.appearances.Effect.Add(appearance.Clone());
                         ThingsEffect.Add(new ShowList() { Id = appearance.Id });
@@ -2821,7 +2821,7 @@ namespace Assets_Editor
                         }
                         else
                         {
-                            appearance.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
+                            appearance.Id = (uint)MainWindow.appearances.Missile.Max(a => a.Id) + 1;
                         }
                         MainWindow.appearances.Missile.Add(appearance.Clone());
                         ThingsMissile.Add(new ShowList() { Id = appearance.Id });
