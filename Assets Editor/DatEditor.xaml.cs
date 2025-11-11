@@ -358,6 +358,10 @@ namespace Assets_Editor
 
         private void LoadSelectedObjectAppearances(Appearance ObjectAppearance)
         {
+            if (ObjectAppearance == null)
+            {
+                return;
+            }
             CurrentObjectAppearance = ObjectAppearance.Clone();
             LoadCurrentObjectAppearances();
             SprGroupSlider.ValueChanged -= SprGroupSlider_ValueChanged;
@@ -2463,6 +2467,7 @@ namespace Assets_Editor
                 }
                 ObjListView.SelectedIndex = Math.Min(currentIndex, ObjListView.Items.Count - 1);
                 StatusBar.MessageQueue.Enqueue($"Successfully deleted {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                UpdateShowList(ObjectMenu.SelectedIndex);
             }
         }
 
@@ -3029,6 +3034,11 @@ namespace Assets_Editor
                     {
                         appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
                         exported = exportObjects.Missile.Any(a => a.Id == appearance.Id);
+                    }
+
+                    if (appearance == null)
+                    {
+                        return;
                     }
 
                     try
