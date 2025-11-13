@@ -24,6 +24,7 @@
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
                         </Grid.RowDefinitions>
                         <StackPanel Orientation="Horizontal" Grid.Row="0">
                             <Label Content="Converting Objects"/>
@@ -33,7 +34,10 @@
                             <Label Content="Converting Sprites"/>
                             <ProgressBar x:Name="LoadProgress2" Minimum="0" Maximum="100" Value="0" Width="210" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
                         </StackPanel>
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
+                            <CheckBox x:Name="C_ExportTransparent" Content="Export with Transparency (Alpha Channel)" IsChecked="True" Margin="10,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button Click="CompileLegacy" Content="Export" Width="100" Margin="0,0,20,0"/>
                             <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
                         </StackPanel>
@@ -106,6 +110,49 @@
                         </StackPanel>
                         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button Click="CompileAsImages" Content="Export" Width="100" Margin="0,0,20,0"/>
+                            <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+            </materialDesign:DialogHost.DialogContent>
+        </materialDesign:DialogHost>
+
+        <materialDesign:DialogHost Grid.Row="1" x:Name="ImportLegacyDialogHost" OverlayBackground="Gray" >
+            <materialDesign:DialogHost.DialogContent>
+                <GroupBox x:Name="ImportLegacyBox" Header="Import From Legacy" Width="550">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Vertical" Grid.Row="0" Margin="10">
+                            <Label Content="Select folder containing Tibia.dat and Tibia.spr files:" FontWeight="Bold"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox x:Name="LegacyFolderPath" Width="360" IsReadOnly="True" Margin="5,0"/>
+                                <Button Content="Browse" Click="BrowseLegacyFolder_Click" Width="80" Margin="5,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="1">
+                            <Label Content="Reading Legacy Files"/>
+                            <ProgressBar x:Name="ImportProgress1" Minimum="0" Maximum="100" Value="0" Width="250" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="2">
+                            <Label Content="Converting Sprites"/>
+                            <ProgressBar x:Name="ImportProgress2" Minimum="0" Maximum="100" Value="0" Width="250" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="3">
+                            <Label Content="Client Version:" VerticalAlignment="Center" Margin="10,0"/>
+                            <ComboBox x:Name="ImportClientVersion" Width="120" Margin="5,0" SelectedIndex="0">
+                                <ComboBoxItem Content="1098 (10.98)"/>
+                                <ComboBoxItem Content="1099 (10.99)"/>
+                                <ComboBoxItem Content="1100 (11.00)"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Click="StartImport_Click" Content="Import" Width="100" Margin="0,0,20,0"/>
                             <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
                         </StackPanel>
                     </Grid>
@@ -225,6 +272,11 @@
                             <MenuItem Header="Export to legacy" Click="CompileLegacy_Click">
                                 <MenuItem.Icon>
                                     <materialDesign:PackIcon Kind="FileDocumentArrowRight" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Import from legacy" Click="ImportLegacy_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="FileImportOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <MenuItem Header="Export as images" Click="CompileToImages_Click">

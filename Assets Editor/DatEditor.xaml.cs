@@ -390,6 +390,16 @@ namespace Assets_Editor
             ButtonProgressAssist.SetIsIndicatorVisible(SprLeftArrow, false);
             ForceSliderChange();
             SprFramesSlider.Maximum = (double)A_SprAnimation.Value - 1;
+            
+            // Update addon slider maximum based on PatternHeight
+            if (ObjectMenu.SelectedIndex == 0 && CurrentObjectAppearance.FrameGroup[group].SpriteInfo.PatternHeight > 1)
+            {
+                SprAddonSlider.Maximum = (double)(CurrentObjectAppearance.FrameGroup[group].SpriteInfo.PatternHeight - 1);
+            }
+            else
+            {
+                SprAddonSlider.Maximum = 0;
+            }
 
             try
             {
@@ -748,23 +758,21 @@ namespace Assets_Editor
                 SpriteViewerGrid.Children.Clear();
                 SpriteViewerGrid.RowDefinitions.Clear();
                 SpriteViewerGrid.ColumnDefinitions.Clear();
-                int gridWidth = 1;
-                int gridHeight = 1;
-                if (ObjectMenu.SelectedIndex != 0)
-                {
-                    gridWidth = (int)frameGroup.SpriteInfo.PatternHeight;
-                    gridHeight = (int)frameGroup.SpriteInfo.PatternWidth;
-                }
+                
+                // For all types: PatternHeight = number of rows, PatternWidth = number of columns
+                int numRows = (int)frameGroup.SpriteInfo.PatternHeight;
+                int numCols = (int)frameGroup.SpriteInfo.PatternWidth;
+                
                 int imgWidth = (int)Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)frameGroup.SpriteInfo.SpriteId[0])).Width;
                 int imgHeight = (int)Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)frameGroup.SpriteInfo.SpriteId[0])).Height;
 
-                for (int i = 0; i < gridWidth; i++)
+                for (int i = 0; i < numRows; i++)
                 {
                     RowDefinition rowDef = new RowDefinition();
                     rowDef.Height = new GridLength(imgHeight);
                     SpriteViewerGrid.RowDefinitions.Add(rowDef);
                 }
-                for (int i = 0; i < gridHeight; i++)
+                for (int i = 0; i < numCols; i++)
                 {
                     ColumnDefinition colDef = new ColumnDefinition();
                     colDef.Width = new GridLength(imgWidth);
@@ -777,10 +785,10 @@ namespace Assets_Editor
                     {
                         int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.Layers - 1 : 0;
                         int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
-                        int addon = frameGroup.SpriteInfo.PatternWidth > 1 ? (int)SprAddonSlider.Value : 0;
+                        int addon = frameGroup.SpriteInfo.PatternHeight > 1 ? (int)SprAddonSlider.Value : 0;
                         int index = GetSpriteIndex(frameGroup, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), addon, mount, (int)SprFramesSlider.Value);
                         int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                        SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(spriteId)), 1, spriteId, index);
+                        SetImageInGrid(SpriteViewerGrid, numRows, numCols, Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(spriteId)), 1, spriteId, index);
                     }
                     else
                     {
@@ -823,7 +831,7 @@ namespace Assets_Editor
 
                         baseBitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
 
-                        SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(memoryStream), 1, 0, 0);
+                        SetImageInGrid(SpriteViewerGrid, numRows, numCols, Utils.BitmapToBitmapImage(memoryStream), 1, 0, 0);
                     }
                 }
                 else
@@ -836,7 +844,7 @@ namespace Assets_Editor
                         {
                             int index = GetSpriteIndex(frameGroup, 0, pw, ph, mount, (int)SprFramesSlider.Value);
                             int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                            SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(spriteId)), counter, spriteId, index);
+                            SetImageInGrid(SpriteViewerGrid, numRows, numCols, Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(spriteId)), counter, spriteId, index);
                             counter++;
                         }
                     }
@@ -862,11 +870,12 @@ namespace Assets_Editor
             if (isPageLoaded)
                 ForceSliderChange();
         }
-        private void SetImageInGrid(Grid grid, int gridWidth, int gridHeight, BitmapImage image, int id, int spriteId, int index)
+        private void SetImageInGrid(Grid grid, int numRows, int numCols, BitmapImage image, int id, int spriteId, int index)
         {
             // Get the row and column of the cell based on the ID number
-            int row = (id - 1) / gridHeight;
-            int col = (id - 1) % gridHeight;
+            // numCols is used because we fill grid left-to-right, top-to-bottom
+            int row = (id - 1) / numCols;
+            int col = (id - 1) % numCols;
 
             // Get the existing Image control in the cell, or create a new one if it doesn't exist
             Image existingImage = null;
@@ -883,7 +892,7 @@ namespace Assets_Editor
                 existingImage = new Image();
                 existingImage.Width = image.Width;
                 existingImage.Height = image.Height;
-                AllowDrop = true;
+                existingImage.AllowDrop = true;  // Enable drop on this image
                 Grid.SetRow(existingImage, row);
                 Grid.SetColumn(existingImage, col);
                 grid.Children.Add(existingImage);
@@ -2269,7 +2278,9 @@ namespace Assets_Editor
                 LoadProgress2.Value = percent;
             });
             string sprfile = MainWindow._assetsPath + "Tibia.spr";
-            await Sprite.CompileSpritesAsync(sprfile, tmpSprStorage, false, 0x53159CA9, progress1);
+            // Use transparency setting from checkbox (default: true for alpha channel support)
+            bool useTransparency = C_ExportTransparent?.IsChecked ?? true;
+            await Sprite.CompileSpritesAsync(sprfile, tmpSprStorage, useTransparency, 0x53159CA9, progress1);
             ComppileDialogHost.IsOpen = false;
         }
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
@@ -3357,6 +3368,974 @@ namespace Assets_Editor
                 CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Clear();
                 foreach (var boxItem in BoundingBoxList)
                     CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Add(boxItem);
+            }
+        }
+
+        // ===== LEGACY IMPORT FUNCTIONS =====
+
+        private void ImportLegacy_Click(object sender, RoutedEventArgs e)
+        {
+            ImportLegacyDialogHost.IsOpen = true;
+            ImportProgress1.Value = 0;
+            ImportProgress2.Value = 0;
+        }
+
+        private void BrowseLegacyFolder_Click(object sender, RoutedEventArgs e)
+        {
+            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                dialog.Description = "Select folder containing Tibia.dat and Tibia.spr";
+                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+
+                if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
+                {
+                    string datPath = Path.Combine(dialog.SelectedPath, "Tibia.dat");
+                    string sprPath = Path.Combine(dialog.SelectedPath, "Tibia.spr");
+
+                    if (!File.Exists(datPath))
+                    {
+                        System.Windows.MessageBox.Show("Tibia.dat not found in selected folder!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    if (!File.Exists(sprPath))
+                    {
+                        System.Windows.MessageBox.Show("Tibia.spr not found in selected folder!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    LegacyFolderPath.Text = dialog.SelectedPath;
+                }
+            }
+        }
+
+        private async void StartImport_Click(object sender, RoutedEventArgs e)
+        {
+            // Check if assets project is loaded first
+            if (MainWindow.appearances == null || MainWindow.SprLists == null)
+            {
+                System.Windows.MessageBox.Show(
+                    "Please open or create an Assets project first!\n\n" +
+                    "Go to File -> Open Assets or File -> New Assets before importing legacy data.",
+                    "No Assets Project Loaded",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(LegacyFolderPath.Text))
+            {
+                System.Windows.MessageBox.Show("Please select a folder first!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            int clientVersion = ImportClientVersion.SelectedIndex switch
+            {
+                0 => 1098,
+                1 => 1099,
+                2 => 1100,
+                _ => 1098
+            };
+
+            var progress1 = new Progress<int>(percent => ImportProgress1.Value = percent);
+            var progress2 = new Progress<int>(percent => ImportProgress2.Value = percent);
+
+            try
+            {
+                await ImportLegacyData(LegacyFolderPath.Text, clientVersion, progress1, progress2);
+                ImportLegacyDialogHost.IsOpen = false;
+                System.Windows.MessageBox.Show("Import completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                
+                // Refresh UI
+                UpdateShowList(ObjectMenu.SelectedIndex);
+            }
+            catch (Exception ex)
+            {
+                ImportLegacyDialogHost.IsOpen = false;
+                
+                // Show detailed error with inner exception if available
+                string errorMessage = $"Import failed: {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $"\n\nInner Exception: {ex.InnerException.Message}";
+                }
+                errorMessage += $"\n\nStack Trace:\n{ex.StackTrace}";
+                
+                MainWindow.Log($"IMPORT FAILED!");
+                MainWindow.Log($"Error: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    MainWindow.Log($"Inner Exception: {ex.InnerException.Message}");
+                    MainWindow.Log($"Inner Stack Trace: {ex.InnerException.StackTrace}");
+                }
+                MainWindow.Log($"Stack trace: {ex.StackTrace}");
+                
+                System.Windows.MessageBox.Show(errorMessage, "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task ImportLegacyData(string folderPath, int version, IProgress<int> progress1, IProgress<int> progress2)
+        {
+            MainWindow.Log($"=== STARTING LEGACY IMPORT ===");
+            MainWindow.Log($"Checking if assets project is loaded...");
+            
+            // Check FIRST if we have assets loaded
+            if (MainWindow.appearances == null)
+            {
+                MainWindow.Log("ERROR: MainWindow.appearances is null - no assets project loaded?");
+                throw new InvalidOperationException("You must load or create an assets project before importing legacy data.");
+            }
+            
+            if (MainWindow.SprLists == null)
+            {
+                MainWindow.Log("ERROR: MainWindow.SprLists is null");
+                throw new InvalidOperationException("Sprite storage is not initialized.");
+            }
+            
+            MainWindow.Log("Assets project is loaded OK");
+            MainWindow.Log($"Current sprite count: {MainWindow.SprLists.Count}");
+            
+            string datPath = Path.Combine(folderPath, "Tibia.dat");
+            string sprPath = Path.Combine(folderPath, "Tibia.spr");
+
+            MainWindow.Log($"Starting legacy import from: {folderPath}");
+            MainWindow.Log($"Client version: {version}");
+            MainWindow.Log($"DAT path: {datPath}");
+            MainWindow.Log($"SPR path: {sprPath}");
+
+            // Step 1: Read legacy .dat file
+            LegacyAppearance legacyData = new LegacyAppearance();
+            try
+            {
+                await Task.Run(() =>
+                {
+                    MainWindow.Log("Reading legacy DAT file...");
+                    legacyData.ReadLegacyDat(datPath, version);
+                    MainWindow.Log("DAT file read successfully");
+                    progress1?.Report(50);
+                });
+            }
+            catch (Exception ex)
+            {
+                MainWindow.Log($"ERROR reading DAT file: {ex.Message}");
+                MainWindow.Log($"Stack trace: {ex.StackTrace}");
+                throw new Exception($"Failed to read DAT file: {ex.Message}", ex);
+            }
+
+            // Verify legacyData is not null
+            if (legacyData == null || legacyData.Appearances == null)
+            {
+                MainWindow.Log("ERROR: Legacy data or appearances is null after reading DAT");
+                throw new Exception("Failed to load legacy data - data is null");
+            }
+
+            MainWindow.Log($"Legacy DAT loaded: Objects={legacyData.Appearances.Object?.Count ?? 0}, Outfits={legacyData.Appearances.Outfit?.Count ?? 0}, Effects={legacyData.Appearances.Effect?.Count ?? 0}, Missiles={legacyData.Appearances.Missile?.Count ?? 0}");
+
+            // Step 2: Identify delta (new appearances)
+            MainWindow.Log("Identifying delta (new appearances)...");
+            
+            uint currentMaxItemId = MainWindow.appearances.Object.Any() ? MainWindow.appearances.Object.Max(a => a.Id) : 99;
+            uint currentMaxOutfitId = MainWindow.appearances.Outfit.Any() ? MainWindow.appearances.Outfit.Max(a => a.Id) : 0;
+            uint currentMaxEffectId = MainWindow.appearances.Effect.Any() ? MainWindow.appearances.Effect.Max(a => a.Id) : 0;
+            uint currentMaxMissileId = MainWindow.appearances.Missile.Any() ? MainWindow.appearances.Missile.Max(a => a.Id) : 0;
+
+            uint legacyMaxItemId = legacyData.Appearances.Object.Any() ? legacyData.Appearances.Object.Max(a => a.Id) : 99;
+            uint legacyMaxOutfitId = legacyData.Appearances.Outfit.Any() ? legacyData.Appearances.Outfit.Max(a => a.Id) : 0;
+            uint legacyMaxEffectId = legacyData.Appearances.Effect.Any() ? legacyData.Appearances.Effect.Max(a => a.Id) : 0;
+            uint legacyMaxMissileId = legacyData.Appearances.Missile.Any() ? legacyData.Appearances.Missile.Max(a => a.Id) : 0;
+
+            MainWindow.Log($"Current max IDs - Items: {currentMaxItemId}, Outfits: {currentMaxOutfitId}, Effects: {currentMaxEffectId}, Missiles: {currentMaxMissileId}");
+            MainWindow.Log($"Legacy max IDs - Items: {legacyMaxItemId}, Outfits: {legacyMaxOutfitId}, Effects: {legacyMaxEffectId}, Missiles: {legacyMaxMissileId}");
+
+            // Step 3: Collect sprite IDs that we actually need
+            MainWindow.Log("Collecting sprite IDs needed for import...");
+            HashSet<uint> neededSpriteIds = new HashSet<uint>();
+            
+            // Collect sprite IDs from items that will be imported
+            for (uint id = currentMaxItemId + 1; id <= legacyMaxItemId; id++)
+            {
+                var appearance = legacyData.Appearances.Object.FirstOrDefault(a => a.Id == id);
+                if (appearance != null)
+                {
+                    foreach (var frameGroup in appearance.FrameGroup)
+                    {
+                        if (frameGroup?.SpriteInfo?.SpriteId != null)
+                        {
+                            foreach (var spriteId in frameGroup.SpriteInfo.SpriteId)
+                            {
+                                if (spriteId > 0)
+                                    neededSpriteIds.Add(spriteId);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Collect from outfits
+            for (uint id = currentMaxOutfitId + 1; id <= legacyMaxOutfitId; id++)
+            {
+                var appearance = legacyData.Appearances.Outfit.FirstOrDefault(a => a.Id == id);
+                if (appearance != null)
+                {
+                    foreach (var frameGroup in appearance.FrameGroup)
+                    {
+                        if (frameGroup?.SpriteInfo?.SpriteId != null)
+                        {
+                            foreach (var spriteId in frameGroup.SpriteInfo.SpriteId)
+                            {
+                                if (spriteId > 0)
+                                    neededSpriteIds.Add(spriteId);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Collect from effects
+            for (uint id = currentMaxEffectId + 1; id <= legacyMaxEffectId; id++)
+            {
+                var appearance = legacyData.Appearances.Effect.FirstOrDefault(a => a.Id == id);
+                if (appearance != null)
+                {
+                    foreach (var frameGroup in appearance.FrameGroup)
+                    {
+                        if (frameGroup?.SpriteInfo?.SpriteId != null)
+                        {
+                            foreach (var spriteId in frameGroup.SpriteInfo.SpriteId)
+                            {
+                                if (spriteId > 0)
+                                    neededSpriteIds.Add(spriteId);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Collect from missiles
+            for (uint id = currentMaxMissileId + 1; id <= legacyMaxMissileId; id++)
+            {
+                var appearance = legacyData.Appearances.Missile.FirstOrDefault(a => a.Id == id);
+                if (appearance != null)
+                {
+                    foreach (var frameGroup in appearance.FrameGroup)
+                    {
+                        if (frameGroup?.SpriteInfo?.SpriteId != null)
+                        {
+                            foreach (var spriteId in frameGroup.SpriteInfo.SpriteId)
+                            {
+                                if (spriteId > 0)
+                                    neededSpriteIds.Add(spriteId);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            MainWindow.Log($"Need to load {neededSpriteIds.Count} sprites (instead of all sprites)");
+            
+            // Step 4: Read only needed sprites from legacy .spr file
+            Dictionary<uint, MemoryStream> legacySprites = null;
+            try
+            {
+                MainWindow.Log("Reading legacy SPR file (only needed sprites)...");
+                bool hasAlpha = version >= 960; // Tibia 9.60+ has alpha channel
+                MainWindow.Log($"Alpha channel support: {hasAlpha}");
+                legacySprites = await Sprite.ReadLegacySprites(sprPath, hasAlpha, progress1, neededSpriteIds);
+                MainWindow.Log("SPR file read successfully");
+            }
+            catch (Exception ex)
+            {
+                MainWindow.Log($"ERROR reading SPR file: {ex.Message}");
+                MainWindow.Log($"Stack trace: {ex.StackTrace}");
+                throw new Exception($"Failed to read SPR file: {ex.Message}", ex);
+            }
+
+            if (legacySprites == null)
+            {
+                MainWindow.Log("ERROR: Legacy sprites dictionary is null");
+                throw new Exception("Failed to load legacy sprites - sprites dictionary is null");
+            }
+
+            progress1?.Report(100);
+            MainWindow.Log($"Legacy SPR loaded: {legacySprites.Count} sprites");
+
+            // Step 5: Import delta
+            MainWindow.Log("Starting delta import...");
+            
+            ConcurrentQueue<uint> pendingSpriteIds = new ConcurrentQueue<uint>();
+            uint startingSpriteId = 0;
+            try
+            {
+                startingSpriteId = MainWindow.SprLists.Keys.Any() 
+                    ? (uint)MainWindow.SprLists.Keys.Max(k => (uint)k) + 1 
+                    : 1;
+                MainWindow.Log($"Starting sprite ID: {startingSpriteId}");
+            }
+            catch (Exception ex)
+            {
+                MainWindow.Log($"ERROR getting next sprite ID: {ex.Message}");
+                MainWindow.Log($"Stack trace: {ex.StackTrace}");
+                throw;
+            }
+            
+            uint nextSpriteId = startingSpriteId;
+            int totalNewAppearances = 0;
+
+            await Task.Run(() =>
+            {
+                try
+                {
+                    MainWindow.Log("Importing new items...");
+                    int itemCount = 0;
+                    // Import new items
+                    for (uint id = currentMaxItemId + 1; id <= legacyMaxItemId; id++)
+                    {
+                        var legacyAppearance = legacyData.Appearances.Object.FirstOrDefault(a => a.Id == id);
+                        if (legacyAppearance != null)
+                        {
+                            var newAppearance = ConvertLegacyAppearance(legacyAppearance, legacySprites, ref nextSpriteId, pendingSpriteIds);
+                            MainWindow.appearances.Object.Add(newAppearance);
+                            ThingsItem.Add(new ShowList() { Id = newAppearance.Id });
+                            totalNewAppearances++;
+                            itemCount++;
+                        }
+                    }
+                    MainWindow.Log($"Imported {itemCount} new items");
+
+                    MainWindow.Log("Importing new outfits...");
+                    int outfitCount = 0;
+                    // Import new outfits
+                    for (uint id = currentMaxOutfitId + 1; id <= legacyMaxOutfitId; id++)
+                    {
+                        var legacyAppearance = legacyData.Appearances.Outfit.FirstOrDefault(a => a.Id == id);
+                        if (legacyAppearance != null)
+                        {
+                            var newAppearance = ConvertLegacyAppearance(legacyAppearance, legacySprites, ref nextSpriteId, pendingSpriteIds);
+                            MainWindow.appearances.Outfit.Add(newAppearance);
+                            ThingsOutfit.Add(new ShowList() { Id = newAppearance.Id });
+                            totalNewAppearances++;
+                            outfitCount++;
+                        }
+                    }
+                    MainWindow.Log($"Imported {outfitCount} new outfits");
+
+                    MainWindow.Log("Importing new effects...");
+                    int effectCount = 0;
+                    // Import new effects
+                    for (uint id = currentMaxEffectId + 1; id <= legacyMaxEffectId; id++)
+                    {
+                        var legacyAppearance = legacyData.Appearances.Effect.FirstOrDefault(a => a.Id == id);
+                        if (legacyAppearance != null)
+                        {
+                            var newAppearance = ConvertLegacyAppearance(legacyAppearance, legacySprites, ref nextSpriteId, pendingSpriteIds);
+                            MainWindow.appearances.Effect.Add(newAppearance);
+                            ThingsEffect.Add(new ShowList() { Id = newAppearance.Id });
+                            totalNewAppearances++;
+                            effectCount++;
+                        }
+                    }
+                    MainWindow.Log($"Imported {effectCount} new effects");
+
+                    MainWindow.Log("Importing new missiles...");
+                    int missileCount = 0;
+                    // Import new missiles
+                    for (uint id = currentMaxMissileId + 1; id <= legacyMaxMissileId; id++)
+                    {
+                        var legacyAppearance = legacyData.Appearances.Missile.FirstOrDefault(a => a.Id == id);
+                        if (legacyAppearance != null)
+                        {
+                            var newAppearance = ConvertLegacyAppearance(legacyAppearance, legacySprites, ref nextSpriteId, pendingSpriteIds);
+                            MainWindow.appearances.Missile.Add(newAppearance);
+                            ThingsMissile.Add(new ShowList() { Id = newAppearance.Id });
+                            totalNewAppearances++;
+                            missileCount++;
+                        }
+                    }
+                    MainWindow.Log($"Imported {missileCount} new missiles");
+
+                    progress2?.Report(100);
+                }
+                catch (Exception ex)
+                {
+                    MainWindow.Log($"ERROR during delta import: {ex.Message}");
+                    MainWindow.Log($"Stack trace: {ex.StackTrace}");
+                    throw;
+                }
+            });
+
+            List<uint> newSpriteIds = new List<uint>();
+            while (pendingSpriteIds.TryDequeue(out uint spriteId))
+            {
+                newSpriteIds.Add(spriteId);
+                MainWindow.AllSprList.Add(new ShowList() { Id = spriteId });
+            }
+
+            if (newSpriteIds.Count > 0)
+            {
+                var sprView = CollectionViewSource.GetDefaultView(SprListView.ItemsSource);
+                sprView?.Refresh();
+
+                await PersistNewSpritesAsync(newSpriteIds);
+            }
+
+            MainWindow.Log($"Import complete: {totalNewAppearances} new appearances imported");
+            MainWindow.Log($"Ending sprite ID: {nextSpriteId}");
+            MainWindow.Log($"IMPORTANT: Remember to SAVE the project to write sprite files to disk!");
+        }
+
+        private async Task PersistNewSpritesAsync(List<uint> spriteIds)
+        {
+            if (spriteIds == null || spriteIds.Count == 0)
+            {
+                return;
+            }
+
+            var sortedIds = spriteIds
+                .Distinct()
+                .OrderBy(id => id)
+                .ToList();
+
+            if (sortedIds.Count == 0)
+            {
+                return;
+            }
+
+            var existingFiles = new HashSet<string>(MainWindow.catalog.Select(c => c.File), StringComparer.OrdinalIgnoreCase);
+
+            var newCatalogEntries = await Task.Run(() =>
+            {
+                List<MainWindow.Catalog> entries = new List<MainWindow.Catalog>();
+                const int sheetSize = 384;
+                const int spritesPerRow = 12;
+                const int spritesPerColumn = 12;
+                const int spritesPerSheet = spritesPerRow * spritesPerColumn; // 144 sprites per sheet
+                const int spriteSize = 32;
+
+                int index = 0;
+                while (index < sortedIds.Count)
+                {
+                    var chunk = sortedIds.Skip(index).Take(spritesPerSheet).ToList();
+                    using System.Drawing.Bitmap sheetBitmap = new System.Drawing.Bitmap(sheetSize, sheetSize, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    using (System.Drawing.Graphics graphics = System.Drawing.Graphics.FromImage(sheetBitmap))
+                    {
+                        graphics.Clear(System.Drawing.Color.Transparent);
+
+                        for (int i = 0; i < chunk.Count; i++)
+                        {
+                            uint spriteId = chunk[i];
+                            if (!MainWindow.SprLists.TryGetValue((int)spriteId, out MemoryStream spriteStream) || spriteStream == null)
+                            {
+                                continue;
+                            }
+
+                            lock (spriteStream)
+                            {
+                                spriteStream.Position = 0;
+                                using System.Drawing.Image spriteImage = System.Drawing.Image.FromStream(spriteStream, true, true);
+                                int x = (i % spritesPerRow) * spriteSize;
+                                int y = (i / spritesPerRow) * spriteSize;
+                                
+                                // Draw sprite - scale to 32×32 if needed (for merged tiles)
+                                graphics.DrawImage(spriteImage, x, y, spriteSize, spriteSize);
+                            }
+                        }
+                    }
+
+                    string fileName = MainWindow._assetsPath;
+                    LZMA.ExportLzmaFile(sheetBitmap, ref fileName);
+                    fileName = EnsureUniqueCatalogFile(fileName, existingFiles);
+
+                    // Determine sprite type based on actual sprite sizes in this chunk
+                    int spriteType = 0; // Default to 32×32
+                    if (chunk.Count > 0 && MainWindow.SpriteSizes.TryGetValue((int)chunk[0], out var size))
+                    {
+                        spriteType = GetSpriteTypeForSize(size.Width, size.Height);
+                    }
+
+                    entries.Add(new MainWindow.Catalog
+                    {
+                        Type = "sprite",
+                        File = fileName,
+                        SpriteType = spriteType,
+                        FirstSpriteid = (int)chunk.First(),
+                        LastSpriteid = (int)chunk.Last(),
+                        Area = 0
+                    });
+
+                    index += chunk.Count;
+                }
+
+                return entries;
+            });
+
+            foreach (var catalogEntry in newCatalogEntries)
+            {
+                MainWindow.catalog.Add(catalogEntry);
+            }
+        }
+
+        private string EnsureUniqueCatalogFile(string fileName, HashSet<string> existingFiles)
+        {
+            if (!existingFiles.Contains(fileName))
+            {
+                existingFiles.Add(fileName);
+                return fileName;
+            }
+
+            string directory = MainWindow._assetsPath;
+            string baseName = System.IO.Path.GetFileNameWithoutExtension(fileName);
+            string extension = System.IO.Path.GetExtension(fileName);
+            string uniqueFilePath;
+
+            do
+            {
+                string suffix = Guid.NewGuid().ToString("N").Substring(0, 8);
+                uniqueFilePath = $"{baseName}_{suffix}{extension}";
+            }
+            while (existingFiles.Contains(uniqueFilePath));
+
+            string originalPath = System.IO.Path.Combine(directory, fileName);
+            string newPath = System.IO.Path.Combine(directory, uniqueFilePath);
+            System.IO.File.Copy(originalPath, newPath, true);
+
+            existingFiles.Add(uniqueFilePath);
+            return uniqueFilePath;
+        }
+
+    /// <summary>
+    /// Determines the appropriate SpriteType based on sprite dimensions
+    /// CRITICAL: OTClient only supports SpriteType 0-3!
+    /// Any sprite >64×64 MUST use type 0 (will be stored as 32×32 tiles)
+    /// </summary>
+    private static int GetSpriteTypeForSize(int width, int height)
+    {
+        // ONLY sprite types 0-3 are supported by OTClient
+        if (width == 32 && height == 32) return 0;
+        if (width == 32 && height == 64) return 1;
+        if (width == 64 && height == 32) return 2;
+        if (width == 64 && height == 64) return 3;
+        
+        // CRITICAL: Sprites >64×64 are NOT supported by OTClient
+        // They should have been split into 32×32 tiles during import
+        // If we get here, something went wrong - default to type 0
+        MainWindow.Log($"WARNING: Sprite size {width}×{height} is not supported by OTClient - using SpriteType 0");
+        return 0;
+    }
+
+    /// <summary>
+    /// Calculates sprite sheet layout parameters for a given sprite size
+    /// </summary>
+    private static (int spritesPerRow, int spritesPerColumn, int spriteType) GetSheetLayoutForSize(System.Drawing.Size spriteSize, int sheetSize = 384)
+    {
+        int spritesPerRow = sheetSize / spriteSize.Width;
+        int spritesPerColumn = sheetSize / spriteSize.Height;
+        int spriteType = GetSpriteTypeForSize(spriteSize.Width, spriteSize.Height);
+        
+        return (spritesPerRow, spritesPerColumn, spriteType);
+    }
+
+    /// <summary>
+    /// Converts legacy appearance format to new format
+    /// 
+    /// CRITICAL: Pattern dimension mapping between legacy and new formats:
+    /// 
+    /// LEGACY FORMAT (old .dat):
+    ///   - PatternX/Y/Z = directions, addons, mount variations
+    ///   - PatternWidth/Height = actual sprite tile dimensions (1x1, 2x2, etc)
+    /// 
+    /// NEW FORMAT (appearances.dat):
+    ///   - PatternWidth/Height/Depth = directions, addons, mount (what was PatternX/Y/Z)
+    ///   - Tile dimensions handled differently (PatternSize field)
+    /// 
+    /// EXPORT (new -> legacy) does: PatternX = PatternWidth, PatternY = PatternHeight (line 1865-1866)
+    /// IMPORT (legacy -> new) must reverse: PatternWidth = PatternX, PatternHeight = PatternY
+    /// 
+    /// Example: Outfit with 4 directions, 3 addons
+    ///   Legacy: PatternX=4, PatternY=3, PatternWidth=1, PatternHeight=1
+    ///   New:    PatternWidth=4, PatternHeight=3, (tile dimensions in PatternSize)
+    /// </summary>
+    /// <summary>
+    /// Merges multiple 32x32 tiles into a single large sprite
+    /// </summary>
+    private MemoryStream MergeTiles(List<uint> tileIds, int tilesWide, int tilesHigh, Dictionary<uint, MemoryStream> legacySprites)
+    {
+        int spriteWidth = tilesWide * 32;
+        int spriteHeight = tilesHigh * 32;
+        
+        // Create a bitmap for the merged sprite
+        System.Drawing.Bitmap mergedBitmap = new System.Drawing.Bitmap(spriteWidth, spriteHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        
+        using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(mergedBitmap))
+        {
+            g.Clear(System.Drawing.Color.Transparent);
+            
+            // Draw each tile in the correct position
+            for (int h = 0; h < tilesHigh; h++)
+            {
+                for (int w = 0; w < tilesWide; w++)
+                {
+                    int tileIndex = h * tilesWide + w;
+                    if (tileIndex >= tileIds.Count)
+                        continue;
+                        
+                    uint tileId = tileIds[tileIndex];
+                    if (tileId == 0)
+                        continue;
+                    
+                    if (legacySprites.TryGetValue(tileId, out MemoryStream tileStream))
+                    {
+                        tileStream.Position = 0;
+                        using (System.Drawing.Bitmap tileBitmap = new System.Drawing.Bitmap(tileStream))
+                        {
+                            int x = w * 32;
+                            int y = h * 32;
+                            g.DrawImage(tileBitmap, x, y, 32, 32);
+                        }
+                        tileStream.Position = 0; // Reset for future use
+                    }
+                }
+            }
+        }
+        
+        // Convert to MemoryStream
+        MemoryStream mergedStream = new MemoryStream();
+        mergedBitmap.Save(mergedStream, System.Drawing.Imaging.ImageFormat.Png);
+        mergedStream.Position = 0;
+        mergedBitmap.Dispose();
+        
+        return mergedStream;
+    }
+    
+    /// <summary>
+    /// Reorders sprite tiles from legacy format (bottom-right to top-left) 
+    /// to new format (top-left to bottom-right)
+    /// </summary>
+    private void ReorderLegacySpriteTiles(SpriteInfo spriteInfo)
+    {
+        // Legacy GetObjectImage uses REVERSED order:
+        //   px = (PatternWidth - w - 1) * 32   // right to left
+        //   py = (PatternHeight - h - 1) * 32  // bottom to top
+        //
+        // For 2x2 sprite, legacy order is: [3,2,1,0] but should be [0,1,2,3]
+        // For 2x1 sprite, legacy order is: [1,0] but should be [0,1]
+        
+        int tilesPerPattern = (int)(spriteInfo.PatternWidth * spriteInfo.PatternHeight);
+        int patternsCount = spriteInfo.SpriteId.Count / tilesPerPattern;
+        
+        List<uint> reorderedIds = new List<uint>();
+        
+        for (int pattern = 0; pattern < patternsCount; pattern++)
+        {
+            int baseIndex = pattern * tilesPerPattern;
+            List<uint> patternTiles = new List<uint>();
+            
+            // Read tiles in legacy order
+            for (int i = 0; i < tilesPerPattern; i++)
+            {
+                patternTiles.Add(spriteInfo.SpriteId[baseIndex + i]);
+            }
+            
+            // Reorder: legacy stores bottom-right to top-left, we want top-left to bottom-right
+            for (int h = (int)spriteInfo.PatternHeight - 1; h >= 0; h--)
+            {
+                for (int w = (int)spriteInfo.PatternWidth - 1; w >= 0; w--)
+                {
+                    int legacyIndex = h * (int)spriteInfo.PatternWidth + w;
+                    reorderedIds.Add(patternTiles[legacyIndex]);
+                }
+            }
+        }
+        
+        spriteInfo.SpriteId.Clear();
+        foreach (uint id in reorderedIds)
+        {
+            spriteInfo.SpriteId.Add(id);
+        }
+    }
+    
+    private Appearance ConvertLegacyAppearance(Appearance legacyAppearance, Dictionary<uint, MemoryStream> legacySprites, ref uint nextSpriteId, ConcurrentQueue<uint> pendingSpriteIds)
+        {
+            try
+            {
+                if (legacyAppearance == null)
+                {
+                    MainWindow.Log("ERROR: legacyAppearance is null");
+                    throw new ArgumentNullException(nameof(legacyAppearance));
+                }
+
+                if (legacySprites == null)
+                {
+                    MainWindow.Log("ERROR: legacySprites dictionary is null");
+                    throw new ArgumentNullException(nameof(legacySprites));
+                }
+
+                // Clone appearance - but Clone() doesn't copy Flags properly!
+                Appearance newAppearance = legacyAppearance.Clone();
+                
+                // Manually copy Flags (Clone doesn't do this correctly)
+                if (legacyAppearance.Flags != null)
+                {
+                    newAppearance.Flags = legacyAppearance.Flags.Clone();
+                }
+                else
+                {
+                    newAppearance.Flags = new AppearanceFlags();
+                }
+
+                if (newAppearance.FrameGroup == null || newAppearance.FrameGroup.Count == 0)
+                {
+                    MainWindow.Log($"Warning: Appearance ID {legacyAppearance.Id} has no frame groups");
+                    return newAppearance;
+                }
+
+                // Convert sprite IDs and add sprites to storage
+                for (int groupIndex = 0; groupIndex < newAppearance.FrameGroup.Count; groupIndex++)
+                {
+                    var frameGroup = newAppearance.FrameGroup[groupIndex];
+                    
+                    if (frameGroup == null)
+                    {
+                        MainWindow.Log($"Warning: FrameGroup {groupIndex} is null for appearance {legacyAppearance.Id}");
+                        continue;
+                    }
+
+                    var spriteInfo = frameGroup.SpriteInfo;
+                    
+                    if (spriteInfo == null)
+                    {
+                        MainWindow.Log($"Warning: SpriteInfo is null for appearance {legacyAppearance.Id}, group {groupIndex}");
+                        continue;
+                    }
+
+                    // Convert legacy format back to new format
+                    //
+                    // CRITICAL: Different meaning of PatternWidth/Height in legacy vs new:
+                    // 
+                    // LEGACY:
+                    //   PatternWidth/Height = tile dimensions (1=32px, 2=64px as 2x2 tiles)
+                    //   PatternX/Y/Z = pattern variations (directions, addons, mount)
+                    //   Example: Item 64x64 has PatternWidth=2, PatternHeight=2, PatternX=1
+                    //
+                    // NEW:
+                    //   PatternWidth/Height/Depth = pattern variations (directions, addons, mount)
+                    //   Single sprites in sheets (no tile splitting)
+                    //   Example: Item 64x64 should have PatternWidth=2, PatternHeight=2 (tile dims stay)
+                    //
+                    // Strategy:
+                    // - For outfits: PatternX/Y/Z ARE pattern variations → copy to PatternWidth/Height/Depth
+                    // - For items/effects/missiles: Usually PatternX/Y=1, so KEEP tile dimensions
+                    
+                    bool isOutfit = newAppearance.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit;
+                    
+                    if (isOutfit && spriteInfo.HasPatternX && spriteInfo.PatternX > 1)
+                    {
+                        // Outfit with directions: use PatternX as PatternWidth
+                        spriteInfo.PatternWidth = spriteInfo.PatternX;
+                    }
+                    // else: keep legacy tile dimensions in PatternWidth
+                    
+                    if (isOutfit && spriteInfo.HasPatternY && spriteInfo.PatternY > 1)
+                    {
+                        // Outfit with addons: use PatternY as PatternHeight  
+                        spriteInfo.PatternHeight = spriteInfo.PatternY;
+                    }
+                    // else: keep legacy tile dimensions in PatternHeight
+                    
+                    if (spriteInfo.HasPatternZ) spriteInfo.PatternDepth = spriteInfo.PatternZ;
+                    if (spriteInfo.HasPatternLayers) spriteInfo.Layers = spriteInfo.PatternLayers;
+
+                    // Always set IsOpaque to false for alpha support
+                    spriteInfo.IsOpaque = false;
+
+                    // CRITICAL: Fix sprite order for multi-tile sprites!
+                    // Legacy stores tiles in REVERSED order (bottom-right to top-left)
+                    // We need to reorder them to match new format (top-left to bottom-right)
+                    if (spriteInfo.PatternWidth > 1 || spriteInfo.PatternHeight > 1)
+                    {
+                        ReorderLegacySpriteTiles(spriteInfo);
+                    }
+
+                    // Check if we need to merge tiles for multi-tile sprites
+                    // IMPORTANT: OTClient only supports SpriteType 0-3 (up to 64×64)
+                    // Sprites larger than 64×64 must stay as separate tiles!
+                    bool canMerge = (spriteInfo.PatternWidth * 32 <= 64) && (spriteInfo.PatternHeight * 32 <= 64);
+                    bool needsTileMerging = (!isOutfit) && (spriteInfo.PatternWidth > 1 || spriteInfo.PatternHeight > 1) && canMerge;
+                    
+                    if (needsTileMerging)
+                    {
+                        // For effects, missiles, items with multi-tile sprites ≤ 64×64:
+                        // Merge tiles into single large sprites for OTClient compatibility
+                        
+                        int tilesPerSprite = (int)(spriteInfo.PatternWidth * spriteInfo.PatternHeight);
+                        
+                        // CRITICAL: Calculate total sprites including ALL dimensions
+                        // Total = tiles_per_frame × patterns × layers × frames
+                        int totalTiles = spriteInfo.SpriteId.Count;
+                        int totalSprites = totalTiles / tilesPerSprite;
+                        
+                        MainWindow.Log($"Merging tiles for appearance {legacyAppearance.Id}: {spriteInfo.PatternWidth}×{spriteInfo.PatternHeight} tiles, {totalSprites} sprites total (from {totalTiles} tiles)");
+                        
+                        List<uint> mergedSpriteIds = new List<uint>();
+                        
+                        for (int spriteIndex = 0; spriteIndex < totalSprites; spriteIndex++)
+                        {
+                            int baseIndex = spriteIndex * tilesPerSprite;
+                            List<uint> tilesToMerge = new List<uint>();
+                            
+                            // Collect tiles for this sprite (frame/pattern/layer)
+                            for (int i = 0; i < tilesPerSprite; i++)
+                            {
+                                if (baseIndex + i < spriteInfo.SpriteId.Count)
+                                {
+                                    tilesToMerge.Add(spriteInfo.SpriteId[baseIndex + i]);
+                                }
+                                else
+                                {
+                                    MainWindow.Log($"WARNING: Tile index {baseIndex + i} out of range (total: {spriteInfo.SpriteId.Count})");
+                                    tilesToMerge.Add(0); // Add blank tile
+                                }
+                            }
+                            
+                            // Merge tiles into single sprite
+                            MemoryStream mergedSprite = MergeTiles(tilesToMerge, (int)spriteInfo.PatternWidth, (int)spriteInfo.PatternHeight, legacySprites);
+                            
+                            // Calculate merged sprite dimensions
+                            int mergedWidth = (int)spriteInfo.PatternWidth * 32;
+                            int mergedHeight = (int)spriteInfo.PatternHeight * 32;
+                            
+                            // Add merged sprite to storage
+                            uint newSpriteId = nextSpriteId++;
+                            MainWindow.SprLists[(int)newSpriteId] = mergedSprite;
+                            MainWindow.SpriteSizes[(int)newSpriteId] = new System.Drawing.Size(mergedWidth, mergedHeight);
+                            pendingSpriteIds?.Enqueue(newSpriteId);
+                            
+                            mergedSpriteIds.Add(newSpriteId);
+                        }
+                        
+                        MainWindow.Log($"Merged {totalSprites} sprites (was {totalTiles} tiles)");
+                        
+                        // Replace tile list with merged sprites
+                        spriteInfo.SpriteId.Clear();
+                        foreach (uint id in mergedSpriteIds)
+                        {
+                            spriteInfo.SpriteId.Add(id);
+                        }
+                        
+                        // Reset PatternWidth/Height to 1 since we merged the tiles
+                        spriteInfo.PatternWidth = 1;
+                        spriteInfo.PatternHeight = 1;
+                    }
+                    else if ((!isOutfit) && (spriteInfo.PatternWidth > 1 || spriteInfo.PatternHeight > 1))
+                    {
+                        // For large multi-tile sprites > 64×64 that cannot be merged:
+                        // Keep tiles separate as individual 32×32 sprites
+                        // KEEP PatternWidth/Height for editor display, but OTClient will only show first tile
+                        
+                        MainWindow.Log($"Large multi-tile sprite detected: {spriteInfo.PatternWidth}×{spriteInfo.PatternHeight} tiles - keeping as separate tiles for editor");
+                        
+                        // Copy sprites normally
+                        List<uint> newSpriteIds = new List<uint>();
+                        foreach (uint oldSpriteId in spriteInfo.SpriteId)
+                        {
+                            if (oldSpriteId == 0)
+                            {
+                                newSpriteIds.Add(0);
+                                continue;
+                            }
+
+                            if (legacySprites.TryGetValue(oldSpriteId, out MemoryStream spriteStream))
+                            {
+                                uint newSpriteId = nextSpriteId++;
+                                
+                                MemoryStream clonedStream = new MemoryStream();
+                                spriteStream.Position = 0;
+                                spriteStream.CopyTo(clonedStream);
+                                clonedStream.Position = 0;
+
+                                if (!MainWindow.SprLists.ContainsKey((int)newSpriteId))
+                                {
+                                    MainWindow.SprLists[(int)newSpriteId] = clonedStream;
+                                    MainWindow.SpriteSizes[(int)newSpriteId] = new System.Drawing.Size(32, 32);
+                                    pendingSpriteIds?.Enqueue(newSpriteId);
+                                }
+
+                                newSpriteIds.Add(newSpriteId);
+                            }
+                            else
+                            {
+                                newSpriteIds.Add(0);
+                                MainWindow.Log($"Warning: Sprite {oldSpriteId} not found in legacy file");
+                            }
+                        }
+
+                        spriteInfo.SpriteId.Clear();
+                        foreach (uint id in newSpriteIds)
+                        {
+                            spriteInfo.SpriteId.Add(id);
+                        }
+                        
+                        // NOTE: We KEEP PatternWidth/Height so the editor can display the sprite grid correctly
+                        // OTClient will only show the first tile, but the editor will show all tiles in proper layout
+                        // This is intentional - editor display vs in-game display are different
+                        MainWindow.Log($"Keeping PatternWidth={spriteInfo.PatternWidth}, PatternHeight={spriteInfo.PatternHeight} for editor display");
+                    }
+                    else
+                    {
+                        // Normal conversion - just copy sprites
+                        List<uint> newSpriteIds = new List<uint>();
+                        foreach (uint oldSpriteId in spriteInfo.SpriteId)
+                        {
+                            if (oldSpriteId == 0)
+                            {
+                                newSpriteIds.Add(0);
+                                continue;
+                            }
+
+                            if (legacySprites.TryGetValue(oldSpriteId, out MemoryStream spriteStream))
+                            {
+                                // Add sprite to storage
+                                uint newSpriteId = nextSpriteId++;
+                                
+                                // Clone stream to avoid disposal issues
+                                MemoryStream clonedStream = new MemoryStream();
+                                spriteStream.Position = 0;
+                                spriteStream.CopyTo(clonedStream);
+                                clonedStream.Position = 0;
+
+                                // Add to sprite storage
+                                if (!MainWindow.SprLists.ContainsKey((int)newSpriteId))
+                                {
+                                    MainWindow.SprLists[(int)newSpriteId] = clonedStream;
+                                    // Legacy sprites are always 32×32
+                                    MainWindow.SpriteSizes[(int)newSpriteId] = new System.Drawing.Size(32, 32);
+                                    pendingSpriteIds?.Enqueue(newSpriteId);
+                                }
+
+                                newSpriteIds.Add(newSpriteId);
+                            }
+                            else
+                            {
+                                // Sprite not found, use blank
+                                newSpriteIds.Add(0);
+                                MainWindow.Log($"Warning: Sprite {oldSpriteId} not found in legacy file");
+                            }
+                        }
+
+                        spriteInfo.SpriteId.Clear();
+                        foreach (uint id in newSpriteIds)
+                        {
+                            spriteInfo.SpriteId.Add(id);
+                        }
+                    }
+                }
+
+                return newAppearance;
+            }
+            catch (Exception ex)
+            {
+                MainWindow.Log($"ERROR in ConvertLegacyAppearance for ID {legacyAppearance?.Id}: {ex.Message}");
+                MainWindow.Log($"Stack trace: {ex.StackTrace}");
+                throw;
             }
         }
 

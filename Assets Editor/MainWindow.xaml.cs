@@ -107,6 +107,8 @@ namespace Assets_Editor
         public static Appearances appearances;
         public static List<ShowList> AllSprList = new List<ShowList>();
         public static ConcurrentDictionary<int, MemoryStream> SprLists = new ConcurrentDictionary<int, MemoryStream>();
+        // Track sprite sizes for proper SpriteType assignment during export
+        public static ConcurrentDictionary<int, System.Drawing.Size> SpriteSizes = new ConcurrentDictionary<int, System.Drawing.Size>();
         public static bool LegacyClient = false;
         public static uint DatSignature { get; set; }
         public static uint SprSignature { get; set; }
@@ -285,10 +287,25 @@ namespace Assets_Editor
 
             if (sheet.SpriteType >= 0)
             {
-                int xCols = (sheet.SpriteType == 0 || sheet.SpriteType == 1) ? 12 : 6;
-                int yCols = (sheet.SpriteType == 0 || sheet.SpriteType == 2) ? 12 : 6;
-                int tWidth = (sheet.SpriteType == 0 || sheet.SpriteType == 1) ? 32 : 64;
-                int tHeight = (sheet.SpriteType == 0 || sheet.SpriteType == 2) ? 32 : 64;
+                // Calculate tile dimensions based on SpriteType
+                int tWidth = 32;
+                int tHeight = 32;
+                
+                switch (sheet.SpriteType)
+                {
+                    case 0: tWidth = 32; tHeight = 32; break;  // 12×12 = 144 sprites
+                    case 1: tWidth = 32; tHeight = 64; break;  // 12×6 = 72 sprites
+                    case 2: tWidth = 64; tHeight = 32; break;  // 6×12 = 72 sprites
+                    case 3: tWidth = 64; tHeight = 64; break;  // 6×6 = 36 sprites
+                    case 4: tWidth = 96; tHeight = 96; break;  // 4×4 = 16 sprites
+                    case 5: tWidth = 128; tHeight = 128; break; // 3×3 = 9 sprites
+                    case 6: tWidth = 192; tHeight = 192; break; // 2×2 = 4 sprites
+                    case 7: tWidth = 256; tHeight = 256; break; // 1×1 = 1 sprite
+                    default: tWidth = 32; tHeight = 32; break;
+                }
+                
+                int xCols = 384 / tWidth;
+                int yCols = 384 / tHeight;
 
                 System.Drawing.Size tileSize = new System.Drawing.Size(tWidth, tHeight);
                 for (int x = 0; x < yCols; x++)

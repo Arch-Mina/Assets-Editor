@@ -524,6 +524,130 @@ namespace Assets_Editor
             });
         }
 
+        /// <summary>
+        /// Reads legacy sprite file (.spr) and returns sprites as MemoryStreams
+        /// </summary>
+        /// <param name="spriteIdsToLoad">Optional: Only load these specific sprite IDs. If null, loads all.</param>
+        public static async Task<Dictionary<uint, MemoryStream>> ReadLegacySprites(string sprFile, bool hasAlpha, IProgress<int> progress = null, HashSet<uint> spriteIdsToLoad = null)
+        {
+            return await Task.Run(() =>
+            {
+                var sprites = new Dictionary<uint, MemoryStream>();
+                
+                if (!File.Exists(sprFile))
+                {
+                    throw new FileNotFoundException($"Sprite file not found: {sprFile}");
+                }
+
+                using (FileStream fileStream = new FileStream(sprFile, FileMode.Open, FileAccess.Read))
+                using (BinaryReader reader = new BinaryReader(fileStream))
+                {
+                    // Read signature
+                    uint signature = reader.ReadUInt32();
+                    
+                    // Read sprite count
+                    uint spriteCount = reader.ReadUInt32();
+
+                    int lastReportedProgress = -1;
+
+                    // Read all sprite addresses first
+                    List<uint> addresses = new List<uint>((int)spriteCount);
+                    for (uint i = 0; i < spriteCount; i++)
+                    {
+                        addresses.Add(reader.ReadUInt32());
+                    }
+
+                    // Read each sprite
+                    for (uint id = 1; id <= spriteCount; id++)
+                    {
+                        // Skip if we have a filter list and this ID is not in it
+                        if (spriteIdsToLoad != null && !spriteIdsToLoad.Contains(id))
+                        {
+                            continue;
+                        }
+                        
+                        uint address = addresses[(int)(id - 1)];
+
+                        if (address == 0)
+                        {
+                            // Empty sprite - create blank
+                            sprites[id] = CreateBlankSpriteStream();
+                        }
+                        else
+                        {
+                            // Seek to sprite data
+                            reader.BaseStream.Seek(address, SeekOrigin.Begin);
+
+                            // Read colorkey (3 bytes - not used in modern format)
+                            byte colorKeyRed = reader.ReadByte();
+                            byte colorKeyGreen = reader.ReadByte();
+                            byte colorKeyBlue = reader.ReadByte();
+
+                            // Read sprite data size
+                            ushort dataSize = reader.ReadUInt16();
+
+                            if (dataSize > 0)
+                            {
+                                // Read compressed sprite data
+                                byte[] compressedPixels = reader.ReadBytes(dataSize);
+
+                                // Decompress to BGRA pixels
+                                byte[] pixels = UncompressPixelsBGRA(compressedPixels, hasAlpha);
+
+                                // Create bitmap from pixels
+                                Bitmap bitmap = new Bitmap(DefaultSize, DefaultSize, PixelFormat.Format32bppArgb);
+                                BitmapData bitmapData = bitmap.LockBits(Rect, ImageLockMode.WriteOnly, bitmap.PixelFormat);
+                                Marshal.Copy(pixels, 0, bitmapData.Scan0, pixels.Length);
+                                bitmap.UnlockBits(bitmapData);
+
+                                // Save to MemoryStream as PNG
+                                MemoryStream memoryStream = new MemoryStream();
+                                bitmap.Save(memoryStream, ImageFormat.Png);
+                                memoryStream.Position = 0;
+                                sprites[id] = memoryStream;
+
+                                bitmap.Dispose();
+                            }
+                            else
+                            {
+                                sprites[id] = CreateBlankSpriteStream();
+                            }
+                        }
+
+                        // Report progress
+                        if (progress != null)
+                        {
+                            int currentProgress = (int)(id * 100 / spriteCount);
+                            if (currentProgress != lastReportedProgress)
+                            {
+                                progress.Report(currentProgress);
+                                lastReportedProgress = currentProgress;
+                            }
+                        }
+                    }
+                }
+
+                return sprites;
+            });
+        }
+
+        /// <summary>
+        /// Creates a blank sprite as MemoryStream
+        /// </summary>
+        private static MemoryStream CreateBlankSpriteStream()
+        {
+            Sprite blankSpr = new Sprite
+            {
+                ID = 0,
+                CompressedPixels = Array.Empty<byte>(),
+            };
+            using Bitmap bmp = blankSpr.GetBitmap();
+            MemoryStream memoryStream = new MemoryStream();
+            bmp.Save(memoryStream, ImageFormat.Png);
+            memoryStream.Position = 0;
+            return memoryStream;
+        }
+
     }
 
     public class SpriteStorage
