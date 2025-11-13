@@ -1291,35 +1291,19 @@ namespace Assets_Editor
                 string[] selectedFiles = openFileDialog.FileNames;
                 foreach (string filePath in selectedFiles)
                 {
-                    using (System.Drawing.Image originalImage = System.Drawing.Image.FromFile(filePath))
+                    using (System.Drawing.Bitmap sourceImage = new System.Drawing.Bitmap(filePath))
+                    using (System.Drawing.Bitmap argbImage = sourceImage.Clone(new System.Drawing.Rectangle(0, 0, sourceImage.Width, sourceImage.Height), System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                     {
-                        System.Drawing.Color magentaColor = System.Drawing.Color.Magenta;
-
-                        int cropsX = originalImage.Width / 32;
-                        int cropsY = originalImage.Height / 32;
+                        int cropsX = argbImage.Width / 32;
+                        int cropsY = argbImage.Height / 32;
 
                         for (int i = 0; i < cropsY; i++)
                         {
                             for (int j = 0; j < cropsX; j++)
                             {
                                 System.Drawing.Rectangle cropRect = new System.Drawing.Rectangle(j * 32, i * 32, 32, 32);
-                                using (System.Drawing.Bitmap croppedBitmap = new System.Drawing.Bitmap(32, 32, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                                using (System.Drawing.Bitmap croppedBitmap = argbImage.Clone(cropRect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                                 {
-                                    using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(croppedBitmap))
-                                    {
-                                        g.Clear(System.Drawing.Color.Transparent);
-                                        ImageAttributes imageAttributes = new ImageAttributes();
-                                        imageAttributes.SetColorKey(magentaColor, magentaColor);
-
-                                        g.DrawImage(
-                                            originalImage,
-                                            new System.Drawing.Rectangle(0, 0, 32, 32),
-                                            cropRect.X, cropRect.Y, cropRect.Width, cropRect.Height,
-                                            System.Drawing.GraphicsUnit.Pixel,
-                                            imageAttributes
-                                        );
-                                    }
-
                                     MemoryStream imgMemory = new MemoryStream();
                                     croppedBitmap.Save(imgMemory, ImageFormat.Png);
                                     imgMemory.Position = 0;
@@ -1404,35 +1388,17 @@ namespace Assets_Editor
             openFileDialog.Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png";
             if (openFileDialog.ShowDialog() == true)
             {
-                using (System.Drawing.Image originalImage = System.Drawing.Image.FromFile(openFileDialog.FileName))
+                using (System.Drawing.Bitmap sourceImage = new System.Drawing.Bitmap(openFileDialog.FileName))
+                using (System.Drawing.Bitmap argbImage = sourceImage.Clone(new System.Drawing.Rectangle(0, 0, sourceImage.Width, sourceImage.Height), System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                using (System.Drawing.Bitmap croppedImage = argbImage.Clone(new System.Drawing.Rectangle(0, 0, 32, 32), System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                 {
-                    System.Drawing.Color magentaColor = System.Drawing.Color.Magenta;
-                    System.Drawing.Rectangle cropRect = new System.Drawing.Rectangle(0, 0, 32, 32);
-                    using (System.Drawing.Bitmap croppedBitmap = new System.Drawing.Bitmap(32, 32, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
-                    {
-                        using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(croppedBitmap))
-                        {
-                            g.Clear(System.Drawing.Color.Transparent);
-                            ImageAttributes imageAttributes = new ImageAttributes();
-                            imageAttributes.SetColorKey(magentaColor, magentaColor);
+                    MemoryStream imgMemory = new MemoryStream();
+                    croppedImage.Save(imgMemory, ImageFormat.Png);
+                    imgMemory.Position = 0;
 
-                            g.DrawImage(
-                                originalImage,
-                                new System.Drawing.Rectangle(0, 0, 32, 32),
-                                cropRect.X, cropRect.Y, cropRect.Width, cropRect.Height,
-                                System.Drawing.GraphicsUnit.Pixel,
-                                imageAttributes
-                            );
-                        }
-
-                        MemoryStream imgMemory = new MemoryStream();
-                        croppedBitmap.Save(imgMemory, ImageFormat.Png);
-                        imgMemory.Position = 0;
-
-                        int sprId = SprListView.SelectedIndex;
-                        MainWindow.SprLists[sprId] = imgMemory;
-                        CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
-                    }
+                    int sprId = SprListView.SelectedIndex;
+                    MainWindow.SprLists[sprId] = imgMemory;
+                    CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
                 }
                 StatusBar.MessageQueue.Enqueue($"Sprite successfully replaced.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }

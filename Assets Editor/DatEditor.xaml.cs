@@ -1808,6 +1808,9 @@ namespace Assets_Editor
 
             frameGroup.SpriteInfo.SpriteId.Add(0);
 
+            // PATCH: Set IsOpaque to false for proper alpha channel support in Tibia 13+
+            frameGroup.SpriteInfo.IsOpaque = false;
+
             newObject.FrameGroup.Add(frameGroup);
 
             newObject.AppearanceType = type;
@@ -2627,7 +2630,8 @@ namespace Assets_Editor
 
                     currentSheet = new System.Drawing.Bitmap(384, 384, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                     graphics = System.Drawing.Graphics.FromImage(currentSheet);
-                    graphics.Clear(System.Drawing.Color.FromArgb(0, 255, 0, 255));
+                    // PATCH: Use transparent background instead of magenta for RGBA support
+                    graphics.Clear(System.Drawing.Color.Transparent);
                 }
 
                 int x = (currentSpriteIndex % spritesPerRow) * spriteSize.Width;
@@ -2707,6 +2711,9 @@ namespace Assets_Editor
                     {
                         for (int i = 0; i < appearance.FrameGroup.Count; i++)
                         {
+                            // PATCH: Set IsOpaque to false for alpha channel support
+                            appearance.FrameGroup[i].SpriteInfo.IsOpaque = false;
+                            
                             for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
                             {
                                 appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
@@ -2719,6 +2726,9 @@ namespace Assets_Editor
                     {
                         for (int i = 0; i < appearance.FrameGroup.Count; i++)
                         {
+                            // PATCH: Set IsOpaque to false for alpha channel support
+                            appearance.FrameGroup[i].SpriteInfo.IsOpaque = false;
+                            
                             for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
                             {
                                 appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
@@ -2731,6 +2741,9 @@ namespace Assets_Editor
                     {
                         for (int i = 0; i < appearance.FrameGroup.Count; i++)
                         {
+                            // PATCH: Set IsOpaque to false for alpha channel support
+                            appearance.FrameGroup[i].SpriteInfo.IsOpaque = false;
+                            
                             for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
                             {
                                 appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
@@ -2743,6 +2756,9 @@ namespace Assets_Editor
                     {
                         for (int i = 0; i < appearance.FrameGroup.Count; i++)
                         {
+                            // PATCH: Set IsOpaque to false for alpha channel support
+                            appearance.FrameGroup[i].SpriteInfo.IsOpaque = false;
+                            
                             for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
                             {
                                 appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];

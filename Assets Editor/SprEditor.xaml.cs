@@ -332,16 +332,17 @@ namespace Assets_Editor
 
             var lockedBitmap = new LockBitmap(targetImg);
             lockedBitmap.LockBits();
-            for (int y = 0; y < lockedBitmap.Height; y++)
-            {
-                for (int x = 0; x < lockedBitmap.Width; x++)
-                {
-                    if (lockedBitmap.GetPixel(x, y) == System.Drawing.Color.FromArgb(255, 255, 0, 255))
-                    {
-                        lockedBitmap.SetPixel(x, y, System.Drawing.Color.FromArgb(0, 255, 0, 255));
-                    }
-                }
-            }
+            // PATCH: Removed magenta to transparent conversion - preserve original alpha channel
+            // for (int y = 0; y < lockedBitmap.Height; y++)
+            // {
+            //     for (int x = 0; x < lockedBitmap.Width; x++)
+            //     {
+            //         if (lockedBitmap.GetPixel(x, y) == System.Drawing.Color.FromArgb(255, 255, 0, 255))
+            //         {
+            //             lockedBitmap.SetPixel(x, y, System.Drawing.Color.FromArgb(0, 255, 0, 255));
+            //         }
+            //     }
+            // }
             lockedBitmap.UnlockBits();
             return targetImg;
         }

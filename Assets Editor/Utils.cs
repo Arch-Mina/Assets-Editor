@@ -165,7 +165,7 @@ namespace Assets_Editor
         public static BitmapImage BitmapToBitmapImage(System.Drawing.Bitmap bitmap)
         {
             using var memory = new MemoryStream();
-            bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+            bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
             memory.Position = 0;
             var bitmapImage = new BitmapImage();
             bitmapImage.BeginInit();
@@ -219,7 +219,7 @@ namespace Assets_Editor
         {
             using (MemoryStream outStream = new MemoryStream())
             {
-                BitmapEncoder enc = new BmpBitmapEncoder();
+                BitmapEncoder enc = new PngBitmapEncoder();
                 enc.Frames.Add(BitmapFrame.Create(bitmapImage));
                 enc.Save(outStream);
                 System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(outStream);
@@ -247,23 +247,8 @@ namespace Assets_Editor
 
         public static Bitmap ConvertBackgroundToMagenta(Bitmap original, bool opaque)
         {
-            System.Drawing.Color magentaOpaque = System.Drawing.Color.FromArgb(255, 255, 0, 255); // Opaque magenta
-            System.Drawing.Color magentaTransparent = System.Drawing.Color.FromArgb(0, 255, 0, 255); // Transparent magenta
-            System.Drawing.Color magenta = opaque ? magentaOpaque : magentaTransparent;
-
-            // Create a bitmap with the same size as the original
-            Bitmap bmpWithMagentaBackground = new Bitmap(original.Width, original.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            using (Graphics graphics = Graphics.FromImage(bmpWithMagentaBackground))
-            {
-                // Fill the background with magenta
-                graphics.Clear(magenta);
-
-                // Draw the original image on top of the magenta background
-                graphics.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height));
-            }
-
-            return bmpWithMagentaBackground;
+            // PATCH: Preserve RGBA data without altering transparency
+            return original.Clone(new Rectangle(0, 0, original.Width, original.Height), System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         }
 
         public static T FindAncestorOrSelf<T>(DependencyObject obj) where T : DependencyObject
