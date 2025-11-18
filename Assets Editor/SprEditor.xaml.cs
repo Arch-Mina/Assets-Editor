@@ -1,24 +1,24 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using Efundies;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Windows;
-using System.Windows.Input;
-
-using System.Windows.Media.Imaging;
-using System.Drawing;
-using System.Windows.Media;
-using Image = System.Windows.Controls.Image;
-using Color = System.Windows.Media.Color;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using static Assets_Editor.MainWindow;
-using System.Runtime.InteropServices;
-using Efundies;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using static Assets_Editor.MainWindow;
+using Color = System.Windows.Media.Color;
+using Image = System.Windows.Controls.Image;
 
 namespace Assets_Editor
 {
@@ -243,54 +243,107 @@ namespace Assets_Editor
             }
         }
 
-        private void MakeFilesAsSprites(string[] files, int targetImageIndex, DragEventArgs e)
-        {
+        private void MakeFilesAsSprites(string[] files, int targetImageIndex, DragEventArgs e) {
             BitmapImage sourceBitmap = new(new Uri(files[0]));
             List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
-
-            // using PixelWidth/PixelHeight (actual pixel dimensions) instead of Width/Height (DIPs affected by DPI metadata)
-            // fixes issues with importing some images
+            // use PixelWidth/PixelHeight (actual pixel dimensions) instead of Width/Height (DIPs affected by DPI metadata)
             if (sourceBitmap.PixelWidth >= DatEditor.SprSheetWidth &&
-                sourceBitmap.PixelHeight >= DatEditor.SprSheetHeight)
-            {
-                Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
-                int sprCount = targetImageIndex;
-                    int xCols = DatEditor.SprSheetWidth / SpriteWidth;
-                    int yCols = DatEditor.SprSheetHeight / SpriteHeight;
+                sourceBitmap.PixelHeight >= DatEditor.SprSheetHeight) {
+                // load original image and preserve alpha when present
+                Bitmap loaded = new(files[0]);
+                bool hasAlpha = (loaded.PixelFormat & System.Drawing.Imaging.PixelFormat.Alpha) != 0
+                                || loaded.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb
+                                || loaded.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppPArgb
+                                || loaded.PixelFormat == System.Drawing.Imaging.PixelFormat.Format64bppArgb;
 
-                    for (int x = 0; x < yCols; x++)
-                    {
-                        for (int y = 0; y < xCols; y++)
-                        {
-                            Rectangle rect = new(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
-                            Bitmap crop = original.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                        if (sprCount < images.Count)
-                        {
+                Bitmap original;
+                if (hasAlpha) {
+                    // ensure we operate on a 32bpp ARGB copy to avoid losing alpha on operations
+                    original = new Bitmap(loaded.Width, loaded.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    using Graphics g = Graphics.FromImage(original);
+                    g.Clear(System.Drawing.Color.Transparent);
+                    g.DrawImage(loaded, 0, 0, loaded.Width, loaded.Height);
+                } else {
+                    // keep legacy magenta background behaviour for images with no alpha
+                    original = Utils.ConvertBackgroundToMagenta(new(files[0]), true);
+                }
+
+                int sprCount = targetImageIndex;
+                int xCols = DatEditor.SprSheetWidth / SpriteWidth;
+                int yCols = DatEditor.SprSheetHeight / SpriteHeight;
+                for (int x = 0; x < yCols; x++) {
+                    for (int y = 0; y < xCols; y++) {
+                        Rectangle rect = new(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
+                        Bitmap crop = original.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        if (sprCount < images.Count) {
                             images[sprCount].Source = Utils.BitmapToBitmapImage(crop);
                         }
 
+                        crop.Dispose();
                         sprCount++;
                     }
                 }
-            }
-            else
-            {
-                if (files.Length > 1)
-                {
-                    for (int i = 0; i < files.Length; i++)
-                    {
-                        Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[i]), true);
-                        if (targetImageIndex + i < images.Count)
-                        {
-                            images[targetImageIndex + i].Source = Utils.BitmapToBitmapImage(original);
+
+                original.Dispose();
+                loaded.Dispose();
+            } else {
+                if (files.Length > 1) {
+                    for (int i = 0; i < files.Length; i++) {
+                        Bitmap loaded = new(files[i]);
+                        bool hasAlpha = (loaded.PixelFormat & System.Drawing.Imaging.PixelFormat.Alpha) != 0
+                                        || loaded.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb
+                                        || loaded.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppPArgb
+                                        || loaded.PixelFormat == System.Drawing.Imaging.PixelFormat.Format64bppArgb;
+
+                        Bitmap toUse;
+                        if (hasAlpha) {
+                            toUse = new(loaded.Width, loaded.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                            using Graphics g = Graphics.FromImage(toUse);
+                            g.Clear(System.Drawing.Color.Transparent);
+                            g.DrawImage(loaded, 0, 0, loaded.Width, loaded.Height);
+                        } else {
+                            toUse = Utils.ConvertBackgroundToMagenta(new Bitmap(files[i]), true);
                         }
+
+                        if (targetImageIndex + i < images.Count) {
+                            images[targetImageIndex + i].Source = Utils.BitmapToBitmapImage(toUse);
+                        }
+
+                        toUse.Dispose();
+                        loaded.Dispose();
                     }
-                }
-                else
-                {
-                    Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
-                    Image img = e.Source as Image;
-                    img.Source = Utils.BitmapToBitmapImage(original);
+                } else {
+                    Bitmap loaded = new(files[0]);
+                    bool hasAlpha = (loaded.PixelFormat & System.Drawing.Imaging.PixelFormat.Alpha) != 0
+                                    || loaded.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb
+                                    || loaded.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppPArgb
+                                    || loaded.PixelFormat == System.Drawing.Imaging.PixelFormat.Format64bppArgb;
+
+                    Bitmap toUse = hasAlpha
+                        ? new Bitmap(loaded.Width, loaded.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+                        : Utils.ConvertBackgroundToMagenta(new Bitmap(files[0]), true);
+
+                    if (hasAlpha) {
+                        using Graphics g = Graphics.FromImage(toUse);
+                        g.Clear(System.Drawing.Color.Transparent);
+                        g.DrawImage(loaded, 0, 0, loaded.Width, loaded.Height);
+                    }
+
+                    // try to get the target Image control more reliably
+                    Image? targetImg;
+                    if (e?.Source is Border b && Utils.GetLogicalChildCollection<Image>(b).Count > 0)
+                        targetImg = Utils.GetLogicalChildCollection<Image>(b)[0];
+                    else if (e?.OriginalSource is Image oi)
+                        targetImg = oi;
+                    else
+                        targetImg = Utils.GetLogicalChildCollection<Image>(SheetWrap).ElementAtOrDefault(targetImageIndex);
+
+                    if (targetImg != null) {
+                        targetImg.Source = Utils.BitmapToBitmapImage(toUse);
+                    }
+
+                    toUse.Dispose();
+                    loaded.Dispose();
                 }
             }
         }
@@ -495,7 +548,10 @@ namespace Assets_Editor
             CreateNewSheetImg(CurrentSheet.SpriteType, true);
             EmptyTiles = false;
             List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
-            Bitmap original = Utils.BitmapImageToBitmap((BitmapImage)showList.Image);
+            Bitmap? original = Utils.BitmapImageToBitmap((BitmapImage)showList.Image);
+            if (original == null) {
+                return;
+            }
 
             int sprCount = 0;
             int xCols = DatEditor.SprSheetWidth / SpriteWidth;
@@ -504,14 +560,13 @@ namespace Assets_Editor
             {
                 for (int y = 0; y < xCols; y++)
                 {
-                    Rectangle rect = new Rectangle(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
-                    Bitmap crop = new Bitmap(SpriteWidth, SpriteHeight);
+                    Rectangle rect = new(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
+                    Bitmap crop = new(SpriteWidth, SpriteHeight);
                     crop = original.Clone(rect, crop.PixelFormat);
                     images[sprCount].Source = Utils.BitmapToBitmapImage(crop);
                     sprCount++;
                 }
             }
-            
         }
 
         private void CreateNewSheet_Click(object sender, RoutedEventArgs e)
@@ -569,19 +624,41 @@ namespace Assets_Editor
                     string _sprPath = String.Format("{0}{1}", MainWindow._assetsPath, catalog.File);
                     if (File.Exists(_sprPath))
                     {
-                        ShowList foundEntry = SprEditor.CustomSheetsList.FirstOrDefault(showList => showList.Id == (uint)catalog.FirstSpriteid);
+                        ShowList? foundEntry = CustomSheetsList.FirstOrDefault(showList => showList.Id == (uint)catalog.FirstSpriteid);
                         if (foundEntry == null)
                         {
                             using System.Drawing.Bitmap SheetM = LZMA.DecompressFileLZMA(_sprPath);
-                            using Bitmap transparentBitmap = new Bitmap(SheetM.Width, SheetM.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                            using Bitmap transparentBitmap = new(SheetM.Width, SheetM.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                             using (Graphics g = Graphics.FromImage(transparentBitmap))
                             {
-                                g.Clear(System.Drawing.Color.FromArgb(255, 255, 0, 255));
+                                // draw on a transparent background
+                                g.Clear(System.Drawing.Color.Transparent);
                                 g.DrawImage(SheetM, 0, 0);
-
                             }
 
-                            SprEditor.CustomSheetsList.Add(new ShowList() { Id = (uint)catalog.FirstSpriteid, Image = Utils.BitmapToBitmapImage(transparentBitmap), Name = catalog.File });
+                            // convert magenta (255,0,255,255) -> transparent using LockBits (fast)
+                            var rect = new Rectangle(0, 0, transparentBitmap.Width, transparentBitmap.Height);
+                            var bmpData = transparentBitmap.LockBits(rect, ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                            int bytes = Math.Abs(bmpData.Stride) * bmpData.Height;
+                            byte[] pixels = new byte[bytes];
+                            Marshal.Copy(bmpData.Scan0, pixels, 0, bytes);
+
+                            for (int i = 0; i < bytes; i += 4) {
+                                byte b = pixels[i];
+                                byte gC = pixels[i + 1];
+                                byte r = pixels[i + 2];
+                                byte a = pixels[i + 3];
+
+                                if (r == 255 && gC == 0 && b == 255 && a == 255) {
+                                    // set alpha to 0 -> fully transparent (keep colors if needed)
+                                    pixels[i + 3] = 0;
+                                }
+                            }
+
+                            Marshal.Copy(pixels, 0, bmpData.Scan0, bytes);
+                            transparentBitmap.UnlockBits(bmpData);
+
+                            CustomSheetsList.Add(new ShowList() { Id = (uint)catalog.FirstSpriteid, Image = Utils.BitmapToBitmapImage(transparentBitmap), Name = catalog.File });
                         }
 
                     }
