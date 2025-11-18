@@ -106,13 +106,24 @@ namespace Assets_Editor
 
         private void OnAnimationTick(object sender, ElapsedEventArgs e)
         {
-            if (Images != null && Images.Count > 0)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
+            // ensure images exist
+            if (Images == null || Images.Count == 0)
+                return;
+
+            // ensure dispatcher is accessible
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null || dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+                return;
+
+            // try to animate
+            try {
+                dispatcher.Invoke(() => {
                     Image = Images[currentFrameIndex];
                     currentFrameIndex = (currentFrameIndex + 1) % Images.Count;
                 }, DispatcherPriority.Render);
+            } catch {
+                // task was cancelled because the user closed the program
+                // nothing to do here
             }
         }
 
