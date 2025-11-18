@@ -42,6 +42,7 @@ namespace Assets_Editor
         private int CurrentSprDir = 2;
         private bool isPageLoaded = false;
         private bool isObjectLoaded = false;
+        private bool isUpdatingFrame = false;
 
         protected override void OnClosed(EventArgs e)
         {
@@ -287,10 +288,13 @@ namespace Assets_Editor
         {
             CurrentObjectAppearance = ObjectAppearance.Clone();
             LoadCurrentObjectAppearances();
-            SprGroupSlider.ValueChanged -= SprGroupSlider_ValueChanged;
-            SprGroupSlider.Value = 0;
-            ChangeGroupType(0);
-            SprGroupSlider.ValueChanged += SprGroupSlider_ValueChanged;
+            isUpdatingFrame = true;
+            try {
+                SprGroupSlider.Value = 0;
+                ChangeGroupType(0);
+            } finally {
+                isUpdatingFrame = false;
+            }
         }
 
         private void ChangeGroupType(int group)
@@ -343,10 +347,15 @@ namespace Assets_Editor
 
         private void ForceSliderChange()
         {
-            SprFramesSlider.ValueChanged -= SprFramesSlider_ValueChanged;
-            SprFramesSlider.Minimum = -1;
-            SprFramesSlider.Value = -1;
-            SprFramesSlider.ValueChanged += SprFramesSlider_ValueChanged;
+            isUpdatingFrame = true;
+
+            try {
+                SprFramesSlider.Minimum = -1;
+                SprFramesSlider.Value = -1;
+            } finally {
+                isUpdatingFrame = false;
+            }
+
             SprFramesSlider.Minimum = 0;
         }
 
@@ -509,6 +518,9 @@ namespace Assets_Editor
         }
         private void SprFramesSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            if (isUpdatingFrame)
+                return;
+
             FrameGroup frameGroup = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value];
             if (frameGroup.SpriteInfo.PatternFrames > 1)
             {
@@ -603,15 +615,12 @@ namespace Assets_Editor
                                 }
                             }
 
-
-
                             MemoryStream memoryStream = new MemoryStream();
                             baseBitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
                             SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(memoryStream), counter, 0, 0);
                             counter++;
                         }
                     }
-
                 }
             }
             else
@@ -636,8 +645,8 @@ namespace Assets_Editor
                     }
                 }
             }
-
         }
+
         private void SprOutfitChanged(object sender, RoutedEventArgs e)
         {
             ForceSliderChange();

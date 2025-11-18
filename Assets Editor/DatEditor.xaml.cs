@@ -40,6 +40,7 @@ namespace Assets_Editor
         public ObservableCollection<Box> BoundingBoxList = new ObservableCollection<Box>();
         private int CurrentSprDir = 0;
         private bool isPageLoaded = false;
+        private bool isUpdatingFrame = false;
         private uint blankSpr = 0;
         private bool isObjectLoaded = false;
         private Appearances exportObjects = new Appearances();
@@ -360,11 +361,14 @@ namespace Assets_Editor
         {
             CurrentObjectAppearance = ObjectAppearance.Clone();
             LoadCurrentObjectAppearances();
-            SprGroupSlider.ValueChanged -= SprGroupSlider_ValueChanged;
-            SprGroupSlider.Value = 0;
-            ChangeGroupType(0);
-            SprGroupSlider.ValueChanged += SprGroupSlider_ValueChanged;
 
+            isUpdatingFrame = true;
+            try {
+                SprGroupSlider.Value = 0;
+                ChangeGroupType(0);
+            } finally {
+                isUpdatingFrame = false;
+            }
         }
 
         private void ChangeGroupType(int group)
@@ -439,10 +443,14 @@ namespace Assets_Editor
         }
         private void ForceSliderChange()
         {
-            SprFramesSlider.ValueChanged -= SprFramesSlider_ValueChanged;
-            SprFramesSlider.Minimum = -1;
-            SprFramesSlider.Value = -1;
-            SprFramesSlider.ValueChanged += SprFramesSlider_ValueChanged;
+            isUpdatingFrame = true;
+            try {
+                SprFramesSlider.Minimum = -1;
+                SprFramesSlider.Value = -1;
+            } finally {
+                isUpdatingFrame = false;
+            }
+
             SprFramesSlider.Minimum = 0;
         }
 
@@ -735,9 +743,11 @@ namespace Assets_Editor
         }
         private void SprFramesSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            if (isUpdatingFrame)
+                return;
+
             try
             {
-
                 FrameGroup frameGroup = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value];
                 if (frameGroup.SpriteInfo.Animation != null)
                 {
@@ -844,7 +854,7 @@ namespace Assets_Editor
             }
             catch (Exception)
             {
-                MainWindow.Log("Unable to view appearance id " + CurrentObjectAppearance.Id + ", crash prevented.");
+                MainWindow.Log("Unable to view appearance id " + CurrentObjectAppearance.Id + ", invalid texture ids.");
             }
         }
 
