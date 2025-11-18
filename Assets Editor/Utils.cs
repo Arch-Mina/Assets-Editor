@@ -164,10 +164,12 @@ namespace Assets_Editor
         }
         public static BitmapImage BitmapToBitmapImage(System.Drawing.Bitmap bitmap)
         {
-            using var memory = new MemoryStream();
-            bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+            using MemoryStream memory = new();
+
+            // save as PNG to preserve alpha channel
+            bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
             memory.Position = 0;
-            var bitmapImage = new BitmapImage();
+            BitmapImage bitmapImage = new();
             bitmapImage.BeginInit();
             bitmapImage.StreamSource = memory;
             bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
@@ -215,17 +217,21 @@ namespace Assets_Editor
             rtb.Render(dv);
             return rtb;
         }
-        public static System.Drawing.Bitmap BitmapImageToBitmap(BitmapImage bitmapImage)
+        public static System.Drawing.Bitmap? BitmapImageToBitmap(BitmapImage bitmapImage)
         {
-            using (MemoryStream outStream = new MemoryStream())
-            {
-                BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(bitmapImage));
-                enc.Save(outStream);
-                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(outStream);
+            if (bitmapImage == null) return null;
 
-                return new System.Drawing.Bitmap(bitmap);
-            }
+            using var ms = new MemoryStream();
+
+            // use PNG so alpha is preserved
+            BitmapEncoder enc = new PngBitmapEncoder();
+            enc.Frames.Add(BitmapFrame.Create(bitmapImage));
+            enc.Save(ms);
+            ms.Position = 0;
+            using var tmp = new System.Drawing.Bitmap(ms);
+
+            // return a copy that's not tied to the stream
+            return new System.Drawing.Bitmap(tmp);
         }
         public static bool ByteArrayCompare(byte[] a1, byte[] a2)
         {
