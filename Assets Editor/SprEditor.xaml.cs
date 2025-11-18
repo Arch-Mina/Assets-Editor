@@ -32,11 +32,23 @@ namespace Assets_Editor
         {
             InitializeComponent();
             _editor = editor;
+            TSpriteType.ItemsSource = DatEditor.SpriteSizes
+
+            .Select(s => {
+                string label = $"Width: {s.Width} | Height: {s.Height} ({s.Width / 32}x{s.Height / 32}";
+
+                if (s.Width > 64 || s.Height > 64) {
+                    label += " , OTClient";
+                }
+
+                label += ")";
+
+                return label;
+            })
+            .ToList();
         }
         private int SpriteWidth = 32;
         private int SpriteHeight = 32;
-        private int SprSheetWidth = 384;
-        private int SprSheetHeight = 384;
         private int SprType = 0;
         private bool EmptyTiles = true;
         private int focusedIndex = 0;
@@ -50,33 +62,19 @@ namespace Assets_Editor
                 CurrentSheet = null;
 
             SprType = sprType;
-            if (sprType == 0)
-            {
-                SpriteWidth = 32;
-                SpriteHeight = 32;
-            }
-            else if (sprType == 1)
-            {
-                SpriteWidth = 32;
-                SpriteHeight = 64;
-            }
-            else if (sprType == 2)
-            {
-                SpriteWidth = 64;
-                SpriteHeight = 32;
-            }
-            else if (sprType == 3)
-            {
-                SpriteWidth = 64;
-                SpriteHeight = 64;
-            }
+            var sprLayout = DatEditor.GetSpriteLayout(sprType);
+            SpriteWidth = sprLayout.SpriteSizeX;
+            SpriteHeight = sprLayout.SpriteSizeY;
 
             SheetWrap.Children.Clear();
+
+            int sprMaxW = DatEditor.SprSheetWidth;
+            int sprMaxH = DatEditor.SprSheetHeight;
 
             int stride = SpriteWidth * (96 / 8);
             emptyBitmapSource = BitmapSource.Create(SpriteWidth, SpriteHeight, 96, 96, PixelFormats.Indexed8,
                 new BitmapPalette(new List<Color> { Color.FromArgb(255, 255, 0, 255) }), new byte[SpriteHeight * stride], stride);
-            int count = (SprSheetWidth / SpriteWidth * SprSheetHeight / SpriteHeight);
+            int count = (sprMaxW / SpriteWidth * sprMaxH / SpriteHeight);
             for (int i = 0; i < count; i++)
             {
                 Border border = new Border
@@ -110,8 +108,8 @@ namespace Assets_Editor
                 RenderOptions.SetBitmapScalingMode(border, BitmapScalingMode.NearestNeighbor);
                 SheetWrap.Children.Add(border);
             }
-            SheetWrap.Width = SprSheetWidth + 1 + (SprSheetWidth / SpriteWidth);
-            SheetWrap.Height = SprSheetHeight + 1 + (SprSheetHeight / SpriteHeight);
+            SheetWrap.Width = sprMaxW + 1 + (sprMaxW / SpriteWidth);
+            SheetWrap.Height = sprMaxH + 1 + (sprMaxH / SpriteHeight);
         }
 
         private void Border_MouseDown(object sender, MouseButtonEventArgs e)
@@ -247,21 +245,25 @@ namespace Assets_Editor
 
         private void MakeFilesAsSprites(string[] files, int targetImageIndex, DragEventArgs e)
         {
-            BitmapImage sourceBitmap = new BitmapImage(new Uri(files[0]));
+            BitmapImage sourceBitmap = new(new Uri(files[0]));
             List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
-            if (Math.Ceiling(sourceBitmap.Width) >= SprSheetWidth &&
-                Math.Ceiling(sourceBitmap.Height) >= SprSheetHeight)
+
+            // using PixelWidth/PixelHeight (actual pixel dimensions) instead of Width/Height (DIPs affected by DPI metadata)
+            // fixes issues with importing some images
+            if (sourceBitmap.PixelWidth >= DatEditor.SprSheetWidth &&
+                sourceBitmap.PixelHeight >= DatEditor.SprSheetHeight)
             {
                 Bitmap original = Utils.ConvertBackgroundToMagenta(new Bitmap(@files[0]), true);
                 int sprCount = targetImageIndex;
-                int xCols = SpriteWidth == 32 ? 12 : 6;
-                int yCols = SpriteHeight == 32 ? 12 : 6;
-                for (int x = 0; x < yCols; x++)
-                {
-                    for (int y = 0; y < xCols; y++)
+                    int xCols = DatEditor.SprSheetWidth / SpriteWidth;
+                    int yCols = DatEditor.SprSheetHeight / SpriteHeight;
+
+                    for (int x = 0; x < yCols; x++)
                     {
-                        Rectangle rect = new Rectangle(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
-                        Bitmap crop = original.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        for (int y = 0; y < xCols; y++)
+                        {
+                            Rectangle rect = new(y * SpriteWidth, x * SpriteHeight, SpriteWidth, SpriteHeight);
+                            Bitmap crop = original.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                         if (sprCount < images.Count)
                         {
                             images[sprCount].Source = Utils.BitmapToBitmapImage(crop);
@@ -302,14 +304,16 @@ namespace Assets_Editor
                 CreateNewSheetImg(TSpriteType.SelectedIndex, false);
             }
         }
-        
 
+
+        // this function is used by bulk export to pngs feature
+        // may require refactoring for larger spritesheets support
         private Bitmap GetBitmapFromTiles(List<Image> images)
         {
-            Bitmap targetImg = new Bitmap(SprSheetWidth, SprSheetHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            Bitmap targetImg = new(DatEditor.SprSheetWidth, DatEditor.SprSheetHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             int sprCount = 0;
-            int xCols = SpriteWidth == 32 ? 12 : 6;
-            int yCols = SpriteHeight == 32 ? 12 : 6;
+            int xCols = DatEditor.SprSheetWidth / SpriteWidth;
+            int yCols = DatEditor.SprSheetHeight / SpriteHeight;
 
             for (int x = 0; x < yCols; x++)
             {
@@ -494,8 +498,8 @@ namespace Assets_Editor
             Bitmap original = Utils.BitmapImageToBitmap((BitmapImage)showList.Image);
 
             int sprCount = 0;
-            int xCols = SpriteWidth == 32 ? 12 : 6;
-            int yCols = SpriteHeight == 32 ? 12 : 6;
+            int xCols = DatEditor.SprSheetWidth / SpriteWidth;
+            int yCols = DatEditor.SprSheetHeight / SpriteHeight;
             for (int x = 0; x < yCols; x++)
             {
                 for (int y = 0; y < xCols; y++)

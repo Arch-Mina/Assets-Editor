@@ -22,12 +22,7 @@
             <materialDesign:DialogHost.DialogContent>
                 <StackPanel Margin="16">
                     <TextBlock Text="Choose New Sheet Size"/>
-                    <ComboBox x:Name="TSpriteType" BorderThickness="1,1,1,1" SelectedIndex="0" Padding="6,1,5,3" Margin="0,10,0,10">
-                        <ComboBoxItem Content="Width: 32 | Height: 32"/>
-                        <ComboBoxItem Content="Width: 32 | Height: 64"/>
-                        <ComboBoxItem Content="Width: 64 | Height: 32"/>
-                        <ComboBoxItem Content="Width: 64 | Height: 64"/>
-                    </ComboBox>
+                    <ComboBox x:Name="TSpriteType" BorderThickness="1,1,1,1" SelectedIndex="0" Padding="6,1,5,3" Margin="0,10,0,10"/>
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Click="CreateNewSheet_Click" Content="Create" Width="100" Margin="0,0,20,0"/>
                         <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
