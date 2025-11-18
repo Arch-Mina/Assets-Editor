@@ -1521,12 +1521,21 @@ namespace Assets_Editor
             searchWindow.Show();
         }
 
-        private void ObjListView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            ShowList showList = (ShowList)ObjListView.SelectedItem;
-            if (showList != null)
-            {
-                Clipboard.SetText(showList.Id.ToString());
+        private void ObjListView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            // C# 9.0: listView = sender (if null: return)
+            if (sender is not ListView listView) return;
+
+            // Perform a hit test to find the clicked item
+            var hit = e.OriginalSource as DependencyObject;
+            while (hit != null && hit is not ListViewItem)
+                hit = VisualTreeHelper.GetParent(hit);
+
+            if (hit is ListViewItem item) {
+                var showList = (ShowList)listView.ItemContainerGenerator.ItemFromContainer(item);
+                if (showList != null) {
+                    Clipboard.SetText(showList.Id.ToString());
+                    StatusBar.MessageQueue?.Enqueue($"object ID copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                }
             }
         }
 
