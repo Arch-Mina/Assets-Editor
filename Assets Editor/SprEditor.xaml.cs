@@ -198,9 +198,9 @@ namespace Assets_Editor
         
         private void OnPaste(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Clipboard.ContainsFileDropList())
+            if (ClipboardManager.ContainsFileDropList())
             {
-                var files = Clipboard.GetFileDropList();
+                var files = ClipboardManager.GetFileDropList();
                 MakeFilesAsSprites(files.Cast<string>().ToArray(), focusedIndex, null);
                 EmptyTiles = false;
             }

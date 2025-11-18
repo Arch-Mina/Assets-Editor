@@ -664,7 +664,7 @@ namespace Assets_Editor
             }
 
             string xml = $"<look type=\"{typeValue}\" head=\"{headValue}\" body=\"{bodyValue}\" legs=\"{legsValue}\" feet=\"{feetValue}\" corpse=\"{corpseValue}\"/>";
-            Clipboard.SetText(xml);
+            ClipboardManager.SetText(xml);
             StatusBar.MessageQueue.Enqueue($"xml copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
         private void SetImageInGrid(Grid grid, int gridHeight, BitmapImage image, int id, int spriteId, int index)
@@ -1526,7 +1526,8 @@ namespace Assets_Editor
             ShowList showList = (ShowList)ObjListView.SelectedItem;
             if (showList != null)
             {
-                Clipboard.SetText(showList.Id.ToString());
+                ClipboardManager.SetText(showList.Id.ToString());
+                StatusBar.MessageQueue.Enqueue($"object ID copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
 

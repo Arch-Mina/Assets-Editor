@@ -778,7 +778,7 @@ namespace Assets_Editor
             }
 
             string xml = $"<look type=\"{typeValue}\" head=\"{headValue}\" body=\"{bodyValue}\" legs=\"{legsValue}\" feet=\"{feetValue}\" corpse=\"{corpseValue}\"/>";
-            Clipboard.SetText(xml);
+            ClipboardManager.SetText(xml);
             StatusBar.MessageQueue.Enqueue($"xml copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
