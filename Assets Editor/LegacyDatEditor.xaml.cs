@@ -42,6 +42,7 @@ namespace Assets_Editor
         private int CurrentSprDir = 2;
         private bool isPageLoaded = false;
         private bool isObjectLoaded = false;
+        private bool isUpdatingFrame = false;
 
         protected override void OnClosed(EventArgs e)
         {
@@ -287,10 +288,13 @@ namespace Assets_Editor
         {
             CurrentObjectAppearance = ObjectAppearance.Clone();
             LoadCurrentObjectAppearances();
-            SprGroupSlider.ValueChanged -= SprGroupSlider_ValueChanged;
-            SprGroupSlider.Value = 0;
-            ChangeGroupType(0);
-            SprGroupSlider.ValueChanged += SprGroupSlider_ValueChanged;
+            isUpdatingFrame = true;
+            try {
+                SprGroupSlider.Value = 0;
+                ChangeGroupType(0);
+            } finally {
+                isUpdatingFrame = false;
+            }
         }
 
         private void ChangeGroupType(int group)
@@ -343,10 +347,15 @@ namespace Assets_Editor
 
         private void ForceSliderChange()
         {
-            SprFramesSlider.ValueChanged -= SprFramesSlider_ValueChanged;
-            SprFramesSlider.Minimum = -1;
-            SprFramesSlider.Value = -1;
-            SprFramesSlider.ValueChanged += SprFramesSlider_ValueChanged;
+            isUpdatingFrame = true;
+
+            try {
+                SprFramesSlider.Minimum = -1;
+                SprFramesSlider.Value = -1;
+            } finally {
+                isUpdatingFrame = false;
+            }
+
             SprFramesSlider.Minimum = 0;
         }
 
@@ -509,135 +518,120 @@ namespace Assets_Editor
         }
         private void SprFramesSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            FrameGroup frameGroup = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value];
-            if (frameGroup.SpriteInfo.PatternFrames > 1)
-            {
-                SprPhaseMin.Value = (int)frameGroup.SpriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMin;
-                SprPhaseMax.Value = (int)frameGroup.SpriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMax;
-            }
+            if (isUpdatingFrame)
+                return;
 
-            SpriteViewerGrid.Children.Clear();
-            SpriteViewerGrid.RowDefinitions.Clear();
-            SpriteViewerGrid.ColumnDefinitions.Clear();
-            int gridWidth = 1;
-            int gridHeight = 1;
-            if (CurrentObjectAppearance.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
-            {
-                gridWidth = (int)frameGroup.SpriteInfo.PatternHeight;
-                gridHeight = (int)frameGroup.SpriteInfo.PatternWidth;
-            }
-            else
-            {
-                gridWidth = (int)(frameGroup.SpriteInfo.PatternHeight * frameGroup.SpriteInfo.PatternY);
-                gridHeight = (int)(frameGroup.SpriteInfo.PatternWidth * frameGroup.SpriteInfo.PatternX);
-            }
-            for (int i = 0; i < gridWidth; i++)
-            {
-                RowDefinition rowDef = new RowDefinition();
-                rowDef.Height = new GridLength(32);
-                SpriteViewerGrid.RowDefinitions.Add(rowDef);
-            }
-            for (int i = 0; i < gridHeight; i++)
-            {
-                ColumnDefinition colDef = new ColumnDefinition();
-                colDef.Width = new GridLength(32);
-                SpriteViewerGrid.ColumnDefinitions.Add(colDef);
-            }
+            InternalUpdateThingPreview();
+        }
 
-            if (CurrentObjectAppearance.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
-            {
-                if ((bool)SprBlendLayers.IsChecked == false)
-                {
-                    int counter = 1;
-                    int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternLayers - 1 : 0;
-                    int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternZ - 1 : 0;
-                    int addon = frameGroup.SpriteInfo.PatternY > 1 ? (int)SprAddonSlider.Value : 0;
-                    for (int h = (int)frameGroup.SpriteInfo.PatternHeight - 1; h >= 0; h--)
-                    {
-                        for (int w = (int)frameGroup.SpriteInfo.PatternWidth - 1; w >= 0; w--)
-                        {
-                            int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), addon, mount, (int)SprFramesSlider.Value);
-                            int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                            SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), counter, spriteId, index);
-                            counter++;
-                        }
-                    }
+        private void InternalUpdateThingPreview()
+        {
+            try {
+                FrameGroup frameGroup = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value];
+                if (frameGroup.SpriteInfo.PatternFrames > 1) {
+                    SprPhaseMin.Value = (int)frameGroup.SpriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMin;
+                    SprPhaseMax.Value = (int)frameGroup.SpriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMax;
                 }
-                else
-                {
-                    int counter = 1;
-                    for (int h = (int)frameGroup.SpriteInfo.PatternHeight - 1; h >= 0; h--)
-                    {
-                        for (int w = (int)frameGroup.SpriteInfo.PatternWidth - 1; w >= 0; w--)
-                        {
-                            int baseIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), 0, 0, (int)SprFramesSlider.Value);
-                            int baseSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseIndex];
-                            System.Drawing.Bitmap baseBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)baseSpriteId));
-                            if (frameGroup.SpriteInfo.PatternLayers > 1)
-                            {
-                                int baseLayerIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 1, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), 0, 0, (int)SprFramesSlider.Value);
-                                int baseLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseLayerIndex];
-                                System.Drawing.Bitmap baseLayerBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)baseLayerSpriteId));
-                                Colorize(baseLayerBitmap, baseBitmap, SprLayerHeadPicker.SelectedColor.Value, SprLayerBodyPicker.SelectedColor.Value, SprLayerLegsPicker.SelectedColor.Value, SprLayerFeetPicker.SelectedColor.Value);
+
+                SpriteViewerGrid.Children.Clear();
+                SpriteViewerGrid.RowDefinitions.Clear();
+                SpriteViewerGrid.ColumnDefinitions.Clear();
+                int gridWidth = 1;
+                int gridHeight = 1;
+                if (CurrentObjectAppearance.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit) {
+                    gridWidth = (int)frameGroup.SpriteInfo.PatternHeight;
+                    gridHeight = (int)frameGroup.SpriteInfo.PatternWidth;
+                } else {
+                    gridWidth = (int)(frameGroup.SpriteInfo.PatternHeight * frameGroup.SpriteInfo.PatternY);
+                    gridHeight = (int)(frameGroup.SpriteInfo.PatternWidth * frameGroup.SpriteInfo.PatternX);
+                }
+                for (int i = 0; i < gridWidth; i++) {
+                    RowDefinition rowDef = new RowDefinition();
+                    rowDef.Height = new GridLength(32);
+                    SpriteViewerGrid.RowDefinitions.Add(rowDef);
+                }
+                for (int i = 0; i < gridHeight; i++) {
+                    ColumnDefinition colDef = new ColumnDefinition();
+                    colDef.Width = new GridLength(32);
+                    SpriteViewerGrid.ColumnDefinitions.Add(colDef);
+                }
+
+                if (CurrentObjectAppearance.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit) {
+                    if ((bool)SprBlendLayers.IsChecked == false) {
+                        int counter = 1;
+                        int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternLayers - 1 : 0;
+                        int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternZ - 1 : 0;
+                        int addon = frameGroup.SpriteInfo.PatternY > 1 ? (int)SprAddonSlider.Value : 0;
+                        for (int h = (int)frameGroup.SpriteInfo.PatternHeight - 1; h >= 0; h--) {
+                            for (int w = (int)frameGroup.SpriteInfo.PatternWidth - 1; w >= 0; w--) {
+                                int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), addon, mount, (int)SprFramesSlider.Value);
+                                int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
+                                SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), counter, spriteId, index);
+                                counter++;
                             }
-                            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(baseBitmap))
-                            {
-                                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+                        }
+                    } else {
+                        int counter = 1;
+                        for (int h = (int)frameGroup.SpriteInfo.PatternHeight - 1; h >= 0; h--) {
+                            for (int w = (int)frameGroup.SpriteInfo.PatternWidth - 1; w >= 0; w--) {
+                                int baseIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), 0, 0, (int)SprFramesSlider.Value);
+                                int baseSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseIndex];
+                                System.Drawing.Bitmap baseBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)baseSpriteId));
+                                if (frameGroup.SpriteInfo.PatternLayers > 1) {
+                                    int baseLayerIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 1, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), 0, 0, (int)SprFramesSlider.Value);
+                                    int baseLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseLayerIndex];
+                                    System.Drawing.Bitmap baseLayerBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)baseLayerSpriteId));
+                                    Colorize(baseLayerBitmap, baseBitmap, SprLayerHeadPicker.SelectedColor.Value, SprLayerBodyPicker.SelectedColor.Value, SprLayerLegsPicker.SelectedColor.Value, SprLayerFeetPicker.SelectedColor.Value);
+                                }
+                                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(baseBitmap)) {
+                                    g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
 
-                                if ((bool)SprFullAddons.IsChecked)
-                                {
-                                    for (int x = 1; x <= (int)SprAddonSlider.Maximum; x++)
-                                    {
-                                        int addonIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), x, 0, (int)SprFramesSlider.Value);
-                                        int addonSpriteId = (int)frameGroup.SpriteInfo.SpriteId[addonIndex];
-                                        System.Drawing.Bitmap addonBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)addonSpriteId));
+                                    if ((bool)SprFullAddons.IsChecked) {
+                                        for (int x = 1; x <= (int)SprAddonSlider.Maximum; x++) {
+                                            int addonIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), x, 0, (int)SprFramesSlider.Value);
+                                            int addonSpriteId = (int)frameGroup.SpriteInfo.SpriteId[addonIndex];
+                                            System.Drawing.Bitmap addonBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)addonSpriteId));
 
-                                        int addonLayerIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 1, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), x, 0, (int)SprFramesSlider.Value);
-                                        int addonLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[addonLayerIndex];
-                                        System.Drawing.Bitmap addonLayerBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)addonLayerSpriteId));
+                                            int addonLayerIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 1, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), x, 0, (int)SprFramesSlider.Value);
+                                            int addonLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[addonLayerIndex];
+                                            System.Drawing.Bitmap addonLayerBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)addonLayerSpriteId));
 
-                                        Colorize(addonLayerBitmap, addonBitmap, SprLayerHeadPicker.SelectedColor.Value, SprLayerBodyPicker.SelectedColor.Value, SprLayerLegsPicker.SelectedColor.Value, SprLayerFeetPicker.SelectedColor.Value);
-                                        g.DrawImage(addonBitmap, new System.Drawing.Point(0, 0));
+                                            Colorize(addonLayerBitmap, addonBitmap, SprLayerHeadPicker.SelectedColor.Value, SprLayerBodyPicker.SelectedColor.Value, SprLayerLegsPicker.SelectedColor.Value, SprLayerFeetPicker.SelectedColor.Value);
+                                            g.DrawImage(addonBitmap, new System.Drawing.Point(0, 0));
 
+                                        }
                                     }
                                 }
-                            }
 
-
-
-                            MemoryStream memoryStream = new MemoryStream();
-                            baseBitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-                            SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(memoryStream), counter, 0, 0);
-                            counter++;
-                        }
-                    }
-
-                }
-            }
-            else
-            {
-                int counter = 1;
-                int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternZ - 1 : 0;
-                for (int ph = 0; ph < frameGroup.SpriteInfo.PatternY; ph++)
-                {
-                    for (int pw = 0; pw < frameGroup.SpriteInfo.PatternX; pw++)
-                    {
-                        for (int h = (int)(frameGroup.SpriteInfo.PatternHeight - 1); h >= 0; h--)
-                        {
-                            for (int w = (int)(frameGroup.SpriteInfo.PatternWidth - 1); w >= 0; w--)
-                            {
-                                int tileid = (int)(ph * gridHeight * frameGroup.SpriteInfo.PatternHeight + (frameGroup.SpriteInfo.PatternHeight - 1 - h) * gridHeight + (pw * frameGroup.SpriteInfo.PatternWidth) + (frameGroup.SpriteInfo.PatternWidth - 1 - w) + 1);
-                                int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, pw, ph, mount, (int)SprFramesSlider.Value);
-                                int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                                SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), tileid, spriteId, index);
+                                MemoryStream memoryStream = new MemoryStream();
+                                baseBitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+                                SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(memoryStream), counter, 0, 0);
                                 counter++;
                             }
                         }
                     }
+                } else {
+                    int counter = 1;
+                    int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternZ - 1 : 0;
+                    for (int ph = 0; ph < frameGroup.SpriteInfo.PatternY; ph++) {
+                        for (int pw = 0; pw < frameGroup.SpriteInfo.PatternX; pw++) {
+                            for (int h = (int)(frameGroup.SpriteInfo.PatternHeight - 1); h >= 0; h--) {
+                                for (int w = (int)(frameGroup.SpriteInfo.PatternWidth - 1); w >= 0; w--) {
+                                    int tileid = (int)(ph * gridHeight * frameGroup.SpriteInfo.PatternHeight + (frameGroup.SpriteInfo.PatternHeight - 1 - h) * gridHeight + (pw * frameGroup.SpriteInfo.PatternWidth) + (frameGroup.SpriteInfo.PatternWidth - 1 - w) + 1);
+                                    int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, pw, ph, mount, (int)SprFramesSlider.Value);
+                                    int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
+                                    SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), tileid, spriteId, index);
+                                    counter++;
+                                }
+                            }
+                        }
+                    }
                 }
+            } catch (Exception) {
+                MainWindow.Log("Unable to view appearance id " + CurrentObjectAppearance.Id + ", invalid texture ids.");
             }
-
         }
+
         private void SprOutfitChanged(object sender, RoutedEventArgs e)
         {
             ForceSliderChange();
@@ -718,7 +712,7 @@ namespace Assets_Editor
             Button _dir = (Button)sender;
 
             CurrentSprDir = int.Parse(_dir.Uid);
-            ForceSliderChange();
+            InternalUpdateThingPreview();
             ButtonProgressAssist.SetIsIndicatorVisible(SprUpArrow, false);
             ButtonProgressAssist.SetIsIndicatorVisible(SprRightArrow, false);
             ButtonProgressAssist.SetIsIndicatorVisible(SprDownArrow, false);
@@ -745,17 +739,17 @@ namespace Assets_Editor
 
         private void SprMount_Click(object sender, RoutedEventArgs e)
         {
-            ForceSliderChange();
+            InternalUpdateThingPreview();
         }
 
         private void SprBlendLayer_Click(object sender, RoutedEventArgs e)
         {
-            ForceSliderChange();
+            InternalUpdateThingPreview();
         }
 
         private void SprAddonSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ForceSliderChange();
+            InternalUpdateThingPreview();
         }
 
         private void FixSpritesCount()

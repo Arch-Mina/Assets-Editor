@@ -40,6 +40,7 @@ namespace Assets_Editor
         public ObservableCollection<Box> BoundingBoxList = new ObservableCollection<Box>();
         private int CurrentSprDir = 0;
         private bool isPageLoaded = false;
+        private bool isUpdatingFrame = false;
         private uint blankSpr = 0;
         private bool isObjectLoaded = false;
         private Appearances exportObjects = new Appearances();
@@ -360,11 +361,14 @@ namespace Assets_Editor
         {
             CurrentObjectAppearance = ObjectAppearance.Clone();
             LoadCurrentObjectAppearances();
-            SprGroupSlider.ValueChanged -= SprGroupSlider_ValueChanged;
-            SprGroupSlider.Value = 0;
-            ChangeGroupType(0);
-            SprGroupSlider.ValueChanged += SprGroupSlider_ValueChanged;
 
+            isUpdatingFrame = true;
+            try {
+                SprGroupSlider.Value = 0;
+                ChangeGroupType(0);
+            } finally {
+                isUpdatingFrame = false;
+            }
         }
 
         private void ChangeGroupType(int group)
@@ -439,10 +443,14 @@ namespace Assets_Editor
         }
         private void ForceSliderChange()
         {
-            SprFramesSlider.ValueChanged -= SprFramesSlider_ValueChanged;
-            SprFramesSlider.Minimum = -1;
-            SprFramesSlider.Value = -1;
-            SprFramesSlider.ValueChanged += SprFramesSlider_ValueChanged;
+            isUpdatingFrame = true;
+            try {
+                SprFramesSlider.Minimum = -1;
+                SprFramesSlider.Value = -1;
+            } finally {
+                isUpdatingFrame = false;
+            }
+
             SprFramesSlider.Minimum = 0;
         }
 
@@ -733,14 +741,20 @@ namespace Assets_Editor
             g = (g + colorPart.G) / 2;
             b = (b + colorPart.B) / 2;
         }
+
         private void SprFramesSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            try
-            {
+            if (isUpdatingFrame)
+                return;
 
+            InternalUpdateThingPreview();
+        }
+
+        private void InternalUpdateThingPreview()
+        {
+            try {
                 FrameGroup frameGroup = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value];
-                if (frameGroup.SpriteInfo.Animation != null)
-                {
+                if (frameGroup.SpriteInfo.Animation != null) {
                     SprPhaseMin.Value = (int)frameGroup.SpriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMin;
                     SprPhaseMax.Value = (int)frameGroup.SpriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMax;
                 }
@@ -750,60 +764,49 @@ namespace Assets_Editor
                 SpriteViewerGrid.ColumnDefinitions.Clear();
                 int gridWidth = 1;
                 int gridHeight = 1;
-                if (ObjectMenu.SelectedIndex != 0)
-                {
+                if (ObjectMenu.SelectedIndex != 0) {
                     gridWidth = (int)frameGroup.SpriteInfo.PatternHeight;
                     gridHeight = (int)frameGroup.SpriteInfo.PatternWidth;
                 }
                 int imgWidth = (int)Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)frameGroup.SpriteInfo.SpriteId[0])).Width;
                 int imgHeight = (int)Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)frameGroup.SpriteInfo.SpriteId[0])).Height;
 
-                for (int i = 0; i < gridWidth; i++)
-                {
+                for (int i = 0; i < gridWidth; i++) {
                     RowDefinition rowDef = new RowDefinition();
                     rowDef.Height = new GridLength(imgHeight);
                     SpriteViewerGrid.RowDefinitions.Add(rowDef);
                 }
-                for (int i = 0; i < gridHeight; i++)
-                {
+                for (int i = 0; i < gridHeight; i++) {
                     ColumnDefinition colDef = new ColumnDefinition();
                     colDef.Width = new GridLength(imgWidth);
                     SpriteViewerGrid.ColumnDefinitions.Add(colDef);
                 }
 
-                if (IsOutfitsMenuOpened())
-                {
-                    if ((bool)SprBlendLayers.IsChecked == false)
-                    {
+                if (IsOutfitsMenuOpened()) {
+                    if ((bool)SprBlendLayers.IsChecked == false) {
                         int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.Layers - 1 : 0;
                         int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
                         int addon = frameGroup.SpriteInfo.PatternWidth > 1 ? (int)SprAddonSlider.Value : 0;
                         int index = GetSpriteIndex(frameGroup, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), addon, mount, (int)SprFramesSlider.Value);
                         int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
                         SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(spriteId)), 1, spriteId, index);
-                    }
-                    else
-                    {
+                    } else {
                         int baseIndex = GetSpriteIndex(frameGroup, 0, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), 0, 0, (int)SprFramesSlider.Value);
                         int baseSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseIndex];
                         System.Drawing.Bitmap baseBitmap = new System.Drawing.Bitmap(MainWindow.getSpriteStream(baseSpriteId));
 
-                        if (frameGroup.SpriteInfo.Layers > 1)
-                        {
+                        if (frameGroup.SpriteInfo.Layers > 1) {
                             int baseLayerIndex = GetSpriteIndex(frameGroup, 1, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), 0, 0, (int)SprFramesSlider.Value);
                             int baseLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseLayerIndex];
                             System.Drawing.Bitmap baseLayerBitmap = new System.Drawing.Bitmap(MainWindow.getSpriteStream(baseLayerSpriteId));
 
                             Colorize(baseLayerBitmap, baseBitmap, SprLayerHeadPicker.SelectedColor.Value, SprLayerBodyPicker.SelectedColor.Value, SprLayerLegsPicker.SelectedColor.Value, SprLayerFeetPicker.SelectedColor.Value);
                         }
-                        using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(baseBitmap))
-                        {
+                        using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(baseBitmap)) {
                             g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
 
-                            if ((bool)SprFullAddons.IsChecked)
-                            {
-                                for (int x = 1; x <= (int)SprAddonSlider.Maximum; x++)
-                                {
+                            if ((bool)SprFullAddons.IsChecked) {
+                                for (int x = 1; x <= (int)SprAddonSlider.Maximum; x++) {
                                     int addonIndex = GetSpriteIndex(frameGroup, 0, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), x, 0, (int)SprFramesSlider.Value);
                                     int addonSpriteId = (int)frameGroup.SpriteInfo.SpriteId[addonIndex];
                                     System.Drawing.Bitmap addonBitmap = new System.Drawing.Bitmap(MainWindow.getSpriteStream(addonSpriteId));
@@ -825,15 +828,11 @@ namespace Assets_Editor
 
                         SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(memoryStream), 1, 0, 0);
                     }
-                }
-                else
-                {
+                } else {
                     int counter = 1;
                     int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
-                    for (int ph = 0; ph < frameGroup.SpriteInfo.PatternHeight; ph++)
-                    {
-                        for (int pw = 0; pw < frameGroup.SpriteInfo.PatternWidth; pw++)
-                        {
+                    for (int ph = 0; ph < frameGroup.SpriteInfo.PatternHeight; ph++) {
+                        for (int pw = 0; pw < frameGroup.SpriteInfo.PatternWidth; pw++) {
                             int index = GetSpriteIndex(frameGroup, 0, pw, ph, mount, (int)SprFramesSlider.Value);
                             int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
                             SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(spriteId)), counter, spriteId, index);
@@ -841,10 +840,8 @@ namespace Assets_Editor
                         }
                     }
                 }
-            }
-            catch (Exception)
-            {
-                MainWindow.Log("Unable to view appearance id " + CurrentObjectAppearance.Id + ", crash prevented.");
+            } catch (Exception) {
+                MainWindow.Log("Unable to view appearance id " + CurrentObjectAppearance.Id + ", invalid texture ids.");
             }
         }
 
@@ -991,7 +988,7 @@ namespace Assets_Editor
             Button _dir = (Button)sender;
 
             CurrentSprDir = int.Parse(_dir.Uid);
-            ForceSliderChange();
+            InternalUpdateThingPreview();
             ButtonProgressAssist.SetIsIndicatorVisible(SprUpArrow, false);
             ButtonProgressAssist.SetIsIndicatorVisible(SprRightArrow, false);
             ButtonProgressAssist.SetIsIndicatorVisible(SprDownArrow, false);
@@ -1010,17 +1007,17 @@ namespace Assets_Editor
 
         private void SprMount_Click(object sender, RoutedEventArgs e)
         {
-            ForceSliderChange();
+            InternalUpdateThingPreview();
         }
 
         private void SprBlendLayer_Click(object sender, RoutedEventArgs e)
         {
-            ForceSliderChange();
+            InternalUpdateThingPreview();
         }
 
         private void SprAddonSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ForceSliderChange();
+            InternalUpdateThingPreview();
         }
 
         private void BoxPerDirection_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
