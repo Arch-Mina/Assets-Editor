@@ -30,6 +30,94 @@ namespace Assets_Editor
     /// </summary>
     public partial class DatEditor : Window
     {
+        public static readonly List<System.Drawing.Size> SpriteSizes = [
+            // standard sprite sizes across entire program
+            new(32, 32), // 0
+            new(32, 64), // 1
+            new(64, 32), // 2 
+            new(64, 64), // 3
+
+            // warning: requires client editing
+            // 384 can be divided to 12 tiles that are 32x32
+            // 12 can be divided by 1, 2, 3, 4, 6, and 12
+            // that's 6 combinations in each dimension
+            // 6 x 6 = 36 possible combinations
+            // as indexing is starting from zero, 35 will be the highest spritesheet type
+
+            // 32 x n
+            new(32, 96), // 4
+            new(32, 128), // 5
+            new(32, 192), // 6
+            new(32, 384), // 7
+
+            // 64 x n
+            new(64, 96), // 8
+            new(64, 128), // 9
+            new(64, 192), // 10
+            new(64, 384), // 11
+
+            // 96 x n
+            new(96, 32), // 12
+            new(96, 64), // 13
+            new(96, 96), // 14
+            new(96, 128), // 15
+            new(96, 192), // 16
+            new(96, 384), // 17
+
+            // 128 x n
+            new(128, 32), // 18
+            new(128, 64), // 19
+            new(128, 96), // 20
+            new(128, 128), // 21
+            new(128, 192), // 22
+            new(128, 384), // 23
+
+            // 192 x n
+            new(192, 32), // 24
+            new(192, 64), // 25
+            new(192, 96), // 26
+            new(192, 128), // 27
+            new(192, 192), // 28
+            new(192, 384), // 29
+
+            // 384 x n
+            new(384, 32), // 30
+            new(384, 64), // 31
+            new(384, 96), // 32
+            new(384, 128), // 33
+            new(384, 192), // 34
+            new(384, 384), // 35
+        ];
+
+        public const int SprSheetWidth = 384;
+        public const int SprSheetHeight = 384;
+
+        public readonly struct SpriteLayout {
+            public int SpriteSizeX { get; }
+            public int SpriteSizeY { get; }
+            public int Cols { get; }
+            public int Rows { get; }
+
+            public SpriteLayout(int spriteSizeX, int spriteSizeY, int cols, int rows) {
+                SpriteSizeX = spriteSizeX;
+                SpriteSizeY = spriteSizeY;
+                Cols = cols;
+                Rows = rows;
+            }
+        }
+
+        public static SpriteLayout GetSpriteLayout(int spriteType) {
+            if ((uint)spriteType >= (uint)SpriteSizes.Count)
+                spriteType = 0; // fallback to 32x32
+
+            var singleSpriteSize = SpriteSizes[spriteType];
+            int spriteSizeX = singleSpriteSize.Width;
+            int spriteSizeY = singleSpriteSize.Height;
+            int cols = SprSheetWidth / spriteSizeX;
+            int rows = SprSheetHeight / spriteSizeY;
+            return new(spriteSizeX, spriteSizeY, cols, rows);
+        }
+
         private static ObservableCollection<ShowList> ThingsOutfit = new ObservableCollection<ShowList>();
         private static ObservableCollection<ShowList> ThingsItem = new ObservableCollection<ShowList>();
         private static ObservableCollection<ShowList> ThingsEffect = new ObservableCollection<ShowList>();
@@ -2520,14 +2608,6 @@ namespace Assets_Editor
         {
             Directory.CreateDirectory(outputDirectory);
 
-            var spriteSizes = new List<System.Drawing.Size>
-            {
-                new System.Drawing.Size(32, 32),
-                new System.Drawing.Size(32, 64),
-                new System.Drawing.Size(64, 32),
-                new System.Drawing.Size(64, 64)
-            };
-
             var spriteInfos = spriteStreams.Select((stream, index) =>
             {
                 stream.Position = 0;
@@ -2538,12 +2618,12 @@ namespace Assets_Editor
             }).ToList();
 
             var catalogs = new List<MainWindow.Catalog>();
-            foreach (var size in spriteSizes)
+            foreach (var size in SpriteSizes)
             {
                 var matchingSprites = spriteInfos.Where(si => si.Size == size).ToList();
                 if (!matchingSprites.Any()) continue;
 
-                var spriteType = spriteSizes.IndexOf(size);
+                var spriteType = SpriteSizes.IndexOf(size);
                 var spriteSheetResults = ProcessSpriteGroup(matchingSprites, size, outputDirectory, spriteType);
                 catalogs.AddRange(spriteSheetResults);
             }
@@ -2552,8 +2632,8 @@ namespace Assets_Editor
         }
         private List<MainWindow.Catalog> ProcessSpriteGroup(List<ImportSpriteInfo> spriteInfos, System.Drawing.Size spriteSize, string outputDirectory, int spriteType)
         {
-            int spritesPerRow = 384 / spriteSize.Width;
-            int spritesPerColumn = 384 / spriteSize.Height;
+            int spritesPerRow = SprSheetWidth / spriteSize.Width;
+            int spritesPerColumn = SprSheetHeight / spriteSize.Height;
             int spritesPerSheet = spritesPerRow * spritesPerColumn;
 
             var catalogs = new List<MainWindow.Catalog>();
@@ -2625,7 +2705,7 @@ namespace Assets_Editor
                 {
                     finalizeSheet(); // Finalize the current sheet before starting a new one
 
-                    currentSheet = new System.Drawing.Bitmap(384, 384, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    currentSheet = new System.Drawing.Bitmap(SprSheetWidth, SprSheetHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                     graphics = System.Drawing.Graphics.FromImage(currentSheet);
                     graphics.Clear(System.Drawing.Color.FromArgb(0, 255, 0, 255));
                 }
@@ -3218,37 +3298,11 @@ namespace Assets_Editor
 
         public void ChangeSpritesAlpha(System.Drawing.Bitmap bmpImage, Dictionary<uint, byte> spriteAlphaValues, int spriteType, int firstSpriteId)
         {
-            int spriteWidth, spriteHeight, spritesPerRow, spritesPerColumn;
-
-            switch (spriteType)
-            {
-                case 0:
-                    spriteWidth = 32;
-                    spriteHeight = 32;
-                    spritesPerRow = 12;
-                    spritesPerColumn = 12;
-                    break;
-                case 1:
-                    spriteWidth = 32;
-                    spriteHeight = 64;
-                    spritesPerRow = 12;
-                    spritesPerColumn = 6;
-                    break;
-                case 2:
-                    spriteWidth = 64;
-                    spriteHeight = 32;
-                    spritesPerRow = 6;
-                    spritesPerColumn = 12;
-                    break;
-                case 3:
-                    spriteWidth = 64;
-                    spriteHeight = 64;
-                    spritesPerRow = 6;
-                    spritesPerColumn = 6;
-                    break;
-                default:
-                    throw new ArgumentException("Invalid sprite type.");
-            }
+            var layout = GetSpriteLayout(spriteType);
+            int spriteWidth = layout.SpriteSizeX;
+            int spriteHeight = layout.SpriteSizeY;
+            int columnCount = layout.Cols;
+            int rowCount = layout.Rows;
 
             System.Drawing.Bitmap bmpWithAlpha = ConvertToFormat32bppArgb(bmpImage);
 
@@ -3271,15 +3325,15 @@ namespace Assets_Editor
                 byte newAlpha = entry.Value;
 
                 int spriteIndex = (int)(spriteId - firstSpriteId);
-                if (spriteIndex < 0 || spriteIndex >= spritesPerRow * spritesPerColumn)
+                if (spriteIndex < 0 || spriteIndex >= columnCount * rowCount)
                 {
                     continue;
                 }
 
-                int row = spriteIndex / spritesPerRow;
-                int column = spriteIndex % spritesPerRow;
+                int row = spriteIndex / columnCount;
+                int column = spriteIndex % columnCount;
 
-                System.Drawing.Rectangle spriteRect = new System.Drawing.Rectangle(
+                System.Drawing.Rectangle spriteRect = new(
                     column * spriteWidth,
                     row * spriteHeight,
                     spriteWidth,

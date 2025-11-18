@@ -283,12 +283,13 @@ namespace Assets_Editor
             int sprCount = 0;
             Image tile;
 
-            if (sheet.SpriteType >= 0)
-            {
-                int xCols = (sheet.SpriteType == 0 || sheet.SpriteType == 1) ? 12 : 6;
-                int yCols = (sheet.SpriteType == 0 || sheet.SpriteType == 2) ? 12 : 6;
-                int tWidth = (sheet.SpriteType == 0 || sheet.SpriteType == 1) ? 32 : 64;
-                int tHeight = (sheet.SpriteType == 0 || sheet.SpriteType == 2) ? 32 : 64;
+            var sprType = sheet.SpriteType;
+            if (sprType >= 0) {
+                var layout = DatEditor.GetSpriteLayout(sprType);
+                int tWidth = layout.SpriteSizeX;
+                int tHeight = layout.SpriteSizeY;
+                int xCols = layout.Cols;
+                int yCols = layout.Rows;
 
                 System.Drawing.Size tileSize = new System.Drawing.Size(tWidth, tHeight);
                 for (int x = 0; x < yCols; x++)
