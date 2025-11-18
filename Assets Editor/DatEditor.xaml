@@ -222,6 +222,11 @@
                                     <materialDesign:PackIcon Kind="ContentSaveCogOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
+                            <MenuItem Header="Import AEC/OBD" Click="ImportItems_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="Download" />
+                                </MenuItem.Icon>
+                            </MenuItem>
                             <MenuItem Header="Export to legacy" Click="CompileLegacy_Click">
                                 <MenuItem.Icon>
                                     <materialDesign:PackIcon Kind="FileDocumentArrowRight" />
