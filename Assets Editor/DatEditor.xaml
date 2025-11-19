@@ -250,6 +250,11 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                         </MenuItem>
+                        <MenuItem Header="Lua Script Editor" Click="OpenLuaWindow_Click">
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="Code"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="_About">
                             <MenuItem Header="About" Click="About_Click">
                                 <MenuItem.Icon>

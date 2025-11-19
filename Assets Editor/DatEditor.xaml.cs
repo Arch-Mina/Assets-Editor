@@ -3,6 +3,7 @@ using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using SevenZip.Compression.LZ;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -3405,5 +3406,9 @@ namespace Assets_Editor
             }
         }
 
+        private void OpenLuaWindow_Click(object sender, RoutedEventArgs e) {
+            LuaWindow luaWindow = new LuaWindow();
+            luaWindow.Show();
+        }
     }
 }

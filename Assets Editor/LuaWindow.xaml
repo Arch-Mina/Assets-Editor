@@ -1,0 +1,285 @@
+<Window x:Class="Assets_Editor.LuaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Assets_Editor"
+        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:liveCharts="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        mc:Ignorable="d"
+        Title="Lua Script Editor" Height="800" Width="1200"
+        Style="{StaticResource MaterialDesignWindow}">
+    
+    <Window.Resources>
+        <Style x:Key="DataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+            <Setter Property="AutoGenerateColumns" Value="True"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" MinWidth="300"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="3*" MinWidth="400"/>
+        </Grid.ColumnDefinitions>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="200" MinHeight="150"/>
+        </Grid.RowDefinitions>
+
+        <!-- Left Panel: Data Display with Tabs -->
+        <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Data Header -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10,10,10,5">
+                <materialDesign:PackIcon Kind="Table" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Text="Data View" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                <Button x:Name="ExportCsvButton"
+                        Margin="20,0,0,0"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Click="ExportCsvButton_Click"
+                        ToolTip="Export current table to CSV">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="FileDelimited" Margin="0,0,5,0"/>
+                        <TextBlock Text="Export CSV"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            
+            <!-- TabControl for DataGrid and Chart -->
+            <TabControl Grid.Row="1" Margin="10,0,10,10">
+                <!-- DataGrid Tab -->
+                <TabItem Header="Table View">
+                    <TabItem.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Table" Margin="0,0,5,0"/>
+                                <TextBlock Text="Table"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TabItem.HeaderTemplate>
+                    <DataGrid x:Name="DataGrid" 
+                              Style="{StaticResource DataGridStyle}"
+                              ItemsSource="{Binding GridView}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True">
+                        <DataGrid.Columns/>
+                    </DataGrid>
+                </TabItem>
+                
+                <!-- Chart Tab -->
+                <TabItem Header="Chart View">
+                    <TabItem.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ChartLine" Margin="0,0,5,0"/>
+                                <TextBlock Text="Chart"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TabItem.HeaderTemplate>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Chart Controls -->
+                        <StackPanel Grid.Row="0" Margin="10,10,10,5">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <TextBlock Text="X-Axis:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <ComboBox x:Name="XAxisComboBox" 
+                                          Width="120" 
+                                          Margin="0,0,20,0"
+                                          SelectionChanged="XAxisComboBox_SelectionChanged"/>
+                                <TextBlock Text="Chart Mode:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <ComboBox x:Name="ChartModeComboBox" 
+                                          Width="150" 
+                                          Margin="0,0,20,0"
+                                          SelectionChanged="ChartModeComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="Single Line" IsSelected="True"/>
+                                    <ComboBoxItem Content="All Numeric Columns"/>
+                                    <ComboBoxItem Content="Custom Selection"/>
+                                </ComboBox>
+                                <!-- Custom Selection Panel (shown when Custom Selection is chosen) -->
+                                <StackPanel x:Name="CustomSelectionPanel" 
+                                        Orientation="Horizontal" 
+                                        Visibility="Collapsed"
+                                        Margin="0,0,10,0">
+                                    <ListBox x:Name="AvailableColumnsListBox" 
+                                         Width="200" 
+                                         Height="100"
+                                         SelectionMode="Multiple"
+                                         Margin="0,0,10,0"/>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                        <Button x:Name="SelectAllColumnsButton" 
+                                            Content="Select All"
+                                            Click="SelectAllColumnsButton_Click"
+                                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                                            Margin="0,0,0,5"/>
+                                        <Button x:Name="ClearSelectionButton" 
+                                            Content="Clear All"
+                                            Click="ClearSelectionButton_Click"
+                                            Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Button x:Name="RefreshChartButton" 
+                                    Content="Refresh Chart"
+                                    Click="RefreshChartButton_Click"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <!-- Chart -->
+                        <liveCharts:CartesianChart Grid.Row="1" Margin="10,0,10,10" Series="{Binding ChartSeries}"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+
+        <!-- Right Panel: Code Editor and Results -->
+        <Grid Grid.Column="2" Grid.Row="0" Grid.RowSpan="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="*" MinHeight="120"/>
+            </Grid.RowDefinitions>
+
+            <!-- Code Editor Header -->
+            <StackPanel Grid.Row="0" Margin="10,10,10,5">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <materialDesign:PackIcon Kind="Code" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="Lua Script Editor" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <Button x:Name="ExecuteButton" 
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Margin="20,0,0,0"
+                            Click="ExecuteButton_Click"
+                            ToolTip="Execute Lua Script">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Play" Margin="0,0,5,0"/>
+                            <TextBlock Text="Execute"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="ClearButton" 
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="10,0,0,0"
+                            Click="ClearButton_Click"
+                            ToolTip="Clear Script">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Clear" Margin="0,0,5,0"/>
+                            <TextBlock Text="Clear"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="CancelButton"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="10,0,0,0"
+                            Click="CancelButton_Click"
+                            ToolTip="Cancel Lua Script"
+                            IsEnabled="False">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Stop" Margin="0,0,5,0"/>
+                            <TextBlock Text="Cancel"/>
+                        </StackPanel>
+                    </Button>
+                    <CheckBox x:Name="ShowInGridCheckBox"
+                              Margin="20,0,0,0"
+                              VerticalAlignment="Center"
+                              IsChecked="True"
+                              ToolTip="If checked, a returned table will populate the Data View">
+                        <TextBlock Text="Show return in Data View"/>
+                    </CheckBox>
+                </StackPanel>
+                
+                <!-- Script Management Controls -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <ComboBox x:Name="ScriptListComboBox" 
+                              Width="200" 
+                              Margin="0,0,10,0"
+                              SelectionChanged="ScriptListComboBox_SelectionChanged"/>
+                    <Button x:Name="NewScriptButton" 
+                            Content="New"
+                            Click="NewScriptButton_Click"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,5,0"/>
+                    <Button x:Name="SaveScriptButton" 
+                            Content="Save"
+                            Click="SaveScriptButton_Click"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,5,0"/>
+                    <Button x:Name="DeleteScriptButton" 
+                            Content="Delete"
+                            Click="DeleteScriptButton_Click"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,5,0"/>
+                    <Button x:Name="RefreshScriptsButton" 
+                            Content="Refresh"
+                            Click="RefreshScriptsButton_Click"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Code Editor -->
+            <avalonEdit:TextEditor x:Name="LuaCodeEditor" 
+                                   Grid.Row="1" 
+                                   Margin="10,0,10,10"
+                                   FontFamily="Consolas"
+                                   FontSize="12"
+                                   ShowLineNumbers="True"
+                                   WordWrap="True"
+                                   VerticalScrollBarVisibility="Auto"
+                                   HorizontalScrollBarVisibility="Auto"/>
+
+            <!-- GridSplitter between code editor and results -->
+            <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" Background="{DynamicResource MaterialDesignDivider}"/>
+
+            <!-- Results Header -->
+
+
+            <!-- Results Display -->
+            <Grid Grid.Row="3" Margin="10,0,10,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" Margin="10,5,10,5" Grid.Row="0">
+                    <materialDesign:PackIcon Kind="Console" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="Execution Results" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBox Grid.Row="1" x:Name="ResultsTextBox"
+                         Text="{Binding Results}"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         IsReadOnly="True"
+                         FontFamily="Consolas"
+                         FontSize="11"
+                         Background="{DynamicResource MaterialDesignPaper}"
+                         BorderBrush="{DynamicResource MaterialDesignDivider}"
+                         BorderThickness="1"
+                         Padding="10"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+            </Grid>
+        </Grid>
+
+        <!-- Grid Splitter -->
+        <GridSplitter Grid.Column="1" 
+                      Grid.Row="0" 
+                      Grid.RowSpan="3"
+                      HorizontalAlignment="Stretch"
+                      Background="{DynamicResource MaterialDesignDivider}"
+                      Width="5"/>
+    </Grid>
+</Window>
