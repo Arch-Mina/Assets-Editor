@@ -2016,6 +2016,10 @@ namespace Assets_Editor
             }
         }
 
+        private void ImportItems_Click(object sender, RoutedEventArgs e) {
+            InternalImportItems();
+        }
+
         private void CompileLegacy_Click(object sender, RoutedEventArgs e)
         {
             ComppileDialogHost.IsOpen = true;
@@ -2733,183 +2737,490 @@ namespace Assets_Editor
             return catalogs;
         }
 
-        private void ImportObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Appearances appearances = new Appearances();
-            importSprCounter = MainWindow.AllSprList.Count;
-            importSprIdList.Clear();
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Filter = "assets editor container (*.aec)|*.aec" // Add appropriate filter here
-            };
+        private void InternalImportAEC(string fileName) {
+            Appearances appearances = new();
 
-            if (openFileDialog.ShowDialog() == true)
-            {
-                using (FileStream fileStream = new FileStream(openFileDialog.FileName, FileMode.Open, FileAccess.Read))
-                {
-                    appearances = Appearances.Parser.ParseFrom(fileStream);
-                    var spriteStreams = new List<MemoryStream>();
-                    foreach (Appearance appearance in appearances.Outfit)
-                    {
-                        foreach (var spr in appearance.SpriteData)
-                        {
-                            spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
-                            importSprIdList.Add((uint)importSprIdList.Count, 0);
-                        }
-                    }
-                    foreach (Appearance appearance in appearances.Object)
-                    {
-                        foreach (var spr in appearance.SpriteData)
-                        {
-                            spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
-                            importSprIdList.Add((uint)importSprIdList.Count, 0);
-                        }
-                    }
-                    foreach (Appearance appearance in appearances.Effect)
-                    {
-                        foreach (var spr in appearance.SpriteData)
-                        {
-                            spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
-                            importSprIdList.Add((uint)importSprIdList.Count, 0);
-                        }
-                    }
-                    foreach (Appearance appearance in appearances.Missile)
-                    {
-                        foreach (var spr in appearance.SpriteData)
-                        {
-                            spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
-                            importSprIdList.Add((uint)importSprIdList.Count, 0);
-                        }
-                    }
+            using FileStream fileStream = new(fileName, FileMode.Open, FileAccess.Read);
+            appearances = Appearances.Parser.ParseFrom(fileStream);
+            var spriteStreams = new List<MemoryStream>();
+            foreach (Appearance appearance in appearances.Outfit) {
+                foreach (var spr in appearance.SpriteData) {
+                    spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
+                    importSprIdList.Add((uint)importSprIdList.Count, 0);
+                }
+            }
+            foreach (Appearance appearance in appearances.Object) {
+                foreach (var spr in appearance.SpriteData) {
+                    spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
+                    importSprIdList.Add((uint)importSprIdList.Count, 0);
+                }
+            }
+            foreach (Appearance appearance in appearances.Effect) {
+                foreach (var spr in appearance.SpriteData) {
+                    spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
+                    importSprIdList.Add((uint)importSprIdList.Count, 0);
+                }
+            }
+            foreach (Appearance appearance in appearances.Missile) {
+                foreach (var spr in appearance.SpriteData) {
+                    spriteStreams.Add(new MemoryStream(spr.ToByteArray()));
+                    importSprIdList.Add((uint)importSprIdList.Count, 0);
+                }
+            }
 
-                    var outputDirectory = Path.GetDirectoryName(openFileDialog.FileName);
-                    List<MainWindow.Catalog> catalogList = CreateSpriteSheetsAndSaveAsPng(spriteStreams, outputDirectory);
-                    int counter = 0;
-                    foreach (Appearance appearance in appearances.Outfit)
-                    {
-                        for (int i = 0; i < appearance.FrameGroup.Count; i++)
-                        {
-                            for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
-                            {
-                                appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
-                                counter++;
-                            }
-                        }
-                    }
-                    
-                    foreach (Appearance appearance in appearances.Object)
-                    {
-                        for (int i = 0; i < appearance.FrameGroup.Count; i++)
-                        {
-                            for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
-                            {
-                                appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
-                                counter++;
-                            }
-                        }
-                    }
-                    
-                    foreach (Appearance appearance in appearances.Effect)
-                    {
-                        for (int i = 0; i < appearance.FrameGroup.Count; i++)
-                        {
-                            for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
-                            {
-                                appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
-                                counter++;
-                            }
-                        }
-                    }
-                    
-                    foreach (Appearance appearance in appearances.Missile)
-                    {
-                        for (int i = 0; i < appearance.FrameGroup.Count; i++)
-                        {
-                            for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++)
-                            {
-                                appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
-                                counter++;
-                            }
-                        }
-                    }
-
-                    foreach (var catalog in catalogList)
-                    {
-                        MainWindow.catalog.Add(catalog);
-                    }
-
-                    foreach (Appearance appearance in appearances.Outfit)
-                    {
-                        appearance.SpriteData.Clear();
-                        
-                        if (!MainWindow.appearances.Outfit.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
-                        {
-                            appearance.Id = (uint)appearance.Id;
-                        }
-                        else
-                        {
-                            appearance.Id = (uint)MainWindow.appearances.Outfit.Max(a => a.Id) + 1;
-                        }
-                        MainWindow.appearances.Outfit.Add(appearance.Clone());
-                        ThingsOutfit.Add(new ShowList() { Id = appearance.Id });
-                    }
-
-                    foreach (Appearance appearance in appearances.Object)
-                    {
-                        appearance.SpriteData.Clear();
-
-                        if (!MainWindow.appearances.Object.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
-                        {
-                            appearance.Id = (uint)appearance.Id;
-                        } else
-                        {
-                            appearance.Id = (uint)MainWindow.appearances.Object.Max(a => a.Id) + 1;
-                        }
-
-                        if (appearance.Flags.Market != null && appearance.Flags.Market.HasTradeAsObjectId)
-                            appearance.Flags.Market.TradeAsObjectId = appearance.Id;
-
-                        if (appearance.Flags.Market != null && appearance.Flags.Market.HasShowAsObjectId)
-                            appearance.Flags.Market.ShowAsObjectId = appearance.Id;
-
-                        if(appearance.Flags.Cyclopediaitem != null && appearance.Flags.Cyclopediaitem.HasCyclopediaType)
-                            appearance.Flags.Cyclopediaitem.CyclopediaType = appearance.Id;
-
-                        MainWindow.appearances.Object.Add(appearance.Clone());
-                        ThingsItem.Add(new ShowList() { Id = appearance.Id });
-                    }
-                    
-                    foreach (Appearance appearance in appearances.Effect)
-                    {
-                        appearance.SpriteData.Clear();
-                        if (!MainWindow.appearances.Effect.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
-                        {
-                            appearance.Id = (uint)appearance.Id;
-                        }
-                        else
-                        {
-                            appearance.Id = (uint)MainWindow.appearances.Effect.Max(a => a.Id) + 1;
-                        }
-                        MainWindow.appearances.Effect.Add(appearance.Clone());
-                        ThingsEffect.Add(new ShowList() { Id = appearance.Id });
-                    }
-                    
-                    foreach (Appearance appearance in appearances.Missile)
-                    {
-                        appearance.SpriteData.Clear();
-                        if (!MainWindow.appearances.Missile.Any(a => a.Id == appearance.Id) && appearance.Id > 100)
-                        {
-                            appearance.Id = (uint)appearance.Id;
-                        }
-                        else
-                        {
-                            appearance.Id = (uint)MainWindow.appearances.Missile.Max(a => a.Id) + 1;
-                        }
-                        MainWindow.appearances.Missile.Add(appearance.Clone());
-                        ThingsMissile.Add(new ShowList() { Id = appearance.Id });
+            var outputDirectory = Path.GetDirectoryName(fileName);
+            List<MainWindow.Catalog> catalogList = CreateSpriteSheetsAndSaveAsPng(spriteStreams, outputDirectory);
+            int counter = 0;
+            foreach (Appearance appearance in appearances.Outfit) {
+                for (int i = 0; i < appearance.FrameGroup.Count; i++) {
+                    for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++) {
+                        appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
+                        counter++;
                     }
                 }
             }
+
+            foreach (Appearance appearance in appearances.Object) {
+                for (int i = 0; i < appearance.FrameGroup.Count; i++) {
+                    for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++) {
+                        appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
+                        counter++;
+                    }
+                }
+            }
+
+            foreach (Appearance appearance in appearances.Effect) {
+                for (int i = 0; i < appearance.FrameGroup.Count; i++) {
+                    for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++) {
+                        appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
+                        counter++;
+                    }
+                }
+            }
+
+            foreach (Appearance appearance in appearances.Missile) {
+                for (int i = 0; i < appearance.FrameGroup.Count; i++) {
+                    for (int s = 0; s < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; s++) {
+                        appearance.FrameGroup[i].SpriteInfo.SpriteId[s] = importSprIdList[(uint)counter];
+                        counter++;
+                    }
+                }
+            }
+
+            foreach (var catalog in catalogList) {
+                MainWindow.catalog.Add(catalog);
+            }
+
+            foreach (Appearance appearance in appearances.Outfit) {
+                appearance.SpriteData.Clear();
+
+                if (!MainWindow.appearances.Outfit.Any(a => a.Id == appearance.Id) && appearance.Id > 100) {
+                    appearance.Id = appearance.Id;
+                } else {
+                    appearance.Id = MainWindow.appearances.Outfit[^1].Id + 1;
+                }
+                MainWindow.appearances.Outfit.Add(appearance.Clone());
+                ThingsOutfit.Add(new ShowList() { Id = appearance.Id });
+            }
+
+            foreach (Appearance appearance in appearances.Object) {
+                appearance.SpriteData.Clear();
+
+                // Preserve incoming id if it's not already used and is a valid item id (>100).
+                if (!MainWindow.appearances.Object.Any(a => a.Id == appearance.Id) && appearance.Id > 100) {
+                    // keep provided id
+                } else {
+                    // otherwise assign a new unique id (last id + 1) as before
+                    appearance.Id = MainWindow.appearances.Object.Count > 0
+                        ? MainWindow.appearances.Object[^1].Id + 1
+                        : 100;
+                }
+
+                if (appearance.Flags.Market != null && appearance.Flags.Market.HasTradeAsObjectId) {
+                    appearance.Flags.Market.TradeAsObjectId = appearance.Id;
+                }
+
+                if (appearance.Flags.Market != null && appearance.Flags.Market.HasShowAsObjectId) {
+                    appearance.Flags.Market.ShowAsObjectId = appearance.Id;
+                }
+
+                if (appearance.Flags.Cyclopediaitem != null && appearance.Flags.Cyclopediaitem.HasCyclopediaType) {
+                    appearance.Flags.Cyclopediaitem.CyclopediaType = appearance.Id;
+                }
+
+                // Insert the appearance into the appearances.Object list in sorted order by Id
+                int insertIndex = MainWindow.appearances.Object.ToList().FindIndex(a => a.Id > appearance.Id);
+                if (insertIndex == -1) {
+                    // no greater id found → append at end
+                    MainWindow.appearances.Object.Add(appearance.Clone());
+                    ThingsItem.Add(new ShowList() { Id = appearance.Id });
+                } else {
+                    // insert at the found index to fill gaps and keep lists in sync
+                    MainWindow.appearances.Object.Insert(insertIndex, appearance.Clone());
+                    ThingsItem.Insert(insertIndex, new ShowList() { Id = appearance.Id });
+                }
+            }
+
+            foreach (Appearance appearance in appearances.Effect) {
+                appearance.SpriteData.Clear();
+                if (!MainWindow.appearances.Effect.Any(a => a.Id == appearance.Id) && appearance.Id > 100) {
+                    appearance.Id = appearance.Id;
+                } else {
+                    appearance.Id = MainWindow.appearances.Effect[^1].Id + 1;
+                }
+                MainWindow.appearances.Effect.Add(appearance.Clone());
+                ThingsEffect.Add(new ShowList() { Id = appearance.Id });
+            }
+
+            foreach (Appearance appearance in appearances.Missile) {
+                appearance.SpriteData.Clear();
+                if (!MainWindow.appearances.Missile.Any(a => a.Id == appearance.Id) && appearance.Id > 100) {
+                    appearance.Id = appearance.Id;
+                } else {
+                    appearance.Id = MainWindow.appearances.Missile[^1].Id + 1;
+                }
+                MainWindow.appearances.Missile.Add(appearance.Clone());
+                ThingsMissile.Add(new ShowList() { Id = appearance.Id });
+            }
+        }
+
+        private void InternalImportOBD(string fileName) {
+            ConcurrentDictionary<int, MemoryStream> objectSprList = new();
+            Appearance appearance = ObdDecoder.Load(fileName, ref objectSprList);
+            if (appearance == null) {
+                return;
+            }
+
+            // We'll build new sprite streams where each stream represents one "frame"
+            // For old obd format frames could be composed from N = patternWidth * patternHeight tiles (each 32x32).
+            var spriteStreams = new List<MemoryStream>();
+
+            // For remapping: record the order in which we appended streams so we can replace spriteId blocks later.
+            var appendedStreamIndices = new List<(int frameGroupIndex, int frameStartTileIndex, int originalStreamIndex)>();
+
+            int originalStreamIndex = 0;
+
+            for (int fgIndex = 0; fgIndex < appearance.FrameGroup.Count; fgIndex++) {
+                var fg = appearance.FrameGroup[fgIndex];
+                var si = fg.SpriteInfo;
+
+                int pw = Math.Max(1, (int)si.PatternWidth);
+                int ph = Math.Max(1, (int)si.PatternHeight);
+                int tilesPerFrame = pw * ph;
+                int totalTiles = si.SpriteId.Count;
+
+                // If there are zero tiles for some reason, skip
+                if (totalTiles == 0) {
+                    continue;
+                }
+
+                // number of logical frames = totalTiles / tilesPerFrame (floor)
+                int framesCount = Math.Max(1, totalTiles / tilesPerFrame);
+
+                // Determine tile size. Legacy data used 32x32 tiles; fallback to 32.
+                // If any referenced image is larger and single-tile-per-frame, we will draw it as-is.
+                const int legacyTileSize = 32;
+
+                for (int frame = 0; frame < framesCount; frame++) {
+                    int combinedWidth = pw * legacyTileSize;
+                    int combinedHeight = ph * legacyTileSize;
+
+                    using var bmp = new System.Drawing.Bitmap(combinedWidth, combinedHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    using (var g = System.Drawing.Graphics.FromImage(bmp)) {
+                        g.Clear(System.Drawing.Color.FromArgb(0, 0, 0, 0));
+
+                        for (int tile = 0; tile < tilesPerFrame; tile++) {
+                            int tileGlobalIndex = frame * tilesPerFrame + tile;
+                            if (tileGlobalIndex >= si.SpriteId.Count) {
+                                break;
+                            }
+
+                            int legacyId = (int)si.SpriteId[tileGlobalIndex];
+
+                            // compute position (row-major)
+                            int col = tile % pw;
+                            int row = tile / pw;
+
+                            // Place tiles using legacy OBD ordering: origin is bottom-right,
+                            // so invert both axes to convert to top-left origin placement.
+                            int x = (pw - 1 - col) * legacyTileSize;
+                            int y = (ph - 1 - row) * legacyTileSize;
+
+                            if (objectSprList.TryGetValue(legacyId, out var tileStream) && tileStream != null) {
+                                tileStream.Position = 0;
+
+                                using var tileImg = System.Drawing.Image.FromStream(new MemoryStream(tileStream.ToArray()));
+                                g.DrawImage(tileImg, new System.Drawing.Rectangle(x, y, legacyTileSize, legacyTileSize),
+                                    new System.Drawing.Rectangle(0, 0, tileImg.Width, tileImg.Height),
+                                    System.Drawing.GraphicsUnit.Pixel);
+                            }
+                        }
+                    }
+
+                    var ms = new MemoryStream();
+                    bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    ms.Position = 0;
+                    spriteStreams.Add(ms);
+
+                    // Reserve an importSprIdList slot (ProcessSpriteGroup will fill importSprIdList entries)
+                    importSprIdList[(uint)originalStreamIndex] = 0u;
+
+                    appendedStreamIndices.Add((fgIndex, frame * tilesPerFrame, originalStreamIndex));
+                    originalStreamIndex++;
+                }
+            }
+
+            // Create sheets, write files and register new catalog entries & sprites
+            var outputDirectory = Path.GetDirectoryName(fileName) ?? Directory.GetCurrentDirectory();
+            var catalogList = CreateSpriteSheetsAndSaveAsPng(spriteStreams, outputDirectory);
+
+            // build quick lookup from (frameGroupIndex, frameStart) -> originalStreamIndex
+            var remapLookup = new Dictionary<(int fgIndex, int frameStart), int>(appendedStreamIndices.Count);
+            foreach (var (frameGroupIndex, frameStartTileIndex, origStrmIdx) in appendedStreamIndices) {
+                remapLookup[(frameGroupIndex, frameStartTileIndex)] = origStrmIdx;
+            }
+
+            // iterate with explicit index so we can map against appendedStreamIndices reliably
+            const int legacyTileSizeForRemap = 32;
+            for (int fgIndex = 0; fgIndex < appearance.FrameGroup.Count; fgIndex++) {
+                var fg = appearance.FrameGroup[fgIndex];
+
+                // 1098 uses FIXED_FRAME_GROUP_OUTFIT_IDLE for objects
+                // assets use FIXED_FRAME_GROUP_OBJECT_INITIAL
+                if (appearance.AppearanceType != APPEARANCE_TYPE.AppearanceOutfit) {
+                    fg.FixedFrameGroup = FIXED_FRAME_GROUP.ObjectInitial;
+                }
+
+                var si = fg.SpriteInfo;
+
+                int pw = Math.Max(1, (int)si.PatternWidth);
+                int ph = Math.Max(1, (int)si.PatternHeight);
+                int tilesPerFrame = pw * ph;
+
+                // move legacy fields to new ones and clear legacy slots
+                si.Layers = si.PatternLayers;
+
+                // ensure pattern size is at least one legacy tile (32)
+                si.PatternSize = Math.Max(si.PatternSize, (uint)legacyTileSizeForRemap);
+
+                si.PatternWidth = si.PatternX;
+                si.PatternHeight = si.PatternY;
+                si.PatternDepth = si.PatternZ;
+
+                // SINGLE-TILE frames (32x32) — remap every sprite id individually
+                if (tilesPerFrame <= 1) {
+                    for (int s = 0; s < si.SpriteId.Count; s++) {
+                        // frameStart equals the tile index for single-tile frames
+                        if (remapLookup.TryGetValue((fgIndex, s), out var originalIdx) &&
+                            importSprIdList.TryGetValue((uint)originalIdx, out uint newGlobalId)) {
+                            si.SpriteId[s] = newGlobalId;
+                        } else {
+                            si.SpriteId[s] = 0u;
+                        }
+                    }
+
+                    continue;
+                }
+
+                // MULTI-TILE frames (2x2, 3x3, etc.) — consolidate frames and map one id per logical frame
+                var newIds = new List<uint>();
+                int totalTiles = si.SpriteId.Count;
+                int framesCount = Math.Max(1, totalTiles / tilesPerFrame);
+
+                for (int f = 0; f < framesCount; f++) {
+                    int frameStart = f * tilesPerFrame;
+                    if (!remapLookup.TryGetValue((fgIndex, frameStart), out var originalIdx)) {
+                        newIds.Add(0u);
+                    } else {
+                        if (importSprIdList.TryGetValue((uint)originalIdx, out uint newGlobalId)) {
+                            newIds.Add(newGlobalId);
+                        } else {
+                            newIds.Add(0u);
+                        }
+                    }
+                }
+
+                // Replace sprite id list: one id per logical frame
+                si.SpriteId.Clear();
+                foreach (var id in newIds) {
+                    si.SpriteId.Add(id);
+                }
+            }
+
+            // register new catalogs
+            foreach (var cat in catalogList) {
+                MainWindow.catalog.Add(cat);
+            }
+
+            // Clear embedded sprite data and insert into master lists as single appearance (OBD contains one appearance)
+            appearance.SpriteData.Clear();
+
+            if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit) {
+                // update id if necessary
+                if (!(!MainWindow.appearances.Outfit.Any(a => a.Id == appearance.Id) && appearance.Id > 0)) {
+                    appearance.Id = MainWindow.appearances.Outfit.Count > 0 ? MainWindow.appearances.Outfit[^1].Id + 1u : 1u;
+                }
+                MainWindow.appearances.Outfit.Add(appearance.Clone());
+                ThingsOutfit.Add(new ShowList() { Id = appearance.Id });
+            } else if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceObject) {
+                // update id if necessary
+                if (!(!MainWindow.appearances.Object.Any(a => a.Id == appearance.Id) && appearance.Id > 100)) {
+                    appearance.Id = MainWindow.appearances.Object.Count > 0 ? MainWindow.appearances.Object[^1].Id + 1u : 100u;
+                }
+
+                if (appearance.Flags.Market != null && appearance.Flags.Market.HasTradeAsObjectId) {
+                    appearance.Flags.Market.TradeAsObjectId = appearance.Id;
+                }
+
+                if (appearance.Flags.Market != null && appearance.Flags.Market.HasShowAsObjectId) {
+                    appearance.Flags.Market.ShowAsObjectId = appearance.Id;
+                }
+
+                if (appearance.Flags.Cyclopediaitem != null && appearance.Flags.Cyclopediaitem.HasCyclopediaType) {
+                    appearance.Flags.Cyclopediaitem.CyclopediaType = appearance.Id;
+                }
+
+                var insertIndex = MainWindow.appearances.Object.ToList().FindIndex(a => a.Id > appearance.Id);
+                if (insertIndex == -1) {
+                    MainWindow.appearances.Object.Add(appearance.Clone());
+                    ThingsItem.Add(new ShowList() { Id = appearance.Id });
+                } else {
+                    MainWindow.appearances.Object.Insert(insertIndex, appearance.Clone());
+                    ThingsItem.Insert(insertIndex, new ShowList() { Id = appearance.Id });
+                }
+            } else if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceEffect) {
+                // update id if necessary
+                if (!(!MainWindow.appearances.Effect.Any(a => a.Id == appearance.Id) && appearance.Id > 0)) {
+                    appearance.Id = MainWindow.appearances.Effect.Count > 0 ? MainWindow.appearances.Effect[^1].Id + 1u : 1u;
+                }
+                MainWindow.appearances.Effect.Add(appearance.Clone());
+                ThingsEffect.Add(new ShowList() { Id = appearance.Id });
+            } else if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceMissile) {
+                // update id if necessary
+                if (!(!MainWindow.appearances.Missile.Any(a => a.Id == appearance.Id) && appearance.Id > 0)) {
+                    appearance.Id = MainWindow.appearances.Missile.Count > 0 ? MainWindow.appearances.Missile[^1].Id + 1u : 1u;
+                }
+                MainWindow.appearances.Missile.Add(appearance.Clone());
+                ThingsMissile.Add(new ShowList() { Id = appearance.Id });
+            }
+        }
+
+        private void InternalImportItems() {
+            // start new global sprite id counter from current master list count
+            importSprCounter = MainWindow.AllSprList.Count;
+
+            OpenFileDialog openFileDialog = new() {
+                Filter =
+                    "all supported types (*.aec;*.obd)|*.aec;*.obd|" +
+                    "assets editor container (*.aec)|*.aec|" +
+                    "object editor dump (*.obd)|*.obd",
+                Multiselect = true
+            };
+
+            int importedCount = 0;
+
+            if (openFileDialog.ShowDialog() != true) {
+                return;
+            }
+
+            int totalFilesToImport = openFileDialog.FileNames.Length;
+
+            // Simple WinForms progress window (keeps things lightweight and animated)
+            var progressForm = new System.Windows.Forms.Form() {
+                Width = 600,
+                Height = 130,
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
+                StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen,
+                Text = "Importing...",
+                TopMost = true,
+                MinimizeBox = false,
+                MaximizeBox = false
+            };
+
+            var label = new System.Windows.Forms.Label() {
+                AutoSize = false,
+                Width = 590,
+                Height = 20,
+                Left = 10,
+                Top = 10,
+                TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
+                Text = $"Preparing to import {totalFilesToImport} file(s)..."
+            };
+            progressForm.Controls.Add(label);
+
+            var progressBar = new System.Windows.Forms.ProgressBar() {
+                Width = 550,
+                Height = 20,
+                Left = 10,
+                Top = 40,
+                Minimum = 0,
+                Maximum = totalFilesToImport,
+                Style = totalFilesToImport > 1 ? System.Windows.Forms.ProgressBarStyle.Continuous : System.Windows.Forms.ProgressBarStyle.Marquee
+            };
+            progressForm.Controls.Add(progressBar);
+
+            // Show the progress window non-modally so the UI thread can still pump messages
+            progressForm.Show();
+
+            bool hasErrors = false;
+
+            // process each selected file independently, but keep importSprCounter across files
+            foreach (var filePath in openFileDialog.FileNames) {
+                // import routines expect importSprIdList to be fresh for the file,
+                // while importSprCounter continues numbering globally
+                importSprIdList.Clear();
+
+                // update progress bar
+                label.Text = $"Importing: {Path.GetFileName(filePath)} ({importedCount + 1}/{totalFilesToImport})";
+                string? ext = Path.GetExtension(filePath)?.ToLowerInvariant();
+
+                bool success = false;
+                try {
+                    // ensure label update is rendered
+                    System.Windows.Forms.Application.DoEvents();
+
+                    if (ext == ".aec") {
+                        InternalImportAEC(filePath);
+                        success = true;
+                    } else if (ext == ".obd") {
+                        InternalImportOBD(filePath);
+                        success = true;
+                    } else {
+                        MainWindow.Log($"Unsupported file type: {filePath}");
+                        hasErrors = true;
+                    }
+                } catch (Exception ex) {
+                    MainWindow.Log($"Error importing '{filePath}': {ex.Message}");
+                    hasErrors = true;
+                }
+
+                if (success) {
+                    importedCount++;
+                }
+
+                // Update progress UI and allow it to repaint
+                if (progressBar.Style != System.Windows.Forms.ProgressBarStyle.Marquee) {
+                    progressBar.Value = Math.Min(progressBar.Maximum, importedCount);
+                }
+                System.Windows.Forms.Application.DoEvents();
+            }
+
+            // destroy the progress bar
+            progressForm.Close();
+
+            CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
+
+            // show how many files were imported
+            StatusBar.MessageQueue?.Enqueue($"Imported {importedCount} file(s).", null, null, null, false, true, TimeSpan.FromSeconds(2));
+
+            // show error message on failed import
+            if (hasErrors) {
+                MessageBox.Show($"Some files failed to import. See log for details.", "Import Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void ImportObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            InternalImportItems();
         }
 
         private void AddExportObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
