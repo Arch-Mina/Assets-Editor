@@ -1792,6 +1792,10 @@ namespace Assets_Editor
             MainWindow.logView.Show();
         }
 
+        private void OpenLuaWindow_Click(object sender, RoutedEventArgs e) {
+            LuaWindow luaWindow = new();
+            luaWindow.Show();
+        }
     }
     public class ArithmeticConverter : IValueConverter
     {

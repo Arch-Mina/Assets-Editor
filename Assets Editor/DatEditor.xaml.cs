@@ -19,7 +19,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using Tibia.Protobuf.Appearances;
 
@@ -205,7 +204,7 @@ namespace Assets_Editor
         }
         private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
         {
-            PaletteHelper palette = new PaletteHelper();
+            PaletteHelper palette = new();
 
             ITheme theme = palette.GetTheme();
             if ((bool)DarkModeToggle.IsChecked)
@@ -4051,5 +4050,9 @@ namespace Assets_Editor
             }
         }
 
+        private void OpenLuaWindow_Click(object sender, RoutedEventArgs e) {
+            LuaWindow luaWindow = new();
+            luaWindow.Show();
+        }
     }
 }
