@@ -202,7 +202,7 @@ namespace Assets_Editor
         }
         private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
         {
-            PaletteHelper palette = new PaletteHelper();
+            PaletteHelper palette = new();
 
             ITheme theme = palette.GetTheme();
             if ((bool)DarkModeToggle.IsChecked)

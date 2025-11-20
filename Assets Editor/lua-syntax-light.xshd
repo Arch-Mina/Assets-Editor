@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<!-- Syntax Definition for RblxLua -->
+
+<SyntaxDefinition name = "RblxLua" extensions = ".rlua;.lua">
+    
+    <Properties>
+        <Property name="LineComment" value="--"/>
+    </Properties>
+    
+    <Digits name = "Digits" bold = "false" italic = "false" color = "LightBlue"/>
+    
+    <RuleSets>
+        <RuleSet ignorecase="false">
+            <Delimiters>&amp;&lt;&gt;~!%^*()-+=|\/{}[]:;"' ,	.?</Delimiters>
+
+            <Span name = "BlockComment" rule = "CommentMarkerSet" bold = "false" italic = "false" color = "Green" stopateol = "false">
+                <Begin>--[[</Begin>
+                <End>]]</End>
+            </Span>
+            
+            <Span name = "LineComment" rule = "CommentMarkerSet" bold = "false" italic = "false" color = "Green" stopateol = "true">
+                <Begin>--</Begin>
+            </Span>
+            
+            <Span name = "Char" bold = "false" italic = "false" color = "Purple" stopateol = "true" escapecharacter="\">
+                <Begin>&apos;</Begin>
+                <End>&apos;</End>
+            </Span>
+            
+            <Span name = "String" bold = "false" italic = "false" color = "Purple" stopateol = "false" escapecharacter="\">
+                <Begin>"</Begin>
+                <End>"</End>
+            </Span>
+            
+            <Span name = "MultiLineString" bold = "false" italic = "false" color = "Purple" stopateol = "false" escapecharacter='"'>
+                <Begin>[[</Begin>
+                <End>]]</End>
+            </Span>
+            
+            <!-- marks functions in bold -->
+            <MarkPrevious bold = "true" italic = "false" color = "MidnightBlue"></MarkPrevious>
+            
+            <KeyWords name = "Punctuation" bold = "false" italic = "false" color = "Black">
+                <Key word = "?" />
+                <Key word = "," />
+                <Key word = "." />
+                <Key word = ";" />
+                <Key word = "(" />
+                <Key word = ")" />
+                <Key word = "[" />
+                <Key word = "]" />
+                <Key word = "{" />
+                <Key word = "}" />
+                <Key word = "+" />
+                <Key word = "-" />
+                <Key word = "/" />
+                <Key word = "%" />
+                <Key word = "*" />
+                <Key word = "&lt;" />
+                <Key word = "&gt;" />
+                <Key word = "^" />
+                <Key word = "=" />
+                <Key word = "~" />
+                <Key word = "!" />
+                <Key word = "|" />
+                <Key word = "&amp;" />
+                <Key word = "@" />
+                <Key word = "$" />
+            </KeyWords>
+            
+            <KeyWords name = "CurrentKeywords" bold="true" italic="false" color="Blue">
+                <Key word="and"/>
+				<Key word="game" />
+				<Key word="workspace" />
+				<Key word="_G" />
+				<Key word="_VERSION" />
+				<Key word="gcinfo" />
+				<Key word="setfenv" />
+				<Key word="getfenv" />
+				<Key word="newproxy" />
+				<Key word="debug" />
+				<Key word="ypcall" />
+				<Key word="typeof" />
+				<Key word="unpack" />
+				<Key word="Enum" />
+				<Key word="shared" />
+				<Key word="Axes" />
+				<Key word="BrickColor" />
+				<Key word="CFrame" />
+				<Key word="Color3" />
+				<Key word="ColorSequence" />
+				<Key word="ColorSequenceKeypoint" />
+				<Key word="Faces" />
+				<Key word="Instance" />
+				<Key word="NumberRange" />
+				<Key word="NumberSequence" />
+				<Key word="NumberSequenceKeypoint" />
+				<Key word="PhysicalProperties" />
+				<Key word="Ray" />
+				<Key word="Rect" />
+				<Key word="Region3" />
+				<Key word="Region3int16" />
+				<Key word="TweenInfo" />
+				<Key word="UDim" />
+				<Key word="UDim2" />
+				<Key word="Vector2" />
+				<Key word="Vector2int16" />
+				<Key word="Vector3" />
+				<Key word="Vector3int16" />
+				<Key word="delay" />
+				<Key word="elapsedTime" />
+				<Key word="spawn" />
+				<Key word="tick" />
+				<Key word="time" />
+				<Key word="UserSettings" />
+				<Key word="utf8" />
+                <Key word="break"/>
+                <Key word="do"/>
+                <Key word="else"/>
+                <Key word="elseif"/>
+                <Key word="end"/>
+                <Key word="false"/>
+                <Key word="for"/>
+                <Key word="function"/>
+                <Key word="if"/>
+                <Key word="in"/>
+                <Key word="local"/>
+                <Key word="nil"/>
+                <Key word="not"/>
+                <Key word="or"/>
+                <Key word="repeat"/>
+                <Key word="return"/>
+                <Key word="then"/>
+                <Key word="true"/>
+                <Key word="until"/>
+                <Key word="while"/>
+                <Key word="print"/>
+                <Key word="collectgarbage" />
+                <Key word="type" />
+                <Key word="tostring" />
+                <Key word="tonumber" />
+                <Key word="print" />
+                <Key word="pairs" />
+                <Key word="ipairs" />
+                <Key word="next" />
+                <Key word="assert" />
+                <Key word="pcall" />
+                <Key word="xpcall" />
+                <Key word="error" />
+                <Key word="select" />
+                <Key word="dofile" />
+                <Key word="require" />
+                <Key word="openfile" />
+                <Key word="loadstring" />
+                <Key word="set" />
+                <Key word="loadfile" />
+                <Key word="wait" />
+				<Key word="warn" />
+                <Key word="rawset" />
+                <Key word="rawget" />
+				<Key word="rawequal" />
+                <Key word="getmetatable" />
+                <Key word="setmetatable" />
+                <Key word="ssave" />
+                <Key word="sload" />
+            </KeyWords>
+            
+            <KeyWords name="Tables" bold="false" italic="false" color="Blue">
+                <Key word="io"/>
+                <Key word="os"/>
+                <Key word="class" />
+                <Key word="table" />
+                <Key word="script" />
+                <Key word="file" />
+                <Key word="WinForms" />
+                <Key word="math" />
+                <Key word="console" />
+                <Key word="coroutine" />
+                <Key word="package" />
+                <Key word="string" />
+            </KeyWords>
+        </RuleSet>
+        <RuleSet name = "CommentMarkerSet" ignorecase = "false">
+            <Delimiters>&lt;&gt;~!@%^*()-+=|\#/{}[]:;"' ,	.?</Delimiters>
+            <KeyWords name = "ErrorWords" bold="true" italic="false" color="Red">
+                <Key word = "TODO" />
+                <Key word = "FIXME" />
+            </KeyWords>
+            <KeyWords name = "WarningWords" bold="true" italic="false" color="#EEE0E000">
+                <Key word = "HACK" />
+                <Key word = "UNDONE" />
+            </KeyWords>
+        </RuleSet>
+    </RuleSets>
+</SyntaxDefinition>

@@ -26,7 +26,7 @@ namespace Assets_Editor
             var executablePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             var executableDir = Path.GetDirectoryName(executablePath);
             _scriptsFilePath = Path.Combine(executableDir, "lua_scripts.json");
-            _scripts = new List<ScriptData>();
+            _scripts = [];
             LoadScripts();
         }
 

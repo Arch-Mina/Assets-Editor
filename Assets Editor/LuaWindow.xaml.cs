@@ -1,15 +1,16 @@
 // system
 // assets editor
 using Assets_editor;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
-
+using MaterialDesignThemes.Wpf;
 // external
 using MoonSharp.Interpreter;
-using MoonSharp.Interpreter.Loaders;
-using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using System;
 using System.Collections.Concurrent;
@@ -25,9 +26,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Threading;
-
-
+using System.Xml;
 // protobuf
 using Tibia.Protobuf.Appearances;
 
@@ -52,7 +53,10 @@ public partial class LuaWindow : Window, INotifyPropertyChanged {
     private string? _currentScriptName;
     private CancellationTokenSource _luaCancellation;
     private readonly ConcurrentQueue<string> _printQueue = new();
-    private readonly object _resultsLock = new();
+
+    private const string LightSyntaxFile = @"lua-syntax-light.xshd";
+    private const string DarkSyntaxFile = @"lua-syntax-dark.xshd";
+
 
     public ObservableCollection<dynamic> DataItems {
         get => _dataItems;
@@ -134,10 +138,25 @@ public partial class LuaWindow : Window, INotifyPropertyChanged {
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    private void OnBackgroundChanged(object? sender, EventArgs e) {
+        if (LuaCodeEditor.Background is SolidColorBrush brush) {
+            LoadSyntaxForTheme(IsDarkMode());
+        }
+    }
+
+    private void ListenForThemeChanges() {
+        var descriptor = DependencyPropertyDescriptor.FromProperty(
+            TextEditor.BackgroundProperty, typeof(TextEditor));
+
+        descriptor?.AddValueChanged(LuaCodeEditor, OnBackgroundChanged);
+    }
+
     public LuaWindow() {
         InitializeComponent();
         DataContext = this;
         InitializeLuaEngine();
+        InitializeTextEditor();
+        ListenForThemeChanges();
         Results = "Lua Script Editor ready. Write your code and click Execute.";
 
         // Initialize script manager
@@ -206,6 +225,32 @@ return generateChartData()
             MessageBox.Show($"Failed to initialize Lua engine: {ex.Message}", "Error",
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private static bool IsDarkMode() {
+        var palette = new PaletteHelper();
+        ITheme theme = palette.GetTheme();
+        return theme.GetBaseTheme() == BaseTheme.Dark;
+    }
+
+    private void LoadSyntaxForTheme(bool darkMode) {
+        string xshdFile = darkMode ? DarkSyntaxFile : LightSyntaxFile;
+
+        if (!File.Exists(xshdFile))
+            return;
+
+        try {
+            using XmlTextReader reader = new(xshdFile);
+            var definition = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+            LuaCodeEditor.SyntaxHighlighting = definition;
+        } catch (Exception ex) {
+            // Optional: log error
+            Console.WriteLine($"Failed to load XSHD syntax: {ex.Message}");
+        }
+    }
+
+    private void InitializeTextEditor() {
+        LoadSyntaxForTheme(IsDarkMode());
     }
 
     private void FlushPrintInternal() {
@@ -397,7 +442,7 @@ return generateChartData()
                     DataGrid.Columns.Clear();
                     if (DataItems.Count > 0 && DataItems[0] is IDictionary<string, object> first) {
                         foreach (var key in first.Keys) {
-                            var col = new DataGridTextColumn {
+                            var col = new MaterialDesignThemes.Wpf.DataGridTextColumn {
                                 Header = key,
                                 Binding = new Binding() {
                                     Path = new PropertyPath($"[{key}]")
