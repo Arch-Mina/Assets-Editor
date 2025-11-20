@@ -3405,7 +3405,7 @@ namespace Assets_Editor
         }
 
         private void OpenLuaWindow_Click(object sender, RoutedEventArgs e) {
-            LuaWindow luaWindow = new LuaWindow();
+            LuaWindow luaWindow = new();
             luaWindow.Show();
         }
     }
