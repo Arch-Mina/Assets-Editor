@@ -1,5 +1,3 @@
-// system
-// assets editor
 using Assets_editor;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Highlighting;
@@ -9,7 +7,6 @@ using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using MaterialDesignThemes.Wpf;
-// external
 using MoonSharp.Interpreter;
 using SkiaSharp;
 using System;
@@ -29,7 +26,6 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
-// protobuf
 using Tibia.Protobuf.Appearances;
 
 namespace Assets_Editor;
