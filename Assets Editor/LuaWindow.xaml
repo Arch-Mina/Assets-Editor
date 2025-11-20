@@ -232,15 +232,18 @@
             </StackPanel>
 
             <!-- Code Editor -->
-            <avalonEdit:TextEditor x:Name="LuaCodeEditor" 
-                                   Grid.Row="1" 
-                                   Margin="10,0,10,10"
-                                   FontFamily="Consolas"
-                                   FontSize="12"
-                                   ShowLineNumbers="True"
-                                   WordWrap="True"
-                                   VerticalScrollBarVisibility="Auto"
-                                   HorizontalScrollBarVisibility="Auto"/>
+            <avalonEdit:TextEditor x:Name="LuaCodeEditor"
+                       Grid.Row="1"
+                       Margin="10,0,10,10"
+                       FontFamily="Consolas"
+                       FontSize="12"
+                       ShowLineNumbers="True"
+                       WordWrap="True"
+                       VerticalScrollBarVisibility="Auto"
+                       HorizontalScrollBarVisibility="Auto"
+                       Background="{DynamicResource MaterialDesignPaper}"
+                       Foreground="{DynamicResource MaterialDesignBody}"
+                       LineNumbersForeground="{DynamicResource MaterialDesignHint}"/>
 
             <!-- GridSplitter between code editor and results -->
             <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" Background="{DynamicResource MaterialDesignDivider}"/>
