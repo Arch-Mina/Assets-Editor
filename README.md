@@ -24,6 +24,7 @@ Assets Editor is an open-source tool designed for modifying and managing client 
 - **Export to spr/dat**
 - **Export to outfit/item images**
 - **Large spritesheets**
+- **Transparent items in spritesheets**
 - **Lua support**
 
 #### Prerequisites
