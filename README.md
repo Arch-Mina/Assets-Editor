@@ -8,7 +8,8 @@ Assets Editor is an open-source tool designed for modifying and managing client 
 ![Sheet Editor](/Assets%20Editor/Resources/4.PNG)
 ![Import and Export](/Assets%20Editor/Resources/5.gif)
 ![Dark Mode](/Assets%20Editor/Resources/6.PNG)
-![Lua Scripting](/Assets%20Editor/Resources/7.PNG)
+![Lua Graphs](/Assets%20Editor/Resources/7.PNG)
+![Lua Scripting](/Assets%20Editor/Resources/8.PNG)
 
 ### Features
 
