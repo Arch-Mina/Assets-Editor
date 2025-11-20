@@ -2550,6 +2550,13 @@ namespace Assets_Editor
 
                 }
                 ObjListView.SelectedItem = ObjListView.Items[^1];
+
+                // scroll to the duplicated item
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    ObjListView.ScrollIntoView(ObjListView.Items[^1]);
+                }), System.Windows.Threading.DispatcherPriority.Background);
+
                 StatusBar.MessageQueue.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
