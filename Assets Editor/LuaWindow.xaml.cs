@@ -191,9 +191,13 @@ return generateChartData()
             Table g_things = new(_luaScript);
             _luaScript.Globals["g_things"] = g_things;
             g_things["getOutfits"] = DynValue.NewCallback(LuaThings.Lua_getOutfits);
-            g_things["getObjects"] = DynValue.NewCallback(LuaThings.Lua_getObjects);
+            g_things["getItems"] = DynValue.NewCallback(LuaThings.Lua_getItems);
             g_things["getEffects"] = DynValue.NewCallback(LuaThings.Lua_getEffects);
             g_things["getMissiles"] = DynValue.NewCallback(LuaThings.Lua_getMissiles);
+            g_things["getOutfitById"] = DynValue.NewCallback(LuaThings.Lua_getOutfitById);
+            g_things["getItemById"] = DynValue.NewCallback(LuaThings.Lua_getItemById);
+            g_things["getEffectById"] = DynValue.NewCallback(LuaThings.Lua_getEffectById);
+            g_things["getMissileById"] = DynValue.NewCallback(LuaThings.Lua_getMissileById);
 
             //UserData.RegisterType<List<Appearance>>();
             //UserData.RegisterType<KeyValuePair<string, object>>();
@@ -235,7 +239,7 @@ return generateChartData()
         }
 
         // Clear previous results
-        Results = "Executing Lua script...\n";
+        Results = "";
 
         // Set up cancellation
         _luaCancellation = new CancellationTokenSource();
@@ -281,6 +285,7 @@ return generateChartData()
                         result = coroutine.Coroutine.Resume();
                     } catch (ScriptRuntimeException ex) {
                         Dispatcher.Invoke(() => {
+                            FlushPrintInternal();
                             Results += $"\nLua Runtime Error: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
                             CancelButton.IsEnabled = false;
                             ExecuteButton.IsEnabled = true;
@@ -314,6 +319,8 @@ return generateChartData()
                     CancelButton.IsEnabled = false;
                     ExecuteButton.IsEnabled = true;
 
+                    FlushPrintInternal();
+
                     if (result != null && result.Type != DataType.Void) {
                         Results += $"\nScript executed successfully! (Result: {result.Type})";
 
@@ -328,12 +335,14 @@ return generateChartData()
                 Dispatcher.Invoke(() => {
                     CancelButton.IsEnabled = false;
                     ExecuteButton.IsEnabled = true;
+                    FlushPrintInternal();
                     Results += $"\nLua Runtime Error: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
                 });
             } catch (Exception ex) {
                 Dispatcher.Invoke(() => {
                     CancelButton.IsEnabled = false;
                     ExecuteButton.IsEnabled = true;
+                    FlushPrintInternal();
                     Results += $"\nError executing Lua script: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
                 });
             }

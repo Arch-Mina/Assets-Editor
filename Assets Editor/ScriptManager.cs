@@ -122,8 +122,7 @@ namespace Assets_Editor
         {
             var defaultScripts = new List<ScriptData>
             {
-                new ScriptData
-                {
+                new() {
                     Name = "Sample Data Generator",
                     Description = "Generates sample data for testing charts and tables",
                     Code = @"-- Sample Data Generator
@@ -144,8 +143,7 @@ end
 
 return generateSampleData()"
                 },
-                new ScriptData
-                {
+                new() {
                     Name = "Weapon Damage Calculator",
                     Description = "Calculates weapon damage based on level and skill",
                     Code = @"-- Weapon Damage Calculator
@@ -182,8 +180,7 @@ end
 
 return weaponData"
                 },
-                new ScriptData
-                {
+                new() {
                     Name = "Multi-Curve Demo",
                     Description = "Demonstrates multiple curves for dynamic charting",
                     Code = @"-- Multi-Curve Demo for Dynamic Charts
@@ -214,6 +211,67 @@ function generateMultiCurveData()
 end
 
 return generateMultiCurveData()"
+                },
+                new() {
+                    Name = "Reading Items Demo",
+                    Description = "Demonstrates interaction with appearances",
+                    Code = @"--- list dat entries count ---
+print(""Total entries (this is NOT max id!):"")
+print(""Outfits:"", #g_things.getOutfits())
+print(""Items:  "", #g_things.getItems())
+print(""Effects:"", #g_things.getEffects())
+print(""Missiles:"", #g_things.getMissiles())
+print()
+
+--- list g_things methods ---
+print(""g_things methods:"")
+
+for methodName, _ in pairs(g_things) do
+	print(string.format(""- %s"", methodName))
+end
+print()
+
+--- read item as json ---
+print(""Accessing item json:"")
+print()
+print(g_things.getItemById(3070))
+print()
+
+--- access item property ---
+print(""Accessing item name:"")
+print()
+print(g_things.getItemById(3070).Name)
+print()
+
+--- display some missiles in human readable format ---
+function showMissiles()
+	print(""List of Missiles:"")
+	print()
+	local maxCount = 5
+	local count = 0
+	for _, missile in pairs(g_things.getMissiles()) do
+		print(""id"", missile.id)
+		print(""flags"", missile.flags)
+		print(""---"")
+
+		count = count + 1
+		if count == maxCount then
+			return
+		end
+	end
+end
+showMissiles()
+print()
+
+--- changing item property ---
+print(""Changing item properties:"")
+print()
+print(""The objects returned by getters are userdata."")
+print(""To change the property, simply assign a new value."")
+print(""For example:"")
+print(""object.cumulative = true"")
+print(""will make the item stackable"")
+print(""changes are applied instantly so be careful!"")"
                 }
             };
 

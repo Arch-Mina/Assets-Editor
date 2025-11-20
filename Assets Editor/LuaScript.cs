@@ -61,7 +61,7 @@ public class LuaThings : IEnumerable<KeyValuePair<string, object>> {
         return Lua_getDynCollection(context, "outfits");
     }
 
-    public static DynValue Lua_getObjects(ScriptExecutionContext context, CallbackArguments _) {
+    public static DynValue Lua_getItems(ScriptExecutionContext context, CallbackArguments _) {
         return Lua_getDynCollection(context, "objects");
     }
 
@@ -82,6 +82,46 @@ public class LuaThings : IEnumerable<KeyValuePair<string, object>> {
             "missile" => GetMissiles().FirstOrDefault(x => x.Id == id),
             _ => null,
         };
+    }
+
+    public static DynValue Lua_getOutfitById(ScriptExecutionContext _, CallbackArguments args) {
+        if (args.Count < 1 || args[0].Type != DataType.Number)
+            return DynValue.Nil;
+
+        uint id = (uint)args[0].Number;
+        var outfit = FindById("outfit", id);
+
+        return outfit != null ? UserData.Create(outfit) : DynValue.Nil;
+    }
+
+    public static DynValue Lua_getItemById(ScriptExecutionContext _, CallbackArguments args) {
+        if (args.Count < 1 || args[0].Type != DataType.Number)
+            return DynValue.Nil;
+
+        uint id = (uint)args[0].Number;
+        var item = FindById("object", id);
+
+        return item != null ? UserData.Create(item) : DynValue.Nil;
+    }
+
+    public static DynValue Lua_getEffectById(ScriptExecutionContext _, CallbackArguments args) {
+        if (args.Count < 1 || args[0].Type != DataType.Number)
+            return DynValue.Nil;
+
+        uint id = (uint)args[0].Number;
+        var effect = FindById("effect", id);
+
+        return effect != null ? UserData.Create(effect) : DynValue.Nil;
+    }
+
+    public static DynValue Lua_getMissileById(ScriptExecutionContext _, CallbackArguments args) {
+        if (args.Count < 1 || args[0].Type != DataType.Number)
+            return DynValue.Nil;
+
+        uint id = (uint)args[0].Number;
+        var missile = FindById("missile", id);
+
+        return missile != null ? UserData.Create(missile) : DynValue.Nil;
     }
 }
 
