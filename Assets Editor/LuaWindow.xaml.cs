@@ -9,8 +9,10 @@ using LiveChartsCore.SkiaSharpView.Painting;
 // external
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Loaders;
+using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -23,6 +25,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Threading;
+
 
 // protobuf
 using Tibia.Protobuf.Appearances;
@@ -47,6 +51,8 @@ public partial class LuaWindow : Window, INotifyPropertyChanged {
     private readonly ScriptManager _scriptManager;
     private string? _currentScriptName;
     private CancellationTokenSource _luaCancellation;
+    private readonly ConcurrentQueue<string> _printQueue = new();
+    private readonly object _resultsLock = new();
 
     public ObservableCollection<dynamic> DataItems {
         get => _dataItems;
@@ -198,6 +204,23 @@ return generateChartData()
         }
     }
 
+    private void FlushPrintInternal() {
+        if (_printQueue.IsEmpty) return;
+
+        StringBuilder sb = new();
+
+        while (_printQueue.TryDequeue(out string? line))
+            sb.AppendLine(line);
+
+        // Update the bound property ONCE per frame
+        Results += sb.ToString();
+
+        ResultsTextBox.ScrollToEnd();
+    }
+    private void FlushPrintQueue(object? _, EventArgs __) {
+        FlushPrintInternal();
+    }
+
     private void ExecuteButton_Click(object sender, RoutedEventArgs e) {
 
         if (_luaScript == null) {
@@ -238,16 +261,27 @@ return generateChartData()
 
                 DynValue func = lua.LoadString(luaCode);   // compiles but does NOT run
                 DynValue coroutine = lua.CreateCoroutine(func);
-                coroutine.Coroutine.AutoYieldCounter = 1000; // yield every 1000 instructions
+                coroutine.Coroutine.AutoYieldCounter = 500; // yield every 500 instructions
 
                 DynValue? result = null;
+
+                // start tracking output
+                DispatcherTimer? logTimer = null;
+                Dispatcher.Invoke(() =>
+                {
+                    logTimer = new DispatcherTimer {
+                        Interval = TimeSpan.FromMilliseconds(1000)
+                    };
+                    logTimer.Tick += FlushPrintQueue;
+                    logTimer.Start();
+                });
 
                 while (coroutine.Coroutine.State != CoroutineState.Dead) {
                     try {
                         result = coroutine.Coroutine.Resume();
                     } catch (ScriptRuntimeException ex) {
                         Dispatcher.Invoke(() => {
-                            Results = $"Lua Runtime Error: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
+                            Results += $"\nLua Runtime Error: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
                             CancelButton.IsEnabled = false;
                             ExecuteButton.IsEnabled = true;
                         });
@@ -256,6 +290,7 @@ return generateChartData()
 
                     if (_luaCancellation.Token.IsCancellationRequested) {
                         Dispatcher.Invoke(() => {
+                            FlushPrintInternal();
                             Results += "\nScript execution cancelled by user.";
                             CancelButton.IsEnabled = false;
                             ExecuteButton.IsEnabled = true;
@@ -263,6 +298,15 @@ return generateChartData()
                         return;
                     }
                 }
+
+                // stop tracking output
+                Dispatcher.Invoke(() =>
+                {
+                    if (logTimer != null) {
+                        logTimer.Stop();
+                        logTimer.Tick -= FlushPrintQueue;
+                    }
+                });
 
                 // Execution finished successfully, update UI
                 Dispatcher.Invoke(() =>
@@ -284,20 +328,21 @@ return generateChartData()
                 Dispatcher.Invoke(() => {
                     CancelButton.IsEnabled = false;
                     ExecuteButton.IsEnabled = true;
-                    Results = $"Lua Runtime Error: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
+                    Results += $"\nLua Runtime Error: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
                 });
             } catch (Exception ex) {
                 Dispatcher.Invoke(() => {
                     CancelButton.IsEnabled = false;
                     ExecuteButton.IsEnabled = true;
-                    Results = $"Error executing Lua script: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
+                    Results += $"\nError executing Lua script: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
                 });
             }
 
         });
     }
 
-    private void CancelButton_Click(object sender, RoutedEventArgs e) {
+    private async void CancelButton_Click(object sender, RoutedEventArgs e) {
+        Results += "\nStopping...\n";
         _luaCancellation?.Cancel();
         CancelButton.IsEnabled = false;
     }
@@ -436,24 +481,47 @@ return generateChartData()
     // Return a plain dictionary so WPF can bind with indexer syntax [key]
     private static Dictionary<string, object> CreateAnonymousObject(Dictionary<string, object> dict) => new(dict);
 
+    private readonly object _printLock = new();
+    private int _tokens = 200;            // burst capacity
+    private const int MaxTokens = 200;    // max prints in a burst
+    private const int RefillRate = 20;    // prints per second restored
+    private DateTime _lastRefill = DateTime.Now;
+    private int _printCounter = 0;
     private DynValue PrintToResults(ScriptExecutionContext context, CallbackArguments args) {
-        // Concatenate all arguments into a single string
-        List<string> messages = [];
-        for (int i = 0; i < args.Count; i++) {
-            messages.Add(args[i].ToPrintString());
+        lock (_printLock) {
+            // Refill tokens based on time passed
+            var now = DateTime.Now;
+            double seconds = (now - _lastRefill).TotalSeconds;
+            if (seconds > 0) {
+                _tokens = Math.Min(MaxTokens, _tokens + (int)(seconds * RefillRate));
+                _lastRefill = now;
+            }
+
+            // Too much printing -> drop outputs to prevent UI flood
+            if (_tokens <= 0) {
+                if (_printCounter % 10000 == 0)
+                    _printQueue.Enqueue("Too many print calls! Consider dumping script output to a file.");
+
+                _printCounter++;
+                return DynValue.Nil; // no yield needed
+            }
+
+            // Consume a token and print
+            _tokens--;
+
+            // Format message
+            List<string> messages = new();
+            for (int i = 0; i < args.Count; i++)
+                messages.Add(args[i].ToPrintString());
+
+            _printQueue.Enqueue(string.Join("\t", messages));
+
+            // Yield every ~50 actual prints
+            if (++_printCounter % 50 == 0)
+                return DynValue.NewYieldReq([]);
+
+            return DynValue.Nil;
         }
-        string finalMessage = string.Join("\t", messages); // Tab-separated like Lua
-
-        // Append to your results
-        Results += "\n" + finalMessage;
-
-        // Scroll to bottom of results
-        Dispatcher.BeginInvoke(new Action(() =>
-        {
-            ResultsTextBox.ScrollToEnd();
-        }), System.Windows.Threading.DispatcherPriority.Background);
-
-        return DynValue.Nil; // print returns nothing
     }
 
     private void ClearButton_Click(object sender, RoutedEventArgs e) {

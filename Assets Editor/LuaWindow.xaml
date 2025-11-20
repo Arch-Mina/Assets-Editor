@@ -173,16 +173,6 @@
                             <TextBlock Text="Execute"/>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="ClearButton" 
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Margin="10,0,0,0"
-                            Click="ClearButton_Click"
-                            ToolTip="Clear Script">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Clear" Margin="0,0,5,0"/>
-                            <TextBlock Text="Clear"/>
-                        </StackPanel>
-                    </Button>
                     <Button x:Name="CancelButton"
                             Style="{StaticResource MaterialDesignOutlinedButton}"
                             Margin="10,0,0,0"
@@ -192,6 +182,16 @@
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Stop" Margin="0,0,5,0"/>
                             <TextBlock Text="Cancel"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="ClearButton"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="10,0,0,0"
+                            Click="ClearButton_Click"
+                            ToolTip="Clear Script">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Clear" Margin="0,0,5,0"/>
+                            <TextBlock Text="Clear"/>
                         </StackPanel>
                     </Button>
                     <CheckBox x:Name="ShowInGridCheckBox"
