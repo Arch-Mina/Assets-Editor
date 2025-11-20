@@ -520,25 +520,41 @@ namespace Assets_Editor
 
             if (versionInfo.Structure == 1)
             {
-                byte Width = (byte)item.FrameGroup[0].SpriteInfo.PatternWidth;
-                byte Height = (byte)item.FrameGroup[0].SpriteInfo.PatternHeight;
+                // old dat files (7.x) had only one frame group
+                SpriteInfo spriteInfo = item.FrameGroup[0].SpriteInfo;
+
+                byte Width = (byte)spriteInfo.PatternWidth;
+                byte Height = (byte)spriteInfo.PatternHeight;
 
                 w.Write(Width);
                 w.Write(Height);
 
                 if (Width > 1 || Height > 1)
-                    w.Write((byte)item.FrameGroup[0].SpriteInfo.PatternSize);
+                    w.Write((byte)spriteInfo.PatternSize);
 
-                w.Write((byte)item.FrameGroup[0].SpriteInfo.PatternLayers);
-                w.Write((byte)item.FrameGroup[0].SpriteInfo.PatternX);
-                w.Write((byte)item.FrameGroup[0].SpriteInfo.PatternY);
-                w.Write((byte)item.FrameGroup[0].SpriteInfo.PatternZ);
-                w.Write((byte)item.FrameGroup[0].SpriteInfo.PatternFrames);
+                w.Write((byte)spriteInfo.PatternLayers);
+                w.Write((byte)spriteInfo.PatternX);
+                w.Write((byte)spriteInfo.PatternY);
+                w.Write((byte)spriteInfo.PatternZ);
+                w.Write((byte)spriteInfo.PatternFrames);
 
+                // some asset packs have broken outfits
+                // using the number of sprites declared by the object
+                // and filling the missing slots with sprite 0
+                // prevents generating a broken dat file
+                uint NumSprites = spriteInfo.PatternWidth
+                * spriteInfo.PatternHeight
+                * spriteInfo.PatternLayers
+                * spriteInfo.PatternX
+                * spriteInfo.PatternY
+                * spriteInfo.PatternZ
+                * spriteInfo.PatternFrames;
 
-                for (var x = 0; x < item.FrameGroup[0].SpriteInfo.SpriteId.Count; x++)
-                {
-                    w.Write(item.FrameGroup[0].SpriteInfo.SpriteId[x]);
+                for (var x = 0; x < NumSprites; x++) {
+                    if (x < spriteInfo.SpriteId.Count)
+                        w.Write(spriteInfo.SpriteId[x]);
+                    else
+                        w.Write((uint)0);
                 }
             }
             else if (versionInfo.Structure == 3)
@@ -548,45 +564,64 @@ namespace Assets_Editor
 
                 for (int i = 0; i < item.FrameGroup.Count; i++)
                 {
+                    SpriteInfo spriteInfo = item.FrameGroup[i].SpriteInfo;
+
                     if (item.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
                         w.Write((byte)item.FrameGroup[i].FixedFrameGroup);
 
-                    byte Width = (byte)item.FrameGroup[i].SpriteInfo.PatternWidth;
-                    byte Height = (byte)item.FrameGroup[i].SpriteInfo.PatternHeight;
+                    byte Width = (byte)spriteInfo.PatternWidth;
+                    byte Height = (byte)spriteInfo.PatternHeight;
 
                     w.Write(Width);
                     w.Write(Height);
 
                     if (Width > 1 || Height > 1)
-                        w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternSize);
+                        w.Write((byte)spriteInfo.PatternSize);
 
-                    w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternLayers);
-                    w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternX);
-                    w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternY);
-                    w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternZ);
-                    w.Write((byte)item.FrameGroup[i].SpriteInfo.PatternFrames);
+                    w.Write((byte)spriteInfo.PatternLayers);
+                    w.Write((byte)spriteInfo.PatternX);
+                    w.Write((byte)spriteInfo.PatternY);
+                    w.Write((byte)spriteInfo.PatternZ);
+                    w.Write((byte)spriteInfo.PatternFrames);
 
-                    if (item.FrameGroup[i].SpriteInfo.PatternFrames > 1)
+                    if (spriteInfo.PatternFrames > 1)
                     {
-                        w.Write(Convert.ToByte(item.FrameGroup[i].SpriteInfo.Animation.AnimationMode));
-                        w.Write(item.FrameGroup[i].SpriteInfo.Animation.LoopCount);
-                        w.Write((byte)item.FrameGroup[i].SpriteInfo.Animation.DefaultStartPhase);
+                        SpriteAnimation animation = spriteInfo.Animation;
 
-                        for (int k = 0; k < item.FrameGroup[i].SpriteInfo.Animation.SpritePhase.Count; k++)
+                        w.Write(Convert.ToByte(animation.AnimationMode));
+                        w.Write(animation.LoopCount);
+                        w.Write((byte)animation.DefaultStartPhase);
+
+                        for (int k = 0; k < animation.SpritePhase.Count; k++)
                         {
-                            w.Write(item.FrameGroup[i].SpriteInfo.Animation.SpritePhase[k].DurationMin);
-                            w.Write(item.FrameGroup[i].SpriteInfo.Animation.SpritePhase[k].DurationMax);
+                            w.Write(animation.SpritePhase[k].DurationMin);
+                            w.Write(animation.SpritePhase[k].DurationMax);
                         }
                     }
 
-                    for (var x = 0; x < item.FrameGroup[i].SpriteInfo.SpriteId.Count; x++)
+                    // some asset packs have broken outfits
+                    // using the number of sprites declared by the object
+                    // and filling the missing slots with sprite 0
+                    // prevents generating a broken dat file
+                    uint NumSprites = spriteInfo.PatternWidth
+                                    * spriteInfo.PatternHeight
+                                    * spriteInfo.PatternLayers
+                                    * spriteInfo.PatternX
+                                    * spriteInfo.PatternY
+                                    * spriteInfo.PatternZ
+                                    * spriteInfo.PatternFrames;
+
+                    for (var x = 0; x < NumSprites; x++)
                     {
-                        w.Write(item.FrameGroup[i].SpriteInfo.SpriteId[x]);
+                        if (x < spriteInfo.SpriteId.Count)
+                            w.Write(spriteInfo.SpriteId[x]);
+                        else
+                            w.Write((uint)0);
                     }
                 }
             }
-
         }
+
         public static void WriteAppearanceAttr(BinaryWriter w, Appearance item, VersionInfo versionInfo)
         {
             if (item.Flags.Bank != null && versionInfo.HasFlag("Ground"))
