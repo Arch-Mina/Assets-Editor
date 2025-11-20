@@ -10,7 +10,6 @@ using Tibia.Protobuf.Appearances;
 using System.Drawing.Imaging;
 using System.Drawing;
 using System.Linq;
-using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -32,14 +31,25 @@ namespace Assets_Editor
         public static ushort EffectCount { get; set; }
         public static ushort MissileCount { get; set; }
 
-        public static Dictionary<uint, Sprite> sprites = new Dictionary<uint, Sprite>();
+        // directory pickers
+        // to generate more use tools -> create GUID in visual studio
+        private static readonly Guid GUID_assetsPicker = new("43A0E8FA-B129-4DB4-AD2D-0C44C23CE222");
+
+        // to do
+        // private static readonly Guid GUID_serverPicker = new("C01637F9-8C7B-4610-BBA2-530487BC57A2");
+
+        private static readonly Guid GUID_export1 = new("820617D2-0ECA-4632-B62D-42F740BD731A");
+        private static readonly Guid Guid_export2 = new("4FC8F7A5-4840-4840-A68B-26DFD955D224");
+        private static readonly Guid Guid_export3 = new("1A5860A3-5722-4FFC-B6F2-FCE4E9FE255F");
+
+        public static Dictionary<uint, Sprite> sprites = [];
         public static SpriteStorage MainSprStorage;
-        readonly BackgroundWorker worker = new BackgroundWorker();
-        public static ServerSetting serverSetting = new ServerSetting();
-        public Settings SettingsList = new Settings();
-        public static OTBReader ServerOTB = new OTBReader();
-        public static LogView logView = new LogView();
-        public static DatStructure datStructure = new DatStructure();
+        readonly BackgroundWorker worker = new();
+        public static ServerSetting serverSetting = new();
+        public Settings SettingsList = new();
+        public static OTBReader ServerOTB = new();
+        public static LogView logView = new();
+        public static DatStructure datStructure = new();
         public MainWindow()
         {
             InitializeComponent();
@@ -68,8 +78,14 @@ namespace Assets_Editor
             public string ServerPath { get; set; }
             public string ClientPath { get; set; }
         }
+        public class DatEditorSettings
+        {
+            public bool DarkMode { get; set; }
+        }
         public class Settings
         {
+            public DatEditorSettings DatEditorSettings { get; set; }
+            public DatEditorSettings LegacyDatEditorSettings { get; set; }
             public List<ServerSetting> Servers { get; set; }
         }
         protected override void OnClosed(EventArgs e)
@@ -202,7 +218,10 @@ namespace Assets_Editor
 
         private void SelectAssetsFolder(object sender, RoutedEventArgs e)
         {
-            FolderBrowserDialog _assets = new FolderBrowserDialog();
+            FolderBrowserDialog _assets = new() {
+                ClientGuid = GUID_assetsPicker
+            };
+
             if (_assets.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 _assetsPath = _assets.SelectedPath;

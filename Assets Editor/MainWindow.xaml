@@ -5,50 +5,158 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Assets_Editor"
         mc:Ignorable="d"
-        Title="Assets Editor" Height="350" Width="600"
+        Title="Assets Editor" Height="420" Width="600"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Style="{StaticResource MaterialDesignWindow}">
-    <Grid>
+
+    <Grid Margin="10,10,10,0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="70"/>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="150"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Label Content="Assets Folder:" VerticalAlignment="Center" Width="100"/>
-            <TextBox x:Name="AssetsPath" VerticalAlignment="Center" Width="330" IsEnabled="False"/>
-            <Button Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" VerticalAlignment="Top" Height="55" Width="55" Click="SelectAssetsFolder">
-                <materialDesign:PackIcon  Kind="CardSearch" Height="40" Width="40" />
-            </Button>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Label Content="Saved Setting:" Width="100"/>
-            <ComboBox x:Name="A_SavedVersion" Width="120" BorderThickness="1,1,1,1" SelectedIndex="0" Padding="6,1,5,3" IsReadOnly="True" VerticalAlignment="Top" SelectionChanged="A_SavedVersion_SelectionChanged"/>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
-            <StackPanel HorizontalAlignment="Left" >
-                <Label Content="Objects:"/>
-                <Label Content="Outfits:"/>
-                <Label Content="Effects:"/>
-                <Label Content="Missiles:"/>
-                <CheckBox x:Name="SprTransparent" Content="Transparent" Visibility="Hidden" Checked="SprTransparent_Changed" Unchecked="SprTransparent_Changed"></CheckBox>
-                <ComboBox x:Name="A_ClientVersion" Width="80" BorderThickness="1,1,1,1" SelectedIndex="1" Padding="6,1,5,3" IsReadOnly="True" Visibility="Hidden" SelectionChanged="A_ClientVersion_SelectionChanged"/>
-            </StackPanel>
-            <StackPanel HorizontalAlignment="Left">
-                <Label x:Name="ObjectsCount"/>
-                <Label x:Name="OutfitsCount"/>
-                <Label x:Name="EffectsCount"/>
-                <Label x:Name="MissilesCount"/>
-            </StackPanel>
-        </StackPanel>
-        <Button Grid.Row="3" x:Name="LoadAssets" HorizontalAlignment="Center" VerticalAlignment="Top" IsEnabled="False" Click="LoadAssets_Click">
-            <Button.Content>
-                <StackPanel>
-                    <TextBlock Text="Load Assets" HorizontalAlignment="Center"/>
-                    <ProgressBar x:Name="LoadProgress" Minimum="0" Maximum="100" Value="0" Width="200" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-10,0,-10,0" Height="8" />
+
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border BorderBrush="Gray" BorderThickness="1" Padding="0,30,0,30" CornerRadius="4"/>
+            <TextBlock Text="Editor Settings"
+               Background="White"
+               Foreground="Black"
+               Padding="4, 0, 4, 0"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Margin="9 -9 0 0"/>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" Grid.Column="0">
+                    <StackPanel Orientation="Vertical" Width="60" VerticalAlignment="Center">
+                        <Label Content="Preset:" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
+                    </StackPanel>
+                    <ComboBox x:Name="A_SavedVersion" Width="160" Height="30" BorderThickness="1,1,1,1" SelectedIndex="0" Margin="3,0,0,0" Padding="6,1,5,3" IsReadOnly="True" SelectionChanged="A_SavedVersion_SelectionChanged"/>
+                    <Button x:Name="NewPresetBtn" 
+            Style="{StaticResource MaterialDesignRaisedButton}"
+            Margin="15,0,0,0"
+            Click="SelectAssetsFolder"
+            ToolTip="Create a new preset">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="New"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="DeletePresetBtn" 
+Style="{StaticResource MaterialDesignRaisedButton}"
+Margin="5,0,0,0"
+Click="SelectAssetsFolder"
+ToolTip="Remove preset">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Delete" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Remove"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
-            </Button.Content>
-        </Button>
+
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="40">
+                        <Label Content="Light" VerticalAlignment="Center"/>
+                        <ToggleButton x:Name="DarkModeToggle" Margin="5,0,5,0" Checked="SelectAssetsFolder" Unchecked="SelectAssetsFolder"/>
+                        <Label Content="Dark" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <Grid Margin="0,15,0,0" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+
+            <Border BorderBrush="Gray" BorderThickness="1" Padding="0,30,0,30" CornerRadius="4"/>
+            <TextBlock Text="Assets Settings"
+               Background="White"
+               Foreground="Black"
+               Padding="4, 0, 4, 0"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Margin="9 -9 0 0"/>
+            
+            <Grid Margin="0,10,0,0" Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <Label Content="DAT File Path:" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    <TextBox x:Name="AssetsPath" VerticalAlignment="Center" Width="330" IsEnabled="False" Margin="5,0,0,0"/>
+                    <Button Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" VerticalAlignment="Center" Height="55" Width="55" Click="SelectAssetsFolder">
+                        <materialDesign:PackIcon  Kind="CardSearch" Height="40" Width="40" />
+                    </Button>
+                </StackPanel>
+
+                <Grid Grid.Row="1" Margin="100,20,80,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="210"/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Grid.Column="0">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Items:" />
+                            <Label x:Name="ObjectsCount"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Outfits:" />
+                            <Label x:Name="OutfitsCount"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" >
+                            <Label Content="Effects:" />
+                            <Label x:Name="EffectsCount"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Missiles:" />
+                            <Label x:Name="MissilesCount"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Grid.Column="1">
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton x:Name="DatExtendedToggle" Margin="5,0,5,0" Checked="SelectAssetsFolder" Unchecked="SelectAssetsFolder"/>
+                            <Label Content="Extended"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton x:Name="DatTransparentToggle" Margin="5,0,5,0" Checked="SelectAssetsFolder" Unchecked="SelectAssetsFolder"/>
+                            <Label Content="Transparency"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton x:Name="DatAnimationsToggle" Margin="5,0,5,0" Checked="SelectAssetsFolder" Unchecked="SelectAssetsFolder"/>
+                            <Label Content="Improved Animations"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton x:Name="DatFrameGroupsToggle" Margin="5,0,5,0" Checked="SelectAssetsFolder" Unchecked="SelectAssetsFolder"/>
+                            <Label Content="Frame Groups"/>
+                        </StackPanel>
+                        <CheckBox x:Name="SprTransparent" Content="Transparent" Visibility="Hidden" Checked="SprTransparent_Changed" Unchecked="SprTransparent_Changed"></CheckBox>
+                        <ComboBox x:Name="A_ClientVersion" Width="80" BorderThickness="1,1,1,1" SelectedIndex="1" Padding="6,1,5,3" IsReadOnly="True" Visibility="Hidden" SelectionChanged="A_ClientVersion_SelectionChanged" Margin="0,10,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <Button Grid.Row="1" x:Name="LoadAssets" HorizontalAlignment="Center" VerticalAlignment="Top" IsEnabled="False" Click="LoadAssets_Click" Margin="0,10,0,0">
+                <Button.Content>
+                    <StackPanel>
+                        <TextBlock Text="Load Assets" HorizontalAlignment="Center"/>
+                        <ProgressBar x:Name="LoadProgress" Minimum="0" Maximum="100" Value="0" Width="200" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-10,0,-10,0" Height="8" />
+                    </StackPanel>
+                </Button.Content>
+            </Button>
+        </Grid>
     </Grid>
 </Window>
