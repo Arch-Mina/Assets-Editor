@@ -624,6 +624,14 @@ namespace Assets_Editor
 
         public static void WriteAppearanceAttr(BinaryWriter w, Appearance item, VersionInfo versionInfo)
         {
+            // some appearances may have flags not set
+            if (item.Flags == null)
+            {
+                // end of flags
+                w.Write((byte)0xFF);
+                return;
+            }
+
             if (item.Flags.Bank != null && versionInfo.HasFlag("Ground"))
             {
                 w.Write((byte)versionInfo.GetFlagId("Ground"));
