@@ -1,27 +1,19 @@
-﻿using Efundies;
-using Google.Protobuf;
-using MaterialDesignThemes.Wpf;
+﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using Tibia.Protobuf.Appearances;
 
@@ -1208,7 +1200,7 @@ namespace Assets_Editor
 
             if (isDatEditable && isSprEditable)
             {
-                LegacyAppearance.WriteLegacyDat(datfile, MainWindow.DatSignature, MainWindow.appearances, MainWindow.serverSetting.Version);
+                LegacyAppearance.WriteLegacyDat(datfile, MainWindow.DatSignature, MainWindow.appearances, MainWindow.GetCurrentLoadedVersion());
                 var progress = new Progress<int>(percent =>
                 {
                     LoadProgress.Value = percent;

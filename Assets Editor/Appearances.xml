@@ -1,5 +1,84 @@
 <Appearances>
-	<Version number="1098" structure="3">
+	<Dat structure="1" name="7.1 - 7.3" pattern_z="false">
+		<Flags>
+			<Flag id="0" name="Ground" />
+			<Flag id="1" name="Bottom" />
+			<Flag id="2" name="Top" />
+			<Flag id="3" name="Container" />
+			<Flag id="4" name="Stackable" />
+			<Flag id="5" name="Multiuse" />
+			<Flag id="6" name="ForceUse" />
+			<Flag id="7" name="Writeable" />
+			<Flag id="8" name="WriteableOnce" />
+			<Flag id="9" name="LiquidContainer" />
+			<Flag id="10" name="LiquidPool" />
+			<Flag id="11" name="Impassable" />
+			<Flag id="12" name="Unmovable" />
+			<Flag id="13" name="BlocksSight" />
+			<Flag id="14" name="BlocksPathfinding" />
+			<Flag id="15" name="Pickupable" />
+			<Flag id="16" name="LightSource" />
+			<Flag id="17" name="Translucent" />
+			<Flag id="18" name="FullTile" />
+			<Flag id="19" name="Elevated" />
+			<Flag id="20" name="Displaced" version="1" />
+			<Flag id="22" name="MinimapColor" />
+			<Flag id="23" name="Rotateable" />
+			<Flag id="24" name="LyingObject" />
+			<Flag id="25" name="AlwaysAnimated" />
+			<Flag id="26" name="HelpInfo" />
+
+			<!-- likely unofficial, present in object builder -->
+			<Flag id="36" name="Wrappable" />
+			<Flag id="37" name="UnWrappable" />
+			<Flag id="38" name="TopEffect" />
+
+			<Flag id="255" name="Default" />
+		</Flags>
+	</Dat>
+
+	<Dat structure="2" name="7.4 - 7.5">
+		<Flags>
+			<Flag id="0" name="Ground" />
+			<Flag id="1" name="Bottom" />
+			<Flag id="2" name="Top" />
+			<Flag id="3" name="Container" />
+			<Flag id="4" name="Stackable" />
+			<Flag id="5" name="Multiuse" />
+			<Flag id="6" name="ForceUse" />
+			<Flag id="7" name="Writeable" />
+			<Flag id="8" name="WriteableOnce" />
+			<Flag id="9" name="LiquidContainer" />
+			<Flag id="10" name="LiquidPool" />
+			<Flag id="11" name="Impassable" />
+			<Flag id="12" name="Unmovable" />
+			<Flag id="13" name="BlocksSight" />
+			<Flag id="14" name="BlocksPathfinding" />
+			<Flag id="15" name="Pickupable" />
+			<Flag id="16" name="LightSource" />
+			<Flag id="17" name="Translucent" />
+			<Flag id="18" name="FullTile" />
+			<Flag id="19" name="Elevated" />
+			<Flag id="20" name="Displaced" version="1" />
+			<Flag id="22" name="MinimapColor" />
+			<Flag id="23" name="Rotateable" />
+			<Flag id="24" name="LyingObject" />
+			<Flag id="25" name="Hangable" />
+			<Flag id="26" name="HooksSouth" />
+			<Flag id="27" name="HooksEast" />
+			<Flag id="28" name="AlwaysAnimated" />
+			<Flag id="29" name="HelpInfo" />
+
+			<!-- likely unofficial, present in object builder -->
+			<Flag id="36" name="Wrappable" />
+			<Flag id="37" name="UnWrappable" />
+			<Flag id="38" name="TopEffect" />
+
+			<Flag id="255" name="Default" />
+		</Flags>
+	</Dat>
+
+	<Dat structure="3" name="7.55 - 7.72">
 		<Flags>
 			<Flag id="0" name="Ground" />
 			<Flag id="1" name="Clip" />
@@ -8,7 +87,125 @@
 			<Flag id="4" name="Container" />
 			<Flag id="5" name="Stackable" />
 			<Flag id="6" name="ForceUse" />
-			<Flag id="254" name="Usable" />
+			<Flag id="7" name="Multiuse" />
+			<Flag id="8" name="Writeable" />
+			<Flag id="9" name="WriteableOnce" />
+			<Flag id="10" name="LiquidContainer" />
+			<Flag id="11" name="LiquidPool" />
+			<Flag id="12" name="Impassable" />
+			<Flag id="13" name="Unmovable" />
+			<Flag id="14" name="BlocksSight" />
+			<Flag id="15" name="BlocksPathfinding" />
+			<Flag id="16" name="Pickupable" />
+			<Flag id="17" name="Hangable" />
+			<Flag id="18" name="HooksSouth" />
+			<Flag id="19" name="HooksEast" />
+			<Flag id="20" name="Rotateable" />
+			<Flag id="21" name="LightSource" />
+
+			<Flag id="23" name="Translucent" />
+			<Flag id="24" name="Displaced" version="2" />
+			<Flag id="25" name="Elevated" />
+			<Flag id="26" name="LyingObject" />
+			<Flag id="27" name="AlwaysAnimated" />
+			<Flag id="28" name="MinimapColor" />
+			<Flag id="29" name="HelpInfo" />
+			<Flag id="30" name="FullTile" />
+
+			<Flag id="255" name="Default" />
+		</Flags>
+	</Dat>
+
+	<Dat structure="4" name="7.8 - 8.54">
+		<Flags>
+			<Flag id="0" name="Ground" />
+			<Flag id="1" name="Clip" />
+			<Flag id="2" name="Bottom" />
+			<Flag id="3" name="Top" />
+			<Flag id="4" name="Container" />
+			<Flag id="5" name="Stackable" />
+			<Flag id="6" name="ForceUse" />
+			<Flag id="7" name="Multiuse" />
+			<Flag id="8" name="ShowCharges" />
+			<Flag id="9" name="Writeable" />
+			<Flag id="10" name="WriteableOnce" />
+			<Flag id="11" name="LiquidContainer" />
+			<Flag id="12" name="LiquidPool" />
+			<Flag id="13" name="Impassable" />
+			<Flag id="14" name="Unmovable" />
+			<Flag id="15" name="BlocksSight" />
+			<Flag id="16" name="BlocksPathfinding" />
+			<Flag id="17" name="Pickupable" />
+			<Flag id="18" name="Hangable" />
+			<Flag id="19" name="HooksSouth" />
+			<Flag id="20" name="HooksEast" />
+			<Flag id="21" name="Rotateable" />
+			<Flag id="22" name="LightSource" />
+			<Flag id="23" name="AlwaysSeen" />
+			<Flag id="24" name="Translucent" />
+			<Flag id="25" name="Displaced" version="2" />
+			<Flag id="26" name="Elevated" />
+			<Flag id="27" name="LyingObject" />
+			<Flag id="28" name="AlwaysAnimated" />
+			<Flag id="29" name="MinimapColor" />
+			<Flag id="30" name="HelpInfo" />
+			<Flag id="31" name="FullTile" />
+			<Flag id="32" name="Lookthrough" />
+
+			<Flag id="255" name="Default" />
+		</Flags>
+	</Dat>
+
+	<Dat structure="5" name="8.6 - 9.86">
+		<Flags>
+			<Flag id="0" name="Ground" />
+			<Flag id="1" name="Clip" />
+			<Flag id="2" name="Bottom" />
+			<Flag id="3" name="Top" />
+			<Flag id="4" name="Container" />
+			<Flag id="5" name="Stackable" />
+			<Flag id="6" name="ForceUse" />
+			<Flag id="7" name="Multiuse" />
+			<Flag id="8" name="Writeable" />
+			<Flag id="9" name="WriteableOnce" />
+			<Flag id="10" name="LiquidContainer" />
+			<Flag id="11" name="LiquidPool" />
+			<Flag id="12" name="Impassable" />
+			<Flag id="13" name="Unmovable" />
+			<Flag id="14" name="BlocksSight" />
+			<Flag id="15" name="BlocksPathfinding" />
+			<Flag id="16" name="Pickupable" />
+			<Flag id="17" name="Hangable" />
+			<Flag id="18" name="HooksSouth" />
+			<Flag id="19" name="HooksEast" />
+			<Flag id="20" name="Rotateable" />
+			<Flag id="21" name="LightSource" />
+			<Flag id="22" name="AlwaysSeen" />
+			<Flag id="23" name="Translucent" />
+			<Flag id="24" name="Displaced" version="2" />
+			<Flag id="25" name="Elevated" />
+			<Flag id="26" name="LyingObject" />
+			<Flag id="27" name="AlwaysAnimated" />
+			<Flag id="28" name="MinimapColor" />
+			<Flag id="29" name="HelpInfo" />
+			<Flag id="30" name="FullTile" />
+			<Flag id="31" name="Lookthrough" />
+			<Flag id="32" name="Clothes" />
+			<Flag id="33" name="Market" />
+
+			<Flag id="255" name="Default" />
+		</Flags>
+	</Dat>
+
+	<Dat structure="6" name="10.10 - 10.56">
+		<Flags>
+			<Flag id="0" name="Ground" />
+			<Flag id="1" name="Clip" />
+			<Flag id="2" name="Bottom" />
+			<Flag id="3" name="Top" />
+			<Flag id="4" name="Container" />
+			<Flag id="5" name="Stackable" />
+			<Flag id="6" name="ForceUse" />
 			<Flag id="7" name="Multiuse" />
 			<Flag id="8" name="Writeable" />
 			<Flag id="9" name="WriteableOnce" />
@@ -27,7 +224,7 @@
 			<Flag id="22" name="LightSource" />
 			<Flag id="23" name="AlwaysSeen" />
 			<Flag id="24" name="Translucent" />
-			<Flag id="25" name="Displaced" />
+			<Flag id="25" name="Displaced" version="2" />
 			<Flag id="26" name="Elevated" />
 			<Flag id="27" name="LyingObject" />
 			<Flag id="28" name="AlwaysAnimated" />
@@ -41,7 +238,56 @@
 			<Flag id="36" name="Wrappable" />
 			<Flag id="37" name="UnWrappable" />
 			<Flag id="38" name="TopEffect" />
+			<Flag id="39" name="WingsOffset" />
+			<Flag id="254" name="Usable" />
 			<Flag id="255" name="Default" />
 		</Flags>
-	</Version>
+	</Dat>
+
+	<Dat structure="7" name="RD" rdbytes="true">
+		<Flags>
+			<Flag id="0" name="Ground" />
+			<Flag id="1" name="Clip" />
+			<Flag id="2" name="Bottom" />
+			<Flag id="3" name="Top" />
+			<Flag id="4" name="Container" />
+			<Flag id="5" name="Stackable" />
+			<Flag id="6" name="ForceUse" />
+			<Flag id="7" name="Multiuse" />
+			<Flag id="8" name="Writeable" />
+			<Flag id="9" name="WriteableOnce" />
+			<Flag id="10" name="LiquidContainer" />
+			<Flag id="11" name="LiquidPool" />
+			<Flag id="12" name="Impassable" />
+			<Flag id="13" name="Unmovable" />
+			<Flag id="14" name="BlocksSight" />
+			<Flag id="15" name="BlocksPathfinding" />
+			<Flag id="16" name="NoMovementAnimation" />
+			<Flag id="17" name="Pickupable" />
+			<Flag id="18" name="Hangable" />
+			<Flag id="19" name="HooksSouth" />
+			<Flag id="20" name="HooksEast" />
+			<Flag id="21" name="Rotateable" />
+			<Flag id="22" name="LightSource" />
+			<Flag id="23" name="AlwaysSeen" />
+			<Flag id="24" name="Translucent" />
+			<Flag id="25" name="Displaced" version="3" />
+			<Flag id="26" name="Elevated" />
+			<Flag id="27" name="LyingObject" />
+			<Flag id="28" name="AlwaysAnimated" />
+			<Flag id="29" name="MinimapColor" />
+			<Flag id="30" name="HelpInfo" />
+			<Flag id="31" name="FullTile" />
+			<Flag id="32" name="Lookthrough" />
+			<Flag id="33" name="Clothes" />
+			<Flag id="34" name="Market" />
+			<Flag id="35" name="DefaultAction" />
+			<Flag id="36" name="Wrappable" />
+			<Flag id="37" name="UnWrappable" />
+			<Flag id="38" name="TopEffect" />
+			<Flag id="39" name="WingsOffset" />
+			<Flag id="254" name="Usable" />
+			<Flag id="255" name="Default" />
+		</Flags>
+	</Dat>
 </Appearances>

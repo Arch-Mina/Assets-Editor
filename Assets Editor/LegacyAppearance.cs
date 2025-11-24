@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -37,30 +38,51 @@ namespace Assets_Editor
                 EffectCount = info.EffectCount;
                 MissileCount = info.MissileCount;
 
+                PresetSettings preset = MainWindow.GetCurrentPreset() ?? new();
+
+                // raw rd file has 2 bytes at the front of every item
+                bool rdBytes = versionInfo.UseRDBytes;
+
                 for (int i = 100; i <= ObjectCount; i++)
                 {
-                    var appearance = DatStructure.ReadAppearance(r, APPEARANCE_TYPE.AppearanceObject, versionInfo);
+                    if (rdBytes) {
+                        r.ReadUInt16();
+                    }
+
+                    var appearance = DatStructure.ReadAppearance(r, APPEARANCE_TYPE.AppearanceObject, versionInfo, preset);
                     appearance.Id = (uint)i;
                     Appearances.Object.Add(appearance);
                 }
 
                 for (int i = 1; i <= OutfitCount; i++)
                 {
-                    var appearance = DatStructure.ReadAppearance(r, APPEARANCE_TYPE.AppearanceOutfit, versionInfo);
+                    if (rdBytes) {
+                        r.ReadUInt16();
+                    }
+
+                    var appearance = DatStructure.ReadAppearance(r, APPEARANCE_TYPE.AppearanceOutfit, versionInfo, preset);
                     appearance.Id = (uint)i;
                     Appearances.Outfit.Add(appearance);
                 }
 
                 for (int i = 1; i <= EffectCount; i++)
                 {
-                    var appearance = DatStructure.ReadAppearance(r, APPEARANCE_TYPE.AppearanceEffect, versionInfo);
+                    if (rdBytes) {
+                        r.ReadUInt16();
+                    }
+
+                    var appearance = DatStructure.ReadAppearance(r, APPEARANCE_TYPE.AppearanceEffect, versionInfo, preset);
                     appearance.Id = (uint)i;
                     Appearances.Effect.Add(appearance);
                 }
 
                 for (int i = 1; i <= MissileCount; i++)
                 {
-                    var appearance = DatStructure.ReadAppearance(r, APPEARANCE_TYPE.AppearanceMissile, versionInfo);
+                    if (rdBytes) {
+                        r.ReadUInt16();
+                    }
+
+                    var appearance = DatStructure.ReadAppearance(r, APPEARANCE_TYPE.AppearanceMissile, versionInfo, preset);
                     appearance.Id = (uint)i;
                     Appearances.Missile.Add(appearance);
                 }

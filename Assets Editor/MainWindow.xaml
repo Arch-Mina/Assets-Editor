@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Assets_Editor"
         mc:Ignorable="d"
-        Title="Assets Editor" Height="420" Width="600"
+        Title="Assets Editor" Height="390" Width="600"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Style="{StaticResource MaterialDesignWindow}">
 
-    <Grid Margin="10,10,10,0">
+    <Grid Margin="10,12,10,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
@@ -22,12 +22,11 @@
 
             <Border BorderBrush="Gray" BorderThickness="1" Padding="0,30,0,30" CornerRadius="4"/>
             <TextBlock Text="Editor Settings"
-               Background="White"
-               Foreground="Black"
-               Padding="4, 0, 4, 0"
-               HorizontalAlignment="Left"
-               VerticalAlignment="Top"
-               Margin="9 -9 0 0"/>
+                Background="{DynamicResource MaterialDesignPaper}"
+                Padding="4, 1, 4, 0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="9 -9 0 0"/>
 
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
@@ -39,7 +38,7 @@
                     <StackPanel Orientation="Vertical" Width="60" VerticalAlignment="Center">
                         <Label Content="Preset:" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
                     </StackPanel>
-                    <ComboBox x:Name="A_SavedVersion" Width="160" Height="30" BorderThickness="1,1,1,1" SelectedIndex="0" Margin="3,0,0,0" Padding="6,1,5,3" IsReadOnly="True" SelectionChanged="A_SavedVersion_SelectionChanged"/>
+                    <ComboBox x:Name="A_SavedVersion" Width="160" Height="30" BorderThickness="1,1,1,1" SelectedIndex="0" Margin="3,0,0,0" Padding="6,1,5,3" IsReadOnly="True"/>
                     <Button x:Name="NewPresetBtn" 
             Style="{StaticResource MaterialDesignRaisedButton}"
             Margin="15,0,0,0"
@@ -65,7 +64,7 @@ ToolTip="Remove preset">
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="40">
                         <Label Content="Light" VerticalAlignment="Center"/>
-                        <ToggleButton x:Name="DarkModeToggle" Margin="5,0,5,0" Checked="SelectAssetsFolder" Unchecked="SelectAssetsFolder"/>
+                        <ToggleButton x:Name="DarkModeToggle" Margin="5,0,5,0" Checked="DarkModeToggle_Checked" Unchecked="DarkModeToggle_Checked"/>
                         <Label Content="Dark" VerticalAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
@@ -80,17 +79,17 @@ ToolTip="Remove preset">
 
             <Border BorderBrush="Gray" BorderThickness="1" Padding="0,30,0,30" CornerRadius="4"/>
             <TextBlock Text="Assets Settings"
-               Background="White"
-               Foreground="Black"
-               Padding="4, 0, 4, 0"
-               HorizontalAlignment="Left"
-               VerticalAlignment="Top"
-               Margin="9 -9 0 0"/>
+                Background="{DynamicResource MaterialDesignPaper}"
+                Padding="4, 1, 4, 0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="9 -9 0 0"/>
             
             <Grid Margin="0,10,0,0" Grid.Row="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
+                    <RowDefinition Height="130" />
                 </Grid.RowDefinitions>
 
                 <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center" Margin="0,10,0,0">
@@ -101,9 +100,55 @@ ToolTip="Remove preset">
                     </Button>
                 </StackPanel>
 
-                <Grid Grid.Row="1" Margin="100,20,80,0">
+                <StackPanel Orientation="Horizontal"
+                            Grid.Row="1"
+                            Margin="140,-10,0,0">
+
+                    <materialDesign:PackIcon x:Name="AssetsPathBaseIcon"
+                                             Kind="Info"
+                                             Width="16"
+                                             Height="16"
+                                             Visibility="Hidden"/>
+
+                    <materialDesign:PackIcon x:Name="AssetsPathLoadingIcon"
+                                             Kind="Loading"
+                                             Width="16"
+                                             Height="16"
+                                             Visibility="Visible">
+
+                        <materialDesign:PackIcon.RenderTransform>
+                            <RotateTransform x:Name="LoadingRotate"
+                                             Angle="0"
+                                             CenterX="8"
+                                             CenterY="8"/>
+                        </materialDesign:PackIcon.RenderTransform>
+
+                        <materialDesign:PackIcon.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetName="LoadingRotate"
+                                                         Storyboard.TargetProperty="Angle"
+                                                         From="0"
+                                                         To="360"
+                                                         Duration="0:0:1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </materialDesign:PackIcon.Triggers>
+
+                    </materialDesign:PackIcon>
+
+                    <TextBlock x:Name="AssetsPathLoadingMessage"
+                               Text="Initializing ..."
+                               Padding="2,0"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Grid Grid.Row="2" Margin="0,20,0,0" HorizontalAlignment="Center">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="210"/>
+                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="170"/>
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
 
@@ -128,24 +173,38 @@ ToolTip="Remove preset">
 
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Grid.Column="1">
                         <StackPanel Orientation="Horizontal">
-                            <ToggleButton x:Name="DatExtendedToggle" Margin="5,0,5,0" Checked="SelectAssetsFolder" Unchecked="SelectAssetsFolder"/>
+                            <ToggleButton x:Name="DatExtendedToggle" Margin="5,0,5,0" Checked="DatExtended_Changed" Unchecked="DatExtended_Changed" IsEnabled="False"/>
                             <Label Content="Extended"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <ToggleButton x:Name="DatTransparentToggle" Margin="5,0,5,0" Checked="SelectAssetsFolder" Unchecked="SelectAssetsFolder"/>
+                            <ToggleButton x:Name="DatTransparentToggle" Margin="5,0,5,0" Checked="DatTransparent_Changed" Unchecked="DatTransparent_Changed" IsEnabled="False"/>
                             <Label Content="Transparency"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <ToggleButton x:Name="DatAnimationsToggle" Margin="5,0,5,0" Checked="SelectAssetsFolder" Unchecked="SelectAssetsFolder"/>
+                            <ToggleButton x:Name="DatAnimationsToggle" Margin="5,0,5,0" Checked="DatAnimations_Changed" Unchecked="DatAnimations_Changed" IsEnabled="False"/>
                             <Label Content="Improved Animations"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <ToggleButton x:Name="DatFrameGroupsToggle" Margin="5,0,5,0" Checked="SelectAssetsFolder" Unchecked="SelectAssetsFolder"/>
+                            <ToggleButton x:Name="DatFrameGroupsToggle" Margin="5,0,5,0" Checked="DatFrameGroup_Changed" Unchecked="DatFrameGroup_Changed" IsEnabled="False"/>
                             <Label Content="Frame Groups"/>
                         </StackPanel>
-                        <CheckBox x:Name="SprTransparent" Content="Transparent" Visibility="Hidden" Checked="SprTransparent_Changed" Unchecked="SprTransparent_Changed"></CheckBox>
-                        <ComboBox x:Name="A_ClientVersion" Width="80" BorderThickness="1,1,1,1" SelectedIndex="1" Padding="6,1,5,3" IsReadOnly="True" Visibility="Hidden" SelectionChanged="A_ClientVersion_SelectionChanged" Margin="0,10,0,0"/>
                     </StackPanel>
+
+                    <Grid Grid.Column="2" Margin="30,2,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="70"/>
+                            <RowDefinition Height="25"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Name="AssetsVersionInfo" LineHeight="20"
+                                    Text="DAT: 0x42ABCDEF&#10;SPR: 0x42ABCDEF&#10;Version: 10.98"
+                                    Grid.Row="0"/>
+                        <CheckBox Name="OTFIOverrideChk"
+                                  Content="override OTFI"
+                                  Margin="-2,0,0,0"
+                                  Grid.Row="1"
+                                  IsEnabled="False"/>
+                    </Grid>
                 </Grid>
             </Grid>
 

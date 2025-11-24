@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography.Xml;
 using System.Text;
+using System.Windows;
+using System.Windows.Forms;
 using System.Xml.Linq;
 using Tibia.Protobuf.Appearances;
+using Appearance = Tibia.Protobuf.Appearances.Appearance;
 
 namespace Assets_Editor
 {
     public class FlagInfo
     {
-        public byte Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
+        public int Version { get; set; }
     }
     public class DatInfo
     {
@@ -26,21 +29,23 @@ namespace Assets_Editor
 
     public class VersionInfo
     {
-        public int Number { get; set; }
+        public string? Name { get; set; }
         public int Structure { get; set; }
-        public Dictionary<string, FlagInfo> FlagsByName { get; set; } = new Dictionary<string, FlagInfo>(StringComparer.OrdinalIgnoreCase);
-        public Dictionary<byte, FlagInfo> FlagsById { get; set; } = new Dictionary<byte, FlagInfo>();
+        public bool UsePatternZ { get; set; }
+        public bool UseRDBytes { get; set; }
+        public Dictionary<string, FlagInfo> FlagsByName { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<int, FlagInfo> FlagsById { get; set; } = [];
         public bool HasFlag(string flagName)
         {
             return FlagsByName.ContainsKey(flagName);
         }
-        public FlagInfo GetFlagInfo(string flagName)
+        public FlagInfo? GetFlagInfo(string flagName)
         {
             if (FlagsByName.TryGetValue(flagName, out var flagInfo))
                 return flagInfo;
             return null;
         }
-        public byte GetFlagId(string flagName)
+        public int GetFlagId(string flagName)
         {
             if (string.IsNullOrWhiteSpace(flagName))
                 throw new ArgumentException("Flag name cannot be null or empty.", nameof(flagName));
@@ -48,7 +53,7 @@ namespace Assets_Editor
             if (FlagsByName.TryGetValue(flagName, out var flagInfo))
                 return flagInfo.Id;
 
-            throw new KeyNotFoundException($"Flag '{flagName}' not found in version {Number}.");
+            throw new KeyNotFoundException($"Flag '{flagName}' not found in version {Name}.");
         }
     }
 
@@ -59,8 +64,9 @@ namespace Assets_Editor
         public DatStructure()
         {
             string xmlPath = "Appearances.xml";
-            if (!File.Exists(xmlPath))
+            if (!File.Exists(xmlPath)) {
                 throw new FileNotFoundException($"Appearances XML not found: {xmlPath}");
+            }
 
             XDocument doc;
             try
@@ -72,22 +78,54 @@ namespace Assets_Editor
                 throw new InvalidOperationException($"Failed to load XML file '{xmlPath}'.", ex);
             }
 
-            foreach (var versionElement in doc.Descendants("Version"))
+            foreach (var versionElement in doc.Descendants("Dat"))
             {
-                var numberAttr = versionElement.Attribute("number");
-                var structureAttr = versionElement.Attribute("structure");
+                var structureVersion = versionElement.Attribute("structure");
+                var structureName = versionElement.Attribute("name");
+                var usePatternZ = versionElement.Attribute("pattern_z");
+                var useRDBytes = versionElement.Attribute("rdbytes");
 
-                if (numberAttr == null || !int.TryParse(numberAttr.Value, out int versionNumber))
-                    throw new InvalidOperationException("<Version> is missing a valid 'number' attribute.");
+                // 7.0-7.5 did not use patternZ
+                bool usePatternZValue = true;
+                if (usePatternZ != null && usePatternZ.Value.Equals("false", StringComparison.OrdinalIgnoreCase)) {
+                    usePatternZValue = false;
+                }
 
-                if (structureAttr == null || !int.TryParse(structureAttr.Value, out int structure))
-                    throw new InvalidOperationException($"Version {versionNumber} is missing a valid 'structure' attribute.");
+                bool useRDBytesValue = false;
+                if (useRDBytes != null && useRDBytes.Value.Equals("true", StringComparison.OrdinalIgnoreCase)) {
+                    useRDBytesValue = true;
+                }
 
-                var versionInfo = new VersionInfo
-                {
-                    Number = versionNumber,
-                    Structure = structure
+                if (structureName == null) {
+                    System.Windows.Forms.MessageBox.Show(
+                        $"{xmlPath}: <Dat> is missing a valid 'name' attribute.",
+                        "Warning",
+                        (MessageBoxButtons)MessageBoxButton.OK,
+                        (MessageBoxIcon)MessageBoxImage.Warning
+                    );
+                    continue;
+                }
+
+                if (structureVersion == null || !int.TryParse(structureVersion.Value, out int structure)) {
+                    System.Windows.Forms.MessageBox.Show(
+                        $"{xmlPath}: Version {structureName.Value} is missing a valid 'structure' attribute.",
+                        "Warning",
+                        (MessageBoxButtons)MessageBoxButton.OK,
+                        (MessageBoxIcon)MessageBoxImage.Warning
+                    );
+                    continue;
+                }
+
+                VersionInfo versionInfo = new() {
+                    Name = structureName.Value,
+                    Structure = structure,
+                    UsePatternZ = usePatternZValue,
+                    UseRDBytes = useRDBytesValue
                 };
+
+                // showing a popup for every flag that is wrong would be annoying
+                // let's show it just once
+                string flagIssues = "";
 
                 var flagsElement = versionElement.Element("Flags");
                 if (flagsElement != null)
@@ -96,21 +134,43 @@ namespace Assets_Editor
                     {
                         var idAttr = flagElement.Attribute("id");
                         var nameAttr = flagElement.Attribute("name");
+                        var versionAttr = flagElement.Attribute("version");
 
-                        if (idAttr == null || !byte.TryParse(idAttr.Value, out byte id))
-                            throw new InvalidOperationException($"Flag under version {versionNumber} is missing a valid 'id' attribute.");
+                        // using int there for two reasons
+                        // 1. to support "-1" when the flag is not present
+                        // 2. to support u16 attributes in the future
+                        if (idAttr == null || !int.TryParse(idAttr.Value, out int id)) {
+                            flagIssues += $"Flag under version {structureVersion} is missing a valid 'id' attribute.\n";
+                            continue;
+                        }
 
-                        if (nameAttr == null)
-                            throw new InvalidOperationException($"Flag with id {id} under version {versionNumber} is missing the 'name' attribute.");
+                        if (nameAttr == null) {
+                            flagIssues += $"Flag with id {id} under version {structureVersion} is missing the 'name' attribute.\n";
+                            continue;
+                        }
+
+                        if (versionAttr == null || !int.TryParse(versionAttr.Value, out int version)) {
+                            version = 1;
+                        }
 
                         string flagName = nameAttr.Value;
-                        var flagInfo = new FlagInfo { Id = id, Name = flagName };
+                        var flagInfo = new FlagInfo { Id = id, Name = flagName, Version = version};
                         versionInfo.FlagsByName[flagName] = flagInfo;
                         versionInfo.FlagsById[id] = flagInfo;
                     }
                 }
 
-                versions[versionNumber] = versionInfo;
+                // show all errors
+                if (flagIssues.Length > 0) {
+                    System.Windows.Forms.MessageBox.Show(
+                        $"{xmlPath}: Version {structureName.Value} has invalid flags:\n\n{flagIssues}",
+                        "Warning",
+                        (MessageBoxButtons)MessageBoxButton.OK,
+                        (MessageBoxIcon)MessageBoxImage.Warning
+                    );
+                }
+
+                versions[structure] = versionInfo;
             }
         }
 
@@ -140,7 +200,7 @@ namespace Assets_Editor
 
         public static DatInfo ReadAppearanceInfo(BinaryReader r)
         {
-            DatInfo info = new DatInfo
+            DatInfo info = new()
             {
                 Signature = r.ReadUInt32(),
                 ObjectCount = r.ReadUInt16(),
@@ -152,135 +212,108 @@ namespace Assets_Editor
             return info;
         }
 
-        public static Appearance ReadAppearance(BinaryReader r, APPEARANCE_TYPE type, VersionInfo versionInfo)
+        public static Appearance ReadAppearance(BinaryReader r, APPEARANCE_TYPE type, VersionInfo versionInfo, PresetSettings preset)
         {
-            Appearance appearance = new Appearance();
-            appearance.AppearanceType = type;
-            appearance.Flags = new AppearanceFlags();
+            Appearance appearance = new() {
+                AppearanceType = type,
+                Flags = new()
+            };
 
             ReadAppearanceAttr(appearance, r, versionInfo);
 
-            if (versionInfo.Structure == 1)
-            {
-                byte FrameGroupCount = 1;
+            bool isExtended = preset.Extended;
+            bool hasFrameDurations = preset.FrameDurations;
+            bool hasFrameGroups = preset.FrameGroups;
 
-                for (int i = 0; i < FrameGroupCount; i++)
-                {
-                    //FIXED_FRAME_GROUP
-                    FrameGroup frameGroup = new FrameGroup();
-                    frameGroup.SpriteInfo = new SpriteInfo();
-                    frameGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
+            byte FrameGroupCount = 1;
 
-                    frameGroup.SpriteInfo.PatternWidth = r.ReadByte();
-                    frameGroup.SpriteInfo.PatternHeight = r.ReadByte();
-
-                    if (frameGroup.SpriteInfo.PatternWidth > 1 || frameGroup.SpriteInfo.PatternHeight > 1)
-                        frameGroup.SpriteInfo.PatternSize = r.ReadByte();
-                    else
-                        frameGroup.SpriteInfo.PatternSize = 32;
-
-                    frameGroup.SpriteInfo.PatternLayers = r.ReadByte();
-
-                    frameGroup.SpriteInfo.PatternX = r.ReadByte();
-
-                    frameGroup.SpriteInfo.PatternY = r.ReadByte();
-
-                    frameGroup.SpriteInfo.PatternZ = r.ReadByte();
-
-                    frameGroup.SpriteInfo.PatternFrames = r.ReadByte();
-
-                    if (frameGroup.SpriteInfo.PatternFrames > 1)
-                    {
-                        SpriteAnimation spriteAnimation = new SpriteAnimation();
-                        spriteAnimation.AnimationMode = ANIMATION_ANIMATION_MODE.AnimationAsynchronized;
-                        spriteAnimation.LoopCount = 1;
-                        spriteAnimation.DefaultStartPhase = 1;
-
-                        for (int k = 0; k < frameGroup.SpriteInfo.PatternFrames; k++)
-                        {
-                            SpritePhase spritePhase = new SpritePhase();
-                            spritePhase.DurationMin = 100;
-                            spritePhase.DurationMax = 100;
-                            spriteAnimation.SpritePhase.Add(spritePhase);
-                        }
-                        frameGroup.SpriteInfo.Animation = spriteAnimation;
-
-                    }
-                    int NumSprites = (int)(frameGroup.SpriteInfo.PatternWidth * frameGroup.SpriteInfo.PatternHeight * frameGroup.SpriteInfo.PatternLayers * frameGroup.SpriteInfo.PatternX * frameGroup.SpriteInfo.PatternY * frameGroup.SpriteInfo.PatternZ * frameGroup.SpriteInfo.PatternFrames);
-                    for (var x = 0; x < NumSprites; x++)
-                    {
-                        var sprite = r.ReadUInt32();
-                        frameGroup.SpriteInfo.SpriteId.Add(sprite);
-
-                    }
-                    appearance.FrameGroup.Add(frameGroup);
-                }
+            // read frame groups if applicable to this version
+            if (hasFrameGroups && type == APPEARANCE_TYPE.AppearanceOutfit) {
+                FrameGroupCount = r.ReadByte();
             }
-            else if (versionInfo.Structure == 3)
-            {
 
+            for (int i = 0; i < FrameGroupCount; i++) {
+                FrameGroup frameGroup = new() {
+                    SpriteInfo = new()
+                };
 
-                byte FrameGroupCount = 1;
-                if (type == APPEARANCE_TYPE.AppearanceOutfit)
-                    FrameGroupCount = r.ReadByte();
+                // read frame groups if applicable to this version
+                if (hasFrameGroups && type == APPEARANCE_TYPE.AppearanceOutfit) {
+                    byte FrameGroupType = r.ReadByte();
+                    frameGroup.FixedFrameGroup = (FIXED_FRAME_GROUP)FrameGroupType;
+                } else {
+                    frameGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
+                }
 
-                for (int i = 0; i < FrameGroupCount; i++)
-                {
-                    //FIXED_FRAME_GROUP
-                    FrameGroup frameGroup = new FrameGroup();
-                    frameGroup.SpriteInfo = new SpriteInfo();
-                    if (type == APPEARANCE_TYPE.AppearanceOutfit)
-                    {
-                        byte FrameGroupType = r.ReadByte();
-                        frameGroup.FixedFrameGroup = (FIXED_FRAME_GROUP)FrameGroupType;
-                    }
-                    else
-                        frameGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
+                frameGroup.SpriteInfo.PatternWidth = r.ReadByte();
+                frameGroup.SpriteInfo.PatternHeight = r.ReadByte();
 
-                    frameGroup.SpriteInfo.PatternWidth = r.ReadByte();
-                    frameGroup.SpriteInfo.PatternHeight = r.ReadByte();
+                if (frameGroup.SpriteInfo.PatternWidth > 1 || frameGroup.SpriteInfo.PatternHeight > 1) {
+                    frameGroup.SpriteInfo.PatternSize = r.ReadByte();
+                } else {
+                    frameGroup.SpriteInfo.PatternSize = 32;
+                }
 
-                    if (frameGroup.SpriteInfo.PatternWidth > 1 || frameGroup.SpriteInfo.PatternHeight > 1)
-                        frameGroup.SpriteInfo.PatternSize = r.ReadByte();
-                    else
-                        frameGroup.SpriteInfo.PatternSize = 32;
+                frameGroup.SpriteInfo.PatternLayers = r.ReadByte();
+                frameGroup.SpriteInfo.PatternX = r.ReadByte();
+                frameGroup.SpriteInfo.PatternY = r.ReadByte();
 
-                    frameGroup.SpriteInfo.PatternLayers = r.ReadByte();
-
-                    frameGroup.SpriteInfo.PatternX = r.ReadByte();
-
-                    frameGroup.SpriteInfo.PatternY = r.ReadByte();
-
+                // old versions did not use pattern Z
+                if (versionInfo.UsePatternZ) {
                     frameGroup.SpriteInfo.PatternZ = r.ReadByte();
+                } else {
+                    frameGroup.SpriteInfo.PatternZ = 1;
+                }
 
-                    frameGroup.SpriteInfo.PatternFrames = r.ReadByte();
+                frameGroup.SpriteInfo.PatternFrames = r.ReadByte();
 
-                    if (frameGroup.SpriteInfo.PatternFrames > 1)
-                    {
-                        SpriteAnimation spriteAnimation = new SpriteAnimation();
-                        spriteAnimation.AnimationMode = (ANIMATION_ANIMATION_MODE)r.ReadByte();
-                        spriteAnimation.LoopCount = r.ReadUInt32();
-                        spriteAnimation.DefaultStartPhase = r.ReadByte();
+                if (frameGroup.SpriteInfo.PatternFrames > 1) {
+                    if (hasFrameDurations) {
+                        // frame durations present
+                        // read animation mode and durations
+                        SpriteAnimation spriteAnimation = new() {
+                            AnimationMode = (ANIMATION_ANIMATION_MODE)r.ReadByte(),
+                            LoopCount = r.ReadUInt32(),
+                            DefaultStartPhase = r.ReadByte()
+                        };
 
-                        for (int k = 0; k < frameGroup.SpriteInfo.PatternFrames; k++)
-                        {
-                            SpritePhase spritePhase = new SpritePhase();
-                            spritePhase.DurationMin = r.ReadUInt32();
-                            spritePhase.DurationMax = r.ReadUInt32();
+                        for (int k = 0; k < frameGroup.SpriteInfo.PatternFrames; k++) {
+                            SpritePhase spritePhase = new() {
+                                DurationMin = r.ReadUInt32(),
+                                DurationMax = r.ReadUInt32()
+                            };
                             spriteAnimation.SpritePhase.Add(spritePhase);
                         }
+
                         frameGroup.SpriteInfo.Animation = spriteAnimation;
+                    } else {
+                        // frame durations not present
+                        // populate the animation info with values used in the old client
+                        SpriteAnimation spriteAnimation = new() {
+                            AnimationMode = ANIMATION_ANIMATION_MODE.AnimationAsynchronized,
+                            LoopCount = 1,
+                            DefaultStartPhase = 1
+                        };
 
-                    }
-                    int NumSprites = (int)(frameGroup.SpriteInfo.PatternWidth * frameGroup.SpriteInfo.PatternHeight * frameGroup.SpriteInfo.PatternLayers * frameGroup.SpriteInfo.PatternX * frameGroup.SpriteInfo.PatternY * frameGroup.SpriteInfo.PatternZ * frameGroup.SpriteInfo.PatternFrames);
-                    for (var x = 0; x < NumSprites; x++)
-                    {
-                        var sprite = r.ReadUInt32();
-                        frameGroup.SpriteInfo.SpriteId.Add(sprite);
+                        for (int k = 0; k < frameGroup.SpriteInfo.PatternFrames; k++) {
+                            SpritePhase spritePhase = new() {
+                                DurationMin = 100,
+                                DurationMax = 100
+                            };
+                            spriteAnimation.SpritePhase.Add(spritePhase);
+                        }
 
+                        frameGroup.SpriteInfo.Animation = spriteAnimation;
                     }
-                    appearance.FrameGroup.Add(frameGroup);
                 }
+
+                int NumSprites = (int)(frameGroup.SpriteInfo.PatternWidth * frameGroup.SpriteInfo.PatternHeight * frameGroup.SpriteInfo.PatternLayers * frameGroup.SpriteInfo.PatternX * frameGroup.SpriteInfo.PatternY * frameGroup.SpriteInfo.PatternZ * frameGroup.SpriteInfo.PatternFrames);
+                for (var x = 0; x < NumSprites; x++) {
+                    var sprite = isExtended ? r.ReadUInt32() : r.ReadUInt16();
+                    frameGroup.SpriteInfo.SpriteId.Add(sprite);
+
+                }
+                appearance.FrameGroup.Add(frameGroup);
             }
 
             return appearance;
@@ -415,11 +448,32 @@ namespace Assets_Editor
                         break;
 
                     case "Displaced":
-                        appearance.Flags.Shift = new AppearanceFlagShift
-                        {
-                            X = r.ReadUInt16(),
-                            Y = r.ReadUInt16()
-                        };
+                        if (flagInfo.Version == 2) {
+                            // 1098 standard - read offset
+                            appearance.Flags.Shift = new AppearanceFlagShift {
+                                X = r.ReadUInt16(),
+                                Y = r.ReadUInt16(),
+                                A = 0,
+                                B = 0
+                            };
+                        } else if (flagInfo.Version == 3) {
+                            // RD standard - displacement + sprite offset (?)
+                            appearance.Flags.Shift = new AppearanceFlagShift {
+                                X = r.ReadUInt16(),
+                                Y = r.ReadUInt16(),
+                                A = r.ReadUInt16(),
+                                B = r.ReadUInt16()
+                            };
+                        } else {
+                            // old elevation did not precise the offset
+                            appearance.Flags.Shift = new AppearanceFlagShift {
+                                X = 8,
+                                Y = 8,
+                                A = 0,
+                                B = 0
+                            };
+                        }
+
                         break;
 
                     case "Elevated":
@@ -502,6 +556,10 @@ namespace Assets_Editor
 
                     case "TopEffect":
                         appearance.Flags.Topeffect = true;
+                        break;
+
+                    case "ShowCharges":
+                        appearance.Flags.Wearout = true;
                         break;
 
                     case "Default":

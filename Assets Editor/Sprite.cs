@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assets_Editor
@@ -553,23 +549,23 @@ namespace Assets_Editor
         public SpriteStorage(string path, bool transparency, IProgress<int> reportProgress = null)
         {
             SprPath = path;
-            Sprites = new Dictionary<uint, Sprite>();
-            SprLists = new ConcurrentDictionary<int, MemoryStream>();
+            Sprites = [];
+            SprLists = [];
             Transparency = transparency;
 
             Sprite.CreateBlankSprite();
-            using FileStream fileStream = new FileStream(path, FileMode.Open);
-            using BinaryReader reader = new BinaryReader(fileStream);
+            using FileStream fileStream = new(path, FileMode.Open, FileAccess.Read);
+            using BinaryReader reader = new(fileStream);
 
             Signature = reader.ReadUInt32();
 
             uint totalPics = reader.ReadUInt32();
 
-            List<(uint Index, uint Id)> spriteIndexes = new List<(uint Index, uint Id)>(Convert.ToInt32(totalPics));
-            Sprite blankSpr = new Sprite
+            List<(uint Index, uint Id)> spriteIndexes = new(Convert.ToInt32(totalPics));
+            Sprite blankSpr = new()
             {
                 ID = 0,
-                CompressedPixels = Array.Empty<byte>(),
+                CompressedPixels = [],
             };
             using Bitmap _bmp = blankSpr.GetBitmap();
             _bmp.Save(blankSpr.MemoryStream, ImageFormat.Png);
@@ -579,7 +575,7 @@ namespace Assets_Editor
             int lastReportedProgress = -1;
             for (uint i = 0; i < totalPics; ++i)
             {
-                Sprite sprite = new Sprite
+                Sprite sprite = new()
                 {
                     ID = i + 1,
                     Transparent = Transparency
@@ -602,17 +598,17 @@ namespace Assets_Editor
                 return SprLists[(int)id];
             }
 
+            bool isExtended = MainWindow.GetCurrentPreset()?.Extended ?? false;
+
             Sprite sprite = Sprites[id];
-            using (FileStream fileStream = new FileStream(SprPath, FileMode.Open, FileAccess.Read))
+            using (FileStream fileStream = new(SprPath, FileMode.Open, FileAccess.Read))
             {
-                using (BinaryReader reader = new BinaryReader(fileStream))
-                {
-                    reader.BaseStream.Seek(8 + (id - 1) * 4, SeekOrigin.Begin);
-                    uint index = reader.ReadUInt32() + 3;
-                    reader.BaseStream.Seek(index, SeekOrigin.Begin);
-                    sprite.Size = reader.ReadUInt16();
-                    sprite.CompressedPixels = reader.ReadBytes((ushort)sprite.Size);
-                }
+                using BinaryReader reader = new(fileStream);
+                reader.BaseStream.Seek((isExtended ? 8 : 6) + (id - 1) * 4, SeekOrigin.Begin);
+                uint index = reader.ReadUInt32() + 3;
+                reader.BaseStream.Seek(index, SeekOrigin.Begin);
+                sprite.Size = reader.ReadUInt16();
+                sprite.CompressedPixels = reader.ReadBytes((ushort)sprite.Size);
             }
 
             using (Bitmap bmp = sprite.GetBitmap())
