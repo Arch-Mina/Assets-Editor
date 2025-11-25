@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Forms;
 using MessageBox = System.Windows.Forms.MessageBox;
 
@@ -29,10 +28,5 @@ public static class ErrorManager {
             (MessageBoxButtons)MessageBoxButton.OK,
             (MessageBoxIcon)MessageBoxImage.Error
         );
-    }
-
-    public static void ShowException(Exception ex) {
-        // to do: an option to copy this
-        ShowError(ex.ToString());
     }
 }

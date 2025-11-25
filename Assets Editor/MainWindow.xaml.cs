@@ -478,13 +478,10 @@ public partial class MainWindow : Window
                 return;
             }
 
-            /*
             if (!String.IsNullOrEmpty(currentPreset.ServerPath)) {
                 string otbPath = Path.Combine(currentPreset.ServerPath, "data/items/items.otb");
                 ServerOTB.Read(otbPath);
             }
-            */
-
             
             Loaded = true;
         }
