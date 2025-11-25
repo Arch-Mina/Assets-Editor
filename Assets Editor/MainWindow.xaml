@@ -176,24 +176,17 @@ ToolTip="Remove preset">
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Grid.Column="0">
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Items:" />
-                            <Label x:Name="ObjectsCount"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Outfits:" />
-                            <Label x:Name="OutfitsCount"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" >
-                            <Label Content="Effects:" />
-                            <Label x:Name="EffectsCount"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Missiles:" />
-                            <Label x:Name="MissilesCount"/>
-                        </StackPanel>
-                    </StackPanel>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="70"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBox x:Name="AppearancesCount"
+                                Style="{StaticResource SelectableTextBlockStyle}"
+                                Text="Items:&#9;&#9;0&#10;Outfits:&#9;&#9;0&#10;Effects:&#9;&#9;0&#10;Missiles:&#9;&#9;0"
+                                 Grid.Row="0"/>
+                    </Grid>
 
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Grid.Column="1">
                         <StackPanel Orientation="Horizontal">
@@ -224,11 +217,19 @@ ToolTip="Remove preset">
                                  Style="{StaticResource SelectableTextBlockStyle}"
                                  Text="No version loaded"
                                  Grid.Row="0" />
-                        <CheckBox Name="OTFIOverrideChk"
-                                  Content="override OTFI"
-                                  Margin="-2,0,0,0"
+
+                        <ComboBox x:Name="DatStructureDropdown"
+                                  Width="100"
+                                  Height="25"
+                                  BorderThickness="1,1,1,1"
+                                  SelectedIndex="1"
+                                  Padding="10,3,5,3"
+                                  IsReadOnly="True"
                                   Grid.Row="1"
-                                  IsEnabled="False"/>
+                                  IsEnabled="False"
+                                  SelectionChanged="DatStructureType_SelectionChanged"
+                        />
+
                     </Grid>
                 </Grid>
 

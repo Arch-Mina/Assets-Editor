@@ -53,11 +53,15 @@ namespace Assets_Editor
 
             throw new KeyNotFoundException($"Flag '{flagName}' not found in version {Name}.");
         }
+
+        public override string ToString() {
+            return $"{Name}";
+        }
     }
 
     public class DatStructure
     {
-        private Dictionary<int, VersionInfo> versions = new Dictionary<int, VersionInfo>();
+        private Dictionary<int, VersionInfo> versions = [];
 
         public DatStructure()
         {

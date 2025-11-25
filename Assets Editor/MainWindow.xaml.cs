@@ -72,6 +72,9 @@ public partial class MainWindow : Window
         // load settings.json
         LoadEditorSettings();
 
+        // populate dat structure selector
+        LoadDatChoices();
+
         // clear selection
         A_SavedVersion.SelectedIndex = -1;
 
@@ -94,6 +97,12 @@ public partial class MainWindow : Window
         worker.ProgressChanged += Worker_ProgressChanged;
         worker.DoWork += Worker_DoWork;
         worker.RunWorkerCompleted += Worker_Completed;
+    }
+
+    private void LoadDatChoices() {
+        foreach (VersionInfo version in datStructure.GetAllVersions()) {
+            DatStructureDropdown.Items.Add(version);
+        }
     }
 
     public class Settings
@@ -232,6 +241,11 @@ public partial class MainWindow : Window
         catalog = JsonConvert.DeserializeObject<List<Catalog>>(json, settings);
     }
 
+    private void UpdateAppearancesCount()
+    {
+        AppearancesCount.Text = $"Items:\t{ObjectCount}\nOutfits:\t{OutfitCount}\nEffects:\t{EffectCount}\nMissiles:\t{MissileCount}";
+    }
+
     private void LoadAppearances()
     {
         _datPath = String.Format("{0}{1}", _assetsPath, catalog[0].File);
@@ -240,16 +254,12 @@ public partial class MainWindow : Window
         FileStream appStream;
         using (appStream = new FileStream(_datPath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
         {
-            appearances = Tibia.Protobuf.Appearances.Appearances.Parser.ParseFrom(appStream);
+            appearances = Appearances.Parser.ParseFrom(appStream);
             ObjectCount = (ushort)appearances.Object[^1].Id;
             OutfitCount = (ushort)appearances.Outfit[^1].Id;
             EffectCount = (ushort)appearances.Effect[^1].Id;
             MissileCount = (ushort)appearances.Missile[^1].Id;
-
-            ObjectsCount.Content = ObjectCount;
-            OutfitsCount.Content = OutfitCount;
-            EffectsCount.Content = EffectCount;
-            MissilesCount.Content = MissileCount;
+            UpdateAppearancesCount();
         }
     }
 
@@ -259,10 +269,11 @@ public partial class MainWindow : Window
         using BinaryReader r = new(stream);
         DatInfo info = DatStructure.ReadAppearanceInfo(r);
         DatSignature = info.Signature;
-        ObjectsCount.Content = info.ObjectCount;
-        OutfitsCount.Content = info.OutfitCount;
-        EffectsCount.Content = info.EffectCount;
-        MissilesCount.Content = info.MissileCount;
+        ObjectCount = info.ObjectCount;
+        OutfitCount = info.OutfitCount;
+        EffectCount = info.EffectCount;
+        MissileCount = info.MissileCount;
+        UpdateAppearancesCount();
     }
 
     private void ReadSprSignature()
@@ -389,6 +400,12 @@ public partial class MainWindow : Window
             DatTransparentToggle.IsChecked = currentPreset.Transparent;
             DatAnimationsToggle.IsChecked = currentPreset.FrameDurations;
             DatFrameGroupsToggle.IsChecked = currentPreset.FrameGroups;
+
+            foreach (VersionInfo version in datStructure.GetAllVersions().Reverse()) {
+                if (currentPreset.Version == version.Structure) {
+                    DatStructureDropdown.SelectedItem = version;
+                }
+            }
         });
     }
 
@@ -404,9 +421,33 @@ public partial class MainWindow : Window
             Loaded = true;
         } else {
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_WIP, "Loading dat file ...");
-            bool datFound = InternalTryLoadDat();
+
+            // try to load dat file with user settings
+            bool datFound = false;
+            try {
+                //currentPreset.FrameDurations;
+                //currentPreset.FrameGroups;
+                LegacyAppearance Dat = new();
+                Dat.ReadLegacyDat(_datPath, currentPreset.Version);
+
+                // dat was found, update the current preset
+                appearances = Dat.Appearances;
+                datFound = true;
+            } catch {
+                // not the dat we are looking for, try another one
+            }
+            
+            // user settings failed, try to match suitable user settings
             if (!datFound) {
-                if (!currentPreset.Extended) {
+                SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_WIP, "Searching for matching version ...");
+
+                currentPreset.Extended = false;
+                currentPreset.FrameDurations = false;
+                currentPreset.FrameGroups = false;
+
+                datFound = InternalTryLoadDat();
+
+                if (!datFound && !currentPreset.Extended) {
                     currentPreset.Extended = true;
                     datFound = InternalTryLoadDat();
                 }
@@ -428,6 +469,8 @@ public partial class MainWindow : Window
                 return;
             }
 
+            RefreshUIToggles();
+
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_WIP, "Loading spr file ...");
             if (!InternalTryLoadSpr()) {
                 SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "Unable to load spr!");
@@ -442,7 +485,7 @@ public partial class MainWindow : Window
             }
             */
 
-            RefreshUIToggles();
+            
             Loaded = true;
         }
     }
@@ -741,20 +784,53 @@ public partial class MainWindow : Window
         return true;
     }
 
+    private void OnInvalidVersionLoaded()
+    {
+        // not configurable for invalid version
+        DatExtendedToggle.IsEnabled = false;
+        DatTransparentToggle.IsEnabled = false;
+        DatAnimationsToggle.IsEnabled = false;
+        DatFrameGroupsToggle.IsEnabled = false;
+        DatStructureDropdown.IsEnabled = false;
+        LoadAssets.IsEnabled = false;
+
+        ObjectCount = 0;
+        OutfitCount = 0;
+        EffectCount = 0;
+        MissileCount = 0;
+        UpdateAppearancesCount();
+    }
+
+    private void OnLegacyAssetsLoaded()
+    {
+        // spr/dat found
+        LegacyClient = true;
+
+        // enable dat version selector
+        DatStructureDropdown.IsEnabled = true;
+
+        // enable dat toggles
+        DatExtendedToggle.IsEnabled = true;
+        DatTransparentToggle.IsEnabled = true;
+        DatAnimationsToggle.IsEnabled = true;
+        DatFrameGroupsToggle.IsEnabled = true;
+    }
+
     private void OnAssetsLoaded()
     {
         // assets found
         LegacyClient = false;
 
         // OTFI does not work with assets
-        OTFIOverrideChk.IsChecked = true;
+        DatStructureDropdown.IsEnabled = false;
 
         // Assets have all features natively
         // this cannot be changed
-        DatExtendedToggle.IsChecked = true;
-        DatTransparentToggle.IsChecked = true;
-        DatAnimationsToggle.IsChecked = true;
-        DatFrameGroupsToggle.IsChecked = true;
+        DatExtendedToggle.IsEnabled = false;
+        DatTransparentToggle.IsEnabled = false;
+        DatAnimationsToggle.IsEnabled = false;
+        DatFrameGroupsToggle.IsEnabled = false;
+
         LoadAssets.IsEnabled = true;
 
         // set version info to the UI
@@ -799,8 +875,7 @@ public partial class MainWindow : Window
         }
 
         if (TryLoadLegacyAssets()) {
-            // handle success
-
+            OnLegacyAssetsLoaded();
             return;
         }
 
@@ -822,6 +897,7 @@ public partial class MainWindow : Window
 
         SetVersionDescription("No version loaded");
         SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_INFO, "No assets found in selected directory.");
+        OnInvalidVersionLoaded();
         return;
     }
 
@@ -855,18 +931,29 @@ public partial class MainWindow : Window
 
     private void DatExtended_Changed(object sender, RoutedEventArgs e) {
         currentPreset?.Extended = DatExtendedToggle.IsChecked ?? false;
+        SaveEditorSettings();
     }
 
     private void DatTransparent_Changed(object sender, RoutedEventArgs e) {
         currentPreset?.Transparent = DatTransparentToggle.IsChecked ?? false;
+        SaveEditorSettings();
     }
 
     private void DatAnimations_Changed(object sender, RoutedEventArgs e) {
         currentPreset?.FrameDurations = DatAnimationsToggle.IsChecked ?? false;
+        SaveEditorSettings();
     }
 
     private void DatFrameGroup_Changed(object sender, RoutedEventArgs e) {
         currentPreset?.FrameGroups = DatFrameGroupsToggle.IsChecked ?? false;
+        SaveEditorSettings();
+    }
+
+    private void DatStructureType_SelectionChanged(object sender, RoutedEventArgs e) {
+        if (DatStructureDropdown.SelectedItem is VersionInfo selectedVersion) {
+            currentPreset?.Version = selectedVersion.Structure;
+            SaveEditorSettings();
+        }
     }
 
     public static void Log(string message, string level = "Info")

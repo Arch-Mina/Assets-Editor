@@ -197,7 +197,7 @@
 		</Flags>
 	</Dat>
 
-	<Dat structure="6" name="10.10 - 10.56">
+	<Dat structure="6" name="10.10 +">
 		<Flags>
 			<Flag id="0" name="Ground" />
 			<Flag id="1" name="Clip" />

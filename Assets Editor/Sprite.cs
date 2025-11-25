@@ -562,7 +562,8 @@ namespace Assets_Editor
 
             Signature = reader.ReadUInt32();
 
-            uint totalPics = reader.ReadUInt32();
+            bool isExtended = MainWindow.GetCurrentPreset()?.Extended ?? false;
+            uint totalPics = isExtended ? reader.ReadUInt32() : reader.ReadUInt16();
 
             List<(uint Index, uint Id)> spriteIndexes = new(Convert.ToInt32(totalPics));
             Sprite blankSpr = new() {
