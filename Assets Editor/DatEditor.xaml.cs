@@ -787,8 +787,10 @@ namespace Assets_Editor
             }
 
             string xml = $"<look type=\"{typeValue}\" head=\"{headValue}\" body=\"{bodyValue}\" legs=\"{legsValue}\" feet=\"{feetValue}\" corpse=\"{corpseValue}\"/>";
-            Clipboard.SetText(xml);
-            StatusBar.MessageQueue.Enqueue($"xml copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+
+            Dispatcher.Invoke(() => {
+                ClipboardManager.CopyText(xml, "xml", StatusBar);
+            });
         }
 
         protected void Colorize(System.Drawing.Bitmap imageTemplate, System.Drawing.Bitmap imageOutfit, Color head, Color body, Color legs, Color feet)
@@ -1788,12 +1790,12 @@ namespace Assets_Editor
             UpdateShowList(ObjectMenu.SelectedIndex, CurrentObjectAppearance.Id);
             AnimateSelectedListItem(showList);
 
-            StatusBar.MessageQueue.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
         private void CopyObjectFlags(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             CurrentFlags = CurrentObjectAppearance.Flags.Clone();
-            StatusBar.MessageQueue.Enqueue($"Copied Current Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Copied Current Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
         private void PasteObjectFlags(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -1801,10 +1803,10 @@ namespace Assets_Editor
             {
                 CurrentObjectAppearance.Flags = CurrentFlags.Clone();
                 LoadCurrentObjectAppearances();
-                StatusBar.MessageQueue.Enqueue($"Pasted Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Pasted Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
             else
-                StatusBar.MessageQueue.Enqueue($"Copy Flags First.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Copy Flags First.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void SprPhaseMin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -1860,7 +1862,7 @@ namespace Assets_Editor
             var output = File.Create(MainWindow._datPath);
             MainWindow.appearances.WriteTo(output);
             output.Close();
-            StatusBar.MessageQueue.Enqueue($"Compiled.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Compiled.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
         public List<System.Drawing.Bitmap> SplitImage(System.Drawing.Bitmap originalImage)
         {
@@ -2503,7 +2505,7 @@ namespace Assets_Editor
             CollectionViewSource.GetDefaultView(ObjListView.ItemsSource).Refresh();
             ObjListView.SelectedItem = ObjListView.Items[^1];
 
-            StatusBar.MessageQueue.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void ObjectClone_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2557,7 +2559,7 @@ namespace Assets_Editor
                     ObjListView.ScrollIntoView(ObjListView.Items[^1]);
                 }), System.Windows.Threading.DispatcherPriority.Background);
 
-                StatusBar.MessageQueue.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
 
@@ -2599,7 +2601,7 @@ namespace Assets_Editor
                     }
                 }
                 ObjListView.SelectedIndex = Math.Min(currentIndex, ObjListView.Items.Count - 1);
-                StatusBar.MessageQueue.Enqueue($"Successfully deleted {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Successfully deleted {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 UpdateShowList(ObjectMenu.SelectedIndex);
             }
         }
@@ -3656,7 +3658,7 @@ namespace Assets_Editor
         {
             if (int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") == 0)
             {
-                StatusBar.MessageQueue.Enqueue($"Export list is empty.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Export list is empty.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 return;
             }
 
@@ -3671,7 +3673,7 @@ namespace Assets_Editor
                 exportSprCounter = 0;
                 exportObjects = new Appearances();
                 ObjListView_ScrollChanged(ObjListView, null!);
-                StatusBar.MessageQueue.Enqueue($"Successfully exported objects.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Successfully exported objects.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
 
@@ -3692,30 +3694,30 @@ namespace Assets_Editor
                 if (!MainWindow.appearances.Outfit.Any(a => a.Id == newId))
                 {
                     CurrentObjectAppearance.Id = newId;
-                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
-                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
             else if (ObjectMenu.SelectedIndex == 1)
             {
                 if (!MainWindow.appearances.Object.Any(a => a.Id == newId) && newId > 100)
                 {
                     CurrentObjectAppearance.Id = newId;
-                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
-                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
             else if (ObjectMenu.SelectedIndex == 2)
             {
                 if (!MainWindow.appearances.Effect.Any(a => a.Id == newId))
                 {
                     CurrentObjectAppearance.Id = newId;
-                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
-                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
 
             }
             else if (ObjectMenu.SelectedIndex == 3)
@@ -3723,10 +3725,10 @@ namespace Assets_Editor
                 if (!MainWindow.appearances.Missile.Any(a => a.Id == newId))
                 {
                     CurrentObjectAppearance.Id = newId;
-                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
-                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
 
@@ -3822,7 +3824,7 @@ namespace Assets_Editor
                 spritePhase.DurationMax = maxDuration;
             }
 
-            StatusBar.MessageQueue.Enqueue($"Successfully applied to {animationSpritePhases.Count} frames.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+            StatusBar.MessageQueue?.Enqueue($"Successfully applied to {animationSpritePhases.Count} frames.", null, null, null, false, true, TimeSpan.FromSeconds(3));
         }
 
         private void SpriteListHelp_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

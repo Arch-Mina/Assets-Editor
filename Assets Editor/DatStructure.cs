@@ -326,7 +326,7 @@ namespace Assets_Editor
             {
                 if (!versionInfo.FlagsById.TryGetValue(opt, out FlagInfo flagInfo))
                 {
-                    throw new Exception($"Unknown flag {opt} for version {versionInfo}");
+                    throw new Exception($"Unknown flag {opt} for version {versionInfo.Name}");
                 }
                 switch (flagInfo.Name)
                 {

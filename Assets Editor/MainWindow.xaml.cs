@@ -257,17 +257,23 @@ public partial class MainWindow : Window
 
     private void LoadLegacyDat()
     {
-        using var stream = File.OpenRead(_datPath);
-        using var r = new BinaryReader(stream);
-        {
-            DatInfo info = DatStructure.ReadAppearanceInfo(r);
-            DatSignature = info.Signature;
-            ObjectsCount.Content = info.ObjectCount;
-            OutfitsCount.Content = info.OutfitCount;
-            EffectsCount.Content = info.EffectCount;
-            MissilesCount.Content = info.MissileCount;
-        }
+        using FileStream stream = File.OpenRead(_datPath);
+        using BinaryReader r = new(stream);
+        DatInfo info = DatStructure.ReadAppearanceInfo(r);
+        DatSignature = info.Signature;
+        ObjectsCount.Content = info.ObjectCount;
+        OutfitsCount.Content = info.OutfitCount;
+        EffectsCount.Content = info.EffectCount;
+        MissilesCount.Content = info.MissileCount;
     }
+
+    private void ReadSprSignature()
+    {
+        using FileStream stream = File.OpenRead(_sprPath);
+        using BinaryReader r = new(stream);
+        SprSignature = r.ReadUInt32();
+    }
+
     private void LoadLegacySpr()
     {
         bool transparency = false;
@@ -314,6 +320,16 @@ public partial class MainWindow : Window
         }
 
         InternalSelectAssets();
+    }
+
+    /// <summary>
+    /// Copies current assets path to clipboard
+    /// </summary>
+    private void CopyAssetsPath(object sender, RoutedEventArgs e)
+    {
+        Dispatcher.Invoke(() => {
+            ClipboardManager.CopyText(AssetsPath.Text, "Path", StatusBar, 1);
+        });
     }
 
     /// <summary>
@@ -386,13 +402,13 @@ public partial class MainWindow : Window
     {
         if (currentPreset == null) {
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "No preset selected!");
-            return; 
+            return;
         }
 
-        if (LegacyClient == false)
+        if (LegacyClient == false) {
             LoadSprSheet();
-        else
-        {
+            Loaded = true;
+        } else {
             bool datFound = InternalTryLoadDat();
             if (!datFound) {
                 if (!currentPreset.Extended) {
@@ -411,32 +427,29 @@ public partial class MainWindow : Window
                 }
             }
 
+            SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_WIP, "Loading dat file ...");
             if (!datFound) {
                 SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "Unable to load dat!");
                 RefreshUIToggles();
                 return;
             }
 
+            SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_WIP, "Loading spr file ...");
             if (!InternalTryLoadSpr()) {
                 SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "Unable to load spr!");
                 RefreshUIToggles();
                 return;
             }
 
-            RefreshUIToggles();
-            Loaded = true;
-
             /*
-            LegacyAppearance Dat = new();
-            Dat.ReadLegacyDat(_datPath, currentPreset.Version);
-            appearances = Dat.Appearances;
-            
-            if (currentPreset.ServerPath != string.Empty)
-            {
+            if (!String.IsNullOrEmpty(currentPreset.ServerPath)) {
                 string otbPath = Path.Combine(currentPreset.ServerPath, "data/items/items.otb");
                 ServerOTB.Read(otbPath);
             }
             */
+
+            RefreshUIToggles();
+            Loaded = true;
         }
     }
     private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -590,6 +603,7 @@ public partial class MainWindow : Window
     {
         try {
             if (!File.Exists(Path.Combine(_assetsPath, "catalog-content.json"))) {
+                SetVersionDescription("No version loaded");
                 SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "No assets found in selected directory");
                 return false;
             }
@@ -732,8 +746,22 @@ public partial class MainWindow : Window
             return true;
         }
 
-        LoadAssets.IsEnabled = true;
+        // attempt to read spr signature
+        try {
+            ReadSprSignature();
+        } catch (Exception ex) {
+            MessageBox.Show(
+                $"Unable to read spr file!\n\n{ex.Message}",
+                "Warning",
+                (MessageBoxButtons)MessageBoxButton.OK,
+                (MessageBoxIcon)MessageBoxImage.Warning
+            );
+            SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "Unable to load spr file!");
+            return true;
+        }
 
+        LoadAssets.IsEnabled = true;
+        SetVersionDescription(AssetsVersionInfo.Text = $"DAT: 0x{DatSignature:X}\nSPR: 0x{SprSignature:X}");
         // DatSignature
         // 0A 93 01 08 - consistent first 4 bytes for appearances.dat (version 12 and newer)
         if (DatSignature == 0x0801930A) {
@@ -747,8 +775,6 @@ public partial class MainWindow : Window
         } else {
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_INFO, "FOUND: Legacy SPR/DAT");
         }
-
-        // to do: read spr signature
 
         return true;
     }
@@ -794,7 +820,7 @@ public partial class MainWindow : Window
             // version reading is optional, no error to display
         }
 
-        AssetsVersionInfo.Text = $"Assets Version:\n{version}";
+        SetVersionDescription($"Assets Version:\n{version}");
     }
 
     private void InternalSelectAssets()
@@ -832,6 +858,7 @@ public partial class MainWindow : Window
         // revert the attempt to search "assets" subdirectory
         _assetsPath = oldAssetsPath;
 
+        SetVersionDescription("No version loaded");
         SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_INFO, "No assets found in selected directory.");
         return;
     }
@@ -904,6 +931,12 @@ public partial class MainWindow : Window
         }
         palette.SetTheme(theme);
         SaveEditorSettings();
+    }
+
+    private void SetVersionDescription(string text) {
+        Dispatcher.Invoke(() => {
+            AssetsVersionInfo.Text = text;
+        });
     }
 
     enum AssetsLoadingStatus {

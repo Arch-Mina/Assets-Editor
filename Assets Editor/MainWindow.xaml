@@ -9,6 +9,20 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Style="{StaticResource MaterialDesignWindow}">
 
+    <Window.Resources>
+        <Style x:Key="SelectableTextBlockStyle" TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignTextForeground}" />
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="CaretBrush" Value="{x:Null}"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="materialDesign:TextFieldAssist.DecorationVisibility" Value="Collapsed"/>
+        </Style>
+    </Window.Resources>
+
     <Grid Margin="10,12,10,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -94,9 +108,19 @@ ToolTip="Remove preset">
 
                 <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center" Margin="0,10,0,0">
                     <Label Content="DAT File Path:" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                    <TextBox x:Name="AssetsPath" VerticalAlignment="Center" Width="330" IsEnabled="False" Margin="5,0,0,0"/>
-                    <Button Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" VerticalAlignment="Center" Height="55" Width="55" Click="SelectAssetsFolder">
+                    <TextBox
+                        x:Name="AssetsPath"
+                        VerticalAlignment="Center"
+                        Width="330"
+                        IsEnabled="False"
+                        Margin="5,0,0,0"
+                    />
+
+                    <Button Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" VerticalAlignment="Center" Height="55" Width="40" Margin="5,0,0,0" Click="SelectAssetsFolder">
                         <materialDesign:PackIcon  Kind="CardSearch" Height="40" Width="40" />
+                    </Button>
+                    <Button ToolTip="Copy Path" Style="{StaticResource MaterialDesignIconButton}" Width="24" Height="24" VerticalAlignment="Center" Click="CopyAssetsPath" Margin="3,0,0,0">
+                        <materialDesign:PackIcon  Kind="ContentCopy" Height="20" Width="20" />
                     </Button>
                 </StackPanel>
 
@@ -196,9 +220,10 @@ ToolTip="Remove preset">
                             <RowDefinition Height="25"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock x:Name="AssetsVersionInfo" LineHeight="20"
-                                    Text="DAT: 0x42ABCDEF&#10;SPR: 0x42ABCDEF&#10;Version: 10.98"
-                                    Grid.Row="0"/>
+                        <TextBox x:Name="AssetsVersionInfo"
+                                 Style="{StaticResource SelectableTextBlockStyle}"
+                                 Text="No version loaded"
+                                 Grid.Row="0" />
                         <CheckBox Name="OTFIOverrideChk"
                                   Content="override OTFI"
                                   Margin="-2,0,0,0"
@@ -206,6 +231,16 @@ ToolTip="Remove preset">
                                   IsEnabled="False"/>
                     </Grid>
                 </Grid>
+
+                <materialDesign:Snackbar
+                    Grid.Row="2"
+                    x:Name="StatusBar"
+                    MessageQueue="{materialDesign:MessageQueue}"
+                    IsActive="False"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                    Padding="0,-20,0,0" />
             </Grid>
 
             <Button Grid.Row="1" x:Name="LoadAssets" HorizontalAlignment="Center" VerticalAlignment="Top" IsEnabled="False" Click="LoadAssets_Click" Margin="0,10,0,0">

@@ -656,8 +656,9 @@ namespace Assets_Editor
             }
 
             string xml = $"<look type=\"{typeValue}\" head=\"{headValue}\" body=\"{bodyValue}\" legs=\"{legsValue}\" feet=\"{feetValue}\" corpse=\"{corpseValue}\"/>";
-            Clipboard.SetText(xml);
-            StatusBar.MessageQueue.Enqueue($"xml copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            Dispatcher.Invoke(() => {
+                ClipboardManager.CopyText(xml, "xml", StatusBar);
+            });
         }
         private void SetImageInGrid(Grid grid, int gridHeight, BitmapImage image, int id, int spriteId, int index)
         {
@@ -1128,13 +1129,13 @@ namespace Assets_Editor
             ShowList showList = ObjListView.SelectedItem as ShowList;
             AnimateSelectedListItem(showList);
 
-            StatusBar.MessageQueue.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void CopyObjectFlags(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             CurrentFlags = CurrentObjectAppearance.Flags.Clone();
-            StatusBar.MessageQueue.Enqueue($"Copied Current Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Copied Current Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
         private void PasteObjectFlags(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -1142,10 +1143,10 @@ namespace Assets_Editor
             {
                 CurrentObjectAppearance.Flags = CurrentFlags.Clone();
                 LoadCurrentObjectAppearances();
-                StatusBar.MessageQueue.Enqueue($"Pasted Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Pasted Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
             else
-                StatusBar.MessageQueue.Enqueue($"Copy Flags First.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Copy Flags First.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
@@ -1209,7 +1210,7 @@ namespace Assets_Editor
                 await Sprite.CompileSpritesAsync(sprfile, MainWindow.MainSprStorage, (bool)C_Transparent.IsChecked, MainWindow.SprSignature, progress);
             }
             else
-                StatusBar.MessageQueue.Enqueue($".dat or .spr file is being used by another process or is not accessible.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($".dat or .spr file is being used by another process or is not accessible.", null, null, null, false, true, TimeSpan.FromSeconds(2));
 
             ComppileDialogHost.IsOpen = false;
         }
@@ -1324,11 +1325,11 @@ namespace Assets_Editor
 
                 if (imported > 0)
                 {
-                    StatusBar.MessageQueue.Enqueue($"Successfully imported {imported} image(s).", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Successfully imported {imported} image(s).", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
                 {
-                    StatusBar.MessageQueue.Enqueue("No images imported.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue("No images imported.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
             }
         }
@@ -1343,7 +1344,7 @@ namespace Assets_Editor
                     using System.Drawing.Bitmap emptyBitmap = new System.Drawing.Bitmap(32, 32, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                     emptyBitmap.Save(MainWindow.SprLists[(int)data.Id], ImageFormat.Png);
                     CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
-                    StatusBar.MessageQueue.Enqueue($"Sprite successfully removed.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Sprite successfully removed.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
                 {
@@ -1371,14 +1372,14 @@ namespace Assets_Editor
                             removedStream.Dispose();
                             MainWindow.AllSprList.RemoveAt((int)data.Id);
                             CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
-                            StatusBar.MessageQueue.Enqueue($"Sprite successfully removed.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                            StatusBar.MessageQueue?.Enqueue($"Sprite successfully removed.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                         }
                         else
-                            StatusBar.MessageQueue.Enqueue($"Unable to delete sprite.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                            StatusBar.MessageQueue?.Enqueue($"Unable to delete sprite.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                     }
                     else
                     {
-                        StatusBar.MessageQueue.Enqueue($"Unable to delete sprite. The sprite is currently in use by one or more objects", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                        StatusBar.MessageQueue?.Enqueue($"Unable to delete sprite. The sprite is currently in use by one or more objects", null, null, null, false, true, TimeSpan.FromSeconds(2));
                     }
                 }
 
@@ -1420,7 +1421,7 @@ namespace Assets_Editor
                         CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
                     }
                 }
-                StatusBar.MessageQueue.Enqueue($"Sprite successfully replaced.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Sprite successfully replaced.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
         private void ExportObject_PreviewMouseLeftButtonDown(object sender, RoutedEventArgs e)
@@ -1443,7 +1444,7 @@ namespace Assets_Editor
                         appearances.Add(MainWindow.appearances.Missile[(int)item.Id - 1]);
                 }
                 if(ObdDecoder.Export(appearances))
-                    StatusBar.MessageQueue.Enqueue($"Successfully exported objects.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Successfully exported objects.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
         
@@ -1510,7 +1511,7 @@ namespace Assets_Editor
                     ObjListView.ScrollIntoView(ObjListView.Items[^1]);
                 }), System.Windows.Threading.DispatcherPriority.Background);
 
-                StatusBar.MessageQueue.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
 
@@ -1532,8 +1533,9 @@ namespace Assets_Editor
             if (hit is ListViewItem item) {
                 var showList = (ShowList)listView.ItemContainerGenerator.ItemFromContainer(item);
                 if (showList != null) {
-                    Clipboard.SetText(showList.Id.ToString());
-                    StatusBar.MessageQueue?.Enqueue($"object ID copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    Dispatcher.Invoke(() => {
+                        ClipboardManager.CopyText(showList.Id.ToString(), "Object ID", StatusBar);
+                    });
                 }
             }
         }
@@ -1611,7 +1613,7 @@ namespace Assets_Editor
                 ShowList selectedShowList = (ShowList)ObjListView.SelectedItem;
                 selectedShowList.Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[0]);
             }
-            StatusBar.MessageQueue.Enqueue($"Object successfully deleted.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Object successfully deleted.", null, null, null, false, true, TimeSpan.FromSeconds(2));
 
         }
 
@@ -1671,7 +1673,7 @@ namespace Assets_Editor
             }
 
             ObjListView.SelectedItem = ObjListView.Items[^1];
-            StatusBar.MessageQueue.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void SprSynchronized_Click(object sender, RoutedEventArgs e)

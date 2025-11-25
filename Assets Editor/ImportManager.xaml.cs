@@ -516,7 +516,7 @@ namespace Assets_Editor
                             ShowList item = (ShowList)_editor.ObjListView.SelectedItem;
                             _editor.AnimateSelectedListItem(item);
                         }else
-                            _editor.StatusBar.MessageQueue.Enqueue($"You can only replace objects of the same type.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                            _editor.StatusBar.MessageQueue?.Enqueue($"You can only replace objects of the same type.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                     }
                 }
             }

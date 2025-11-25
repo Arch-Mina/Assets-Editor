@@ -407,7 +407,7 @@ namespace Assets_Editor
             List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
             if(images.Count == 0)
             {
-                SprStatusBar.MessageQueue.Enqueue($"Current sheet is empty.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                SprStatusBar.MessageQueue?.Enqueue($"Current sheet is empty.", null, null, null, false, true, TimeSpan.FromSeconds(3));
                 return;
             }
             SaveFileDialog saveFileDialog = new SaveFileDialog
@@ -524,11 +524,11 @@ namespace Assets_Editor
                         AllSprList.Add(new ShowList() { Id = (uint)i });
                     }
                 }
-                SprStatusBar.MessageQueue.Enqueue($"New sheet saved.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                SprStatusBar.MessageQueue?.Enqueue($"New sheet saved.", null, null, null, false, true, TimeSpan.FromSeconds(3));
                 CollectionViewSource.GetDefaultView(_editor.SprListView.ItemsSource).Refresh();
             }
             else
-                SprStatusBar.MessageQueue.Enqueue($"Create a new sheet to import.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                SprStatusBar.MessageQueue?.Enqueue($"Create a new sheet to import.", null, null, null, false, true, TimeSpan.FromSeconds(3));
         }
 
         private void EditSheet_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
