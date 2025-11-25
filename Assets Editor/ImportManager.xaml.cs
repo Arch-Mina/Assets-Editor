@@ -92,6 +92,7 @@ namespace Assets_Editor
                         });
 
                         MainSprStorage = new SpriteStorage(_sprPath, transparency, progressReporter);
+                        MainSprStorage.LoadSprites();
                         SprLists = MainSprStorage.SprLists;
                         sprites = MainSprStorage.Sprites;
                         for (uint i = 0; i < sprites.Count; i++)

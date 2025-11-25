@@ -527,6 +527,7 @@ namespace Assets_Editor
         public string SprPath { get; set; }
         public uint Signature;
         public bool Transparency;
+        public IProgress<int>? ProgressListener { get; set; }
         public Dictionary<uint, Sprite> Sprites { get; set; }
         public ConcurrentDictionary<int, MemoryStream> SprLists { get; set; }
 
@@ -546,15 +547,17 @@ namespace Assets_Editor
             Sprites[0] = blankSpr;
             SprLists[0] = blankSpr.MemoryStream;
         }
-        public SpriteStorage(string path, bool transparency, IProgress<int> reportProgress = null)
+        public SpriteStorage(string path, bool transparency, IProgress<int>? progressListener = null)
         {
             SprPath = path;
             Sprites = [];
             SprLists = [];
             Transparency = transparency;
-
+            ProgressListener = progressListener;
+        }
+        public void LoadSprites() {
             Sprite.CreateBlankSprite();
-            using FileStream fileStream = new(path, FileMode.Open, FileAccess.Read);
+            using FileStream fileStream = new(SprPath, FileMode.Open, FileAccess.Read);
             using BinaryReader reader = new(fileStream);
 
             Signature = reader.ReadUInt32();
@@ -562,8 +565,7 @@ namespace Assets_Editor
             uint totalPics = reader.ReadUInt32();
 
             List<(uint Index, uint Id)> spriteIndexes = new(Convert.ToInt32(totalPics));
-            Sprite blankSpr = new()
-            {
+            Sprite blankSpr = new() {
                 ID = 0,
                 CompressedPixels = [],
             };
@@ -573,19 +575,16 @@ namespace Assets_Editor
             Sprites[0] = blankSpr;
             SprLists[0] = blankSpr.MemoryStream;
             int lastReportedProgress = -1;
-            for (uint i = 0; i < totalPics; ++i)
-            {
-                Sprite sprite = new()
-                {
+            for (uint i = 0; i < totalPics; ++i) {
+                Sprite sprite = new() {
                     ID = i + 1,
                     Transparent = Transparency
                 };
                 Sprites[sprite.ID] = sprite;
                 SprLists[(int)sprite.ID] = sprite.MemoryStream;
                 int progress = (int)(i * 100 / totalPics);
-                if (progress != lastReportedProgress && reportProgress != null)
-                {
-                    reportProgress.Report(progress);
+                if (progress != lastReportedProgress && ProgressListener != null) {
+                    ProgressListener.Report(progress);
                     lastReportedProgress = progress;
                 }
             }

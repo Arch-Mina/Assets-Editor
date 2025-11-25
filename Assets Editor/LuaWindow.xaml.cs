@@ -218,8 +218,7 @@ return generateChartData()
             //UserData.RegisterType<KeyValuePair<string, object>>();
 
         } catch (Exception ex) {
-            MessageBox.Show($"Failed to initialize Lua engine: {ex.Message}", "Error",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            ErrorManager.ShowError($"Failed to initialize Lua engine: {ex.Message}");
         }
     }
 

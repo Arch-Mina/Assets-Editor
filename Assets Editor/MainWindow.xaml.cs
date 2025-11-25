@@ -16,7 +16,6 @@ using System.Windows.Forms;
 using System.Windows.Media;
 using Tibia.Protobuf.Appearances;
 using static Assets_Editor.LogView;
-using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace Assets_Editor;
 
@@ -86,6 +85,15 @@ public partial class MainWindow : Window
 
         // select some preset
         A_SavedVersion.SelectedIndex = Math.Min(SettingsList.LastPresetChoice, A_SavedVersion.Items.Count - 1);
+
+        // initialize worker
+        worker = new BackgroundWorker {
+            WorkerReportsProgress = true
+        };
+        worker.WorkerReportsProgress = true;
+        worker.ProgressChanged += Worker_ProgressChanged;
+        worker.DoWork += Worker_DoWork;
+        worker.RunWorkerCompleted += Worker_Completed;
     }
 
     public class Settings
@@ -149,12 +157,7 @@ public partial class MainWindow : Window
     {
         if (SettingsList.Presets == null) {
             LoadDefaultSettings();
-            MessageBox.Show(
-                $"Unable to create presets! Settings not loaded.",
-                "Warning",
-                (MessageBoxButtons)MessageBoxButton.OK,
-                (MessageBoxIcon)MessageBoxImage.Warning
-            );
+            ErrorManager.ShowWarning($"Unable to create presets! Settings not loaded.");
             return;
         }
 
@@ -202,12 +205,7 @@ public partial class MainWindow : Window
                 SettingsList = jsonSettings;
             } catch (Exception e) {
                 LoadDefaultSettings();
-                MessageBox.Show(
-                    $"Unable to read settings! Using defaults.\n\n{e.Message}",
-                    "Warning",
-                    (MessageBoxButtons)MessageBoxButton.OK,
-                    (MessageBoxIcon)MessageBoxImage.Warning
-                );
+                ErrorManager.ShowWarning($"Unable to read settings! Using defaults.\n\n{e.Message}");
             }
         } else {
             // load defaults
@@ -285,8 +283,9 @@ public partial class MainWindow : Window
         {
             worker.ReportProgress(value);
         });
-
+        
         MainSprStorage = new SpriteStorage(_sprPath, transparency, progressReporter);
+        MainSprStorage.LoadSprites();
         SprSignature = MainSprStorage.Signature;
         SprLists = MainSprStorage.SprLists;
         sprites = MainSprStorage.Sprites;
@@ -341,12 +340,7 @@ public partial class MainWindow : Window
             File.WriteAllText(settingsFilePath, json);
         } catch (Exception e) {
             LoadDefaultSettings();
-            MessageBox.Show(
-                $"Unable to save settings!\n\n{e.Message}",
-                "Error",
-                (MessageBoxButtons)MessageBoxButton.OK,
-                (MessageBoxIcon)MessageBoxImage.Error
-            );
+            ErrorManager.ShowError($"Unable to save settings!\n\n{e.Message}");
         }
     }
 
@@ -409,6 +403,7 @@ public partial class MainWindow : Window
             LoadSprSheet();
             Loaded = true;
         } else {
+            SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_WIP, "Loading dat file ...");
             bool datFound = InternalTryLoadDat();
             if (!datFound) {
                 if (!currentPreset.Extended) {
@@ -427,7 +422,6 @@ public partial class MainWindow : Window
                 }
             }
 
-            SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_WIP, "Loading dat file ...");
             if (!datFound) {
                 SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "Unable to load dat!");
                 RefreshUIToggles();
@@ -482,19 +476,7 @@ public partial class MainWindow : Window
     }
     private void LoadAssets_Click(object sender, RoutedEventArgs e)
     {
-        if (worker == null || !worker.IsBusy)
-        {
-            worker = new BackgroundWorker {
-                WorkerReportsProgress = true
-            };
-
-            worker.WorkerReportsProgress = true;
-            worker.ProgressChanged += Worker_ProgressChanged;
-            worker.DoWork += Worker_DoWork;
-            worker.RunWorkerCompleted += Worker_Completed;
-
-            worker.RunWorkerAsync();
-        }
+        worker.RunWorkerAsync();
     }
 
     private static void GenerateTileSetImageList(Bitmap bitmap, Catalog sheet)
@@ -685,12 +667,7 @@ public partial class MainWindow : Window
                 has_otfi = true;
             }
         } catch (Exception e) {
-            MessageBox.Show(
-                $"Unable to read otfi!\n\n{e.Message}",
-                "Warning",
-                (MessageBoxButtons)MessageBoxButton.OK,
-                (MessageBoxIcon)MessageBoxImage.Warning
-            );
+            ErrorManager.ShowWarning($"Unable to read otfi!\n\n{e.Message}");
         }
 
         SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_WIP, $"Searching for DAT file ...");
@@ -736,12 +713,7 @@ public partial class MainWindow : Window
         try {
             LoadLegacyDat();
         } catch (Exception ex) {
-            MessageBox.Show(
-                $"Unable to read dat file!\n\n{ex.Message}",
-                "Warning",
-                (MessageBoxButtons)MessageBoxButton.OK,
-                (MessageBoxIcon)MessageBoxImage.Warning
-            );
+            ErrorManager.ShowWarning($"Unable to read dat file!\n\n{ex.Message}");
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "Unable to load dat file!");
             return true;
         }
@@ -750,12 +722,7 @@ public partial class MainWindow : Window
         try {
             ReadSprSignature();
         } catch (Exception ex) {
-            MessageBox.Show(
-                $"Unable to read spr file!\n\n{ex.Message}",
-                "Warning",
-                (MessageBoxButtons)MessageBoxButton.OK,
-                (MessageBoxIcon)MessageBoxImage.Warning
-            );
+            ErrorManager.ShowWarning($"Unable to read spr file!\n\n{ex.Message}");
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "Unable to load spr file!");
             return true;
         }
@@ -765,12 +732,7 @@ public partial class MainWindow : Window
         // DatSignature
         // 0A 93 01 08 - consistent first 4 bytes for appearances.dat (version 12 and newer)
         if (DatSignature == 0x0801930A) {
-            MessageBox.Show(
-                $"Detected DAT signature is matching appearances.dat, but catalog-content.json was not detected in the selected directory.",
-                "Warning",
-                (MessageBoxButtons)MessageBoxButton.OK,
-                (MessageBoxIcon)MessageBoxImage.Warning
-            );
+            ErrorManager.ShowWarning($"Detected DAT signature is matching appearances.dat, but catalog-content.json was not detected in the selected directory.");
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_WARNING, "Possibly missing catalog-content.json!");
         } else {
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_INFO, "FOUND: Legacy SPR/DAT");

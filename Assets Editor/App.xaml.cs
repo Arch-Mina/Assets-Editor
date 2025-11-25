@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Forms;
 
 namespace Assets_Editor
 {
@@ -16,11 +15,7 @@ namespace Assets_Editor
         }
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e) {
-            MessageBox.Show(
-                e.Exception.ToString(),
-                "Unexpected Error (UI Thread)",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            ErrorManager.ShowException(e.Exception);
 
             e.Handled = true; // Prevent WPF crashing dialog
 
@@ -28,13 +23,10 @@ namespace Assets_Editor
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e) {
-            var ex = e.ExceptionObject as Exception;
-
-            MessageBox.Show(
-                ex?.ToString() ?? "Unknown error",
-                "Unexpected Error (Non-UI Thread)",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            Exception? ex = e.ExceptionObject as Exception;
+            if (ex != null) {
+                ErrorManager.ShowException(ex);
+            }
 
             // Runtime will force shutdown anyway
             Environment.Exit(1);

@@ -3557,7 +3557,7 @@ namespace Assets_Editor
             // show error message on failed import
             if (hasErrors)
             {
-                MessageBox.Show($"Some files failed to import. See log for details.", "Import Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ErrorManager.ShowError($"Some files failed to import. See log for details.");
             }
         }
 
@@ -3833,7 +3833,7 @@ namespace Assets_Editor
                 "You can drag and drop a single or multiple sprites at once onto a Texture. \n" +
                 "Normal dragging - treats sprites as elements of the current frame. \n" +
                 "Ctrl dragging - treats sprites as a sequence of frames.";
-            MessageBox.Show(message, "Sprite List Help", MessageBoxButton.OK, MessageBoxImage.Information);
+            ErrorManager.ShowInfo(message);
         }
         private void ShowLogger(object sender, RoutedEventArgs e)
         {

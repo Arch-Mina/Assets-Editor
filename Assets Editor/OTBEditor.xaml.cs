@@ -247,7 +247,7 @@ namespace Assets_Editor
                 }
                 catch (UnauthorizedAccessException exception)
                 {
-                    MessageBox.Show(exception.Message);
+                    ErrorManager.ShowException(exception);
                 }
             }
         }

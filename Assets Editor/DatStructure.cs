@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
-using System.Windows.Forms;
 using System.Xml.Linq;
 using Tibia.Protobuf.Appearances;
 using Appearance = Tibia.Protobuf.Appearances.Appearance;
@@ -97,22 +95,12 @@ namespace Assets_Editor
                 }
 
                 if (structureName == null) {
-                    System.Windows.Forms.MessageBox.Show(
-                        $"{xmlPath}: <Dat> is missing a valid 'name' attribute.",
-                        "Warning",
-                        (MessageBoxButtons)MessageBoxButton.OK,
-                        (MessageBoxIcon)MessageBoxImage.Warning
-                    );
+                    ErrorManager.ShowWarning($"{xmlPath}: <Dat> is missing a valid 'name' attribute.");
                     continue;
                 }
 
                 if (structureVersion == null || !int.TryParse(structureVersion.Value, out int structure)) {
-                    System.Windows.Forms.MessageBox.Show(
-                        $"{xmlPath}: Version {structureName.Value} is missing a valid 'structure' attribute.",
-                        "Warning",
-                        (MessageBoxButtons)MessageBoxButton.OK,
-                        (MessageBoxIcon)MessageBoxImage.Warning
-                    );
+                    ErrorManager.ShowWarning($"{xmlPath}: Version {structureName.Value} is missing a valid 'structure' attribute.");
                     continue;
                 }
 
@@ -162,12 +150,7 @@ namespace Assets_Editor
 
                 // show all errors
                 if (flagIssues.Length > 0) {
-                    System.Windows.Forms.MessageBox.Show(
-                        $"{xmlPath}: Version {structureName.Value} has invalid flags:\n\n{flagIssues}",
-                        "Warning",
-                        (MessageBoxButtons)MessageBoxButton.OK,
-                        (MessageBoxIcon)MessageBoxImage.Warning
-                    );
+                    ErrorManager.ShowWarning($"{xmlPath}: Version {structureName.Value} has invalid flags:\n\n{flagIssues}");
                 }
 
                 versions[structure] = versionInfo;
@@ -450,7 +433,7 @@ namespace Assets_Editor
                     case "Displaced":
                         if (flagInfo.Version == 2) {
                             // 1098 standard - read offset
-                            appearance.Flags.Shift = new AppearanceFlagShift {
+                            appearance.Flags.Shift = new() {
                                 X = r.ReadUInt16(),
                                 Y = r.ReadUInt16(),
                                 A = 0,
@@ -458,7 +441,7 @@ namespace Assets_Editor
                             };
                         } else if (flagInfo.Version == 3) {
                             // RD standard - displacement + sprite offset (?)
-                            appearance.Flags.Shift = new AppearanceFlagShift {
+                            appearance.Flags.Shift = new() {
                                 X = r.ReadUInt16(),
                                 Y = r.ReadUInt16(),
                                 A = r.ReadUInt16(),
@@ -466,7 +449,7 @@ namespace Assets_Editor
                             };
                         } else {
                             // old elevation did not precise the offset
-                            appearance.Flags.Shift = new AppearanceFlagShift {
+                            appearance.Flags.Shift = new() {
                                 X = 8,
                                 Y = 8,
                                 A = 0,
