@@ -59,7 +59,7 @@ public partial class MainWindow : Window
     public static SpriteStorage MainSprStorage;
     private BackgroundWorker worker;
     private static PresetSettings? currentPreset;
-    public Settings SettingsList = new();
+    public static Settings SettingsList = new();
     public static OTBReader ServerOTB = new();
     public static LogView logView = new();
     public static readonly DatStructure datStructure = new();
@@ -172,19 +172,19 @@ public partial class MainWindow : Window
 
         // add preset choices
         string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        foreach (var server in SettingsList.Presets) {
-            if (server.ServerPath.StartsWith(@"~\"))
-                server.ServerPath = Path.Combine(localAppData, server.ServerPath[2..]);
+        foreach (var preset in SettingsList.Presets) {
+            if (preset.ServerPath.StartsWith(@"~\"))
+                preset.ServerPath = Path.Combine(localAppData, preset.ServerPath[2..]);
 
-            if (server.ClientPath.StartsWith(@"~\"))
-                server.ClientPath = Path.Combine(localAppData, server.ClientPath[2..]);
+            if (preset.ClientPath.StartsWith(@"~\"))
+                preset.ClientPath = Path.Combine(localAppData, preset.ClientPath[2..]);
 
             // add preset to dropdown
-            A_SavedVersion.Items.Add(server.Name + " " + server.Version);
+            A_SavedVersion.Items.Add(preset.Name);
         }
     }
 
-    private void LoadDefaultSettings()
+    private static void LoadDefaultSettings()
     {
         Settings defaultSettings = new() {
             DarkMode = false,
@@ -345,7 +345,7 @@ public partial class MainWindow : Window
     /// <summary>
     /// Saves current preset immediately to json
     /// </summary>
-    private void SaveEditorSettings() {
+    private static void SaveEditorSettings() {
         try {
             var json = JsonConvert.SerializeObject(SettingsList, Formatting.Indented);
             File.WriteAllText(settingsFilePath, json);
@@ -964,11 +964,11 @@ public partial class MainWindow : Window
         logView.AddLogEntry(entry);
     }
 
-    private void DarkModeToggle_Checked(object sender, RoutedEventArgs e) {
+    public static void SetCurrentTheme(bool isDarkMode)
+    {
         PaletteHelper palette = new();
-
         ITheme theme = palette.GetTheme();
-        if (DarkModeToggle.IsChecked ?? false) {
+        if (isDarkMode) {
             theme.SetBaseTheme(Theme.Dark);
             SettingsList.DarkMode = true;
         } else {
@@ -977,6 +977,15 @@ public partial class MainWindow : Window
         }
         palette.SetTheme(theme);
         SaveEditorSettings();
+    }
+
+    public static bool IsDarkModeSet()
+    {
+        return SettingsList.DarkMode;
+    }
+
+    private void DarkModeToggle_Checked(object sender, RoutedEventArgs e) {
+        SetCurrentTheme(DarkModeToggle.IsChecked ?? false);
     }
 
     private void SetVersionDescription(string text) {

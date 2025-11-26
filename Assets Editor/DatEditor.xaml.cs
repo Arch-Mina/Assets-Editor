@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -24,6 +25,24 @@ using Tibia.Protobuf.Appearances;
 
 namespace Assets_Editor
 {
+    // dialog manager for export popups
+    public class BooleanOrInverterConverter : IMultiValueConverter {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture) {
+            // If ANY value is true → return false (disable background)
+            foreach (var value in values) {
+                if (value is bool b && b)
+                    return false;
+            }
+
+            // If NONE are true → return true (enable background)
+            return true;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) {
+            throw new NotImplementedException();
+        }
+    }
+
     /// <summary>
     /// Interaction logic for DatEditor.xaml
     /// </summary>
@@ -182,6 +201,10 @@ namespace Assets_Editor
         public DatEditor()
         {
             InitializeComponent();
+
+            // set current theme
+            DarkModeToggle.IsChecked = MainWindow.IsDarkModeSet();
+
             A_FlagAutomapColorPicker.AvailableColors.Clear();
             for (int x = 0; x <= 215; x++)
             {
@@ -204,18 +227,7 @@ namespace Assets_Editor
         }
         private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
         {
-            PaletteHelper palette = new();
-
-            ITheme theme = palette.GetTheme();
-            if ((bool)DarkModeToggle.IsChecked)
-            {
-                theme.SetBaseTheme(Theme.Dark);
-            }
-            else
-            {
-                theme.SetBaseTheme(Theme.Light);
-            }
-            palette.SetTheme(theme);
+            MainWindow.SetCurrentTheme(DarkModeToggle.IsChecked ?? false);
         }
         public DatEditor(Appearances appearances)
             : this()

@@ -52,22 +52,36 @@
                     <StackPanel Orientation="Vertical" Width="60" VerticalAlignment="Center">
                         <Label Content="Preset:" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
                     </StackPanel>
-                    <ComboBox x:Name="A_SavedVersion" Width="160" Height="30" BorderThickness="1,1,1,1" SelectedIndex="0" Margin="3,0,0,0" Padding="6,1,5,3" IsReadOnly="True"/>
+                    <ComboBox x:Name="A_SavedVersion" Width="120" Height="30" BorderThickness="1,1,1,1" SelectedIndex="0" Margin="3,0,0,0" Padding="6,1,5,3" IsReadOnly="True"/>
                     <Button x:Name="NewPresetBtn" 
             Style="{StaticResource MaterialDesignRaisedButton}"
-            Margin="15,0,0,0"
+            Margin="10,0,0,0"
             Click="SelectAssetsFolder"
-            ToolTip="Create a new preset">
+            ToolTip="Create a new preset" Padding="5,0,10,0">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Plus" Margin="0,0,5,0" VerticalAlignment="Center"/>
                             <TextBlock Text="New"/>
                         </StackPanel>
                     </Button>
+
+                    <Button x:Name="RenamePresetBtn" 
+            Style="{StaticResource MaterialDesignRaisedButton}"
+            Margin="5,0,0,0"
+            Click="SelectAssetsFolder"
+            ToolTip="Rename current preset" Padding="5,0,10,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Rename" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Rename"/>
+                        </StackPanel>
+                    </Button>
+                    
                     <Button x:Name="DeletePresetBtn" 
 Style="{StaticResource MaterialDesignRaisedButton}"
-Margin="5,0,0,0"
+Margin="5,0,0,0" Padding="5,0,10,0"
 Click="SelectAssetsFolder"
 ToolTip="Remove preset">
+                        
+                        
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Delete" Margin="0,0,5,0" VerticalAlignment="Center"/>
                             <TextBlock Text="Remove"/>
@@ -116,9 +130,18 @@ ToolTip="Remove preset">
                         Margin="5,0,0,0"
                     />
 
-                    <Button Style="{StaticResource MaterialDesignIconButton}" materialDesign:RippleAssist.IsDisabled="True" VerticalAlignment="Center" Height="55" Width="40" Margin="5,0,0,0" Click="SelectAssetsFolder">
-                        <materialDesign:PackIcon  Kind="CardSearch" Height="40" Width="40" />
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}" materialDesign:RippleAssist.IsDisabled="True" 
+                            VerticalAlignment="Center"
+                            Width="35" Height="28"
+                            Margin="10,0,0,0"
+                            Click="SelectAssetsFolder"
+                            ToolTip="Rename current preset" Padding="3,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Search" Margin="3,2,5,0" VerticalAlignment="Center" Width="25" Height="25"/>
+                        </StackPanel>
                     </Button>
+
+
                     <Button ToolTip="Copy Path" Style="{StaticResource MaterialDesignIconButton}" Width="24" Height="24" VerticalAlignment="Center" Click="CopyAssetsPath" Margin="3,0,0,0">
                         <materialDesign:PackIcon  Kind="ContentCopy" Height="20" Width="20" />
                     </Button>
@@ -126,7 +149,7 @@ ToolTip="Remove preset">
 
                 <StackPanel Orientation="Horizontal"
                             Grid.Row="1"
-                            Margin="140,-10,0,0">
+                            Margin="140,5,0,0">
 
                     <materialDesign:PackIcon x:Name="AssetsPathBaseIcon"
                                              Kind="Info"

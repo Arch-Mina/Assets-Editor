@@ -49,6 +49,10 @@ namespace Assets_Editor
         public LegacyDatEditor()
         {
             InitializeComponent();
+
+            // set current theme
+            DarkModeToggle.IsChecked = MainWindow.IsDarkModeSet();
+
             A_FlagAutomapColorPicker.AvailableColors.Clear();
             for (int x = 0; x <= 215; x++)
             {
@@ -71,18 +75,7 @@ namespace Assets_Editor
         }
         private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
         {
-            PaletteHelper palette = new PaletteHelper();
-
-            ITheme theme = palette.GetTheme();
-            if ((bool)DarkModeToggle.IsChecked)
-            {
-                theme.SetBaseTheme(Theme.Dark);
-            }
-            else
-            {
-                theme.SetBaseTheme(Theme.Light);
-            }
-            palette.SetTheme(theme);
+            MainWindow.SetCurrentTheme(DarkModeToggle.IsChecked ?? false);
         }
         public LegacyDatEditor(Appearances appearances)
             : this()
