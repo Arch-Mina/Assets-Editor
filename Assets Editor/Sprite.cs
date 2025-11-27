@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.DirectoryServices;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -15,11 +14,11 @@ namespace Assets_Editor
 
         public Sprite()
         {
-            this.ID = 0;
-            this.Size = 0;
-            this.CompressedPixels = null;
-            this.Transparent = false;
-            this.MemoryStream = new MemoryStream();
+            ID = 0;
+            Size = 0;
+            CompressedPixels = null;
+            Transparent = false;
+            MemoryStream = new MemoryStream();
         }
 
         public const byte DefaultSize = 32;
@@ -34,11 +33,11 @@ namespace Assets_Editor
 
         private static byte[] BlankRGBSprite = new byte[RGBPixelsDataSize];
         private static byte[] BlankARGBSprite = new byte[ARGBPixelsDataSize];
-        private static readonly Rectangle Rect = new Rectangle(0, 0, DefaultSize, DefaultSize);
+        private static readonly Rectangle Rect = new(0, 0, DefaultSize, DefaultSize);
 
         public byte[] GetPixels()
         {
-            if (this.CompressedPixels == null || this.CompressedPixels.Length != this.Size)
+            if (CompressedPixels == null || CompressedPixels.Length != Size)
             {
                 return BlankARGBSprite;
             }
@@ -48,14 +47,14 @@ namespace Assets_Editor
             int pos = 0;
             int transparentPixels = 0;
             int coloredPixels = 0;
-            int length = this.CompressedPixels.Length;
-            byte bitPerPixel = (byte)(this.Transparent ? 4 : 3);
+            int length = CompressedPixels.Length;
+            byte bitPerPixel = (byte)(Transparent ? 4 : 3);
             byte[] pixels = new byte[ARGBPixelsDataSize];
 
             for (read = 0; read < length; read += 4 + (bitPerPixel * coloredPixels))
             {
-                transparentPixels = this.CompressedPixels[pos++] | this.CompressedPixels[pos++] << 8;
-                coloredPixels = this.CompressedPixels[pos++] | this.CompressedPixels[pos++] << 8;
+                transparentPixels = CompressedPixels[pos++] | CompressedPixels[pos++] << 8;
+                coloredPixels = CompressedPixels[pos++] | CompressedPixels[pos++] << 8;
 
                 if (write + (transparentPixels * 4) <= pixels.Length)
                 {
@@ -72,14 +71,14 @@ namespace Assets_Editor
                     // Log an error message or handle the issue as appropriate
                 }
 
-                if (write + (coloredPixels * 4) <= pixels.Length && pos + (coloredPixels * (this.Transparent ? 4 : 3)) <= this.CompressedPixels.Length)
+                if (write + (coloredPixels * 4) <= pixels.Length && pos + (coloredPixels * (Transparent ? 4 : 3)) <= CompressedPixels.Length)
                 {
                     for (int i = 0; i < coloredPixels; i++)
                     {
-                        byte red = this.CompressedPixels[pos++];
-                        byte green = this.CompressedPixels[pos++];
-                        byte blue = this.CompressedPixels[pos++];
-                        byte alpha = this.Transparent ? this.CompressedPixels[pos++] : (byte)0xFF;
+                        byte red = CompressedPixels[pos++];
+                        byte green = CompressedPixels[pos++];
+                        byte blue = CompressedPixels[pos++];
+                        byte alpha = Transparent ? CompressedPixels[pos++] : (byte)0xFF;
 
                         pixels[write++] = blue;
                         pixels[write++] = green;
@@ -108,7 +107,7 @@ namespace Assets_Editor
         public Bitmap GetBitmap()
         {
             Bitmap bitmap = new Bitmap(DefaultSize, DefaultSize, PixelFormat.Format32bppArgb);
-            byte[] pixels = this.GetPixels();
+            byte[] pixels = GetPixels();
 
             if (pixels != null)
             {

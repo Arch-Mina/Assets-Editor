@@ -242,7 +242,12 @@ namespace Assets_Editor
             int width = (int)(Sprite.DefaultSize * appearance.FrameGroup[0].SpriteInfo.PatternWidth);
             int height = (int)(Sprite.DefaultSize * appearance.FrameGroup[0].SpriteInfo.PatternHeight);
 
-            using Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            // handle bad sprite
+            if (width == 0 || height == 0) {
+                return new();
+            }
+
+            using Bitmap bitmap = new(width, height, PixelFormat.Format32bppArgb);
             using Graphics g = Graphics.FromImage(bitmap);
 
             byte layers = (byte)(appearance.FrameGroup[0].SpriteInfo.PatternLayers);
@@ -271,7 +276,7 @@ namespace Assets_Editor
                     }
                 }
             }
-            MemoryStream combinedStream = new MemoryStream();
+            MemoryStream combinedStream = new();
             bitmap.Save(combinedStream, ImageFormat.Png);
             return combinedStream;
         }

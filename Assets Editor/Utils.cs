@@ -154,9 +154,9 @@ namespace Assets_Editor
             {
                 return null;
             }
-            BitmapImage bitmap = new BitmapImage();
+            BitmapImage bitmap = new();
             bitmap.BeginInit();
-            stream.Seek(0, System.IO.SeekOrigin.Begin);
+            stream.Seek(0, SeekOrigin.Begin);
             bitmap.StreamSource = stream;
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
             bitmap.EndInit();

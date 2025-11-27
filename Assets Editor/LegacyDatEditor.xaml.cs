@@ -513,7 +513,17 @@ namespace Assets_Editor
             A_FlagAutomap.IsChecked = CurrentObjectAppearance.Flags.Automap != null;
             A_FlagAutomapColor.Value = (CurrentObjectAppearance.Flags.Automap != null && CurrentObjectAppearance.Flags.Automap.HasColor) ? (int)CurrentObjectAppearance.Flags.Automap.Color : 0;
             A_FlagLenshelp.IsChecked = CurrentObjectAppearance.Flags.Lenshelp != null;
-            A_FlagLenshelpId.SelectedIndex = (CurrentObjectAppearance.Flags.Lenshelp != null && CurrentObjectAppearance.Flags.Lenshelp.HasId) ? (int)CurrentObjectAppearance.Flags.Lenshelp.Id - 1100 : -1;
+
+            // select from dropdown only when the argument has valid value
+            if (CurrentObjectAppearance.Flags.Lenshelp != null) {
+                int lensHelpId = CurrentObjectAppearance.Flags.Lenshelp.HasId ? (int)CurrentObjectAppearance.Flags.Lenshelp.Id : -1;
+                if (lensHelpId >= 1100) {
+                    A_FlagLenshelpId.SelectedIndex = lensHelpId - 1100;
+                } else {
+                    A_FlagLenshelpId.SelectedIndex = -1;
+                }
+            }
+
             A_FlagFullGround.IsChecked = CurrentObjectAppearance.Flags.HasFullbank;
             A_FlagIgnoreLook.IsChecked = CurrentObjectAppearance.Flags.HasIgnoreLook;
             A_FlagClothes.IsChecked = (CurrentObjectAppearance.Flags.Clothes != null && CurrentObjectAppearance.Flags.Clothes.HasSlot) ? true : false;
@@ -1884,34 +1894,35 @@ namespace Assets_Editor
         public void AnimateSelectedListItem(ShowList showList)
         {
             // Find the ListViewItem for the selected item
-            var listViewItem = ObjListView.ItemContainerGenerator.ContainerFromItem(showList) as ListViewItem;
-            if (listViewItem != null)
-            {
-                // Find the Image control within the ListViewItem
-                var imageControl = Utils.FindVisualChild<Image>(listViewItem);
-                if (imageControl != null)
-                {
-                    showList.Images.Clear();
+            try {
+                var listViewItem = ObjListView.ItemContainerGenerator.ContainerFromItem(showList) as ListViewItem;
+                if (listViewItem != null) {
+                    // Find the Image control within the ListViewItem
+                    var imageControl = Utils.FindVisualChild<Image>(listViewItem);
+                    if (imageControl != null) {
+                        showList.Images.Clear();
 
-                    Appearance appearance = null;
+                        Appearance appearance = null;
 
-                    if (ObjectMenu.SelectedIndex == 0)
-                        appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == showList.Id);
-                    else if (ObjectMenu.SelectedIndex == 1)
-                        appearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == showList.Id);
-                    else if (ObjectMenu.SelectedIndex == 2)
-                        appearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == showList.Id);
-                    else if (ObjectMenu.SelectedIndex == 3)
-                        appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
+                        if (ObjectMenu.SelectedIndex == 0)
+                            appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == showList.Id);
+                        else if (ObjectMenu.SelectedIndex == 1)
+                            appearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == showList.Id);
+                        else if (ObjectMenu.SelectedIndex == 2)
+                            appearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == showList.Id);
+                        else if (ObjectMenu.SelectedIndex == 3)
+                            appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
 
-                    for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.PatternFrames; i++)
-                    {
-                        BitmapImage imageFrame = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearance, MainWindow.MainSprStorage, i));
-                        showList.Images.Add(imageFrame);
+                        for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.PatternFrames; i++) {
+                            BitmapImage imageFrame = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearance, MainWindow.MainSprStorage, i));
+                            showList.Images.Add(imageFrame);
+                        }
+
+                        showList.StartAnimation();
                     }
-
-                    showList.StartAnimation();
                 }
+            } catch (Exception e) {
+                MainWindow.Log(e.Message, "Error");
             }
         }
 
