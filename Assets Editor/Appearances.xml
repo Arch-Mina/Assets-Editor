@@ -239,6 +239,7 @@
 			<Flag id="37" name="UnWrappable" />
 			<Flag id="38" name="TopEffect" />
 			<Flag id="39" name="WingsOffset" />
+			<Flag id="41" name="Default" />
 			<Flag id="254" name="Usable" />
 			<Flag id="255" name="Default" />
 		</Flags>

@@ -217,6 +217,10 @@ namespace Assets_Editor
 
             // flag "rune charges visible" - dat structure 7.8 - 8.54
             UpdateFlagVisibility(A_FlagWearout, "ShowCharges");
+
+            // otc wings
+            FlagInfo? otcWings = loadedVersion.GetFlagInfo("WingsOffset");
+            A_FlagWingsCoords.Visibility = otcWings != null ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public void UpdateShowList(int selection)
@@ -533,6 +537,15 @@ namespace Assets_Editor
             A_FlagTopeffect.IsChecked = CurrentObjectAppearance.Flags.HasTop;
             A_FlagWearout.IsChecked = CurrentObjectAppearance.Flags.HasWearout;
 
+            A_FlagWingsOffset.IsChecked = CurrentObjectAppearance.Flags.WingsOffset != null;
+            A_FlagWingsNorthX.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasNorthX) ? (int)CurrentObjectAppearance.Flags.WingsOffset.NorthX : 0;
+            A_FlagWingsNorthY.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasNorthY) ? (int)CurrentObjectAppearance.Flags.WingsOffset.NorthY : 0;
+            A_FlagWingsEastX.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasEastX) ? (int)CurrentObjectAppearance.Flags.WingsOffset.EastX : 0;
+            A_FlagWingsEastY.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasEastY) ? (int)CurrentObjectAppearance.Flags.WingsOffset.EastY : 0;
+            A_FlagWingsSouthX.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasSouthX) ? (int)CurrentObjectAppearance.Flags.WingsOffset.SouthX : 0;
+            A_FlagWingsSouthY.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasSouthY) ? (int)CurrentObjectAppearance.Flags.WingsOffset.SouthY : 0;
+            A_FlagWingsWestX.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasWestX) ? (int)CurrentObjectAppearance.Flags.WingsOffset.WestX : 0;
+            A_FlagWingsWestY.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasWestY) ? (int)CurrentObjectAppearance.Flags.WingsOffset.WestY : 0;
             A_FullInfo.Text = CurrentObjectAppearance.ToString();
         }
         private void A_FlagLightColorPickerChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
@@ -1239,6 +1252,20 @@ namespace Assets_Editor
                 CurrentObjectAppearance.Flags.Wearout = true;
             else if ((CurrentObjectAppearance.Flags.HasWearout))
                 CurrentObjectAppearance.Flags.ClearWearout();
+
+            if ((bool)A_FlagWingsOffset.IsChecked) {
+                CurrentObjectAppearance.Flags.WingsOffset = new() {
+                    NorthX = (int)A_FlagWingsNorthX.Value,
+                    NorthY = (int)A_FlagWingsNorthY.Value,
+                    EastX = (int)A_FlagWingsEastX.Value,
+                    EastY = (int)A_FlagWingsEastY.Value,
+                    SouthX = (int)A_FlagWingsSouthX.Value,
+                    SouthY = (int)A_FlagWingsSouthY.Value,
+                    WestX = (int)A_FlagWingsWestX.Value,
+                    WestY = (int)A_FlagWingsWestY.Value,
+                };
+            } else
+                CurrentObjectAppearance.Flags.WingsOffset = null;
 
             if (ObjectMenu.SelectedIndex == 0)
                 MainWindow.appearances.Outfit[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();

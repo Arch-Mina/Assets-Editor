@@ -3677,7 +3677,7 @@ namespace Assets_Editor
                 return;
             }
 
-            System.Windows.Forms.FolderBrowserDialog exportPath = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.FolderBrowserDialog exportPath = new();
             if (exportPath.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 string fullPath = Path.Combine(exportPath.SelectedPath, "Appearances.aec");

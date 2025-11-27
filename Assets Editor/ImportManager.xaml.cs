@@ -63,7 +63,7 @@ namespace Assets_Editor
         }
         private async Task LoadImportClient()
         {
-            System.Windows.Forms.FolderBrowserDialog _assets = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.FolderBrowserDialog _assets = new();
             if (_assets.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 string _assetsPath = _assets.SelectedPath;

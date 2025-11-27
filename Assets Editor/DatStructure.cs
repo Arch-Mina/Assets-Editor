@@ -560,6 +560,19 @@ namespace Assets_Editor
                         appearance.Flags.Wearout = true;
                         break;
 
+                    case "WingsOffset":
+                        appearance.Flags.WingsOffset = new() {
+                            NorthX = r.ReadInt16(),
+                            NorthY = r.ReadInt16(),
+                            EastX = r.ReadInt16(),
+                            EastY = r.ReadInt16(),
+                            SouthX = r.ReadInt16(),
+                            SouthY = r.ReadInt16(),
+                            WestX = r.ReadInt16(),
+                            WestY = r.ReadInt16(),
+                        };
+                        break;
+
                     case "Default":
                         //ret.Default = true;
                         break;
@@ -855,6 +868,18 @@ namespace Assets_Editor
             if (item.Flags.Wearout && versionInfo.HasFlag("ShowCharges"))
                 w.Write((byte)versionInfo.GetFlagId("ShowCharges"));
 
+            // otc wings offset
+            if (item.Flags.WingsOffset != null && versionInfo.HasFlag("WingsOffset")) {
+                w.Write((byte)versionInfo.GetFlagId("WingsOffset"));
+                w.Write((short)item.Flags.WingsOffset.NorthX);
+                w.Write((short)item.Flags.WingsOffset.NorthY);
+                w.Write((short)item.Flags.WingsOffset.EastX);
+                w.Write((short)item.Flags.WingsOffset.EastY);
+                w.Write((short)item.Flags.WingsOffset.SouthX);
+                w.Write((short)item.Flags.WingsOffset.SouthY);
+                w.Write((short)item.Flags.WingsOffset.WestX);
+                w.Write((short)item.Flags.WingsOffset.WestY);
+            }
             w.Write((byte)0xFF);
         }
 
