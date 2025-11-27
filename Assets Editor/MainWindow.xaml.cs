@@ -509,7 +509,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            LegacyDatEditor legacyDatEditor = new(appearances);
+            LegacyDatEditor legacyDatEditor = new(appearances, (VersionInfo)DatStructureDropdown.SelectedItem);
             legacyDatEditor.Show();
         }
         Hide();

@@ -160,10 +160,10 @@ message AppearanceFlagHeight {
 }
 
 message AppearanceFlagShift {
-    optional uint32 x = 1;
-    optional uint32 y = 2;
-    optional uint32 a = 3;
-    optional uint32 b = 4;
+    optional int32 x = 1;
+    optional int32 y = 2;
+    optional int32 a = 3;
+    optional int32 b = 4;
 }
 
 message AppearanceFlagClothes {

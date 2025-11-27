@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Windows;
 using System.Xml.Linq;
 using Tibia.Protobuf.Appearances;
 using Appearance = Tibia.Protobuf.Appearances.Appearance;
@@ -450,18 +449,18 @@ namespace Assets_Editor
                         if (flagInfo.Version == 2) {
                             // 1098 standard - read offset
                             appearance.Flags.Shift = new() {
-                                X = r.ReadUInt16(),
-                                Y = r.ReadUInt16(),
+                                X = r.ReadInt16(),
+                                Y = r.ReadInt16(),
                                 A = 0,
                                 B = 0
                             };
                         } else if (flagInfo.Version == 3) {
                             // RD standard - displacement + sprite offset (?)
                             appearance.Flags.Shift = new() {
-                                X = r.ReadUInt16(),
-                                Y = r.ReadUInt16(),
-                                A = r.ReadUInt16(),
-                                B = r.ReadUInt16()
+                                X = r.ReadInt16(),
+                                A = r.ReadInt16(),
+                                Y = r.ReadInt16(),
+                                B = r.ReadInt16()
                             };
                         } else {
                             // old elevation did not precise the offset
@@ -768,15 +767,15 @@ namespace Assets_Editor
                 switch (flagInfo.Version) {
                     case 2:
                         // 1098 standard
-                        w.Write((ushort)item.Flags.Shift.X);
-                        w.Write((ushort)item.Flags.Shift.Y);
+                        w.Write((short)item.Flags.Shift.X);
+                        w.Write((short)item.Flags.Shift.Y);
                         break;
                     case 3:
                         // RD standard - displacement + sprite offset (?)
-                        w.Write((ushort)item.Flags.Shift.X);
-                        w.Write((ushort)item.Flags.Shift.Y);
-                        w.Write((ushort)item.Flags.Shift.A);
-                        w.Write((ushort)item.Flags.Shift.B);
+                        w.Write((short)item.Flags.Shift.X);
+                        w.Write((short)item.Flags.Shift.A);
+                        w.Write((short)item.Flags.Shift.Y);
+                        w.Write((short)item.Flags.Shift.B);
                         break;
                     default:
                         // old elevation did not precise the offset

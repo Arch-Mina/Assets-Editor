@@ -83,6 +83,7 @@
                     <CheckBox x:Name="A_FlagUnwrap" Content="Unwrap" Margin="0,5,0,0" Width="140"/>
                     <CheckBox x:Name="A_FlagTopeffect" Content="Top Effect" Margin="0,5,0,0" Width="140"/>
                     <CheckBox x:Name="A_FlagAnimated" Content="Animated" Margin="0,5,0,0" Width="140"/>
+                    <CheckBox x:Name="A_FlagWearout" Content="Show Charges" Margin="0,5,0,0" Width="140"/>
                 </WrapPanel>
             </GroupBox>
             <Button x:Name="SearchItem" Content="Search" Width="100" ToolTip="Save" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="SearchItem_PreviewMouseLeftButtonDown" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0"/>

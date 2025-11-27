@@ -24,10 +24,10 @@ namespace Assets_Editor
     /// </summary>
     public partial class LegacyDatEditor : Window
     {
-        public ObservableCollection<ShowList> ThingsOutfit = new ObservableCollection<ShowList>();
-        public ObservableCollection<ShowList> ThingsItem = new ObservableCollection<ShowList>();
-        public ObservableCollection<ShowList> ThingsEffect = new ObservableCollection<ShowList>();
-        public ObservableCollection<ShowList> ThingsMissile = new ObservableCollection<ShowList>();
+        public ObservableCollection<ShowList> ThingsOutfit = [];
+        public ObservableCollection<ShowList> ThingsItem = [];
+        public ObservableCollection<ShowList> ThingsEffect = [];
+        public ObservableCollection<ShowList> ThingsMissile = [];
         public Appearance CurrentObjectAppearance;
         public Appearance ReplaceObjectAppearance;
         public AppearanceFlags CurrentFlags = null;
@@ -35,6 +35,7 @@ namespace Assets_Editor
         private bool isPageLoaded = false;
         private bool isObjectLoaded = false;
         private bool isUpdatingFrame = false;
+        private VersionInfo loadedVersion;
 
         protected override void OnClosed(EventArgs e)
         {
@@ -57,16 +58,16 @@ namespace Assets_Editor
             for (int x = 0; x <= 215; x++)
             {
                 Color myRgbColor = Utils.Get8Bit(x);
-                A_FlagAutomapColorPicker.AvailableColors.Add(new Xceed.Wpf.Toolkit.ColorItem(System.Windows.Media.Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
+                A_FlagAutomapColorPicker.AvailableColors.Add(new Xceed.Wpf.Toolkit.ColorItem(Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
             }
-            ObservableCollection<Xceed.Wpf.Toolkit.ColorItem> outfitColors = new ObservableCollection<Xceed.Wpf.Toolkit.ColorItem>();
+            ObservableCollection<Xceed.Wpf.Toolkit.ColorItem> outfitColors = [];
             SprLayerHeadPicker.AvailableColors = outfitColors;
             SprLayerHeadPicker.AvailableColors.Clear();
 
             for (int x = 0; x <= 132; x++)
             {
                 System.Drawing.Color myRgbColor = Utils.GetOutfitColor(x);
-                outfitColors.Add(new Xceed.Wpf.Toolkit.ColorItem(System.Windows.Media.Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
+                outfitColors.Add(new Xceed.Wpf.Toolkit.ColorItem(Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
             }
             SprLayerHeadPicker.AvailableColors = outfitColors;
             SprLayerBodyPicker.AvailableColors = outfitColors;
@@ -77,7 +78,7 @@ namespace Assets_Editor
         {
             MainWindow.SetCurrentTheme(DarkModeToggle.IsChecked ?? false);
         }
-        public LegacyDatEditor(Appearances appearances)
+        public LegacyDatEditor(Appearances appearances, VersionInfo versionInfo)
             : this()
         {
             foreach (var outfit in appearances.Outfit)
@@ -98,7 +99,126 @@ namespace Assets_Editor
             }
             SprListView.ItemsSource = MainWindow.AllSprList;
             UpdateShowList(ObjectMenu.SelectedIndex);
+
+            loadedVersion = versionInfo;
+            SetThingViewLayout();
         }
+
+        private void UpdateFlagVisibility(Control control, string flagName) {
+            control.Visibility = loadedVersion.HasFlag(flagName) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void SetThingViewLayout() {
+            // ground + friction
+            UpdateFlagVisibility(A_FlagGround, "Ground");
+            UpdateFlagVisibility(A_FlagGroundSpeed, "Ground");
+
+            UpdateFlagVisibility(A_FlagClip, "Clip");
+            UpdateFlagVisibility(A_FlagTop, "Top");
+            UpdateFlagVisibility(A_FlagBottom, "Bottom");
+            UpdateFlagVisibility(A_FlagContainer, "Container");
+            UpdateFlagVisibility(A_FlagCumulative, "Stackable");
+            UpdateFlagVisibility(A_FlagUsable, "Usable");
+            UpdateFlagVisibility(A_FlagForceuse, "Forceuse");
+            UpdateFlagVisibility(A_FlagMultiuse, "Multiuse");
+            UpdateFlagVisibility(A_FlagWrite, "Writeable");
+            UpdateFlagVisibility(A_FlagMaxTextLength, "Writeable");
+            UpdateFlagVisibility(A_FlagWriteOnce, "WriteableOnce");
+            UpdateFlagVisibility(A_FlagMaxTextLengthOnce, "WriteableOnce");
+            UpdateFlagVisibility(A_FlagLiquidpool, "LiquidPool");
+            UpdateFlagVisibility(A_FlagLiquidcontainer, "LiquidContainer");
+            UpdateFlagVisibility(A_FlagUnpass, "Impassable");
+            UpdateFlagVisibility(A_FlagUnmove, "Unmovable");
+            UpdateFlagVisibility(A_FlagUnsight, "BlocksSight");
+            UpdateFlagVisibility(A_FlagAvoid, "BlocksPathfinding");
+            UpdateFlagVisibility(A_FlagNoMoveAnimation, "NoMovementAnimation");
+            UpdateFlagVisibility(A_FlagTake, "Pickupable");
+            UpdateFlagVisibility(A_FlagHang, "Hangable");
+            UpdateFlagVisibility(A_FlagHookSouth, "HooksSouth");
+            UpdateFlagVisibility(A_FlagHookEast, "HooksEast");
+            UpdateFlagVisibility(A_FlagRotate, "Rotateable");
+
+            // light source fields
+            UpdateFlagVisibility(A_FlagLight, "LightSource");
+            UpdateFlagVisibility(A_FlagLightBrightness, "LightSource");
+            UpdateFlagVisibility(A_FlagLightColor, "LightSource");
+
+            UpdateFlagVisibility(A_FlagDontHide, "AlwaysSeen");
+            UpdateFlagVisibility(A_FlagTranslucent, "Translucent");
+
+            // versioned flag
+            FlagInfo? displaced = loadedVersion.GetFlagInfo("Displaced");
+            if (displaced != null) {
+                A_FlagShift.Visibility = Visibility.Visible;
+
+                switch(displaced.Version) {
+                    case 2:
+                        // 1098 standard - offsets configurable
+                        A_StandardShiftCoords.Visibility = Visibility.Visible;
+                        A_ExtendedShiftCoords.Visibility = Visibility.Collapsed;
+                        break;
+                    case 3:
+                        // RD - extra parameters
+                        A_StandardShiftCoords.Visibility = Visibility.Visible;
+                        A_ExtendedShiftCoords.Visibility = Visibility.Visible;
+                        break;
+                    default:
+                        // old version - not configurable
+                        A_StandardShiftCoords.Visibility = Visibility.Collapsed;
+                        A_ExtendedShiftCoords.Visibility = Visibility.Collapsed;
+                        break;
+                }
+            } else {
+                A_FlagShift.Visibility = Visibility.Collapsed;
+                A_StandardShiftCoords.Visibility = Visibility.Collapsed;
+                A_ExtendedShiftCoords.Visibility = Visibility.Collapsed;
+            }
+
+            // item height
+            UpdateFlagVisibility(A_FlagHeight, "Elevated");
+            UpdateFlagVisibility(A_FlagElevation, "Elevated");
+
+            UpdateFlagVisibility(A_FlagLyingObject, "LyingObject");
+            UpdateFlagVisibility(A_FlagAnimateAlways, "AlwaysAnimated");
+
+            // minimap
+            UpdateFlagVisibility(A_FlagAutomap, "MinimapColor");
+            UpdateFlagVisibility(A_FlagAutomapColor, "MinimapColor");
+
+            UpdateFlagVisibility(A_FlagFullGround, "FullTile");
+
+            // lenshelp
+            UpdateFlagVisibility(A_FlagLenshelp, "HelpInfo");
+            UpdateFlagVisibility(A_FlagLenshelpId, "HelpInfo");
+
+            UpdateFlagVisibility(A_FlagIgnoreLook, "Lookthrough");
+
+            // hotkey equip slot
+            UpdateFlagVisibility(A_FlagClothes, "Clothes");
+            UpdateFlagVisibility(A_FlagClothesSlot, "Clothes");
+
+            // default action
+            UpdateFlagVisibility(A_FlagDefaultAction, "DefaultAction");
+            UpdateFlagVisibility(A_FlagDefaultActionType, "DefaultAction");
+
+            // market
+            UpdateFlagVisibility(A_FlagMarket, "Market");
+            UpdateFlagVisibility(A_FlagMarketCategory, "Market");
+            UpdateFlagVisibility(A_FlagMarketTrade, "Market");
+            UpdateFlagVisibility(A_FlagMarketShow, "Market");
+            UpdateFlagVisibility(A_FlagMarketProfession, "Market");
+            UpdateFlagVisibility(A_FlagMarketlevel, "Market");
+            UpdateFlagVisibility(A_FlagName, "Market");
+            UpdateFlagVisibility(A_FlagDescription, "Market");
+
+            UpdateFlagVisibility(A_FlagWrap, "Wrappable");
+            UpdateFlagVisibility(A_FlagUnwrap, "UnWrappable");
+            UpdateFlagVisibility(A_FlagTopeffect, "TopEffect");
+
+            // flag "rune charges visible" - dat structure 7.8 - 8.54
+            UpdateFlagVisibility(A_FlagWearout, "ShowCharges");
+        }
+
         public void UpdateShowList(int selection)
         {
             if (ObjListView != null)
@@ -380,6 +500,8 @@ namespace Assets_Editor
             A_FlagShift.IsChecked = CurrentObjectAppearance.Flags.Shift != null;
             A_FlagShiftX.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasX) ? (int)CurrentObjectAppearance.Flags.Shift.X : 0;
             A_FlagShiftY.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasY) ? (int)CurrentObjectAppearance.Flags.Shift.Y : 0;
+            A_FlagShiftA.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasA) ? (int)CurrentObjectAppearance.Flags.Shift.A : 0;
+            A_FlagShiftB.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasB) ? (int)CurrentObjectAppearance.Flags.Shift.B : 0;
             A_FlagHeight.IsChecked = CurrentObjectAppearance.Flags.Height != null;
             A_FlagElevation.Value = (CurrentObjectAppearance.Flags.Height != null && CurrentObjectAppearance.Flags.Height.HasElevation) ? (int)CurrentObjectAppearance.Flags.Height.Elevation : 0;
             A_FlagLyingObject.IsChecked = CurrentObjectAppearance.Flags.HasLyingObject;
@@ -409,6 +531,7 @@ namespace Assets_Editor
             A_FlagWrap.IsChecked = CurrentObjectAppearance.Flags.HasWrap;
             A_FlagUnwrap.IsChecked = CurrentObjectAppearance.Flags.HasUnwrap;
             A_FlagTopeffect.IsChecked = CurrentObjectAppearance.Flags.HasTop;
+            A_FlagWearout.IsChecked = CurrentObjectAppearance.Flags.HasWearout;
 
             A_FullInfo.Text = CurrentObjectAppearance.ToString();
         }
@@ -1008,8 +1131,10 @@ namespace Assets_Editor
             {
                 CurrentObjectAppearance.Flags.Shift = new AppearanceFlagShift
                 {
-                    X = (uint)A_FlagShiftX.Value,
-                    Y = (uint)A_FlagShiftY.Value
+                    X = (int)A_FlagShiftX.Value,
+                    Y = (int)A_FlagShiftY.Value,
+                    A = (int)A_FlagShiftA.Value,
+                    B = (int)A_FlagShiftB.Value
                 };
             }
             else
@@ -1110,6 +1235,11 @@ namespace Assets_Editor
             else if (CurrentObjectAppearance.Flags.HasTopeffect)
                 CurrentObjectAppearance.Flags.ClearTopeffect();
 
+            if ((bool)A_FlagWearout.IsChecked)
+                CurrentObjectAppearance.Flags.Wearout = true;
+            else if ((CurrentObjectAppearance.Flags.HasWearout))
+                CurrentObjectAppearance.Flags.ClearWearout();
+
             if (ObjectMenu.SelectedIndex == 0)
                 MainWindow.appearances.Outfit[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
             else if (ObjectMenu.SelectedIndex == 1)
@@ -1161,13 +1291,13 @@ namespace Assets_Editor
             CompileBox.IsEnabled = true;
         }
 
-        private void WritePresetToOtfi(string otfiPath, PresetSettings preset, string datFile, string sprFile) {
+        private void WritePresetToOtfi(string otfiPath, PresetSettings preset, string datFile, string sprFile, bool transparency) {
             // create DatSpr node
             OTMLNode datspr = OTMLNode.Create("DatSpr", unique: true);
 
             // bools
             datspr.AddChild(OTMLNode.Create("extended", preset.Extended.ToString().ToLower()));
-            datspr.AddChild(OTMLNode.Create("transparency", preset.Transparent.ToString().ToLower()));
+            datspr.AddChild(OTMLNode.Create("transparency", transparency.ToString().ToLower()));
             datspr.AddChild(OTMLNode.Create("frame-durations", preset.FrameDurations.ToString().ToLower()));
             datspr.AddChild(OTMLNode.Create("frame-groups", preset.FrameGroups.ToString().ToLower()));
 
@@ -1222,7 +1352,7 @@ namespace Assets_Editor
             try {
                 PresetSettings? preset = MainWindow.GetCurrentPreset();
                 if (preset != null) {
-                    WritePresetToOtfi(otfile, preset, datfile, sprfile);
+                    WritePresetToOtfi(otfile, preset, datfile, sprfile, (bool)C_Transparent.IsChecked);
                 }
             } catch {
                 // ...

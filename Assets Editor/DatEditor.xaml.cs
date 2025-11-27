@@ -1490,8 +1490,8 @@ namespace Assets_Editor
             {
                 CurrentObjectAppearance.Flags.Shift = new AppearanceFlagShift
                 {
-                    X = (uint)A_FlagShiftX.Value,
-                    Y = (uint)A_FlagShiftY.Value
+                    X = (int)A_FlagShiftX.Value,
+                    Y = (int)A_FlagShiftY.Value
                 };
             }
             else
