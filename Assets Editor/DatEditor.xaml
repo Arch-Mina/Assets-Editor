@@ -13,9 +13,17 @@
         <local:ArithmeticConverter x:Key="ArithmeticConverter" />
         <local:NullableColorToBrushConverter x:Key="NullableColorToBrushConverter" />
         <local:BooleanInverter x:Key="BooleanInverter"/>
+        <local:BooleanOrInverterConverter x:Key="BooleanOrInverterConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
-    <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch" IsHitTestVisible="{Binding ElementName=ComppileDialogHost, Path=IsOpen, Mode=OneWay, Converter={StaticResource BooleanInverter}}">
+    <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+        <Grid.IsHitTestVisible>
+            <MultiBinding Converter="{StaticResource BooleanOrInverterConverter}">
+                <!-- If either dialog is open, background must NOT be clickable -->
+                <Binding ElementName="ComppileDialogHost" Path="IsOpen"/>
+                <Binding ElementName="CompileToImagesDialogHost" Path="IsOpen"/>
+            </MultiBinding>
+        </Grid.IsHitTestVisible>
         <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray" >
             <materialDesign:DialogHost.DialogContent>
                 <GroupBox x:Name="CompileBox" Header="Export To Legacy" Width="350">

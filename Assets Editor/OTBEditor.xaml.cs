@@ -3,10 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using Tibia.Protobuf.Appearances;
 using static Assets_Editor.OTB;
 
@@ -34,9 +32,10 @@ namespace Assets_Editor
         private uint ClientVersion;
         private void OpenOTBButton_Click(object sender, RoutedEventArgs e)
         {
-
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "OTB Files (*.otb)|*.otb";
+            OpenFileDialog openFileDialog = new() {
+                Filter = "OTB Files (*.otb)|*.otb",
+                ClientGuid = Globals.GUID_OtbEditor_load
+            };
             if (openFileDialog.ShowDialog() == true)
             {
                 appearanceByClientId.Clear();
@@ -222,9 +221,11 @@ namespace Assets_Editor
         {
             if (!OTBLoaded)
                 return;
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "OTB files (*.otb)|*.otb";
-            dialog.Title = "Save OTB File";
+            SaveFileDialog dialog = new() {
+                Filter = "OTB files (*.otb)|*.otb",
+                Title = "Save OTB File",
+                ClientGuid = Globals.GUID_OtbEditor_save
+            };
 
             if (dialog.ShowDialog() == true)
             {
@@ -247,7 +248,7 @@ namespace Assets_Editor
                 }
                 catch (UnauthorizedAccessException exception)
                 {
-                    MessageBox.Show(exception.Message);
+                    ErrorManager.ShowError(exception.Message);
                 }
             }
         }

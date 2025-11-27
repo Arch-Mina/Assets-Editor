@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -14,6 +10,13 @@ namespace Assets_Editor
 {
     public static class Utils
     {
+        public static void SafeSetColor(int? colorIndex, Xceed.Wpf.Toolkit.ColorPicker colorPicker)
+        {
+            if (colorIndex > 0 && colorIndex < colorPicker.AvailableColors.Count) {
+                colorPicker.SelectedColor = colorPicker.AvailableColors[colorIndex ?? 0].Color;
+            }
+        }
+
         public static System.Windows.Media.Color Get8Bit(int color)
         {
             System.Windows.Media.Color RgbColor = new System.Windows.Media.Color
@@ -154,9 +157,9 @@ namespace Assets_Editor
             {
                 return null;
             }
-            BitmapImage bitmap = new BitmapImage();
+            BitmapImage bitmap = new();
             bitmap.BeginInit();
-            stream.Seek(0, System.IO.SeekOrigin.Begin);
+            stream.Seek(0, SeekOrigin.Begin);
             bitmap.StreamSource = stream;
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
             bitmap.EndInit();
