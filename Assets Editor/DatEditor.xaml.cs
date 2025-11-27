@@ -760,11 +760,11 @@ namespace Assets_Editor
         }
         private void A_FlagAutomapColor_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            A_FlagAutomapColorPicker.SelectedColor = A_FlagAutomapColorPicker.AvailableColors[(int)A_FlagAutomapColor.Value].Color;
+            Utils.SafeSetColor(A_FlagAutomapColor.Value, A_FlagAutomapColorPicker);
         }
         private void A_FlagLightColor_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            A_FlagLightColorPicker.SelectedColor = A_FlagLightColorPicker.AvailableColors[(int)A_FlagLightColor.Value].Color;
+            Utils.SafeSetColor(A_FlagLightColor.Value, A_FlagLightColorPicker);
         }
         private void A_FlagMarketProfession_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

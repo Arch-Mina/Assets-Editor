@@ -577,11 +577,11 @@ namespace Assets_Editor
         }
         private void A_FlagAutomapColor_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            A_FlagAutomapColorPicker.SelectedColor = A_FlagAutomapColorPicker.AvailableColors[(int)A_FlagAutomapColor.Value].Color;
+            Utils.SafeSetColor(A_FlagAutomapColor.Value, A_FlagAutomapColorPicker);
         }
         private void A_FlagLightColor_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            A_FlagLightColorPicker.SelectedColor = A_FlagLightColorPicker.AvailableColors[(int)A_FlagLightColor.Value].Color;
+            Utils.SafeSetColor(A_FlagLightColor.Value, A_FlagLightColorPicker);
         }
         private void A_FlagMarketProfession_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -743,13 +743,14 @@ namespace Assets_Editor
                     }
                 } else {
                     int counter = 1;
+                    int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternLayers - 1 : 0;
                     int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternZ - 1 : 0;
                     for (int ph = 0; ph < frameGroup.SpriteInfo.PatternY; ph++) {
                         for (int pw = 0; pw < frameGroup.SpriteInfo.PatternX; pw++) {
                             for (int h = (int)(frameGroup.SpriteInfo.PatternHeight - 1); h >= 0; h--) {
                                 for (int w = (int)(frameGroup.SpriteInfo.PatternWidth - 1); w >= 0; w--) {
                                     int tileid = (int)(ph * gridHeight * frameGroup.SpriteInfo.PatternHeight + (frameGroup.SpriteInfo.PatternHeight - 1 - h) * gridHeight + (pw * frameGroup.SpriteInfo.PatternWidth) + (frameGroup.SpriteInfo.PatternWidth - 1 - w) + 1);
-                                    int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, pw, ph, mount, (int)SprFramesSlider.Value);
+                                    int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, layer, pw, ph, mount, (int)SprFramesSlider.Value);
                                     int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
                                     SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), tileid, spriteId, index);
                                     counter++;
