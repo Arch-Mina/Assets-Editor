@@ -14,6 +14,9 @@ public class ObdDecoder
     public static void SetDatStructure(VersionInfo versionInfo) {
         Version1098 = versionInfo;
     }
+    public static VersionInfo? GetDatStructure() {
+        return Version1098;
+    }
 
     private static Appearance ReadAppearance1098(BinaryReader r, APPEARANCE_TYPE type)
     {

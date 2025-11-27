@@ -823,6 +823,11 @@ public partial class MainWindow : Window
 
         // Assets have all features natively
         // this cannot be changed
+        DatExtendedToggle.IsChecked = true;
+        DatTransparentToggle.IsChecked = true;
+        DatAnimationsToggle.IsChecked = true;
+        DatFrameGroupsToggle.IsChecked = true;
+
         DatExtendedToggle.IsEnabled = false;
         DatTransparentToggle.IsEnabled = false;
         DatAnimationsToggle.IsEnabled = false;

@@ -2402,7 +2402,12 @@ namespace Assets_Editor
                 }
 
                 string datfile = MainWindow._assetsPath + "Tibia.dat";
-                LegacyAppearance.WriteLegacyDat(datfile, 0x42A3, tmpAppearances, 1098);
+                VersionInfo? legacyEncoder = ObdDecoder.GetDatStructure();
+                if (legacyEncoder == null) {
+                    ErrorManager.ShowError("obd structure not defined in appearances.xml!");
+                    return;
+                }
+                LegacyAppearance.WriteLegacyDat(datfile, 0x42A3, tmpAppearances, legacyEncoder.Structure);
 
             });
             var progress1 = new Progress<int>(percent =>

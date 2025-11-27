@@ -1161,12 +1161,36 @@ namespace Assets_Editor
             CompileBox.IsEnabled = true;
         }
 
+        private void WritePresetToOtfi(string otfiPath, PresetSettings preset, string datFile, string sprFile) {
+            // create DatSpr node
+            OTMLNode datspr = OTMLNode.Create("DatSpr", unique: true);
+
+            // bools
+            datspr.AddChild(OTMLNode.Create("extended", preset.Extended.ToString().ToLower()));
+            datspr.AddChild(OTMLNode.Create("transparency", preset.Transparent.ToString().ToLower()));
+            datspr.AddChild(OTMLNode.Create("frame-durations", preset.FrameDurations.ToString().ToLower()));
+            datspr.AddChild(OTMLNode.Create("frame-groups", preset.FrameGroups.ToString().ToLower()));
+
+            // spr/dat pair
+            datspr.AddChild(OTMLNode.Create("metadata-file", Path.GetFileName(datFile)));
+            datspr.AddChild(OTMLNode.Create("sprites-file", Path.GetFileName(sprFile)));
+
+            // optional combined name ("assets-name")
+            string? baseName = Path.GetFileNameWithoutExtension(datFile);
+            if (baseName != null) {
+                datspr.AddChild(OTMLNode.Create("assets-name", baseName));
+            }
+
+            File.WriteAllText(otfiPath, datspr.Emit() + "\n");
+        }
+
         private async void CompileClient(object sender, RoutedEventArgs e)
         {
             bool isDatEditable = false;
             bool isSprEditable = false;
             string datfile = MainWindow._assetsPath + A_CompileName.Text + ".dat";
             string sprfile = MainWindow._assetsPath + A_CompileName.Text + ".spr";
+            string otfile = MainWindow._assetsPath + A_CompileName.Text + ".otfi";
 
             try {
                 using var fileStream = new FileStream(datfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
@@ -1192,6 +1216,16 @@ namespace Assets_Editor
                 await Sprite.CompileSpritesAsync(sprfile, MainWindow.MainSprStorage, (bool)C_Transparent.IsChecked, MainWindow.SprSignature, progress, MainWindow.GetCurrentPreset()?.Extended ?? true);
             } else {
                 StatusBar.MessageQueue?.Enqueue($".dat or .spr file is being used by another process or is not accessible.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
+
+            // write otfi (optional)
+            try {
+                PresetSettings? preset = MainWindow.GetCurrentPreset();
+                if (preset != null) {
+                    WritePresetToOtfi(otfile, preset, datfile, sprfile);
+                }
+            } catch {
+                // ...
             }
 
             ComppileDialogHost.IsOpen = false;
