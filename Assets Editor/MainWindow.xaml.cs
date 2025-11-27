@@ -44,17 +44,6 @@ public partial class MainWindow : Window
     public static ushort EffectCount { get; set; }
     public static ushort MissileCount { get; set; }
 
-    // directory pickers
-    // to generate more use tools -> create GUID in visual studio
-    private static readonly Guid GUID_assetsPicker = new("43A0E8FA-B129-4DB4-AD2D-0C44C23CE222");
-
-    // to do
-    // private static readonly Guid GUID_serverPicker = new("C01637F9-8C7B-4610-BBA2-530487BC57A2");
-
-    private static readonly Guid GUID_export1 = new("820617D2-0ECA-4632-B62D-42F740BD731A");
-    private static readonly Guid Guid_export2 = new("4FC8F7A5-4840-4840-A68B-26DFD955D224");
-    private static readonly Guid Guid_export3 = new("1A5860A3-5722-4FFC-B6F2-FCE4E9FE255F");
-
     public static Dictionary<uint, Sprite> sprites = [];
     public static SpriteStorage MainSprStorage;
     private BackgroundWorker worker;
@@ -309,7 +298,7 @@ public partial class MainWindow : Window
     private void SelectAssetsFolder(object sender, RoutedEventArgs e)
     {
         FolderBrowserDialog _assets = new() {
-            ClientGuid = GUID_assetsPicker
+            ClientGuid = Globals.GUID_MainWindowAssetsPicker
         };
 
         // If _assetsPath is valid, set it as the starting folder

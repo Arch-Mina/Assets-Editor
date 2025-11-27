@@ -412,7 +412,8 @@ namespace Assets_Editor
             }
             SaveFileDialog saveFileDialog = new()
             {
-                Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Lzma Archive (.lzma)|*.lzma"
+                Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Lzma Archive (.lzma)|*.lzma",
+                ClientGuid = Globals.GUID_SprEditor_save
             };
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -435,7 +436,7 @@ namespace Assets_Editor
                         break;
                     case 5:
                         {
-                            FileInfo fileInfo = new FileInfo(saveFileDialog.FileName);
+                            FileInfo fileInfo = new(saveFileDialog.FileName);
                             string dirPath = fileInfo.DirectoryName;
                             LZMA.ExportLzmaFile(targetImg, ref dirPath);
                             break;

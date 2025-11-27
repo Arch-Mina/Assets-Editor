@@ -1398,10 +1398,11 @@ namespace Assets_Editor
             List<ShowList> selectedItems = SprListView.SelectedItems.Cast<ShowList>().ToList();
             if (selectedItems.Any())
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog
+                SaveFileDialog saveFileDialog = new()
                 {
                     Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png",
-                    FileName = " "
+                    FileName = " ",
+                    ClientGuid = Globals.GUID_LegacyDatEditor1
                 };
                 if (saveFileDialog.ShowDialog() == true)
                 {
@@ -1442,9 +1443,11 @@ namespace Assets_Editor
 
         private void ImportSprite_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png";
-            openFileDialog.Multiselect = true;
+            OpenFileDialog openFileDialog = new() {
+                ClientGuid = Globals.GUID_LegacyDatEditor2,
+                Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png",
+                Multiselect = true
+            };
             int imported = 0;
             if (openFileDialog.ShowDialog() == true)
             {
@@ -1560,8 +1563,10 @@ namespace Assets_Editor
         }
         private void ReplaceSprite_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png";
+            OpenFileDialog openFileDialog = new() {
+                Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png",
+                ClientGuid = Globals.GUID_LegacyDatEditor3
+            };
             if (openFileDialog.ShowDialog() == true)
             {
                 using (System.Drawing.Image originalImage = System.Drawing.Image.FromFile(openFileDialog.FileName))

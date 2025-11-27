@@ -63,7 +63,9 @@ namespace Assets_Editor
         }
         private async Task LoadImportClient()
         {
-            System.Windows.Forms.FolderBrowserDialog _assets = new();
+            System.Windows.Forms.FolderBrowserDialog _assets = new() {
+                ClientGuid = Globals.GUID_ImportManager1
+            };
             if (_assets.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 string _assetsPath = _assets.SelectedPath;
@@ -402,12 +404,14 @@ namespace Assets_Editor
 
         private void ImportObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "OBD Files (*.obd)|*.obd";
+            OpenFileDialog openFileDialog = new() {
+                Filter = "OBD Files (*.obd)|*.obd",
+                ClientGuid = Globals.GUID_ImportManager2
+            };
             if (openFileDialog.ShowDialog() == true)
             {
                 string selectedFilePath = openFileDialog.FileName;
-                ConcurrentDictionary<int, MemoryStream> objectSprList = new ConcurrentDictionary<int, MemoryStream>();
+                ConcurrentDictionary<int, MemoryStream> objectSprList = [];
                 Appearance appearance = ObdDecoder.Load(selectedFilePath, ref objectSprList);
                 if (appearance != null)
                 {

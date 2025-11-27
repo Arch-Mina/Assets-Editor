@@ -22,6 +22,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Tibia.Protobuf.Appearances;
+using FolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
 
 namespace Assets_Editor
 {
@@ -2150,7 +2151,9 @@ namespace Assets_Editor
 
         private void ExportAsImageDirectoryPicker_Click(object sender, RoutedEventArgs e)
         {
-            using var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            using FolderBrowserDialog dialog = new() {
+                ClientGuid = Globals.GUID_DatEditor1
+            };
             dialog.Description = "Select the directory to export objects.";
             dialog.ShowNewFolderButton = true;
 
@@ -2429,10 +2432,11 @@ namespace Assets_Editor
             List<ShowList> selectedItems = SprListView.SelectedItems.Cast<ShowList>().ToList();
             if (selectedItems.Any())
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog
+                SaveFileDialog saveFileDialog = new()
                 {
                     Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png",
-                    FileName = " "
+                    FileName = " ",
+                    ClientGuid = Globals.GUID_DatEditor2
                 };
                 if (saveFileDialog.ShowDialog() == true)
                 {
@@ -2448,7 +2452,7 @@ namespace Assets_Editor
                             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
                             g.DrawImage(image, new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), System.Drawing.GraphicsUnit.Pixel);
                             g.Dispose();
-                            string directoryPath = System.IO.Path.GetDirectoryName(saveFileDialog.FileName);
+                            string directoryPath = Path.GetDirectoryName(saveFileDialog.FileName);
                             switch (saveFileDialog.FilterIndex)
                             {
                                 case 1:
@@ -3276,7 +3280,8 @@ namespace Assets_Editor
                 Filter =
                     "assets editor container (*.aec)|*.aec|" +
                     "object editor dump (*.obd)|*.obd",
-                Multiselect = true
+                Multiselect = true,
+                ClientGuid = Globals.GUID_DatEditor3
             };
 
             int importedCount = 0;
@@ -3677,7 +3682,9 @@ namespace Assets_Editor
                 return;
             }
 
-            System.Windows.Forms.FolderBrowserDialog exportPath = new();
+            FolderBrowserDialog exportPath = new() {
+                ClientGuid = Globals.GUID_DatEditor4
+            };
             if (exportPath.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 string fullPath = Path.Combine(exportPath.SelectedPath, "Appearances.aec");

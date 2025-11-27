@@ -392,7 +392,9 @@ public class ObdDecoder
     }
     public static bool Export(List<Appearance> appearances)
     {
-        System.Windows.Forms.FolderBrowserDialog folder = new();
+        System.Windows.Forms.FolderBrowserDialog folder = new() {
+            ClientGuid = Globals.GUID_ObdDecoder_export
+        };
         if (folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
         {
             string exportFolder = folder.SelectedPath;

@@ -670,7 +670,8 @@ return generateChartData()
                 Title = "Export CSV",
                 Filter = "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*",
                 FileName = "export.csv",
-                OverwritePrompt = true
+                OverwritePrompt = true,
+                ClientGuid = Globals.GUID_LuaWindowExportCSV
             };
             var ok = sfd.ShowDialog(this);
             if (ok == true) {
