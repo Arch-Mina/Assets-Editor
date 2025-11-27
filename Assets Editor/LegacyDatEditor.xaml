@@ -362,30 +362,30 @@
                                                 <StackPanel Orientation="Horizontal">
                                                     <Label Content="North" Width="32" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                                     <Label Content="X:" Width="12" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsNorthX" Margin="0,0,0,0" Width="50" Minimum="-64" Maximum="64"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsNorthX" Margin="0,0,0,0" Width="50" Minimum="-128" Maximum="128"/>
                                                     <Label Content="Y:" Width="12" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsNorthY" Margin="0,0,0,0" Width="50" Minimum="-64" Maximum="64"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsNorthY" Margin="0,0,0,0" Width="50" Minimum="-128" Maximum="128"/>
                                                 </StackPanel>
                                                 <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                                                     <Label Content="East" Width="32" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                                     <Label Content="X:" Width="12" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsEastX" Margin="0,0,0,0" Width="50" Minimum="-64" Maximum="64"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsEastX" Margin="0,0,0,0" Width="50" Minimum="-128" Maximum="128"/>
                                                     <Label Content="Y:" Width="12" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsEastY" Margin="0,0,0,0" Width="50" Minimum="-64" Maximum="64"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsEastY" Margin="0,0,0,0" Width="50" Minimum="-128" Maximum="128"/>
                                                 </StackPanel>
                                                 <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                                                     <Label Content="South" Width="32" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                                     <Label Content="X:" Width="12" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsSouthX" Margin="0,0,0,0" Width="50" Minimum="-64" Maximum="64"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsSouthX" Margin="0,0,0,0" Width="50" Minimum="-128" Maximum="128"/>
                                                     <Label Content="Y:" Width="12" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsSouthY" Margin="0,0,0,0" Width="50" Minimum="-64" Maximum="64"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsSouthY" Margin="0,0,0,0" Width="50" Minimum="-128" Maximum="128"/>
                                                 </StackPanel>
                                                 <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                                                     <Label Content="West" Width="32" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                                     <Label Content="X:" Width="12" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsWestX" Margin="0,0,0,0" Width="50" Minimum="-64" Maximum="64"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsWestX" Margin="0,0,0,0" Width="50" Minimum="-128" Maximum="128"/>
                                                     <Label Content="Y:" Width="12" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsWestY" Margin="0,0,0,0" Width="50" Minimum="-64" Maximum="64"/>
+                                                    <xctk:IntegerUpDown x:Name="A_FlagWingsWestY" Margin="0,0,0,0" Width="50" Minimum="-128" Maximum="128"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
