@@ -961,12 +961,13 @@ namespace Assets_Editor
                 else
                 {
                     int counter = 1;
+                    int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.Layers - 1 : 0;
                     int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
                     for (int ph = 0; ph < frameGroup.SpriteInfo.PatternHeight; ph++)
                     {
                         for (int pw = 0; pw < frameGroup.SpriteInfo.PatternWidth; pw++)
                         {
-                            int index = GetSpriteIndex(frameGroup, 0, pw, ph, mount, (int)SprFramesSlider.Value);
+                            int index = GetSpriteIndex(frameGroup, layer, pw, ph, mount, (int)SprFramesSlider.Value);
                             int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
                             SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(spriteId)), counter, spriteId, index);
                             counter++;
