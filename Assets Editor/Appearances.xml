@@ -1,4 +1,4 @@
-<Appearances>
+<Appearances obd_structure="6">
 	<Dat structure="1" name="7.1 - 7.3" pattern_z="false">
 		<Flags>
 			<Flag id="0" name="Ground" />

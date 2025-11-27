@@ -1168,42 +1168,31 @@ namespace Assets_Editor
             string datfile = MainWindow._assetsPath + A_CompileName.Text + ".dat";
             string sprfile = MainWindow._assetsPath + A_CompileName.Text + ".spr";
 
-            try
-            {
-                using (var fileStream = new FileStream(datfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                {
-                    isDatEditable = true;
-                }
-            }
-            catch (IOException)
-            {
+            try {
+                using var fileStream = new FileStream(datfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                isDatEditable = true;
+            } catch (IOException) {
                 isDatEditable = false;
             }
 
-            try
-            {
-                using (var fileStream = new FileStream(sprfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                {
-                    isSprEditable = true;
-                }
-            }
-            catch (IOException)
-            {
+            try {
+                using var fileStream = new FileStream(sprfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                isSprEditable = true;
+            } catch (IOException) {
                 isSprEditable = false;
             }
 
-            if (isDatEditable && isSprEditable)
-            {
+            if (isDatEditable && isSprEditable) {
                 LegacyAppearance.WriteLegacyDat(datfile, MainWindow.DatSignature, MainWindow.appearances, MainWindow.GetCurrentLoadedVersion());
-                var progress = new Progress<int>(percent =>
-                {
+                var progress = new Progress<int>(percent => {
                     LoadProgress.Value = percent;
                 });
                 CompileBox.IsEnabled = false;
-                await Sprite.CompileSpritesAsync(sprfile, MainWindow.MainSprStorage, (bool)C_Transparent.IsChecked, MainWindow.SprSignature, progress);
-            }
-            else
+
+                await Sprite.CompileSpritesAsync(sprfile, MainWindow.MainSprStorage, (bool)C_Transparent.IsChecked, MainWindow.SprSignature, progress, MainWindow.GetCurrentPreset()?.Extended ?? true);
+            } else {
                 StatusBar.MessageQueue?.Enqueue($".dat or .spr file is being used by another process or is not accessible.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            }
 
             ComppileDialogHost.IsOpen = false;
         }

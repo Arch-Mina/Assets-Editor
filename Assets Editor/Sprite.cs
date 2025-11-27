@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.DirectoryServices;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -159,7 +160,7 @@ namespace Assets_Editor
 
             byte[] compressedPixels;
 
-            using (BinaryWriter writer = new BinaryWriter(new MemoryStream()))
+            using (BinaryWriter writer = new(new MemoryStream()))
             {
                 int read = 0;
                 int alphaCount = 0;
@@ -439,7 +440,7 @@ namespace Assets_Editor
             return pixels;
         }
 
-        public static async Task CompileSpritesAsync(string file, SpriteStorage spriteStorage, bool transparency, uint version, IProgress<int> progress)
+        public static async Task CompileSpritesAsync(string file, SpriteStorage spriteStorage, bool transparency, uint signature, IProgress<int> progress, bool extended = true)
         {
             await Task.Run(() =>
             {
@@ -447,79 +448,69 @@ namespace Assets_Editor
                 int currentPercentage = 0;
                 int FullProgress = spriteStorage.SprLists.Count;
                 string tempFile = file + ".tmp";
-                using (BinaryWriter writer = new BinaryWriter(new FileStream(tempFile, FileMode.Create)))
-                {
-                    uint count = (uint)spriteStorage.SprLists.Count - 1; ;
+                using BinaryWriter writer = new(new FileStream(tempFile, FileMode.Create));
+                uint totalPics = (uint)spriteStorage.SprLists.Count - 1; ;
 
-                    writer.Write(version);
+                
+                writer.Write(signature);
 
-                    writer.Write(count);
+                if (extended) {
+                    writer.Write(totalPics);
+                } else {
+                    writer.Write(Convert.ToUInt16(totalPics));
+                }
 
-                    byte headSize = 8;
-                    int addressPosition = headSize;
-                    int address = (int)((count * 4) + headSize);
-                    byte[] bytes = null;
+                byte headSize = extended ? (byte)8 : (byte)6;
+                int addressPosition = headSize;
+                int address = (int)((totalPics * 4) + headSize);
+                byte[] bytes = null;
 
-                    for (uint id = 1; id <= count; id++)
-                    {
+                for (uint id = 1; id <= totalPics; id++) {
 
-                        writer.Seek(addressPosition, SeekOrigin.Begin);
+                    writer.Seek(addressPosition, SeekOrigin.Begin);
 
-                        bytes = CompressBitmap(new Bitmap(spriteStorage.getSpriteStream((uint)id)), transparency);
+                    bytes = CompressBitmap(new Bitmap(spriteStorage.getSpriteStream((uint)id)), transparency);
 
-                        if (bytes.Length > 0)
-                        {
-                            // write address
-                            writer.Write((uint)address);
-                            writer.Seek(address, SeekOrigin.Begin);
+                    if (bytes.Length > 0) {
+                        // write address
+                        writer.Write((uint)address);
+                        writer.Seek(address, SeekOrigin.Begin);
 
-                            // write colorkey
-                            writer.Write((byte)0xFF); // red
-                            writer.Write((byte)0x00); // blue
-                            writer.Write((byte)0xFF); // green
+                        // write colorkey
+                        writer.Write((byte)0xFF); // red
+                        writer.Write((byte)0x00); // blue
+                        writer.Write((byte)0xFF); // green
 
-                            // write sprite data size
-                            writer.Write((short)bytes.Length);
+                        // write sprite data size
+                        writer.Write((short)bytes.Length);
 
-                            if (bytes.Length > 0)
-                            {
-                                writer.Write(bytes);
-                            }
+                        if (bytes.Length > 0) {
+                            writer.Write(bytes);
                         }
-                        else
-                        {
-                            writer.Write((uint)0);
-                            writer.Seek(address, SeekOrigin.Begin);
-                        }
-                        address = (int)writer.BaseStream.Position;
-                        addressPosition += 4;
-
-                        percentageComplete = (int)(id * 100 / FullProgress);
-                        if (percentageComplete > currentPercentage)
-                        {
-                            progress?.Report(percentageComplete);
-                            currentPercentage = percentageComplete;
-                        }
+                    } else {
+                        writer.Write((uint)0);
+                        writer.Seek(address, SeekOrigin.Begin);
                     }
+                    address = (int)writer.BaseStream.Position;
+                    addressPosition += 4;
 
-                    writer.Close();
-                    File.Move(tempFile, file, overwrite: true);
-                    if (File.Exists(tempFile))
-                    {
-                        try
-                        {
-                            File.Delete(tempFile);
-                        }
-                        catch
-                        {
-                        }
+                    percentageComplete = (int)(id * 100 / FullProgress);
+                    if (percentageComplete > currentPercentage) {
+                        progress?.Report(percentageComplete);
+                        currentPercentage = percentageComplete;
                     }
                 }
 
-
+                writer.Close();
+                File.Move(tempFile, file, overwrite: true);
+                if (File.Exists(tempFile)) {
+                    try {
+                        File.Delete(tempFile);
+                    } catch {
+                    }
+                }
             });
         }
-
     }
 
     public class SpriteStorage

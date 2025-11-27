@@ -95,38 +95,54 @@ namespace Assets_Editor
         {
             try
             {
-                var versionInfo = MainWindow.datStructure.GetVersionInfo(version);
-                var datFile = new FileStream(fn, FileMode.Create, FileAccess.Write);
-                using (var w = new BinaryWriter(datFile))
-                {
-                    w.Write(signature);
-                    w.Write((ushort)(appearances.Object.Count + 99));
-                    w.Write((ushort)appearances.Outfit.Count);
-                    w.Write((ushort)appearances.Effect.Count);
-                    w.Write((ushort)appearances.Missile.Count);
+                VersionInfo versionInfo = MainWindow.datStructure.GetVersionInfo(version);
+                FileStream datFile = new(fn, FileMode.Create, FileAccess.Write);
+                using var w = new BinaryWriter(datFile);
+                w.Write(signature);
+                w.Write((ushort)(appearances.Object.Count + 99));
+                w.Write((ushort)appearances.Outfit.Count);
+                w.Write((ushort)appearances.Effect.Count);
+                w.Write((ushort)appearances.Missile.Count);
 
-                    foreach (Appearance appearance in appearances.Object.OrderBy(a => a.Id))
-                    {
-                        DatStructure.WriteAppearance(w, appearance, versionInfo);
-                    }
-                    foreach (Appearance appearance in appearances.Outfit.OrderBy(a => a.Id))
-                    {
-                        DatStructure.WriteAppearance(w, appearance, versionInfo);
-                    }
-                    foreach (Appearance appearance in appearances.Effect.OrderBy(a => a.Id))
-                    {
-                        DatStructure.WriteAppearance(w, appearance, versionInfo);
-                    }
-                    foreach (Appearance appearance in appearances.Missile.OrderBy(a => a.Id))
-                    {
-                        DatStructure.WriteAppearance(w, appearance, versionInfo);
+                PresetSettings preset = MainWindow.GetCurrentPreset() ?? new();
+
+                // raw rd file has 2 bytes at the front of every item
+                bool rdBytes = versionInfo.UseRDBytes;
+
+                foreach (Appearance appearance in appearances.Object.OrderBy(a => a.Id)) {
+                    if (rdBytes) {
+                        w.Write((ushort)0);
                     }
 
-                    return true;
+                    DatStructure.WriteAppearance(w, appearance, versionInfo, preset);
                 }
+                foreach (Appearance appearance in appearances.Outfit.OrderBy(a => a.Id)) {
+                    if (rdBytes) {
+                        w.Write((ushort)0);
+                    }
+
+                    DatStructure.WriteAppearance(w, appearance, versionInfo, preset);
+                }
+                foreach (Appearance appearance in appearances.Effect.OrderBy(a => a.Id)) {
+                    if (rdBytes) {
+                        w.Write((ushort)0);
+                    }
+
+                    DatStructure.WriteAppearance(w, appearance, versionInfo, preset);
+                }
+                foreach (Appearance appearance in appearances.Missile.OrderBy(a => a.Id)) {
+                    if (rdBytes) {
+                        w.Write((ushort)0);
+                    }
+
+                    DatStructure.WriteAppearance(w, appearance, versionInfo, preset);
+                }
+
+                return true;
             }
             catch (UnauthorizedAccessException exception)
             {
+                ErrorManager.ShowError(exception.Message);
                 return false;
             }
         }

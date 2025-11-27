@@ -2251,10 +2251,10 @@ namespace Assets_Editor
         private async Task ExportLegacy(IProgress<int> progress)
         {
             CompileBox.IsEnabled = false;
-            SpriteStorage tmpSprStorage = new SpriteStorage();
-            Appearances tmpAppearances = new Appearances();
-            ConcurrentDictionary<int, List<MemoryStream>> SlicedSprList = new ConcurrentDictionary<int, List<MemoryStream>>();
-            ConcurrentDictionary<string, uint> SpriteOffsetList = new ConcurrentDictionary<string, uint>();
+            SpriteStorage tmpSprStorage = new();
+            Appearances tmpAppearances = new();
+            ConcurrentDictionary<int, List<MemoryStream>> SlicedSprList = [];
+            ConcurrentDictionary<string, uint> SpriteOffsetList = [];
 
             await Task.Run(() =>
             {
@@ -2278,9 +2278,9 @@ namespace Assets_Editor
                         }
                         for (int i = sheet.FirstSpriteid; i <= sheet.LastSpriteid; i++)
                         {
-                            System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(MainWindow.getSpriteStream(i));
+                            System.Drawing.Bitmap bitmap = new(MainWindow.getSpriteStream(i));
                             List<System.Drawing.Bitmap> slices = SplitImage(bitmap);
-                            SlicedSprList[i] = new List<MemoryStream>();
+                            SlicedSprList[i] = [];
                             for (int j = 0; j < slices.Count; j++)
                             {
                                 if (IsImageFullyTransparent(slices[j]) == false)
@@ -2675,17 +2675,15 @@ namespace Assets_Editor
             var spriteInfos = spriteStreams.Select((stream, index) =>
             {
                 stream.Position = 0;
-                using (var image = System.Drawing.Image.FromStream(stream))
-                {
-                    return new ImportSpriteInfo { Stream = stream, OriginalIndex = index, Size = new System.Drawing.Size(image.Width, image.Height) };
-                }
+                using var image = System.Drawing.Image.FromStream(stream);
+                return new ImportSpriteInfo { Stream = stream, OriginalIndex = index, Size = new System.Drawing.Size(image.Width, image.Height) };
             }).ToList();
 
             var catalogs = new List<MainWindow.Catalog>();
             foreach (var size in SpriteSizes)
             {
                 var matchingSprites = spriteInfos.Where(si => si.Size == size).ToList();
-                if (!matchingSprites.Any()) continue;
+                if (matchingSprites.Count == 0) continue;
 
                 var spriteType = SpriteSizes.IndexOf(size);
                 var spriteSheetResults = ProcessSpriteGroup(matchingSprites, size, outputDirectory, spriteType);

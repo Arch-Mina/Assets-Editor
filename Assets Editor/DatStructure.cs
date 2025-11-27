@@ -80,6 +80,13 @@ namespace Assets_Editor
                 throw new InvalidOperationException($"Failed to load XML file '{xmlPath}'.", ex);
             }
 
+
+            var appearancesElement = doc.Root;
+            string? obdStructure = appearancesElement?.Attribute("obd_structure")?.Value;
+            if (obdStructure == null || !int.TryParse(obdStructure, out int obdStructureInt)) {
+                throw new InvalidOperationException($"Failed to load XML file '{xmlPath}'. OBD structure not defined!");
+            }
+
             foreach (var versionElement in doc.Descendants("Dat"))
             {
                 var structureVersion = versionElement.Attribute("structure");
@@ -112,7 +119,7 @@ namespace Assets_Editor
                     Name = structureName.Value,
                     Structure = structure,
                     UsePatternZ = usePatternZValue,
-                    UseRDBytes = useRDBytesValue
+                    UseRDBytes = useRDBytesValue,
                 };
 
                 // showing a popup for every flag that is wrong would be annoying
@@ -158,6 +165,11 @@ namespace Assets_Editor
                 }
 
                 versions[structure] = versionInfo;
+
+                // set the default obd encoding standard
+                if (versionInfo.Structure == obdStructureInt) {
+                    ObdDecoder.SetDatStructure(versionInfo);
+                }
             }
         }
 
@@ -559,14 +571,27 @@ namespace Assets_Editor
                 }
             }
         }
-        public static void WriteAppearance(BinaryWriter w, Appearance item, VersionInfo versionInfo)
+        public static void WriteAppearance(BinaryWriter w, Appearance item, VersionInfo versionInfo, PresetSettings preset)
         {
             WriteAppearanceAttr(w, item, versionInfo);
 
-            if (versionInfo.Structure == 1)
-            {
-                // old dat files (7.x) had only one frame group
-                SpriteInfo spriteInfo = item.FrameGroup[0].SpriteInfo;
+            bool isExtended = preset.Extended;
+            bool hasFrameDurations = preset.FrameDurations;
+            bool hasFrameGroups = preset.FrameGroups;
+
+            byte FrameGroupCount = 1;
+
+            if (hasFrameGroups && item.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit) {
+                FrameGroupCount = (byte)item.FrameGroup.Count;
+                w.Write((byte)FrameGroupCount);
+            }
+
+            for (int i = 0; i < FrameGroupCount; i++) {
+                SpriteInfo spriteInfo = item.FrameGroup[i].SpriteInfo;
+
+                if (hasFrameGroups && item.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit) {
+                    w.Write((byte)item.FrameGroup[i].FixedFrameGroup);
+                }
 
                 byte Width = (byte)spriteInfo.PatternWidth;
                 byte Height = (byte)spriteInfo.PatternHeight;
@@ -574,94 +599,57 @@ namespace Assets_Editor
                 w.Write(Width);
                 w.Write(Height);
 
-                if (Width > 1 || Height > 1)
+                if (Width > 1 || Height > 1) {
                     w.Write((byte)spriteInfo.PatternSize);
+                }
 
                 w.Write((byte)spriteInfo.PatternLayers);
                 w.Write((byte)spriteInfo.PatternX);
                 w.Write((byte)spriteInfo.PatternY);
-                w.Write((byte)spriteInfo.PatternZ);
+
+                byte patternZ = 1;
+                if (versionInfo.UsePatternZ) {
+                    patternZ = (byte)spriteInfo.PatternZ;
+                    w.Write((byte)patternZ);
+                }
+
                 w.Write((byte)spriteInfo.PatternFrames);
+
+                if (hasFrameDurations && spriteInfo.PatternFrames > 1) {
+                    SpriteAnimation animation = spriteInfo.Animation;
+
+                    w.Write(Convert.ToByte(animation.AnimationMode));
+                    w.Write(animation.LoopCount);
+                    w.Write((byte)animation.DefaultStartPhase);
+
+                    for (int k = 0; k < animation.SpritePhase.Count; k++) {
+                        w.Write(animation.SpritePhase[k].DurationMin);
+                        w.Write(animation.SpritePhase[k].DurationMax);
+                    }
+                }
 
                 // some asset packs have broken outfits
                 // using the number of sprites declared by the object
                 // and filling the missing slots with sprite 0
                 // prevents generating a broken dat file
                 uint NumSprites = spriteInfo.PatternWidth
-                * spriteInfo.PatternHeight
-                * spriteInfo.PatternLayers
-                * spriteInfo.PatternX
-                * spriteInfo.PatternY
-                * spriteInfo.PatternZ
-                * spriteInfo.PatternFrames;
+                                * spriteInfo.PatternHeight
+                                * spriteInfo.PatternLayers
+                                * spriteInfo.PatternX
+                                * spriteInfo.PatternY
+                                * patternZ
+                                * spriteInfo.PatternFrames;
 
                 for (var x = 0; x < NumSprites; x++) {
-                    if (x < spriteInfo.SpriteId.Count)
-                        w.Write(spriteInfo.SpriteId[x]);
-                    else
-                        w.Write((uint)0);
-                }
-            }
-            else if (versionInfo.Structure == 3)
-            {
-                if (item.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
-                    w.Write((byte)item.FrameGroup.Count);
-
-                for (int i = 0; i < item.FrameGroup.Count; i++)
-                {
-                    SpriteInfo spriteInfo = item.FrameGroup[i].SpriteInfo;
-
-                    if (item.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
-                        w.Write((byte)item.FrameGroup[i].FixedFrameGroup);
-
-                    byte Width = (byte)spriteInfo.PatternWidth;
-                    byte Height = (byte)spriteInfo.PatternHeight;
-
-                    w.Write(Width);
-                    w.Write(Height);
-
-                    if (Width > 1 || Height > 1)
-                        w.Write((byte)spriteInfo.PatternSize);
-
-                    w.Write((byte)spriteInfo.PatternLayers);
-                    w.Write((byte)spriteInfo.PatternX);
-                    w.Write((byte)spriteInfo.PatternY);
-                    w.Write((byte)spriteInfo.PatternZ);
-                    w.Write((byte)spriteInfo.PatternFrames);
-
-                    if (spriteInfo.PatternFrames > 1)
-                    {
-                        SpriteAnimation animation = spriteInfo.Animation;
-
-                        w.Write(Convert.ToByte(animation.AnimationMode));
-                        w.Write(animation.LoopCount);
-                        w.Write((byte)animation.DefaultStartPhase);
-
-                        for (int k = 0; k < animation.SpritePhase.Count; k++)
-                        {
-                            w.Write(animation.SpritePhase[k].DurationMin);
-                            w.Write(animation.SpritePhase[k].DurationMax);
-                        }
+                    uint spriteId = 0;
+                    if (x < spriteInfo.SpriteId.Count) {
+                        spriteId = spriteInfo.SpriteId[x];
                     }
 
-                    // some asset packs have broken outfits
-                    // using the number of sprites declared by the object
-                    // and filling the missing slots with sprite 0
-                    // prevents generating a broken dat file
-                    uint NumSprites = spriteInfo.PatternWidth
-                                    * spriteInfo.PatternHeight
-                                    * spriteInfo.PatternLayers
-                                    * spriteInfo.PatternX
-                                    * spriteInfo.PatternY
-                                    * spriteInfo.PatternZ
-                                    * spriteInfo.PatternFrames;
-
-                    for (var x = 0; x < NumSprites; x++)
-                    {
-                        if (x < spriteInfo.SpriteId.Count)
-                            w.Write(spriteInfo.SpriteId[x]);
-                        else
-                            w.Write((uint)0);
+                    if (isExtended) {
+                        w.Write(spriteId);
+                    } else {
+                        w.Write((ushort)spriteId);
                     }
                 }
             }
@@ -699,11 +687,11 @@ namespace Assets_Editor
             if (item.Flags.Cumulative && versionInfo.HasFlag("Stackable"))
                 w.Write((byte)versionInfo.GetFlagId("Stackable"));
 
-            if (item.Flags.Forceuse && versionInfo.HasFlag("ForceUse"))
-                w.Write((byte)versionInfo.GetFlagId("ForceUse"));
-
             if (item.Flags.Usable && versionInfo.HasFlag("Usable"))
                 w.Write((byte)versionInfo.GetFlagId("Usable"));
+
+            if (item.Flags.Forceuse && versionInfo.HasFlag("ForceUse"))
+                w.Write((byte)versionInfo.GetFlagId("ForceUse"));
 
             if (item.Flags.Multiuse && versionInfo.HasFlag("Multiuse"))
                 w.Write((byte)versionInfo.GetFlagId("Multiuse"));
@@ -771,9 +759,29 @@ namespace Assets_Editor
 
             if (item.Flags.Shift != null && versionInfo.HasFlag("Displaced"))
             {
-                w.Write((byte)versionInfo.GetFlagId("Displaced"));
-                w.Write((ushort)item.Flags.Shift.X);
-                w.Write((ushort)item.Flags.Shift.Y);
+                byte flagId = (byte)versionInfo.GetFlagId("Displaced");
+                if (!versionInfo.FlagsById.TryGetValue(flagId, out FlagInfo flagInfo)) {
+                    throw new Exception($"Failed to get the structure of flag \"Displaced\".");
+                }
+
+                w.Write((byte)flagId);
+                switch (flagInfo.Version) {
+                    case 2:
+                        // 1098 standard
+                        w.Write((ushort)item.Flags.Shift.X);
+                        w.Write((ushort)item.Flags.Shift.Y);
+                        break;
+                    case 3:
+                        // RD standard - displacement + sprite offset (?)
+                        w.Write((ushort)item.Flags.Shift.X);
+                        w.Write((ushort)item.Flags.Shift.Y);
+                        w.Write((ushort)item.Flags.Shift.A);
+                        w.Write((ushort)item.Flags.Shift.B);
+                        break;
+                    default:
+                        // old elevation did not precise the offset
+                        break;
+                }
             }
 
             if (item.Flags.Height != null && versionInfo.HasFlag("Elevated"))
@@ -812,6 +820,11 @@ namespace Assets_Editor
                 w.Write((ushort)item.Flags.Clothes.Slot);
             }
 
+            if (item.Flags.DefaultAction != null && versionInfo.HasFlag("DefaultAction")) {
+                w.Write((byte)versionInfo.GetFlagId("DefaultAction"));
+                w.Write((ushort)item.Flags.DefaultAction.Action);
+            }
+
             if (item.Flags.Market != null && versionInfo.HasFlag("Market"))
             {
                 w.Write((byte)versionInfo.GetFlagId("Market"));
@@ -830,12 +843,6 @@ namespace Assets_Editor
                 w.Write((ushort)item.Flags.Market.MinimumLevel);
             }
 
-            if (item.Flags.DefaultAction != null && versionInfo.HasFlag("DefaultAction"))
-            {
-                w.Write((byte)versionInfo.GetFlagId("DefaultAction"));
-                w.Write((ushort)item.Flags.DefaultAction.Action);
-            }
-
             if (item.Flags.Wrap && versionInfo.HasFlag("Wrappable"))
                 w.Write((byte)versionInfo.GetFlagId("Wrappable"));
 
@@ -845,6 +852,9 @@ namespace Assets_Editor
             if (item.Flags.Topeffect && versionInfo.HasFlag("TopEffect"))
                 w.Write((byte)versionInfo.GetFlagId("TopEffect"));
 
+            // flag "rune charges visible" - dat structure 7.8 - 8.54
+            if (item.Flags.Wearout && versionInfo.HasFlag("ShowCharges"))
+                w.Write((byte)versionInfo.GetFlagId("ShowCharges"));
 
             w.Write((byte)0xFF);
         }
