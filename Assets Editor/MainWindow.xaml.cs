@@ -551,9 +551,9 @@ public partial class MainWindow : Window
     private void SetUILock(bool locked) {
         Dispatcher.Invoke(() => {
             bool enabled = !locked;
-            NewPresetBtn.IsEnabled = enabled;
-            RenamePresetBtn.IsEnabled = enabled;
-            DeletePresetBtn.IsEnabled = enabled;
+            PresetsConfGrid.IsEnabled = enabled;
+            AssetsConfGrid.IsEnabled = enabled;
+            LoadAssets.IsEnabled = enabled;
         });
     }
 
