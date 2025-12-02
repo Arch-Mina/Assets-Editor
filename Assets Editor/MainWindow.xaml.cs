@@ -274,10 +274,11 @@ public partial class MainWindow : Window
         using (appStream = new FileStream(_datPath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
         {
             appearances = Appearances.Parser.ParseFrom(appStream);
-            ObjectCount = (ushort)appearances.Object[^1].Id;
-            OutfitCount = (ushort)appearances.Outfit[^1].Id;
-            EffectCount = (ushort)appearances.Effect[^1].Id;
-            MissileCount = (ushort)appearances.Missile[^1].Id;
+
+            ObjectCount = Utils.GetLastIdOrZero(appearances.Object, o => o.Id);
+            OutfitCount = Utils.GetLastIdOrZero(appearances.Outfit, o => o.Id);
+            EffectCount = Utils.GetLastIdOrZero(appearances.Effect, e => e.Id);
+            MissileCount = Utils.GetLastIdOrZero(appearances.Missile, m => m.Id);
             UpdateAppearancesCount();
         }
     }
@@ -730,7 +731,14 @@ public partial class MainWindow : Window
                 worker.ReportProgress((int)(progress * 100 / catalog.Count));
             }
         });
-        uint maxSpriteId = (uint)(catalog.Max(r => r.LastSpriteid) + 1);
+
+        // this prevents infinite loop when loading empty assets project
+        int maxVal = catalog.Max(r =>r.LastSpriteid);
+        if (maxVal <= 0) {
+            return;
+        }
+
+        uint maxSpriteId = (uint)(maxVal + 1);
         for (uint i = 0; i < maxSpriteId; i++)
         {
             AllSprList.Add(new ShowList() { Id = i });

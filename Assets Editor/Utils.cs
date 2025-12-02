@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -317,6 +318,10 @@ namespace Assets_Editor
             public byte Addons { get; set; }
         }
 
+        public static ushort GetLastIdOrZero<T>(IList<T> list, Func<T, uint> idSelector)
+        {
+            return (ushort)(list.Count > 0 ? idSelector(list[^1]) : 0);
+        }
     }
 }
 
