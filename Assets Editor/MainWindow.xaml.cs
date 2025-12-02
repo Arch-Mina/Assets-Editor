@@ -1092,6 +1092,7 @@ public partial class MainWindow : Window
             foreach (var item in DatStructureDropdown.Items) {
                 if (item is VersionInfo versionInfo && preset.Version == versionInfo.Structure) {
                     DatStructureDropdown.SelectedItem = item;
+                    break;
                 }
             }
         }
