@@ -1,27 +1,19 @@
-﻿using Efundies;
-using Google.Protobuf;
-using MaterialDesignThemes.Wpf;
+﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using Tibia.Protobuf.Appearances;
 
@@ -32,10 +24,10 @@ namespace Assets_Editor
     /// </summary>
     public partial class LegacyDatEditor : Window
     {
-        public ObservableCollection<ShowList> ThingsOutfit = new ObservableCollection<ShowList>();
-        public ObservableCollection<ShowList> ThingsItem = new ObservableCollection<ShowList>();
-        public ObservableCollection<ShowList> ThingsEffect = new ObservableCollection<ShowList>();
-        public ObservableCollection<ShowList> ThingsMissile = new ObservableCollection<ShowList>();
+        public ObservableCollection<ShowList> ThingsOutfit = [];
+        public ObservableCollection<ShowList> ThingsItem = [];
+        public ObservableCollection<ShowList> ThingsEffect = [];
+        public ObservableCollection<ShowList> ThingsMissile = [];
         public Appearance CurrentObjectAppearance;
         public Appearance ReplaceObjectAppearance;
         public AppearanceFlags CurrentFlags = null;
@@ -43,6 +35,7 @@ namespace Assets_Editor
         private bool isPageLoaded = false;
         private bool isObjectLoaded = false;
         private bool isUpdatingFrame = false;
+        private VersionInfo loadedVersion;
 
         protected override void OnClosed(EventArgs e)
         {
@@ -57,20 +50,24 @@ namespace Assets_Editor
         public LegacyDatEditor()
         {
             InitializeComponent();
+
+            // set current theme
+            DarkModeToggle.IsChecked = MainWindow.IsDarkModeSet();
+
             A_FlagAutomapColorPicker.AvailableColors.Clear();
             for (int x = 0; x <= 215; x++)
             {
                 Color myRgbColor = Utils.Get8Bit(x);
-                A_FlagAutomapColorPicker.AvailableColors.Add(new Xceed.Wpf.Toolkit.ColorItem(System.Windows.Media.Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
+                A_FlagAutomapColorPicker.AvailableColors.Add(new Xceed.Wpf.Toolkit.ColorItem(Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
             }
-            ObservableCollection<Xceed.Wpf.Toolkit.ColorItem> outfitColors = new ObservableCollection<Xceed.Wpf.Toolkit.ColorItem>();
+            ObservableCollection<Xceed.Wpf.Toolkit.ColorItem> outfitColors = [];
             SprLayerHeadPicker.AvailableColors = outfitColors;
             SprLayerHeadPicker.AvailableColors.Clear();
 
             for (int x = 0; x <= 132; x++)
             {
                 System.Drawing.Color myRgbColor = Utils.GetOutfitColor(x);
-                outfitColors.Add(new Xceed.Wpf.Toolkit.ColorItem(System.Windows.Media.Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
+                outfitColors.Add(new Xceed.Wpf.Toolkit.ColorItem(Color.FromRgb(myRgbColor.R, myRgbColor.G, myRgbColor.B), x.ToString()));
             }
             SprLayerHeadPicker.AvailableColors = outfitColors;
             SprLayerBodyPicker.AvailableColors = outfitColors;
@@ -79,20 +76,9 @@ namespace Assets_Editor
         }
         private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
         {
-            PaletteHelper palette = new PaletteHelper();
-
-            ITheme theme = palette.GetTheme();
-            if ((bool)DarkModeToggle.IsChecked)
-            {
-                theme.SetBaseTheme(Theme.Dark);
-            }
-            else
-            {
-                theme.SetBaseTheme(Theme.Light);
-            }
-            palette.SetTheme(theme);
+            MainWindow.SetCurrentTheme(DarkModeToggle.IsChecked ?? false);
         }
-        public LegacyDatEditor(Appearances appearances)
+        public LegacyDatEditor(Appearances appearances, VersionInfo versionInfo)
             : this()
         {
             foreach (var outfit in appearances.Outfit)
@@ -113,7 +99,130 @@ namespace Assets_Editor
             }
             SprListView.ItemsSource = MainWindow.AllSprList;
             UpdateShowList(ObjectMenu.SelectedIndex);
+
+            loadedVersion = versionInfo;
+            SetThingViewLayout();
         }
+
+        private void UpdateFlagVisibility(Control control, string flagName) {
+            control.Visibility = loadedVersion.HasFlag(flagName) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void SetThingViewLayout() {
+            // ground + friction
+            UpdateFlagVisibility(A_FlagGround, "Ground");
+            UpdateFlagVisibility(A_FlagGroundSpeed, "Ground");
+
+            UpdateFlagVisibility(A_FlagClip, "Clip");
+            UpdateFlagVisibility(A_FlagTop, "Top");
+            UpdateFlagVisibility(A_FlagBottom, "Bottom");
+            UpdateFlagVisibility(A_FlagContainer, "Container");
+            UpdateFlagVisibility(A_FlagCumulative, "Stackable");
+            UpdateFlagVisibility(A_FlagUsable, "Usable");
+            UpdateFlagVisibility(A_FlagForceuse, "Forceuse");
+            UpdateFlagVisibility(A_FlagMultiuse, "Multiuse");
+            UpdateFlagVisibility(A_FlagWrite, "Writeable");
+            UpdateFlagVisibility(A_FlagMaxTextLength, "Writeable");
+            UpdateFlagVisibility(A_FlagWriteOnce, "WriteableOnce");
+            UpdateFlagVisibility(A_FlagMaxTextLengthOnce, "WriteableOnce");
+            UpdateFlagVisibility(A_FlagLiquidpool, "LiquidPool");
+            UpdateFlagVisibility(A_FlagLiquidcontainer, "LiquidContainer");
+            UpdateFlagVisibility(A_FlagUnpass, "Impassable");
+            UpdateFlagVisibility(A_FlagUnmove, "Unmovable");
+            UpdateFlagVisibility(A_FlagUnsight, "BlocksSight");
+            UpdateFlagVisibility(A_FlagAvoid, "BlocksPathfinding");
+            UpdateFlagVisibility(A_FlagNoMoveAnimation, "NoMovementAnimation");
+            UpdateFlagVisibility(A_FlagTake, "Pickupable");
+            UpdateFlagVisibility(A_FlagHang, "Hangable");
+            UpdateFlagVisibility(A_FlagHookSouth, "HooksSouth");
+            UpdateFlagVisibility(A_FlagHookEast, "HooksEast");
+            UpdateFlagVisibility(A_FlagRotate, "Rotateable");
+
+            // light source fields
+            UpdateFlagVisibility(A_FlagLight, "LightSource");
+            UpdateFlagVisibility(A_FlagLightBrightness, "LightSource");
+            UpdateFlagVisibility(A_FlagLightColor, "LightSource");
+
+            UpdateFlagVisibility(A_FlagDontHide, "AlwaysSeen");
+            UpdateFlagVisibility(A_FlagTranslucent, "Translucent");
+
+            // versioned flag
+            FlagInfo? displaced = loadedVersion.GetFlagInfo("Displaced");
+            if (displaced != null) {
+                A_FlagShift.Visibility = Visibility.Visible;
+
+                switch(displaced.Version) {
+                    case 2:
+                        // 1098 standard - offsets configurable
+                        A_StandardShiftCoords.Visibility = Visibility.Visible;
+                        A_ExtendedShiftCoords.Visibility = Visibility.Collapsed;
+                        break;
+                    case 3:
+                        // RD - extra parameters
+                        A_StandardShiftCoords.Visibility = Visibility.Visible;
+                        A_ExtendedShiftCoords.Visibility = Visibility.Visible;
+                        break;
+                    default:
+                        // old version - not configurable
+                        A_StandardShiftCoords.Visibility = Visibility.Collapsed;
+                        A_ExtendedShiftCoords.Visibility = Visibility.Collapsed;
+                        break;
+                }
+            } else {
+                A_FlagShift.Visibility = Visibility.Collapsed;
+                A_StandardShiftCoords.Visibility = Visibility.Collapsed;
+                A_ExtendedShiftCoords.Visibility = Visibility.Collapsed;
+            }
+
+            // item height
+            UpdateFlagVisibility(A_FlagHeight, "Elevated");
+            UpdateFlagVisibility(A_FlagElevation, "Elevated");
+
+            UpdateFlagVisibility(A_FlagLyingObject, "LyingObject");
+            UpdateFlagVisibility(A_FlagAnimateAlways, "AlwaysAnimated");
+
+            // minimap
+            UpdateFlagVisibility(A_FlagAutomap, "MinimapColor");
+            UpdateFlagVisibility(A_FlagAutomapColor, "MinimapColor");
+
+            UpdateFlagVisibility(A_FlagFullGround, "FullTile");
+
+            // lenshelp
+            UpdateFlagVisibility(A_FlagLenshelp, "HelpInfo");
+            UpdateFlagVisibility(A_FlagLenshelpId, "HelpInfo");
+
+            UpdateFlagVisibility(A_FlagIgnoreLook, "Lookthrough");
+
+            // hotkey equip slot
+            UpdateFlagVisibility(A_FlagClothes, "Clothes");
+            UpdateFlagVisibility(A_FlagClothesSlot, "Clothes");
+
+            // default action
+            UpdateFlagVisibility(A_FlagDefaultAction, "DefaultAction");
+            UpdateFlagVisibility(A_FlagDefaultActionType, "DefaultAction");
+
+            // market
+            UpdateFlagVisibility(A_FlagMarket, "Market");
+            UpdateFlagVisibility(A_FlagMarketCategory, "Market");
+            UpdateFlagVisibility(A_FlagMarketTrade, "Market");
+            UpdateFlagVisibility(A_FlagMarketShow, "Market");
+            UpdateFlagVisibility(A_FlagMarketProfession, "Market");
+            UpdateFlagVisibility(A_FlagMarketlevel, "Market");
+            UpdateFlagVisibility(A_FlagName, "Market");
+            UpdateFlagVisibility(A_FlagDescription, "Market");
+
+            UpdateFlagVisibility(A_FlagWrap, "Wrappable");
+            UpdateFlagVisibility(A_FlagUnwrap, "UnWrappable");
+            UpdateFlagVisibility(A_FlagTopeffect, "TopEffect");
+
+            // flag "rune charges visible" - dat structure 7.8 - 8.54
+            UpdateFlagVisibility(A_FlagWearout, "ShowCharges");
+
+            // otc wings
+            FlagInfo? otcWings = loadedVersion.GetFlagInfo("WingsOffset");
+            A_FlagWingsCoords.Visibility = otcWings != null ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         public void UpdateShowList(int selection)
         {
             if (ObjListView != null)
@@ -395,6 +504,8 @@ namespace Assets_Editor
             A_FlagShift.IsChecked = CurrentObjectAppearance.Flags.Shift != null;
             A_FlagShiftX.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasX) ? (int)CurrentObjectAppearance.Flags.Shift.X : 0;
             A_FlagShiftY.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasY) ? (int)CurrentObjectAppearance.Flags.Shift.Y : 0;
+            A_FlagShiftA.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasA) ? (int)CurrentObjectAppearance.Flags.Shift.A : 0;
+            A_FlagShiftB.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasB) ? (int)CurrentObjectAppearance.Flags.Shift.B : 0;
             A_FlagHeight.IsChecked = CurrentObjectAppearance.Flags.Height != null;
             A_FlagElevation.Value = (CurrentObjectAppearance.Flags.Height != null && CurrentObjectAppearance.Flags.Height.HasElevation) ? (int)CurrentObjectAppearance.Flags.Height.Elevation : 0;
             A_FlagLyingObject.IsChecked = CurrentObjectAppearance.Flags.HasLyingObject;
@@ -402,7 +513,17 @@ namespace Assets_Editor
             A_FlagAutomap.IsChecked = CurrentObjectAppearance.Flags.Automap != null;
             A_FlagAutomapColor.Value = (CurrentObjectAppearance.Flags.Automap != null && CurrentObjectAppearance.Flags.Automap.HasColor) ? (int)CurrentObjectAppearance.Flags.Automap.Color : 0;
             A_FlagLenshelp.IsChecked = CurrentObjectAppearance.Flags.Lenshelp != null;
-            A_FlagLenshelpId.SelectedIndex = (CurrentObjectAppearance.Flags.Lenshelp != null && CurrentObjectAppearance.Flags.Lenshelp.HasId) ? (int)CurrentObjectAppearance.Flags.Lenshelp.Id - 1100 : -1;
+
+            // select from dropdown only when the argument has valid value
+            if (CurrentObjectAppearance.Flags.Lenshelp != null) {
+                int lensHelpId = CurrentObjectAppearance.Flags.Lenshelp.HasId ? (int)CurrentObjectAppearance.Flags.Lenshelp.Id : -1;
+                if (lensHelpId >= 1100) {
+                    A_FlagLenshelpId.SelectedIndex = lensHelpId - 1100;
+                } else {
+                    A_FlagLenshelpId.SelectedIndex = -1;
+                }
+            }
+
             A_FlagFullGround.IsChecked = CurrentObjectAppearance.Flags.HasFullbank;
             A_FlagIgnoreLook.IsChecked = CurrentObjectAppearance.Flags.HasIgnoreLook;
             A_FlagClothes.IsChecked = (CurrentObjectAppearance.Flags.Clothes != null && CurrentObjectAppearance.Flags.Clothes.HasSlot) ? true : false;
@@ -424,7 +545,17 @@ namespace Assets_Editor
             A_FlagWrap.IsChecked = CurrentObjectAppearance.Flags.HasWrap;
             A_FlagUnwrap.IsChecked = CurrentObjectAppearance.Flags.HasUnwrap;
             A_FlagTopeffect.IsChecked = CurrentObjectAppearance.Flags.HasTop;
+            A_FlagWearout.IsChecked = CurrentObjectAppearance.Flags.HasWearout;
 
+            A_FlagWingsOffset.IsChecked = CurrentObjectAppearance.Flags.WingsOffset != null;
+            A_FlagWingsNorthX.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasNorthX) ? (int)CurrentObjectAppearance.Flags.WingsOffset.NorthX : 0;
+            A_FlagWingsNorthY.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasNorthY) ? (int)CurrentObjectAppearance.Flags.WingsOffset.NorthY : 0;
+            A_FlagWingsEastX.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasEastX) ? (int)CurrentObjectAppearance.Flags.WingsOffset.EastX : 0;
+            A_FlagWingsEastY.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasEastY) ? (int)CurrentObjectAppearance.Flags.WingsOffset.EastY : 0;
+            A_FlagWingsSouthX.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasSouthX) ? (int)CurrentObjectAppearance.Flags.WingsOffset.SouthX : 0;
+            A_FlagWingsSouthY.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasSouthY) ? (int)CurrentObjectAppearance.Flags.WingsOffset.SouthY : 0;
+            A_FlagWingsWestX.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasWestX) ? (int)CurrentObjectAppearance.Flags.WingsOffset.WestX : 0;
+            A_FlagWingsWestY.Value = (CurrentObjectAppearance.Flags.WingsOffset != null && CurrentObjectAppearance.Flags.WingsOffset.HasWestY) ? (int)CurrentObjectAppearance.Flags.WingsOffset.WestY : 0;
             A_FullInfo.Text = CurrentObjectAppearance.ToString();
         }
         private void A_FlagLightColorPickerChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
@@ -446,11 +577,11 @@ namespace Assets_Editor
         }
         private void A_FlagAutomapColor_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            A_FlagAutomapColorPicker.SelectedColor = A_FlagAutomapColorPicker.AvailableColors[(int)A_FlagAutomapColor.Value].Color;
+            Utils.SafeSetColor(A_FlagAutomapColor.Value, A_FlagAutomapColorPicker);
         }
         private void A_FlagLightColor_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            A_FlagLightColorPicker.SelectedColor = A_FlagLightColorPicker.AvailableColors[(int)A_FlagLightColor.Value].Color;
+            Utils.SafeSetColor(A_FlagLightColor.Value, A_FlagLightColorPicker);
         }
         private void A_FlagMarketProfession_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -612,13 +743,14 @@ namespace Assets_Editor
                     }
                 } else {
                     int counter = 1;
+                    int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternLayers - 1 : 0;
                     int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternZ - 1 : 0;
                     for (int ph = 0; ph < frameGroup.SpriteInfo.PatternY; ph++) {
                         for (int pw = 0; pw < frameGroup.SpriteInfo.PatternX; pw++) {
                             for (int h = (int)(frameGroup.SpriteInfo.PatternHeight - 1); h >= 0; h--) {
                                 for (int w = (int)(frameGroup.SpriteInfo.PatternWidth - 1); w >= 0; w--) {
                                     int tileid = (int)(ph * gridHeight * frameGroup.SpriteInfo.PatternHeight + (frameGroup.SpriteInfo.PatternHeight - 1 - h) * gridHeight + (pw * frameGroup.SpriteInfo.PatternWidth) + (frameGroup.SpriteInfo.PatternWidth - 1 - w) + 1);
-                                    int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 0, pw, ph, mount, (int)SprFramesSlider.Value);
+                                    int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, layer, pw, ph, mount, (int)SprFramesSlider.Value);
                                     int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
                                     SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), tileid, spriteId, index);
                                     counter++;
@@ -664,8 +796,9 @@ namespace Assets_Editor
             }
 
             string xml = $"<look type=\"{typeValue}\" head=\"{headValue}\" body=\"{bodyValue}\" legs=\"{legsValue}\" feet=\"{feetValue}\" corpse=\"{corpseValue}\"/>";
-            Clipboard.SetText(xml);
-            StatusBar.MessageQueue.Enqueue($"xml copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            Dispatcher.Invoke(() => {
+                ClipboardManager.CopyText(xml, "xml", StatusBar);
+            });
         }
         private void SetImageInGrid(Grid grid, int gridHeight, BitmapImage image, int id, int spriteId, int index)
         {
@@ -1022,8 +1155,10 @@ namespace Assets_Editor
             {
                 CurrentObjectAppearance.Flags.Shift = new AppearanceFlagShift
                 {
-                    X = (uint)A_FlagShiftX.Value,
-                    Y = (uint)A_FlagShiftY.Value
+                    X = (int)A_FlagShiftX.Value,
+                    Y = (int)A_FlagShiftY.Value,
+                    A = (int)A_FlagShiftA.Value,
+                    B = (int)A_FlagShiftB.Value
                 };
             }
             else
@@ -1124,6 +1259,25 @@ namespace Assets_Editor
             else if (CurrentObjectAppearance.Flags.HasTopeffect)
                 CurrentObjectAppearance.Flags.ClearTopeffect();
 
+            if ((bool)A_FlagWearout.IsChecked)
+                CurrentObjectAppearance.Flags.Wearout = true;
+            else if ((CurrentObjectAppearance.Flags.HasWearout))
+                CurrentObjectAppearance.Flags.ClearWearout();
+
+            if ((bool)A_FlagWingsOffset.IsChecked) {
+                CurrentObjectAppearance.Flags.WingsOffset = new() {
+                    NorthX = (int)A_FlagWingsNorthX.Value,
+                    NorthY = (int)A_FlagWingsNorthY.Value,
+                    EastX = (int)A_FlagWingsEastX.Value,
+                    EastY = (int)A_FlagWingsEastY.Value,
+                    SouthX = (int)A_FlagWingsSouthX.Value,
+                    SouthY = (int)A_FlagWingsSouthY.Value,
+                    WestX = (int)A_FlagWingsWestX.Value,
+                    WestY = (int)A_FlagWingsWestY.Value,
+                };
+            } else
+                CurrentObjectAppearance.Flags.WingsOffset = null;
+
             if (ObjectMenu.SelectedIndex == 0)
                 MainWindow.appearances.Outfit[ObjListView.SelectedIndex] = CurrentObjectAppearance.Clone();
             else if (ObjectMenu.SelectedIndex == 1)
@@ -1136,13 +1290,13 @@ namespace Assets_Editor
             ShowList showList = ObjListView.SelectedItem as ShowList;
             AnimateSelectedListItem(showList);
 
-            StatusBar.MessageQueue.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void CopyObjectFlags(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             CurrentFlags = CurrentObjectAppearance.Flags.Clone();
-            StatusBar.MessageQueue.Enqueue($"Copied Current Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Copied Current Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
         private void PasteObjectFlags(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -1150,10 +1304,10 @@ namespace Assets_Editor
             {
                 CurrentObjectAppearance.Flags = CurrentFlags.Clone();
                 LoadCurrentObjectAppearances();
-                StatusBar.MessageQueue.Enqueue($"Pasted Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Pasted Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
             else
-                StatusBar.MessageQueue.Enqueue($"Copy Flags First.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Copy Flags First.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
@@ -1175,49 +1329,72 @@ namespace Assets_Editor
             CompileBox.IsEnabled = true;
         }
 
+        private void WritePresetToOtfi(string otfiPath, PresetSettings preset, string datFile, string sprFile, bool transparency) {
+            // create DatSpr node
+            OTMLNode datspr = OTMLNode.Create("DatSpr", unique: true);
+
+            // bools
+            datspr.AddChild(OTMLNode.Create("extended", preset.Extended.ToString().ToLower()));
+            datspr.AddChild(OTMLNode.Create("transparency", transparency.ToString().ToLower()));
+            datspr.AddChild(OTMLNode.Create("frame-durations", preset.FrameDurations.ToString().ToLower()));
+            datspr.AddChild(OTMLNode.Create("frame-groups", preset.FrameGroups.ToString().ToLower()));
+
+            // spr/dat pair
+            datspr.AddChild(OTMLNode.Create("metadata-file", Path.GetFileName(datFile)));
+            datspr.AddChild(OTMLNode.Create("sprites-file", Path.GetFileName(sprFile)));
+
+            // optional combined name ("assets-name")
+            string? baseName = Path.GetFileNameWithoutExtension(datFile);
+            if (baseName != null) {
+                datspr.AddChild(OTMLNode.Create("assets-name", baseName));
+            }
+
+            File.WriteAllText(otfiPath, datspr.Emit() + "\n");
+        }
+
         private async void CompileClient(object sender, RoutedEventArgs e)
         {
             bool isDatEditable = false;
             bool isSprEditable = false;
             string datfile = MainWindow._assetsPath + A_CompileName.Text + ".dat";
             string sprfile = MainWindow._assetsPath + A_CompileName.Text + ".spr";
+            string otfile = MainWindow._assetsPath + A_CompileName.Text + ".otfi";
 
-            try
-            {
-                using (var fileStream = new FileStream(datfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                {
-                    isDatEditable = true;
-                }
-            }
-            catch (IOException)
-            {
+            try {
+                using var fileStream = new FileStream(datfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                isDatEditable = true;
+            } catch (IOException) {
                 isDatEditable = false;
             }
 
-            try
-            {
-                using (var fileStream = new FileStream(sprfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                {
-                    isSprEditable = true;
-                }
-            }
-            catch (IOException)
-            {
+            try {
+                using var fileStream = new FileStream(sprfile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                isSprEditable = true;
+            } catch (IOException) {
                 isSprEditable = false;
             }
 
-            if (isDatEditable && isSprEditable)
-            {
-                LegacyAppearance.WriteLegacyDat(datfile, MainWindow.DatSignature, MainWindow.appearances, MainWindow.serverSetting.Version);
-                var progress = new Progress<int>(percent =>
-                {
+            if (isDatEditable && isSprEditable) {
+                LegacyAppearance.WriteLegacyDat(datfile, MainWindow.DatSignature, MainWindow.appearances, MainWindow.GetCurrentLoadedVersion());
+                var progress = new Progress<int>(percent => {
                     LoadProgress.Value = percent;
                 });
                 CompileBox.IsEnabled = false;
-                await Sprite.CompileSpritesAsync(sprfile, MainWindow.MainSprStorage, (bool)C_Transparent.IsChecked, MainWindow.SprSignature, progress);
+
+                await Sprite.CompileSpritesAsync(sprfile, MainWindow.MainSprStorage, (bool)C_Transparent.IsChecked, MainWindow.SprSignature, progress, MainWindow.GetCurrentPreset()?.Extended ?? true);
+            } else {
+                StatusBar.MessageQueue?.Enqueue($".dat or .spr file is being used by another process or is not accessible.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
-            else
-                StatusBar.MessageQueue.Enqueue($".dat or .spr file is being used by another process or is not accessible.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+
+            // write otfi (optional)
+            try {
+                PresetSettings? preset = MainWindow.GetCurrentPreset();
+                if (preset != null) {
+                    WritePresetToOtfi(otfile, preset, datfile, sprfile, (bool)C_Transparent.IsChecked);
+                }
+            } catch {
+                // ...
+            }
 
             ComppileDialogHost.IsOpen = false;
         }
@@ -1232,10 +1409,11 @@ namespace Assets_Editor
             List<ShowList> selectedItems = SprListView.SelectedItems.Cast<ShowList>().ToList();
             if (selectedItems.Any())
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog
+                SaveFileDialog saveFileDialog = new()
                 {
                     Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png",
-                    FileName = " "
+                    FileName = " ",
+                    ClientGuid = Globals.GUID_LegacyDatEditor1
                 };
                 if (saveFileDialog.ShowDialog() == true)
                 {
@@ -1276,9 +1454,11 @@ namespace Assets_Editor
 
         private void ImportSprite_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png";
-            openFileDialog.Multiselect = true;
+            OpenFileDialog openFileDialog = new() {
+                ClientGuid = Globals.GUID_LegacyDatEditor2,
+                Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png",
+                Multiselect = true
+            };
             int imported = 0;
             if (openFileDialog.ShowDialog() == true)
             {
@@ -1332,11 +1512,11 @@ namespace Assets_Editor
 
                 if (imported > 0)
                 {
-                    StatusBar.MessageQueue.Enqueue($"Successfully imported {imported} image(s).", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Successfully imported {imported} image(s).", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
                 {
-                    StatusBar.MessageQueue.Enqueue("No images imported.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue("No images imported.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
             }
         }
@@ -1351,7 +1531,7 @@ namespace Assets_Editor
                     using System.Drawing.Bitmap emptyBitmap = new System.Drawing.Bitmap(32, 32, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                     emptyBitmap.Save(MainWindow.SprLists[(int)data.Id], ImageFormat.Png);
                     CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
-                    StatusBar.MessageQueue.Enqueue($"Sprite successfully removed.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Sprite successfully removed.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
                 {
@@ -1379,14 +1559,14 @@ namespace Assets_Editor
                             removedStream.Dispose();
                             MainWindow.AllSprList.RemoveAt((int)data.Id);
                             CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
-                            StatusBar.MessageQueue.Enqueue($"Sprite successfully removed.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                            StatusBar.MessageQueue?.Enqueue($"Sprite successfully removed.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                         }
                         else
-                            StatusBar.MessageQueue.Enqueue($"Unable to delete sprite.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                            StatusBar.MessageQueue?.Enqueue($"Unable to delete sprite.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                     }
                     else
                     {
-                        StatusBar.MessageQueue.Enqueue($"Unable to delete sprite. The sprite is currently in use by one or more objects", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                        StatusBar.MessageQueue?.Enqueue($"Unable to delete sprite. The sprite is currently in use by one or more objects", null, null, null, false, true, TimeSpan.FromSeconds(2));
                     }
                 }
 
@@ -1394,8 +1574,10 @@ namespace Assets_Editor
         }
         private void ReplaceSprite_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png";
+            OpenFileDialog openFileDialog = new() {
+                Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png",
+                ClientGuid = Globals.GUID_LegacyDatEditor3
+            };
             if (openFileDialog.ShowDialog() == true)
             {
                 using (System.Drawing.Image originalImage = System.Drawing.Image.FromFile(openFileDialog.FileName))
@@ -1428,7 +1610,7 @@ namespace Assets_Editor
                         CollectionViewSource.GetDefaultView(SprListView.ItemsSource).Refresh();
                     }
                 }
-                StatusBar.MessageQueue.Enqueue($"Sprite successfully replaced.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Sprite successfully replaced.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
         private void ExportObject_PreviewMouseLeftButtonDown(object sender, RoutedEventArgs e)
@@ -1451,7 +1633,7 @@ namespace Assets_Editor
                         appearances.Add(MainWindow.appearances.Missile[(int)item.Id - 1]);
                 }
                 if(ObdDecoder.Export(appearances))
-                    StatusBar.MessageQueue.Enqueue($"Successfully exported objects.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Successfully exported objects.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
         
@@ -1518,7 +1700,7 @@ namespace Assets_Editor
                     ObjListView.ScrollIntoView(ObjListView.Items[^1]);
                 }), System.Windows.Threading.DispatcherPriority.Background);
 
-                StatusBar.MessageQueue.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
 
@@ -1540,8 +1722,9 @@ namespace Assets_Editor
             if (hit is ListViewItem item) {
                 var showList = (ShowList)listView.ItemContainerGenerator.ItemFromContainer(item);
                 if (showList != null) {
-                    Clipboard.SetText(showList.Id.ToString());
-                    StatusBar.MessageQueue?.Enqueue($"object ID copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    Dispatcher.Invoke(() => {
+                        ClipboardManager.CopyText(showList.Id.ToString(), "Object ID", StatusBar);
+                    });
                 }
             }
         }
@@ -1619,7 +1802,7 @@ namespace Assets_Editor
                 ShowList selectedShowList = (ShowList)ObjListView.SelectedItem;
                 selectedShowList.Image = Utils.BitmapToBitmapImage(MainWindow.SprLists[0]);
             }
-            StatusBar.MessageQueue.Enqueue($"Object successfully deleted.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Object successfully deleted.", null, null, null, false, true, TimeSpan.FromSeconds(2));
 
         }
 
@@ -1679,7 +1862,7 @@ namespace Assets_Editor
             }
 
             ObjListView.SelectedItem = ObjListView.Items[^1];
-            StatusBar.MessageQueue.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void SprSynchronized_Click(object sender, RoutedEventArgs e)
@@ -1712,34 +1895,35 @@ namespace Assets_Editor
         public void AnimateSelectedListItem(ShowList showList)
         {
             // Find the ListViewItem for the selected item
-            var listViewItem = ObjListView.ItemContainerGenerator.ContainerFromItem(showList) as ListViewItem;
-            if (listViewItem != null)
-            {
-                // Find the Image control within the ListViewItem
-                var imageControl = Utils.FindVisualChild<Image>(listViewItem);
-                if (imageControl != null)
-                {
-                    showList.Images.Clear();
+            try {
+                var listViewItem = ObjListView.ItemContainerGenerator.ContainerFromItem(showList) as ListViewItem;
+                if (listViewItem != null) {
+                    // Find the Image control within the ListViewItem
+                    var imageControl = Utils.FindVisualChild<Image>(listViewItem);
+                    if (imageControl != null) {
+                        showList.Images.Clear();
 
-                    Appearance appearance = null;
+                        Appearance appearance = null;
 
-                    if (ObjectMenu.SelectedIndex == 0)
-                        appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == showList.Id);
-                    else if (ObjectMenu.SelectedIndex == 1)
-                        appearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == showList.Id);
-                    else if (ObjectMenu.SelectedIndex == 2)
-                        appearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == showList.Id);
-                    else if (ObjectMenu.SelectedIndex == 3)
-                        appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
+                        if (ObjectMenu.SelectedIndex == 0)
+                            appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == showList.Id);
+                        else if (ObjectMenu.SelectedIndex == 1)
+                            appearance = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == showList.Id);
+                        else if (ObjectMenu.SelectedIndex == 2)
+                            appearance = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == showList.Id);
+                        else if (ObjectMenu.SelectedIndex == 3)
+                            appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
 
-                    for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.PatternFrames; i++)
-                    {
-                        BitmapImage imageFrame = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearance, MainWindow.MainSprStorage, i));
-                        showList.Images.Add(imageFrame);
+                        for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.PatternFrames; i++) {
+                            BitmapImage imageFrame = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearance, MainWindow.MainSprStorage, i));
+                            showList.Images.Add(imageFrame);
+                        }
+
+                        showList.StartAnimation();
                     }
-
-                    showList.StartAnimation();
                 }
+            } catch (Exception e) {
+                MainWindow.Log(e.Message, "Error");
             }
         }
 

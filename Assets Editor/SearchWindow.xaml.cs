@@ -193,10 +193,16 @@ namespace Assets_Editor
                 if (A_FlagTopeffect.IsChecked == true && item.Flags.HasTop != true)
                     continue;
 
+                if (A_FlagWearout.IsChecked == true && item.Flags.HasWearout != true)
+                    continue;
+
                 if (A_FlagAnimated.IsChecked == true && item.FrameGroup[0].SpriteInfo.PatternFrames == 1)
                     continue;
 
-                    ItemListView.Items.Add(new ShowList() { Id = item.Id});
+                if (A_FlagWingsOffset.IsChecked == true && (item.Flags.WingsOffset == null))
+                    continue;
+
+                ItemListView.Items.Add(new ShowList() { Id = item.Id});
             }
         }
     }

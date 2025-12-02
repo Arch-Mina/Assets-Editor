@@ -63,7 +63,9 @@ namespace Assets_Editor
         }
         private async Task LoadImportClient()
         {
-            System.Windows.Forms.FolderBrowserDialog _assets = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.FolderBrowserDialog _assets = new() {
+                ClientGuid = Globals.GUID_ImportManager1
+            };
             if (_assets.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 string _assetsPath = _assets.SelectedPath;
@@ -81,8 +83,8 @@ namespace Assets_Editor
 
                         string _datPath = String.Format("{0}{1}", _assetsPath, "Tibia.dat");
                         string _sprPath = String.Format("{0}{1}", _assetsPath, "Tibia.spr");
-                        LegacyAppearance Dat = new LegacyAppearance();
-                        Dat.ReadLegacyDat(_datPath, MainWindow.serverSetting.Version);
+                        LegacyAppearance Dat = new();
+                        Dat.ReadLegacyDat(_datPath, MainWindow.GetCurrentLoadedVersion());
                         ImportAppearances = Dat.Appearances;
 
                         bool transparency = false;
@@ -92,6 +94,7 @@ namespace Assets_Editor
                         });
 
                         MainSprStorage = new SpriteStorage(_sprPath, transparency, progressReporter);
+                        MainSprStorage.LoadSprites();
                         SprLists = MainSprStorage.SprLists;
                         sprites = MainSprStorage.Sprites;
                         for (uint i = 0; i < sprites.Count; i++)
@@ -401,12 +404,14 @@ namespace Assets_Editor
 
         private void ImportObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "OBD Files (*.obd)|*.obd";
+            OpenFileDialog openFileDialog = new() {
+                Filter = "OBD Files (*.obd)|*.obd",
+                ClientGuid = Globals.GUID_ImportManager2
+            };
             if (openFileDialog.ShowDialog() == true)
             {
                 string selectedFilePath = openFileDialog.FileName;
-                ConcurrentDictionary<int, MemoryStream> objectSprList = new ConcurrentDictionary<int, MemoryStream>();
+                ConcurrentDictionary<int, MemoryStream> objectSprList = [];
                 Appearance appearance = ObdDecoder.Load(selectedFilePath, ref objectSprList);
                 if (appearance != null)
                 {
@@ -516,7 +521,7 @@ namespace Assets_Editor
                             ShowList item = (ShowList)_editor.ObjListView.SelectedItem;
                             _editor.AnimateSelectedListItem(item);
                         }else
-                            _editor.StatusBar.MessageQueue.Enqueue($"You can only replace objects of the same type.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                            _editor.StatusBar.MessageQueue?.Enqueue($"You can only replace objects of the same type.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                     }
                 }
             }

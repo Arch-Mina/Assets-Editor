@@ -132,10 +132,16 @@ message AppearanceFlags {
     repeated VOCATION restrict_to_vocation = 62;
     optional uint32 minimum_level = 63;
     optional WEAPON_TYPE weapon_type = 64;
-    reserved 65 to 69;;
+    reserved 65 to 69;
     optional bool hook_south = 70;
     optional bool hook_east = 71;
     optional AppearanceFlagTransparencyLevel transparencylevel = 72;
+
+    // add official client flags in this range when new ones are added to the official client
+    reserved 73 to 99;
+
+    // otc / custom flags
+    optional AppearanceFlagWingsOffset wingsOffset = 100;
 }
 
 message AppearanceFlagBank {
@@ -160,8 +166,21 @@ message AppearanceFlagHeight {
 }
 
 message AppearanceFlagShift {
-    optional uint32 x = 1;
-    optional uint32 y = 2;
+    optional int32 x = 1;
+    optional int32 y = 2;
+    optional int32 a = 3;
+    optional int32 b = 4;
+}
+
+message AppearanceFlagWingsOffset {
+    optional int32 north_x = 1;
+    optional int32 north_y = 2;
+    optional int32 east_x = 3;
+    optional int32 east_y = 4;
+    optional int32 south_x = 5;
+    optional int32 south_y = 6;
+    optional int32 west_x = 7;
+    optional int32 west_y = 8;
 }
 
 message AppearanceFlagClothes {

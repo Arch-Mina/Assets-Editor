@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -21,9 +22,28 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Tibia.Protobuf.Appearances;
+using FolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
 
 namespace Assets_Editor
 {
+    // dialog manager for export popups
+    public class BooleanOrInverterConverter : IMultiValueConverter {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture) {
+            // If ANY value is true → return false (disable background)
+            foreach (var value in values) {
+                if (value is bool b && b)
+                    return false;
+            }
+
+            // If NONE are true → return true (enable background)
+            return true;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) {
+            throw new NotImplementedException();
+        }
+    }
+
     /// <summary>
     /// Interaction logic for DatEditor.xaml
     /// </summary>
@@ -182,6 +202,10 @@ namespace Assets_Editor
         public DatEditor()
         {
             InitializeComponent();
+
+            // set current theme
+            DarkModeToggle.IsChecked = MainWindow.IsDarkModeSet();
+
             A_FlagAutomapColorPicker.AvailableColors.Clear();
             for (int x = 0; x <= 215; x++)
             {
@@ -204,18 +228,7 @@ namespace Assets_Editor
         }
         private void DarkModeToggle_Checked(object sender, RoutedEventArgs e)
         {
-            PaletteHelper palette = new();
-
-            ITheme theme = palette.GetTheme();
-            if ((bool)DarkModeToggle.IsChecked)
-            {
-                theme.SetBaseTheme(Theme.Dark);
-            }
-            else
-            {
-                theme.SetBaseTheme(Theme.Light);
-            }
-            palette.SetTheme(theme);
+            MainWindow.SetCurrentTheme(DarkModeToggle.IsChecked ?? false);
         }
         public DatEditor(Appearances appearances)
             : this()
@@ -747,11 +760,11 @@ namespace Assets_Editor
         }
         private void A_FlagAutomapColor_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            A_FlagAutomapColorPicker.SelectedColor = A_FlagAutomapColorPicker.AvailableColors[(int)A_FlagAutomapColor.Value].Color;
+            Utils.SafeSetColor(A_FlagAutomapColor.Value, A_FlagAutomapColorPicker);
         }
         private void A_FlagLightColor_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            A_FlagLightColorPicker.SelectedColor = A_FlagLightColorPicker.AvailableColors[(int)A_FlagLightColor.Value].Color;
+            Utils.SafeSetColor(A_FlagLightColor.Value, A_FlagLightColorPicker);
         }
         private void A_FlagMarketProfession_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -787,8 +800,10 @@ namespace Assets_Editor
             }
 
             string xml = $"<look type=\"{typeValue}\" head=\"{headValue}\" body=\"{bodyValue}\" legs=\"{legsValue}\" feet=\"{feetValue}\" corpse=\"{corpseValue}\"/>";
-            Clipboard.SetText(xml);
-            StatusBar.MessageQueue.Enqueue($"xml copied to clipboard.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+
+            Dispatcher.Invoke(() => {
+                ClipboardManager.CopyText(xml, "xml", StatusBar);
+            });
         }
 
         protected void Colorize(System.Drawing.Bitmap imageTemplate, System.Drawing.Bitmap imageOutfit, Color head, Color body, Color legs, Color feet)
@@ -946,12 +961,13 @@ namespace Assets_Editor
                 else
                 {
                     int counter = 1;
+                    int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.Layers - 1 : 0;
                     int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
                     for (int ph = 0; ph < frameGroup.SpriteInfo.PatternHeight; ph++)
                     {
                         for (int pw = 0; pw < frameGroup.SpriteInfo.PatternWidth; pw++)
                         {
-                            int index = GetSpriteIndex(frameGroup, 0, pw, ph, mount, (int)SprFramesSlider.Value);
+                            int index = GetSpriteIndex(frameGroup, layer, pw, ph, mount, (int)SprFramesSlider.Value);
                             int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
                             SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(spriteId)), counter, spriteId, index);
                             counter++;
@@ -1476,8 +1492,8 @@ namespace Assets_Editor
             {
                 CurrentObjectAppearance.Flags.Shift = new AppearanceFlagShift
                 {
-                    X = (uint)A_FlagShiftX.Value,
-                    Y = (uint)A_FlagShiftY.Value
+                    X = (int)A_FlagShiftX.Value,
+                    Y = (int)A_FlagShiftY.Value
                 };
             }
             else
@@ -1788,12 +1804,12 @@ namespace Assets_Editor
             UpdateShowList(ObjectMenu.SelectedIndex, CurrentObjectAppearance.Id);
             AnimateSelectedListItem(showList);
 
-            StatusBar.MessageQueue.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Saved Current Object.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
         private void CopyObjectFlags(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             CurrentFlags = CurrentObjectAppearance.Flags.Clone();
-            StatusBar.MessageQueue.Enqueue($"Copied Current Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Copied Current Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
         private void PasteObjectFlags(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -1801,10 +1817,10 @@ namespace Assets_Editor
             {
                 CurrentObjectAppearance.Flags = CurrentFlags.Clone();
                 LoadCurrentObjectAppearances();
-                StatusBar.MessageQueue.Enqueue($"Pasted Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Pasted Object Flags.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
             else
-                StatusBar.MessageQueue.Enqueue($"Copy Flags First.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Copy Flags First.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void SprPhaseMin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -1860,7 +1876,7 @@ namespace Assets_Editor
             var output = File.Create(MainWindow._datPath);
             MainWindow.appearances.WriteTo(output);
             output.Close();
-            StatusBar.MessageQueue.Enqueue($"Compiled.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Compiled.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
         public List<System.Drawing.Bitmap> SplitImage(System.Drawing.Bitmap originalImage)
         {
@@ -2136,7 +2152,9 @@ namespace Assets_Editor
 
         private void ExportAsImageDirectoryPicker_Click(object sender, RoutedEventArgs e)
         {
-            using var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            using FolderBrowserDialog dialog = new() {
+                ClientGuid = Globals.GUID_DatEditor1
+            };
             dialog.Description = "Select the directory to export objects.";
             dialog.ShowNewFolderButton = true;
 
@@ -2237,10 +2255,10 @@ namespace Assets_Editor
         private async Task ExportLegacy(IProgress<int> progress)
         {
             CompileBox.IsEnabled = false;
-            SpriteStorage tmpSprStorage = new SpriteStorage();
-            Appearances tmpAppearances = new Appearances();
-            ConcurrentDictionary<int, List<MemoryStream>> SlicedSprList = new ConcurrentDictionary<int, List<MemoryStream>>();
-            ConcurrentDictionary<string, uint> SpriteOffsetList = new ConcurrentDictionary<string, uint>();
+            SpriteStorage tmpSprStorage = new();
+            Appearances tmpAppearances = new();
+            ConcurrentDictionary<int, List<MemoryStream>> SlicedSprList = [];
+            ConcurrentDictionary<string, uint> SpriteOffsetList = [];
 
             await Task.Run(() =>
             {
@@ -2264,9 +2282,9 @@ namespace Assets_Editor
                         }
                         for (int i = sheet.FirstSpriteid; i <= sheet.LastSpriteid; i++)
                         {
-                            System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(MainWindow.getSpriteStream(i));
+                            System.Drawing.Bitmap bitmap = new(MainWindow.getSpriteStream(i));
                             List<System.Drawing.Bitmap> slices = SplitImage(bitmap);
-                            SlicedSprList[i] = new List<MemoryStream>();
+                            SlicedSprList[i] = [];
                             for (int j = 0; j < slices.Count; j++)
                             {
                                 if (IsImageFullyTransparent(slices[j]) == false)
@@ -2388,7 +2406,12 @@ namespace Assets_Editor
                 }
 
                 string datfile = MainWindow._assetsPath + "Tibia.dat";
-                LegacyAppearance.WriteLegacyDat(datfile, 0x42A3, tmpAppearances, 1098);
+                VersionInfo? legacyEncoder = ObdDecoder.GetDatStructure();
+                if (legacyEncoder == null) {
+                    ErrorManager.ShowError("obd structure not defined in appearances.xml!");
+                    return;
+                }
+                LegacyAppearance.WriteLegacyDat(datfile, 0x42A3, tmpAppearances, legacyEncoder.Structure);
 
             });
             var progress1 = new Progress<int>(percent =>
@@ -2410,10 +2433,11 @@ namespace Assets_Editor
             List<ShowList> selectedItems = SprListView.SelectedItems.Cast<ShowList>().ToList();
             if (selectedItems.Any())
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog
+                SaveFileDialog saveFileDialog = new()
                 {
                     Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png",
-                    FileName = " "
+                    FileName = " ",
+                    ClientGuid = Globals.GUID_DatEditor2
                 };
                 if (saveFileDialog.ShowDialog() == true)
                 {
@@ -2429,7 +2453,7 @@ namespace Assets_Editor
                             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
                             g.DrawImage(image, new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), new System.Drawing.Rectangle(0, 0, targetImg.Width, targetImg.Height), System.Drawing.GraphicsUnit.Pixel);
                             g.Dispose();
-                            string directoryPath = System.IO.Path.GetDirectoryName(saveFileDialog.FileName);
+                            string directoryPath = Path.GetDirectoryName(saveFileDialog.FileName);
                             switch (saveFileDialog.FilterIndex)
                             {
                                 case 1:
@@ -2503,7 +2527,7 @@ namespace Assets_Editor
             CollectionViewSource.GetDefaultView(ObjListView.ItemsSource).Refresh();
             ObjListView.SelectedItem = ObjListView.Items[^1];
 
-            StatusBar.MessageQueue.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+            StatusBar.MessageQueue?.Enqueue($"Object successfully created.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
         private void ObjectClone_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2557,7 +2581,7 @@ namespace Assets_Editor
                     ObjListView.ScrollIntoView(ObjListView.Items[^1]);
                 }), System.Windows.Threading.DispatcherPriority.Background);
 
-                StatusBar.MessageQueue.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Successfully duplicated {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
 
@@ -2599,7 +2623,7 @@ namespace Assets_Editor
                     }
                 }
                 ObjListView.SelectedIndex = Math.Min(currentIndex, ObjListView.Items.Count - 1);
-                StatusBar.MessageQueue.Enqueue($"Successfully deleted {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Successfully deleted {selectedItems.Count} {(selectedItems.Count == 1 ? "object" : "objects")}.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 UpdateShowList(ObjectMenu.SelectedIndex);
             }
         }
@@ -2661,17 +2685,15 @@ namespace Assets_Editor
             var spriteInfos = spriteStreams.Select((stream, index) =>
             {
                 stream.Position = 0;
-                using (var image = System.Drawing.Image.FromStream(stream))
-                {
-                    return new ImportSpriteInfo { Stream = stream, OriginalIndex = index, Size = new System.Drawing.Size(image.Width, image.Height) };
-                }
+                using var image = System.Drawing.Image.FromStream(stream);
+                return new ImportSpriteInfo { Stream = stream, OriginalIndex = index, Size = new System.Drawing.Size(image.Width, image.Height) };
             }).ToList();
 
             var catalogs = new List<MainWindow.Catalog>();
             foreach (var size in SpriteSizes)
             {
                 var matchingSprites = spriteInfos.Where(si => si.Size == size).ToList();
-                if (!matchingSprites.Any()) continue;
+                if (matchingSprites.Count == 0) continue;
 
                 var spriteType = SpriteSizes.IndexOf(size);
                 var spriteSheetResults = ProcessSpriteGroup(matchingSprites, size, outputDirectory, spriteType);
@@ -3259,7 +3281,8 @@ namespace Assets_Editor
                 Filter =
                     "assets editor container (*.aec)|*.aec|" +
                     "object editor dump (*.obd)|*.obd",
-                Multiselect = true
+                Multiselect = true,
+                ClientGuid = Globals.GUID_DatEditor3
             };
 
             int importedCount = 0;
@@ -3555,7 +3578,7 @@ namespace Assets_Editor
             // show error message on failed import
             if (hasErrors)
             {
-                MessageBox.Show($"Some files failed to import. See log for details.", "Import Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ErrorManager.ShowError($"Some files failed to import. See log for details.");
             }
         }
 
@@ -3656,11 +3679,13 @@ namespace Assets_Editor
         {
             if (int.Parse(AddExportObjectCounter.Badge.ToString() ?? "0") == 0)
             {
-                StatusBar.MessageQueue.Enqueue($"Export list is empty.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Export list is empty.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 return;
             }
 
-            System.Windows.Forms.FolderBrowserDialog exportPath = new System.Windows.Forms.FolderBrowserDialog();
+            FolderBrowserDialog exportPath = new() {
+                ClientGuid = Globals.GUID_DatEditor4
+            };
             if (exportPath.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 string fullPath = Path.Combine(exportPath.SelectedPath, "Appearances.aec");
@@ -3671,7 +3696,7 @@ namespace Assets_Editor
                 exportSprCounter = 0;
                 exportObjects = new Appearances();
                 ObjListView_ScrollChanged(ObjListView, null!);
-                StatusBar.MessageQueue.Enqueue($"Successfully exported objects.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                StatusBar.MessageQueue?.Enqueue($"Successfully exported objects.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
 
@@ -3692,30 +3717,30 @@ namespace Assets_Editor
                 if (!MainWindow.appearances.Outfit.Any(a => a.Id == newId))
                 {
                     CurrentObjectAppearance.Id = newId;
-                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
-                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
             else if (ObjectMenu.SelectedIndex == 1)
             {
                 if (!MainWindow.appearances.Object.Any(a => a.Id == newId) && newId > 100)
                 {
                     CurrentObjectAppearance.Id = newId;
-                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
-                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
             else if (ObjectMenu.SelectedIndex == 2)
             {
                 if (!MainWindow.appearances.Effect.Any(a => a.Id == newId))
                 {
                     CurrentObjectAppearance.Id = newId;
-                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
-                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
 
             }
             else if (ObjectMenu.SelectedIndex == 3)
@@ -3723,10 +3748,10 @@ namespace Assets_Editor
                 if (!MainWindow.appearances.Missile.Any(a => a.Id == newId))
                 {
                     CurrentObjectAppearance.Id = newId;
-                    StatusBar.MessageQueue.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Valid Id.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                 }
                 else
-                    StatusBar.MessageQueue.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                    StatusBar.MessageQueue?.Enqueue($"Invalid Id, make sure the Id is unique.", null, null, null, false, true, TimeSpan.FromSeconds(2));
             }
         }
 
@@ -3822,7 +3847,7 @@ namespace Assets_Editor
                 spritePhase.DurationMax = maxDuration;
             }
 
-            StatusBar.MessageQueue.Enqueue($"Successfully applied to {animationSpritePhases.Count} frames.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+            StatusBar.MessageQueue?.Enqueue($"Successfully applied to {animationSpritePhases.Count} frames.", null, null, null, false, true, TimeSpan.FromSeconds(3));
         }
 
         private void SpriteListHelp_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -3831,7 +3856,7 @@ namespace Assets_Editor
                 "You can drag and drop a single or multiple sprites at once onto a Texture. \n" +
                 "Normal dragging - treats sprites as elements of the current frame. \n" +
                 "Ctrl dragging - treats sprites as a sequence of frames.";
-            MessageBox.Show(message, "Sprite List Help", MessageBoxButton.OK, MessageBoxImage.Information);
+            ErrorManager.ShowInfo(message);
         }
         private void ShowLogger(object sender, RoutedEventArgs e)
         {

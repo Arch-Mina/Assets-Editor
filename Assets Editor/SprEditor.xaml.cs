@@ -407,12 +407,13 @@ namespace Assets_Editor
             List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
             if(images.Count == 0)
             {
-                SprStatusBar.MessageQueue.Enqueue($"Current sheet is empty.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                SprStatusBar.MessageQueue?.Enqueue($"Current sheet is empty.", null, null, null, false, true, TimeSpan.FromSeconds(3));
                 return;
             }
-            SaveFileDialog saveFileDialog = new SaveFileDialog
+            SaveFileDialog saveFileDialog = new()
             {
-                Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Lzma Archive (.lzma)|*.lzma"
+                Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Lzma Archive (.lzma)|*.lzma",
+                ClientGuid = Globals.GUID_SprEditor_save
             };
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -422,20 +423,20 @@ namespace Assets_Editor
                 switch (saveFileDialog.FilterIndex)
                 {
                     case 1:
-                        targetImg.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
+                        targetImg.Save(saveFileDialog.FileName, ImageFormat.Bmp);
                         break;
                     case 2:
-                        targetImg.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Gif);
+                        targetImg.Save(saveFileDialog.FileName, ImageFormat.Gif);
                         break;
                     case 3:
-                        targetImg.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        targetImg.Save(saveFileDialog.FileName, ImageFormat.Jpeg);
                         break;
                     case 4:
-                        targetImg.Save(saveFileDialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        targetImg.Save(saveFileDialog.FileName, ImageFormat.Png);
                         break;
                     case 5:
                         {
-                            FileInfo fileInfo = new FileInfo(saveFileDialog.FileName);
+                            FileInfo fileInfo = new(saveFileDialog.FileName);
                             string dirPath = fileInfo.DirectoryName;
                             LZMA.ExportLzmaFile(targetImg, ref dirPath);
                             break;
@@ -524,11 +525,11 @@ namespace Assets_Editor
                         AllSprList.Add(new ShowList() { Id = (uint)i });
                     }
                 }
-                SprStatusBar.MessageQueue.Enqueue($"New sheet saved.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                SprStatusBar.MessageQueue?.Enqueue($"New sheet saved.", null, null, null, false, true, TimeSpan.FromSeconds(3));
                 CollectionViewSource.GetDefaultView(_editor.SprListView.ItemsSource).Refresh();
             }
             else
-                SprStatusBar.MessageQueue.Enqueue($"Create a new sheet to import.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                SprStatusBar.MessageQueue?.Enqueue($"Create a new sheet to import.", null, null, null, false, true, TimeSpan.FromSeconds(3));
         }
 
         private void EditSheet_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
