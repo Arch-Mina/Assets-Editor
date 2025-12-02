@@ -549,10 +549,12 @@ public partial class MainWindow : Window
     }
 
     private void SetUILock(bool locked) {
-        bool enabled = !locked;
-        NewPresetBtn.IsEnabled = enabled;
-        RenamePresetBtn.IsEnabled = enabled;
-        DeletePresetBtn.IsEnabled = enabled;
+        Dispatcher.Invoke(() => {
+            bool enabled = !locked;
+            NewPresetBtn.IsEnabled = enabled;
+            RenamePresetBtn.IsEnabled = enabled;
+            DeletePresetBtn.IsEnabled = enabled;
+        });
     }
 
     private void Worker_DoWork(object sender, DoWorkEventArgs e)
