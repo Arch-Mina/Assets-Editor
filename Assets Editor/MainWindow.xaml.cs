@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -19,8 +20,18 @@ using static Assets_Editor.LogView;
 
 namespace Assets_Editor;
 
-public class PresetSettings {
-    public string? Name { get; set; }
+public class PresetSettings : INotifyPropertyChanged {
+    private string _name = string.Empty;
+    public string Name {
+        get => _name;
+        set {
+            if (_name != value) {
+                _name = value;
+                OnPropertyChanged(nameof(Name));
+            }
+        }
+    }
+
     public int Version { get; set; }
     public bool Extended { get; set; }
     public bool Transparent { get; set; }
@@ -28,6 +39,21 @@ public class PresetSettings {
     public bool FrameGroups { get; set; }
     public string? ServerPath { get; set; }
     public string? ClientPath { get; set; }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    public void Reset() {
+        Name = "Default";
+        Version = 0;
+        Extended = false;
+        Transparent = false;
+        FrameDurations = false;
+        FrameGroups = false;
+        ServerPath = null;
+        ClientPath = null;
+    }
 }
 
 /// <summary>
@@ -53,6 +79,8 @@ public partial class MainWindow : Window
     public static LogView logView = new();
     public static readonly DatStructure datStructure = new();
     private static readonly string settingsFilePath = "Settings.json";
+    private PresetSettings? _editingPreset;
+
     public MainWindow()
     {
         // initialize WPF dialog
@@ -65,10 +93,10 @@ public partial class MainWindow : Window
         LoadDatChoices();
 
         // clear selection
-        A_SavedVersion.SelectedIndex = -1;
+        CurrentPresetDropdown.SelectedIndex = -1;
 
         // register event
-        A_SavedVersion.SelectionChanged += A_SavedVersion_SelectionChanged;
+        CurrentPresetDropdown.SelectionChanged += CurrentPresetDropdown_SelectionChanged;
 
         logView.Closing += (sender, e) => {
             e.Cancel = true;
@@ -76,7 +104,7 @@ public partial class MainWindow : Window
         };
 
         // select some preset
-        A_SavedVersion.SelectedIndex = Math.Min(SettingsList.LastPresetChoice, A_SavedVersion.Items.Count - 1);
+        CurrentPresetDropdown.SelectedIndex = Math.Clamp(SettingsList.LastPresetChoice, 0, CurrentPresetDropdown.Items.Count - 1);
 
         // initialize worker
         worker = new BackgroundWorker {
@@ -98,7 +126,7 @@ public partial class MainWindow : Window
     {
         public bool DarkMode { get; set; }
         public int LastPresetChoice { get; set; }
-        public List<PresetSettings>? Presets { get; set; }
+        public ObservableCollection<PresetSettings> Presets { get; set; } = [];
     }
     protected override void OnClosed(EventArgs e)
     {
@@ -151,26 +179,28 @@ public partial class MainWindow : Window
         return currentPreset;
     }
 
+    private static string CastToAppData(string? path, string localAppData) {
+        if (path == null) {
+            return "";
+        }
+
+        if (path.StartsWith(@"~\")) {
+            return Path.Combine(localAppData, path[2..]);
+        }
+
+        return path;
+    }
+
     private void CreateSettingsChoices()
     {
-        if (SettingsList.Presets == null) {
-            LoadDefaultSettings();
-            ErrorManager.ShowWarning($"Unable to create presets! Settings not loaded.");
-            return;
-        }
-
-        // add preset choices
+        // cast "~/" to appdata
         string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         foreach (var preset in SettingsList.Presets) {
-            if (preset.ServerPath.StartsWith(@"~\"))
-                preset.ServerPath = Path.Combine(localAppData, preset.ServerPath[2..]);
-
-            if (preset.ClientPath.StartsWith(@"~\"))
-                preset.ClientPath = Path.Combine(localAppData, preset.ClientPath[2..]);
-
-            // add preset to dropdown
-            A_SavedVersion.Items.Add(preset.Name);
+            preset.ServerPath = CastToAppData(preset.ServerPath, localAppData);
+            preset.ClientPath = CastToAppData(preset.ClientPath, localAppData);
         }
+
+        CurrentPresetDropdown.ItemsSource = SettingsList.Presets;
     }
 
     private static void LoadDefaultSettings()
@@ -195,7 +225,7 @@ public partial class MainWindow : Window
                 }
 
                 // if the json does not have any presets, add default preset to the list
-                if (jsonSettings.Presets == null || jsonSettings.Presets.Count == 0) {
+                if (jsonSettings.Presets.Count == 0) {
                     jsonSettings.Presets = [defaultPreset];
                 }
 
@@ -321,6 +351,126 @@ public partial class MainWindow : Window
         InternalSelectAssets();
     }
 
+    private void NewPreset_Click(object sender, RoutedEventArgs e) {
+        PresetDialogTitle.Text = "New Preset";
+        PresetNameTextBox.Text = $"Preset {SettingsList.Presets.Count + 1}";
+        _editingPreset = null; // reset currently edited preset
+        PresetDialogHost.IsOpen = true;
+    }
+
+    private void RenamePreset_Click(object sender, RoutedEventArgs e) {
+        // no preset to rename
+        if (CurrentPresetDropdown.SelectedItem is not PresetSettings preset) {
+            StatusBar.MessageQueue?.Enqueue(
+                "No preset selected!",
+                null, null, null, false, true, TimeSpan.FromSeconds(1)
+            );
+            return;
+        }
+
+        PresetDialogTitle.Text = "Rename Preset";
+        PresetNameTextBox.Text = preset.Name;
+
+        // set the currently edited preset
+        _editingPreset = preset;
+
+        PresetDialogHost.IsOpen = true;
+    }
+
+    private void DeletePreset_Click(object sender, RoutedEventArgs e) {
+        // no preset to delete
+        if (CurrentPresetDropdown.SelectedItem == null) {
+            StatusBar.MessageQueue?.Enqueue(
+                "No preset available!",
+                null, null, null, false, true, TimeSpan.FromSeconds(1)
+            );
+            return;
+        }
+
+        // some other object got there by accident
+        // prevent crash
+        if (CurrentPresetDropdown.SelectedItem is not PresetSettings preset) {
+            StatusBar.MessageQueue?.Enqueue(
+                "Failed to remove preset!",
+                null, null, null, false, true, TimeSpan.FromSeconds(1)
+            );
+
+            return;
+        }
+
+        // only one preset available, reset it
+        if (CurrentPresetDropdown.Items.Count == 1) {
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            preset.Reset();
+            preset.ClientPath = Path.Combine(localAppData, "Tibia\\packages\\Tibia\\assets\\");
+            preset.ServerPath = "";
+            SetCurrentPreset();
+            SaveEditorSettings();
+            return;
+        }
+
+        // multiple presets available, delete current one
+        if (SettingsList.Presets == null) {
+            StatusBar.MessageQueue?.Enqueue(
+                "Failed to remove preset!",
+                null, null, null, false, true, TimeSpan.FromSeconds(1)
+            );
+            return;
+        }
+
+        // get the index of currently selected item
+        int index = CurrentPresetDropdown.SelectedIndex;
+        // select the nearest neighbour
+        if (index == SettingsList.Presets.Count - 1) {
+            index--;
+        } else {
+            index++;
+        }
+
+        CurrentPresetDropdown.SelectedIndex = index;
+
+        // remove the currently selected item
+        SettingsList.Presets.Remove(preset);
+
+        SaveEditorSettings();
+    }
+
+    private void ModifyPresetConfirm_Click(object sender, RoutedEventArgs e)
+    {
+        string newName = PresetNameTextBox.Text.Trim();
+        if (string.IsNullOrEmpty(newName)) {
+            StatusBar.MessageQueue?.Enqueue(
+                "Preset name cannot be empty!",
+                null, null, null, false, true, TimeSpan.FromSeconds(1)
+            );
+            return;
+        }
+
+        if (_editingPreset != null) {
+            // rename existing preset
+            _editingPreset.Name = newName;
+        } else {
+            // create a new preset
+            PresetSettings newPreset = new() {
+                Name = newName,
+                ClientPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Tibia\\packages\\Tibia\\assets\\"),
+                ServerPath = ""
+            };
+
+            // add and select the new preset
+            SettingsList.Presets.Add(newPreset);
+            CurrentPresetDropdown.SelectedItem = newPreset;
+        }
+
+        PresetDialogHost.IsOpen = false;
+        SaveEditorSettings();
+    }
+
+    private void ModifyPresetCancel_Click(object sender, RoutedEventArgs e)
+    {
+        PresetDialogHost.IsOpen = false;
+    }
+
     /// <summary>
     /// Copies current assets path to clipboard
     /// </summary>
@@ -398,8 +548,17 @@ public partial class MainWindow : Window
         });
     }
 
+    private void SetUILock(bool locked) {
+        bool enabled = !locked;
+        NewPresetBtn.IsEnabled = enabled;
+        RenamePresetBtn.IsEnabled = enabled;
+        DeletePresetBtn.IsEnabled = enabled;
+    }
+
     private void Worker_DoWork(object sender, DoWorkEventArgs e)
     {
+        SetUILock(true);
+
         if (currentPreset == null) {
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "No preset selected!");
             return;
@@ -481,6 +640,8 @@ public partial class MainWindow : Window
     }
     private void Worker_Completed(object sender, RunWorkerCompletedEventArgs e)
     {
+        SetUILock(false);
+
         if (appearances == null) {
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_ERROR, "No suitable version was found.");
             return;
@@ -641,6 +802,11 @@ public partial class MainWindow : Window
         defaultFileName = "Tibia" + fallbackExtension;
         if (File.Exists(Path.Combine(_assetsPath, defaultFileName))) {
             return Path.Combine(_assetsPath, defaultFileName);
+        }
+
+        // this may trigger when the user doesn't have Tibia installed in local app data
+        if (!Directory.Exists(_assetsPath)) {
+            return null;
         }
 
         // try the first match of *.(ext)
@@ -892,12 +1058,12 @@ public partial class MainWindow : Window
         return;
     }
 
-    private void A_SavedVersion_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    private void SetCurrentPreset()
     {
-        int presetId = A_SavedVersion.SelectedIndex;
+        int presetId = CurrentPresetDropdown.SelectedIndex;
 
         // another fallback for invalid server lists
-        if (SettingsList.Presets == null || SettingsList.Presets.Count == 0) {
+        if (SettingsList.Presets.Count == 0) {
             SettingsList.Presets = [defaultPreset];
             presetId = 0;
         }
@@ -910,12 +1076,30 @@ public partial class MainWindow : Window
         // update currently selected preset
         currentPreset = preset;
 
+        // memorize current index
+        SettingsList.LastPresetChoice = presetId;
+
+        // set the assets path
         _assetsPath = preset.ClientPath;
         if (_assetsPath.EndsWith("\\") == false)
             _assetsPath += "\\";
         AssetsPath.Text = _assetsPath;
 
+        // update version dropdown
+        if (DatStructureDropdown.Items.Count > 0) {
+            foreach (var item in DatStructureDropdown.Items) {
+                if (item is VersionInfo versionInfo && preset.Version == versionInfo.Structure) {
+                    DatStructureDropdown.SelectedItem = item;
+                }
+            }
+        }
+
         InternalSelectAssets();
+    }
+
+    private void CurrentPresetDropdown_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        SetCurrentPreset();
     }
 
     public static int GetCurrentLoadedVersion() => currentPreset.Version;
