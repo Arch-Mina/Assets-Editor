@@ -4086,5 +4086,9 @@ namespace Assets_Editor
             LuaWindow luaWindow = new();
             luaWindow.Show();
         }
+
+        private void ResetZoom_Click(object sender, RoutedEventArgs e) {
+            ZoomSlider.Value = 1;
+        }
     }
 }

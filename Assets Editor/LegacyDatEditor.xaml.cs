@@ -1987,6 +1987,10 @@ namespace Assets_Editor
             LuaWindow luaWindow = new();
             luaWindow.Show();
         }
+
+        private void ResetZoom_Click(object sender, RoutedEventArgs e) {
+            ZoomSlider.Value = 1;
+        }
     }
     public class ArithmeticConverter : IValueConverter
     {
@@ -2094,5 +2098,4 @@ namespace Assets_Editor
             throw new NotSupportedException("BooleanInverter can only be used for one-way binding");
         }
     }
-
 }
