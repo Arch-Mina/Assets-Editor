@@ -596,57 +596,6 @@ namespace Assets_Editor
             SprLayerFeetPicker.SelectedColor = SprLayerFeetPicker.AvailableColors[rnd.Next(0, SprLayerFeetPicker.AvailableColors.Count)].Color;
         }
 
-        protected void Colorize(System.Drawing.Bitmap imageTemplate, System.Drawing.Bitmap imageOutfit, Color head, Color body, Color legs, Color feet)
-        {
-            for (int i = 0; i < imageTemplate.Height; i++)
-            {
-                for (int j = 0; j < imageTemplate.Width; j++)
-                {
-                    System.Drawing.Color templatePixel = imageTemplate.GetPixel(j, i);
-                    System.Drawing.Color outfitPixel = imageOutfit.GetPixel(j, i);
-
-                    if (templatePixel == outfitPixel)
-                        continue;
-
-                    int rt = templatePixel.R;
-                    int gt = templatePixel.G;
-                    int bt = templatePixel.B;
-                    int ro = outfitPixel.R;
-                    int go = outfitPixel.G;
-                    int bo = outfitPixel.B;
-
-                    if (rt > 0 && gt > 0 && bt == 0) // yellow == head
-                    {
-                        ColorizePixel(ref ro, ref go, ref bo, head);
-                    }
-                    else if (rt > 0 && gt == 0 && bt == 0) // red == body
-                    {
-                        ColorizePixel(ref ro, ref go, ref bo, body);
-                    }
-                    else if (rt == 0 && gt > 0 && bt == 0) // green == legs
-                    {
-                        ColorizePixel(ref ro, ref go, ref bo, legs);
-                    }
-                    else if (rt == 0 && gt == 0 && bt > 0) // blue == feet
-                    {
-                        ColorizePixel(ref ro, ref go, ref bo, feet);
-                    }
-                    else
-                    {
-                        continue; // if nothing changed, skip the change of pixel
-                    }
-
-                    imageOutfit.SetPixel(j, i, System.Drawing.Color.FromArgb(ro, go, bo));
-                }
-            }
-        }
-
-        protected void ColorizePixel(ref int r, ref int g, ref int b, Color colorPart)
-        {
-            r = (r + colorPart.R) / 2;
-            g = (g + colorPart.G) / 2;
-            b = (b + colorPart.B) / 2;
-        }
         private void SprFramesSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (isUpdatingFrame)
@@ -712,7 +661,14 @@ namespace Assets_Editor
                                     int baseLayerIndex = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, 1, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), 0, 0, (int)SprFramesSlider.Value);
                                     int baseLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseLayerIndex];
                                     System.Drawing.Bitmap baseLayerBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)baseLayerSpriteId));
-                                    Colorize(baseLayerBitmap, baseBitmap, SprLayerHeadPicker.SelectedColor.Value, SprLayerBodyPicker.SelectedColor.Value, SprLayerLegsPicker.SelectedColor.Value, SprLayerFeetPicker.SelectedColor.Value);
+                                    Utils.ColorizeOutfit(
+                                        baseLayerBitmap,
+                                        baseBitmap,
+                                        SprLayerHeadPicker.SelectedColor.Value,
+                                        SprLayerBodyPicker.SelectedColor.Value,
+                                        SprLayerLegsPicker.SelectedColor.Value,
+                                        SprLayerFeetPicker.SelectedColor.Value
+                                    );
                                 }
                                 using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(baseBitmap)) {
                                     g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
@@ -727,9 +683,15 @@ namespace Assets_Editor
                                             int addonLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[addonLayerIndex];
                                             System.Drawing.Bitmap addonLayerBitmap = new System.Drawing.Bitmap(MainWindow.MainSprStorage.getSpriteStream((uint)addonLayerSpriteId));
 
-                                            Colorize(addonLayerBitmap, addonBitmap, SprLayerHeadPicker.SelectedColor.Value, SprLayerBodyPicker.SelectedColor.Value, SprLayerLegsPicker.SelectedColor.Value, SprLayerFeetPicker.SelectedColor.Value);
+                                            Utils.ColorizeOutfit(
+                                                addonLayerBitmap,
+                                                addonBitmap,
+                                                SprLayerHeadPicker.SelectedColor.Value,
+                                                SprLayerBodyPicker.SelectedColor.Value,
+                                                SprLayerLegsPicker.SelectedColor.Value,
+                                                SprLayerFeetPicker.SelectedColor.Value
+                                            );
                                             g.DrawImage(addonBitmap, new System.Drawing.Point(0, 0));
-
                                         }
                                     }
                                 }
