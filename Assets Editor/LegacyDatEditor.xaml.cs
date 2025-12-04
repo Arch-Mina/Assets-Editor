@@ -252,7 +252,7 @@ namespace Assets_Editor
                 for (int i = 0; i < SprListView.Items.Count; i++)
                 {
                     if (i >= offset && i < Math.Min(offset + 20, SprListView.Items.Count) && MainWindow.SprLists.ContainsKey(i))
-                        MainWindow.AllSprList[i].Image = Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)i));
+                        MainWindow.AllSprList[i].Image = Utils.ResizeForUI(MainWindow.MainSprStorage.getSpriteStream((uint)i));
                     else
                         MainWindow.AllSprList[i].Image = null;
                 }
@@ -697,7 +697,7 @@ namespace Assets_Editor
                             for (int w = (int)frameGroup.SpriteInfo.PatternWidth - 1; w >= 0; w--) {
                                 int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternX - 1), addon, mount, (int)SprFramesSlider.Value);
                                 int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                                SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), counter, spriteId, index);
+                                SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.ResizeForUI(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), counter, spriteId, index);
                                 counter++;
                             }
                         }
@@ -736,7 +736,7 @@ namespace Assets_Editor
 
                                 MemoryStream memoryStream = new MemoryStream();
                                 baseBitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-                                SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(memoryStream), counter, 0, 0);
+                                SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.ResizeForUI(memoryStream), counter, 0, 0);
                                 counter++;
                             }
                         }
@@ -752,7 +752,7 @@ namespace Assets_Editor
                                     int tileid = (int)(ph * gridHeight * frameGroup.SpriteInfo.PatternHeight + (frameGroup.SpriteInfo.PatternHeight - 1 - h) * gridHeight + (pw * frameGroup.SpriteInfo.PatternWidth) + (frameGroup.SpriteInfo.PatternWidth - 1 - w) + 1);
                                     int index = LegacyAppearance.GetSpriteIndex(frameGroup, w, h, layer, pw, ph, mount, (int)SprFramesSlider.Value);
                                     int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                                    SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.BitmapToBitmapImage(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), tileid, spriteId, index);
+                                    SetImageInGrid(SpriteViewerGrid, gridHeight, Utils.ResizeForUI(MainWindow.MainSprStorage.getSpriteStream((uint)spriteId)), tileid, spriteId, index);
                                     counter++;
                                 }
                             }
@@ -1915,7 +1915,7 @@ namespace Assets_Editor
                             appearance = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == showList.Id);
 
                         for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.PatternFrames; i++) {
-                            BitmapImage imageFrame = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearance, MainWindow.MainSprStorage, i));
+                            BitmapImage imageFrame = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(appearance, MainWindow.MainSprStorage, i));
                             showList.Images.Add(imageFrame);
                         }
 

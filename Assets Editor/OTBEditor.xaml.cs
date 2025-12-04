@@ -124,7 +124,7 @@ namespace Assets_Editor
                             ShowList item = (ShowList)ItemListView.Items[i];
                             if (appearanceByClientId.ContainsKey(item.Cid))
                             {
-                                item.Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearanceByClientId[item.Cid], MainWindow.MainSprStorage));
+                                item.Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(appearanceByClientId[item.Cid], MainWindow.MainSprStorage));
                             }
                         }
                         else
@@ -132,7 +132,7 @@ namespace Assets_Editor
                             ShowList item = (ShowList)ItemListView.Items[i];
                             if (appearanceByClientId.ContainsKey(item.Cid))
                             {
-                                item.Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)appearanceByClientId[item.Cid].FrameGroup[0].SpriteInfo.SpriteId[0]));
+                                item.Image = Utils.ResizeForUI(MainWindow.getSpriteStream((int)appearanceByClientId[item.Cid].FrameGroup[0].SpriteInfo.SpriteId[0]));
                             }
                         }
 
