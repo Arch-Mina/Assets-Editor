@@ -3544,18 +3544,18 @@ namespace Assets_Editor
                     }
                     else if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceEffect)
                     {
-                        if (!(!MainWindow.appearances.Effect.Any(a => a.Id == appearance.Id) && appearance.Id > 100))
+                        if (!(!MainWindow.appearances.Effect.Any(a => a.Id == appearance.Id) && appearance.Id > 0))
                         {
-                            appearance.Id = MainWindow.appearances.Effect[^1].Id + 1u;
+                            appearance.Id = MainWindow.appearances.Effect.Count > 0 ? MainWindow.appearances.Effect[^1].Id + 1u : 1u;
                         }
                         MainWindow.appearances.Effect.Add(appearance.Clone());
                         ThingsEffect.Add(new ShowList() { Id = appearance.Id });
                     }
                     else if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceMissile)
                     {
-                        if (!(!MainWindow.appearances.Missile.Any(a => a.Id == appearance.Id) && appearance.Id > 100))
+                        if (!(!MainWindow.appearances.Missile.Any(a => a.Id == appearance.Id) && appearance.Id > 0))
                         {
-                            appearance.Id = MainWindow.appearances.Missile[^1].Id + 1u;
+                            appearance.Id = MainWindow.appearances.Missile.Count > 0 ? MainWindow.appearances.Missile[^1].Id + 1u : 1u;
                         }
                         MainWindow.appearances.Missile.Add(appearance.Clone());
                         ThingsMissile.Add(new ShowList() { Id = appearance.Id });
