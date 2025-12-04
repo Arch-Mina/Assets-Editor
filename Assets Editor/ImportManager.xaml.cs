@@ -160,13 +160,13 @@ namespace Assets_Editor
                     if (i >= offset && i < Math.Min(offset + 20, ObjListView.Items.Count))
                     {
                         if (ObjectMenu.SelectedIndex == 0)
-                            ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Outfit[i], MainSprStorage));
+                            ThingsOutfit[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Outfit[i], MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 1)
-                            ThingsItem[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Object[i], MainSprStorage));
+                            ThingsItem[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Object[i], MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 2)
-                            ThingsEffect[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Effect[i], MainSprStorage));
+                            ThingsEffect[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Effect[i], MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 3)
-                            ThingsMissile[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Missile[i], MainSprStorage));
+                            ThingsMissile[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Missile[i], MainSprStorage));
                     }
                     else
                     {
@@ -222,7 +222,7 @@ namespace Assets_Editor
                 for (int i = 0; i < SprListView.Items.Count; i++)
                 {
                     if (i >= offset && i < Math.Min(offset + 20, SprListView.Items.Count) && SprLists.ContainsKey(i))
-                        AllSprList[i].Image = Utils.BitmapToBitmapImage(MainSprStorage.getSpriteStream((uint)i));
+                        AllSprList[i].Image = Utils.ResizeForUI(MainSprStorage.getSpriteStream((uint)i));
                     else
                         AllSprList[i].Image = null;
                 }

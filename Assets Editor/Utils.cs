@@ -276,6 +276,46 @@ namespace Assets_Editor
             return bmpWithMagentaBackground;
         }
 
+        public static double GetDpiScale() {
+            var window = Application.Current.MainWindow;
+            var windowSource = PresentationSource.FromVisual(window);
+            if (windowSource != null) {
+                // system scale
+                return windowSource.CompositionTarget.TransformToDevice.M11;
+            }
+
+            return 1.0;
+        }
+
+        public static BitmapImage ResizeForUI(MemoryStream stream) {
+            if (stream == null)
+                return null;
+
+            double scale = GetDpiScale();
+
+            using Bitmap original = new(stream);
+            int newWidth = (int)(original.Width * scale);
+            int newHeight = (int)(original.Height * scale);
+            Bitmap resized = new(newWidth, newHeight);
+
+            using (var g = Graphics.FromImage(resized)) {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+                g.DrawImage(original, 0, 0, newWidth, newHeight);
+            }
+
+            var ms = new MemoryStream();
+            resized.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+            ms.Seek(0, SeekOrigin.Begin);
+
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.StreamSource = ms;
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            return bitmap;
+        }
+
         public static T FindAncestorOrSelf<T>(DependencyObject obj) where T : DependencyObject
         {
             while (obj != null)

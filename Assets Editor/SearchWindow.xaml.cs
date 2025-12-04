@@ -41,11 +41,11 @@ namespace Assets_Editor
                     {
                         ShowList item = (ShowList)ItemListView.Items[i];
                         if (MainWindow.LegacyClient)
-                            item.Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Object[(int)item.Id - 100], MainWindow.MainSprStorage));
+                            item.Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(MainWindow.appearances.Object[(int)item.Id - 100], MainWindow.MainSprStorage));
                         else
                         {
                             Appearance obj = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id);
-                            item.Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)obj.FrameGroup[0].SpriteInfo.SpriteId[0]));
+                            item.Image = Utils.ResizeForUI(MainWindow.getSpriteStream((int)obj.FrameGroup[0].SpriteInfo.SpriteId[0]));
                         }
                     }
                     else

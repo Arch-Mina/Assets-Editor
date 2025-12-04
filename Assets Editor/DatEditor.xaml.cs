@@ -299,7 +299,7 @@ namespace Assets_Editor
                     if (i >= offset && i < Math.Min(offset + 20, SprListView.Items.Count) && MainWindow.SprLists.ContainsKey(i))
                         try
                         {
-                            MainWindow.AllSprList[i].Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(i));
+                            MainWindow.AllSprList[i].Image = Utils.ResizeForUI(MainWindow.getSpriteStream(i));
                         }
                         catch (Exception ex)
                         {
@@ -887,8 +887,8 @@ namespace Assets_Editor
                     gridWidth = (int)frameGroup.SpriteInfo.PatternHeight;
                     gridHeight = (int)frameGroup.SpriteInfo.PatternWidth;
                 }
-                int imgWidth = (int)Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)frameGroup.SpriteInfo.SpriteId[0])).Width;
-                int imgHeight = (int)Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)frameGroup.SpriteInfo.SpriteId[0])).Height;
+                int imgWidth = (int)Utils.ResizeForUI(MainWindow.getSpriteStream((int)frameGroup.SpriteInfo.SpriteId[0])).Width;
+                int imgHeight = (int)Utils.ResizeForUI(MainWindow.getSpriteStream((int)frameGroup.SpriteInfo.SpriteId[0])).Height;
 
                 for (int i = 0; i < gridWidth; i++)
                 {
@@ -912,7 +912,7 @@ namespace Assets_Editor
                         int addon = frameGroup.SpriteInfo.PatternWidth > 1 ? (int)SprAddonSlider.Value : 0;
                         int index = GetSpriteIndex(frameGroup, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), addon, mount, (int)SprFramesSlider.Value);
                         int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                        SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(spriteId)), 1, spriteId, index);
+                        SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.ResizeForUI(MainWindow.getSpriteStream(spriteId)), 1, spriteId, index);
                     }
                     else
                     {
@@ -955,7 +955,7 @@ namespace Assets_Editor
 
                         baseBitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
 
-                        SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(memoryStream), 1, 0, 0);
+                        SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.ResizeForUI(memoryStream), 1, 0, 0);
                     }
                 }
                 else
@@ -969,7 +969,7 @@ namespace Assets_Editor
                         {
                             int index = GetSpriteIndex(frameGroup, layer, pw, ph, mount, (int)SprFramesSlider.Value);
                             int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
-                            SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.BitmapToBitmapImage(MainWindow.getSpriteStream(spriteId)), counter, spriteId, index);
+                            SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.ResizeForUI(MainWindow.getSpriteStream(spriteId)), counter, spriteId, index);
                             counter++;
                         }
                     }
@@ -3800,7 +3800,7 @@ namespace Assets_Editor
                         for (int i = 0; i < appearance.FrameGroup[0].SpriteInfo.SpriteId.Count; i++)
                         {
                             int index = GetSpriteIndex(appearance.FrameGroup[0], 0, (ObjectMenu.SelectedIndex == 0 || ObjectMenu.SelectedIndex == 2) ? (int)Math.Min(2, appearance.FrameGroup[0].SpriteInfo.PatternWidth - 1) : 0, ObjectMenu.SelectedIndex == 2 ? (int)Math.Min(1, appearance.FrameGroup[0].SpriteInfo.PatternHeight - 1) : 0, 0, i);
-                            BitmapImage imageFrame = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)appearance.FrameGroup[0].SpriteInfo.SpriteId[index]));
+                            BitmapImage imageFrame = Utils.ResizeForUI(MainWindow.getSpriteStream((int)appearance.FrameGroup[0].SpriteInfo.SpriteId[index]));
                             showList.Images.Add(imageFrame);
                         }
                     }
