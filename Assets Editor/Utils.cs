@@ -6,6 +6,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using MediaColor = System.Windows.Media.Color;
+using DrawingColor = System.Drawing.Color;
 
 namespace Assets_Editor
 {
@@ -18,9 +20,9 @@ namespace Assets_Editor
             }
         }
 
-        public static System.Windows.Media.Color Get8Bit(int color)
+        public static MediaColor Get8Bit(int color)
         {
-            System.Windows.Media.Color RgbColor = new System.Windows.Media.Color
+            MediaColor RgbColor = new()
             {
                 R = (byte)(color / 36 % 6 * 51),
                 G = (byte)(color / 6 % 6 * 51),
@@ -28,7 +30,7 @@ namespace Assets_Editor
             };
             return RgbColor;
         }
-        public static System.Drawing.Color GetOutfitColor(int color)
+        public static DrawingColor GetOutfitColor(int color)
         {
             const int HSI_SI_VALUES = 7;
             const int HSI_H_STEPS = 19;
@@ -83,12 +85,12 @@ namespace Assets_Editor
             }
 
             if (loc3 == 0)
-                return System.Drawing.Color.FromArgb(0, 0, 0);
+                return DrawingColor.FromArgb(0, 0, 0);
 
             if (loc2 == 0)
             {
                 int loc7 = (int)(loc3 * 255);
-                return System.Drawing.Color.FromArgb(loc7, loc7, loc7);
+                return DrawingColor.FromArgb(loc7, loc7, loc7);
             }
 
             float red = 0, green = 0, blue = 0;
@@ -131,7 +133,7 @@ namespace Assets_Editor
                 blue = red - (loc3 - green) * (6 * loc1 - 5);
             }
 
-            return System.Drawing.Color.FromArgb((int)(red * 255), (int)(green * 255), (int)(blue * 255));
+            return DrawingColor.FromArgb((int)(red * 255), (int)(green * 255), (int)(blue * 255));
         }
         public static childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
         {
@@ -257,9 +259,9 @@ namespace Assets_Editor
 
         public static Bitmap ConvertBackgroundToMagenta(Bitmap original, bool opaque)
         {
-            System.Drawing.Color magentaOpaque = System.Drawing.Color.FromArgb(255, 255, 0, 255); // Opaque magenta
-            System.Drawing.Color magentaTransparent = System.Drawing.Color.FromArgb(0, 255, 0, 255); // Transparent magenta
-            System.Drawing.Color magenta = opaque ? magentaOpaque : magentaTransparent;
+            DrawingColor magentaOpaque = DrawingColor.FromArgb(255, 255, 0, 255); // Opaque magenta
+            DrawingColor magentaTransparent = DrawingColor.FromArgb(0, 255, 0, 255); // Transparent magenta
+            DrawingColor magenta = opaque ? magentaOpaque : magentaTransparent;
 
             // Create a bitmap with the same size as the original
             Bitmap bmpWithMagentaBackground = new Bitmap(original.Width, original.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
@@ -314,6 +316,49 @@ namespace Assets_Editor
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
             bitmap.EndInit();
             return bitmap;
+        }
+
+        public static void ColorizeOutfit(Bitmap imageTemplate, Bitmap imageOutfit, MediaColor head, MediaColor body, MediaColor legs, MediaColor feet) {
+            for (int i = 0; i < imageTemplate.Height; i++) {
+                for (int j = 0; j < imageTemplate.Width; j++) {
+                    DrawingColor templatePixel = imageTemplate.GetPixel(j, i);
+                    DrawingColor outfitPixel = imageOutfit.GetPixel(j, i);
+
+                    if (templatePixel == outfitPixel)
+                        continue;
+
+                    int rt = templatePixel.R;
+                    int gt = templatePixel.G;
+                    int bt = templatePixel.B;
+                    int ro = outfitPixel.R;
+                    int go = outfitPixel.G;
+                    int bo = outfitPixel.B;
+
+                    if (rt > 0 && gt > 0 && bt == 0) // yellow == head
+                    {
+                        ColorizePixel(ref ro, ref go, ref bo, head);
+                    } else if (rt > 0 && gt == 0 && bt == 0) // red == body
+                      {
+                        ColorizePixel(ref ro, ref go, ref bo, body);
+                    } else if (rt == 0 && gt > 0 && bt == 0) // green == legs
+                      {
+                        ColorizePixel(ref ro, ref go, ref bo, legs);
+                    } else if (rt == 0 && gt == 0 && bt > 0) // blue == feet
+                      {
+                        ColorizePixel(ref ro, ref go, ref bo, feet);
+                    } else {
+                        continue; // if nothing changed, skip the change of pixel
+                    }
+
+                    imageOutfit.SetPixel(j, i, DrawingColor.FromArgb(ro, go, bo));
+                }
+            }
+        }
+
+        private static void ColorizePixel(ref int r, ref int g, ref int b, MediaColor colorPart) {
+            r = (r * colorPart.R) / 255;
+            g = (g * colorPart.G) / 255;
+            b = (b * colorPart.B) / 255;
         }
 
         public static T FindAncestorOrSelf<T>(DependencyObject obj) where T : DependencyObject
