@@ -399,10 +399,27 @@
                             <ScrollViewer>
                                 <WrapPanel Orientation="Horizontal" MaxWidth="700">
                                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="321" Margin="5,0,5,0">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                                            <Label Content="Zoom:" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <Slider x:Name="ZoomSlider"
+                                                    Minimum="0.5"
+                                                    Maximum="4"
+                                                    Value="1"
+                                                    TickFrequency="0.1"
+                                                    IsSnapToTickEnabled="True"
+                                                    Width="150"
+                                                    Margin="5"
+                                                    VerticalAlignment="Center"
+                                            />
+                                            <Button Margin="10,0,0,0" Content="Reset" Click="ResetZoom_Click" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                         <Grid Margin="20,20,0,0" Width="265" Height="265" HorizontalAlignment="Left" VerticalAlignment="Top">
                                             <Border BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#FF4F4F4F" Background="{Binding SelectedColor, ElementName=SprBackgroundPicker, Converter={StaticResource NullableColorToBrushConverter} }">
                                                 <Grid>
                                                     <Grid x:Name="SpriteViewerGrid" ShowGridLines="false" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <Grid.LayoutTransform>
+                                                            <ScaleTransform ScaleX="{Binding Value, ElementName=ZoomSlider}" ScaleY="{Binding Value, ElementName=ZoomSlider}"/>
+                                                        </Grid.LayoutTransform>
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="32"/>
                                                             <RowDefinition Height="32"/>
