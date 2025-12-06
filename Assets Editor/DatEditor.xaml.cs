@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -140,26 +141,26 @@ namespace Assets_Editor
             return new(spriteSizeX, spriteSizeY, cols, rows);
         }
 
-        private static ObservableCollection<ShowList> ThingsOutfit = new ObservableCollection<ShowList>();
-        private static ObservableCollection<ShowList> ThingsItem = new ObservableCollection<ShowList>();
-        private static ObservableCollection<ShowList> ThingsEffect = new ObservableCollection<ShowList>();
-        private static ObservableCollection<ShowList> ThingsMissile = new ObservableCollection<ShowList>();
+        private static ObservableCollection<ShowList> ThingsOutfit = [];
+        private static ObservableCollection<ShowList> ThingsItem = [];
+        private static ObservableCollection<ShowList> ThingsEffect = [];
+        private static ObservableCollection<ShowList> ThingsMissile = [];
         public Appearance CurrentObjectAppearance;
         public AppearanceFlags CurrentFlags = null;
-        List<AppearanceFlagNPC> NpcDataList = new List<AppearanceFlagNPC>();
-        public ObservableCollection<Box> BoundingBoxList = new ObservableCollection<Box>();
+        List<AppearanceFlagNPC> NpcDataList = [];
+        public ObservableCollection<Box> BoundingBoxList = [];
         private int CurrentSprDir = 0;
         private bool isPageLoaded = false;
         private bool isUpdatingFrame = false;
         private uint blankSpr = 0;
         private bool isObjectLoaded = false;
-        private Appearances exportObjects = new Appearances();
+        private Appearances exportObjects = new();
         private uint exportSprCounter = 0;
         private int importSprCounter = 0;
         private List<ShowList> SelectedSprites = [];
-        private Dictionary<uint, uint> importSprIdList = new Dictionary<uint, uint>();
-        private List<(List<MemoryStream> streams, Appearance appearance, List<(int, int, int)> appendedIndices, uint streamOffset)> pendingOBDImports = new();
-        private List<CatalogTransparency> transparentSheets = new List<CatalogTransparency>();
+        private Dictionary<uint, uint> importSprIdList = [];
+        private List<(List<MemoryStream> streams, Appearance appearance, List<(int, int, int)> appendedIndices, uint streamOffset)> pendingOBDImports = [];
+        private List<CatalogTransparency> transparentSheets = [];
         private class ImportSpriteInfo
         {
             public MemoryStream Stream { get; set; }
@@ -253,40 +254,41 @@ namespace Assets_Editor
             SprListView.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(SprListView_MouseLeftButtonDown), true);
             UpdateShowList(ObjectMenu.SelectedIndex);
         }
-        private void UpdateShowList(int selection, uint? preserveId = null)
-        {
-            if (ObjListView != null)
-            {
-                ObjListViewSelectedIndex.Minimum = 1;
-                if (selection == 0)
-                    ObjListView.ItemsSource = ThingsOutfit.OrderBy(x => x.Id);
-                else if (selection == 1)
-                {
-                    ObjListView.ItemsSource = ThingsItem.OrderBy(x => x.Id);
-                    ObjListViewSelectedIndex.Minimum = 100;
-                }
-                else if (selection == 2)
-                    ObjListView.ItemsSource = ThingsEffect.OrderBy(x => x.Id);
-                else if (selection == 3)
-                    ObjListView.ItemsSource = ThingsMissile.OrderBy(x => x.Id);
 
-                if (preserveId.HasValue)
-                {
-                    foreach (ShowList item in ObjListView.Items)
-                    {
-                        if (item.Id == preserveId.Value)
-                        {
-                            ObjListView.SelectedItem = item;
+        private void UpdateShowList(int selection, uint? preserveId = null) {
+            if (ObjListView == null)
+                return;
 
-                            ObjListView.ScrollIntoView(item);
+            ObservableCollection<ShowList> source =
+                selection switch {
+                    0 => ThingsOutfit,
+                    1 => ThingsItem,
+                    2 => ThingsEffect,
+                    3 => ThingsMissile,
+                    _ => ThingsOutfit
+                };
 
-                            return;
-                        }
+            // Create/update the view
+            var view = CollectionViewSource.GetDefaultView(source);
+            view.SortDescriptions.Clear();
+            view.SortDescriptions.Add(new SortDescription(nameof(ShowList.Id), ListSortDirection.Ascending));
+
+            ObjListView.ItemsSource = view;
+
+            // Restore item selection if ID is provided
+            if (preserveId.HasValue) {
+                foreach (ShowList item in view) {
+                    if (item.Id == preserveId.Value) {
+                        ObjListView.SelectedItem = item;
+                        ObjListView.ScrollIntoView(item);
+                        return;
                     }
                 }
-                ObjListView.SelectedIndex = 0;
             }
+
+            ObjListView.SelectedIndex = 0;
         }
+
         private void SprListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             VirtualizingStackPanel panel = Utils.FindVisualChild<VirtualizingStackPanel>(SprListView);
@@ -2495,52 +2497,49 @@ namespace Assets_Editor
 
         private void ObjectClone_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            List<ShowList> selectedItems = ObjListView.SelectedItems.Cast<ShowList>().ToList();
-            if (selectedItems.Any())
+            List<ShowList> selectedItems = [.. ObjListView.SelectedItems.Cast<ShowList>()];
+            if (selectedItems.Count != 0)
             {
                 ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
 
+                if (ObjectMenu.SelectedIndex is not >= 0 and <= 3)
+                    return;
+
+                var (group, targetList) = ObjectMenu.SelectedIndex switch {
+                    0 => (MainWindow.appearances?.Outfit, ThingsOutfit),
+                    1 => (MainWindow.appearances?.Object, ThingsItem),
+                    2 => (MainWindow.appearances?.Effect, ThingsEffect),
+                    3 => (MainWindow.appearances?.Missile, ThingsMissile),
+                    _ => throw new InvalidOperationException()
+                };
+
+                if (group is null)
+                    return;
+
+                uint newId = (uint)group.Max(a => a.Id) + 1;
                 foreach (var item in selectedItems)
                 {
-                    Appearance NewObject = new Appearance();
-                    if (ObjectMenu.SelectedIndex == 0)
-                    {
-                        NewObject = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Outfit.Max(a => a.Id) + 1;
-                        MainWindow.appearances.Outfit.Add(NewObject);
-                        ThingsOutfit.Add(new ShowList() { Id = NewObject.Id });
-                    }
-                    else if (ObjectMenu.SelectedIndex == 1)
-                    {
-                        NewObject = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Object.Max(a => a.Id) + 1;
-                        MainWindow.appearances.Object.Add(NewObject);
-                        ThingsItem.Add(new ShowList() { Id = NewObject.Id });
+                    var origItem = group.First(o => o.Id == item.Id);
+                    var clonedItem = origItem.Clone();
+                    clonedItem.Id = newId++;
 
-                    }
-                    else if (ObjectMenu.SelectedIndex == 2)
-                    {
-                        NewObject = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Effect.Max(a => a.Id) + 1;
-                        MainWindow.appearances.Effect.Add(NewObject);
-                        ThingsEffect.Add(new ShowList() { Id = NewObject.Id });
+                    // update market/cyclopedia item ids if item was referencing to self
+                    Utils.OnAppearanceCloned(origItem, ref clonedItem);
 
-                    }
-                    else if (ObjectMenu.SelectedIndex == 3)
-                    {
-                        NewObject = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Missile.Max(a => a.Id) + 1;
-                        MainWindow.appearances.Missile.Add(NewObject);
-                        ThingsMissile.Add(new ShowList() { Id = NewObject.Id });
-
-                    }
-
+                    group.Add(clonedItem);
+                    targetList.Add(new ShowList { Id = clonedItem.Id });
                 }
+
+                // update the ui
+                var src = ObjListView.ItemsSource;
+                ObjListView.ItemsSource = null;
+                ObjListView.ItemsSource = src;
+
+                // move the cursor to the recently cloned item
                 ObjListView.SelectedItem = ObjListView.Items[^1];
 
                 // scroll to the duplicated item
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
+                Dispatcher.BeginInvoke(new Action(() => {
                     ObjListView.ScrollIntoView(ObjListView.Items[^1]);
                 }), System.Windows.Threading.DispatcherPriority.Background);
 

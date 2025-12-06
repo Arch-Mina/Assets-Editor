@@ -31,13 +31,13 @@ namespace Assets_Editor
             this.Closed += ImportManager_Closed;
         }
         private Appearances ImportAppearances;
-        private Dictionary<uint, Sprite> sprites = new Dictionary<uint, Sprite>();
-        private List<ShowList> AllSprList = new List<ShowList>();
-        private ConcurrentDictionary<int, MemoryStream> SprLists = new ConcurrentDictionary<int, MemoryStream>();
-        private ObservableCollection<ShowList> ThingsOutfit = new ObservableCollection<ShowList>();
-        private ObservableCollection<ShowList> ThingsItem = new ObservableCollection<ShowList>();
-        private ObservableCollection<ShowList> ThingsEffect = new ObservableCollection<ShowList>();
-        private ObservableCollection<ShowList> ThingsMissile = new ObservableCollection<ShowList>();
+        private Dictionary<uint, Sprite> sprites = [];
+        private List<ShowList> AllSprList = [];
+        private ConcurrentDictionary<int, MemoryStream> SprLists = [];
+        private ObservableCollection<ShowList> ThingsOutfit = [];
+        private ObservableCollection<ShowList> ThingsItem = [];
+        private ObservableCollection<ShowList> ThingsEffect = [];
+        private ObservableCollection<ShowList> ThingsMissile = [];
         private static SpriteStorage MainSprStorage;
         private void ImportManager_Closed(object sender, EventArgs e)
         {
