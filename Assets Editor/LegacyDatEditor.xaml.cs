@@ -1611,54 +1611,44 @@ namespace Assets_Editor
             importerManager.Show();
         }
 
-        private void ObjectClone_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
+        private void ObjectClone_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             List<ShowList> selectedItems = ObjListView.SelectedItems.Cast<ShowList>().ToList();
-            if (selectedItems.Any())
-            {
+            if (selectedItems.Count != 0) {
                 ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
 
-                foreach (var item in selectedItems)
-                {
-                    Appearance NewObject = new Appearance();
-                    if (ObjectMenu.SelectedIndex == 0)
-                    {
-                        NewObject = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Outfit[^1].Id + 1;
-                        MainWindow.appearances.Outfit.Add(NewObject);
-                        ThingsOutfit.Add(new ShowList() { Id = NewObject.Id });
-                    }
-                    else if (ObjectMenu.SelectedIndex == 1)
-                    {
-                        NewObject = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Object[^1].Id + 1;
-                        MainWindow.appearances.Object.Add(NewObject);
-                        ThingsItem.Add(new ShowList() { Id = NewObject.Id });
+                if (ObjectMenu.SelectedIndex is not >= 0 and <= 3)
+                    return;
 
-                    }
-                    else if (ObjectMenu.SelectedIndex == 2)
-                    {
-                        NewObject = MainWindow.appearances.Effect.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Effect[^1].Id + 1;
-                        MainWindow.appearances.Effect.Add(NewObject);
-                        ThingsEffect.Add(new ShowList() { Id = NewObject.Id });
+                var (group, targetList) = ObjectMenu.SelectedIndex switch {
+                    0 => (MainWindow.appearances?.Outfit, ThingsOutfit),
+                    1 => (MainWindow.appearances?.Object, ThingsItem),
+                    2 => (MainWindow.appearances?.Effect, ThingsEffect),
+                    3 => (MainWindow.appearances?.Missile, ThingsMissile),
+                    _ => throw new InvalidOperationException()
+                };
 
-                    }
-                    else if (ObjectMenu.SelectedIndex == 3)
-                    {
-                        NewObject = MainWindow.appearances.Missile.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        NewObject.Id = (uint)MainWindow.appearances.Missile[^1].Id + 1;
-                        MainWindow.appearances.Missile.Add(NewObject);
-                        ThingsMissile.Add(new ShowList() { Id = NewObject.Id });
-
-                    }
-
+                if (group is null) {
+                    return;
                 }
+
+                uint newId = (uint)group.Max(a => a.Id) + 1;
+                foreach (var item in selectedItems) {
+                    var cloned = group.First(o => o.Id == item.Id).Clone();
+                    cloned.Id = newId++;
+                    group.Add(cloned);
+                    targetList.Add(new ShowList { Id = cloned.Id });
+                }
+
+                // update the ui
+                var src = ObjListView.ItemsSource;
+                ObjListView.ItemsSource = null;
+                ObjListView.ItemsSource = src;
+
+                // move the cursor to the recently cloned item
                 ObjListView.SelectedItem = ObjListView.Items[^1];
 
                 // scroll to the duplicated item
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
+                Dispatcher.BeginInvoke(new Action(() => {
                     ObjListView.ScrollIntoView(ObjListView.Items[^1]);
                 }), System.Windows.Threading.DispatcherPriority.Background);
 
