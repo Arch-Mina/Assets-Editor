@@ -1611,9 +1611,11 @@ namespace Assets_Editor
             importerManager.Show();
         }
 
-        private void ObjectClone_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            List<ShowList> selectedItems = ObjListView.SelectedItems.Cast<ShowList>().ToList();
-            if (selectedItems.Count != 0) {
+        private void ObjectClone_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            List<ShowList> selectedItems = [.. ObjListView.SelectedItems.Cast<ShowList>()];
+            if (selectedItems.Count != 0)
+            {
                 ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
 
                 if (ObjectMenu.SelectedIndex is not >= 0 and <= 3)
@@ -1627,16 +1629,20 @@ namespace Assets_Editor
                     _ => throw new InvalidOperationException()
                 };
 
-                if (group is null) {
+                if (group is null)
                     return;
-                }
 
                 uint newId = (uint)group.Max(a => a.Id) + 1;
                 foreach (var item in selectedItems) {
-                    var cloned = group.First(o => o.Id == item.Id).Clone();
-                    cloned.Id = newId++;
-                    group.Add(cloned);
-                    targetList.Add(new ShowList { Id = cloned.Id });
+                    var origItem = group.First(o => o.Id == item.Id);
+                    var clonedItem = origItem.Clone();
+                    clonedItem.Id = newId++;
+
+                    // update market/cyclopedia item ids if item was referencing to self
+                    Utils.OnAppearanceCloned(origItem, ref clonedItem);
+
+                    group.Add(clonedItem);
+                    targetList.Add(new ShowList { Id = clonedItem.Id });
                 }
 
                 // update the ui
