@@ -285,35 +285,43 @@ public class ObdDecoder
         writer.Write((uint)writer.BaseStream.Position);
         writer.Seek(position, SeekOrigin.Begin);
 
-        FrameGroup group = data.FrameGroup[0];
+        var spriteInfo = data.FrameGroup[0].SpriteInfo;
 
-        writer.Write((byte)group.SpriteInfo.PatternWidth);
-        writer.Write((byte)group.SpriteInfo.PatternHeight);
+        writer.Write((byte)spriteInfo.PatternWidth);
+        writer.Write((byte)spriteInfo.PatternHeight);
 
-        if (group.SpriteInfo.PatternWidth > 1 || group.SpriteInfo.PatternHeight > 1) {
-            writer.Write((byte)group.SpriteInfo.PatternSize);
+        if (spriteInfo.PatternWidth > 1 || spriteInfo.PatternHeight > 1) {
+            writer.Write((byte)spriteInfo.PatternSize);
         }
 
-        writer.Write((byte)group.SpriteInfo.PatternLayers);
-        writer.Write((byte)group.SpriteInfo.PatternX);
-        writer.Write((byte)group.SpriteInfo.PatternY);
-        writer.Write((byte)group.SpriteInfo.PatternZ);
-        writer.Write((byte)group.SpriteInfo.PatternFrames);
+        writer.Write((byte)spriteInfo.PatternLayers);
+        writer.Write((byte)spriteInfo.PatternX);
+        writer.Write((byte)spriteInfo.PatternY);
+        writer.Write((byte)spriteInfo.PatternZ);
+        writer.Write((byte)spriteInfo.PatternFrames);
 
-        if (group.SpriteInfo.PatternFrames > 1) {
-            writer.Write((byte)group.SpriteInfo.Animation.AnimationMode);
-            writer.Write(group.SpriteInfo.Animation.LoopCount);
-            writer.Write((byte)group.SpriteInfo.Animation.DefaultStartPhase);
+        if (spriteInfo.PatternFrames > 1) {
+            byte animationMode = (byte)spriteInfo.Animation.AnimationMode;
+            int loopCount = (int)spriteInfo.Animation.LoopCount;
 
-            for (int i = 0; i < group.SpriteInfo.PatternFrames; i++) {
-                writer.Write(group.SpriteInfo.Animation.SpritePhase[i].DurationMin);
-                writer.Write(group.SpriteInfo.Animation.SpritePhase[i].DurationMax);
+            // infinite animation does not use loop count
+            if (animationMode == (byte)ANIMATION_LOOP_TYPE.Infinite) {
+                loopCount = 0;
+            }
+
+            writer.Write(animationMode);
+            writer.Write(loopCount);
+            writer.Write((byte)spriteInfo.Animation.DefaultStartPhase);
+
+            for (int i = 0; i < spriteInfo.PatternFrames; i++) {
+                writer.Write(spriteInfo.Animation.SpritePhase[i].DurationMin);
+                writer.Write(spriteInfo.Animation.SpritePhase[i].DurationMax);
             }
         }
 
-        for (int i = 0; i < group.SpriteInfo.SpriteId.Count; i++) {
-            byte[] pixels = Sprite.UncompressPixelsARGB(Sprite.CompressBitmap(new Bitmap(MainWindow.MainSprStorage.getSpriteStream(group.SpriteInfo.SpriteId[i])), true), true);
-            writer.Write(group.SpriteInfo.SpriteId[i]);
+        for (int i = 0; i < spriteInfo.SpriteId.Count; i++) {
+            byte[] pixels = Sprite.UncompressPixelsARGB(Sprite.CompressBitmap(new Bitmap(MainWindow.MainSprStorage.getSpriteStream(spriteInfo.SpriteId[i])), true), true);
+            writer.Write(spriteInfo.SpriteId[i]);
             writer.Write(pixels);
         }
 
@@ -355,35 +363,44 @@ public class ObdDecoder
         for (int frame = 0; frame < FrameGroupCount; frame++) {
 
             FrameGroup group = data.FrameGroup[frame];
+            var spriteInfo = group.SpriteInfo;
 
             writer.Write((byte)group.FixedFrameGroup);
-            writer.Write((byte)group.SpriteInfo.PatternWidth);
-            writer.Write((byte)group.SpriteInfo.PatternHeight);
+            writer.Write((byte)spriteInfo.PatternWidth);
+            writer.Write((byte)spriteInfo.PatternHeight);
 
-            if (group.SpriteInfo.PatternWidth > 1 || group.SpriteInfo.PatternHeight > 1) {
-                writer.Write((byte)group.SpriteInfo.PatternSize);
+            if (spriteInfo.PatternWidth > 1 || spriteInfo.PatternHeight > 1) {
+                writer.Write((byte)spriteInfo.PatternSize);
             }
 
-            writer.Write((byte)group.SpriteInfo.PatternLayers);
-            writer.Write((byte)group.SpriteInfo.PatternX);
-            writer.Write((byte)group.SpriteInfo.PatternY);
-            writer.Write((byte)group.SpriteInfo.PatternZ);
-            writer.Write((byte)group.SpriteInfo.PatternFrames);
+            writer.Write((byte)spriteInfo.PatternLayers);
+            writer.Write((byte)spriteInfo.PatternX);
+            writer.Write((byte)spriteInfo.PatternY);
+            writer.Write((byte)spriteInfo.PatternZ);
+            writer.Write((byte)spriteInfo.PatternFrames);
 
-            if (group.SpriteInfo.PatternFrames > 1) {
-                writer.Write((byte)group.SpriteInfo.Animation.AnimationMode);
-                writer.Write((int)group.SpriteInfo.Animation.LoopCount);
-                writer.Write((byte)group.SpriteInfo.Animation.DefaultStartPhase);
+            if (spriteInfo.PatternFrames > 1) {
+                byte animationMode = (byte)spriteInfo.Animation.AnimationMode;
+                int loopCount = (int)spriteInfo.Animation.LoopCount;
 
-                for (int i = 0; i < group.SpriteInfo.PatternFrames; i++) {
-                    writer.Write(group.SpriteInfo.Animation.SpritePhase[i].DurationMin);
-                    writer.Write(group.SpriteInfo.Animation.SpritePhase[i].DurationMax);
+                // infinite animation does not use loop count
+                if (animationMode == (byte)ANIMATION_LOOP_TYPE.Infinite) {
+                    loopCount = 0;
+                }
+
+                writer.Write(animationMode);
+                writer.Write(loopCount);
+                writer.Write((byte)spriteInfo.Animation.DefaultStartPhase);
+
+                for (int i = 0; i < spriteInfo.PatternFrames; i++) {
+                    writer.Write(spriteInfo.Animation.SpritePhase[i].DurationMin);
+                    writer.Write(spriteInfo.Animation.SpritePhase[i].DurationMax);
                 }
             }
 
-            for (int i = 0; i < group.SpriteInfo.SpriteId.Count; i++) {
-                byte[] pixels = Sprite.UncompressPixelsARGB(Sprite.CompressBitmap(new Bitmap(MainWindow.MainSprStorage.getSpriteStream(group.SpriteInfo.SpriteId[i])), true), true);
-                writer.Write(group.SpriteInfo.SpriteId[i]);
+            for (int i = 0; i < spriteInfo.SpriteId.Count; i++) {
+                byte[] pixels = Sprite.UncompressPixelsARGB(Sprite.CompressBitmap(new Bitmap(MainWindow.MainSprStorage.getSpriteStream(spriteInfo.SpriteId[i])), true), true);
+                writer.Write(spriteInfo.SpriteId[i]);
                 writer.Write(pixels.Length);
                 writer.Write(pixels);
             }

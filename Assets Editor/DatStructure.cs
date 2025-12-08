@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Xml.Linq;
@@ -630,8 +631,16 @@ namespace Assets_Editor
                 if (hasFrameDurations && spriteInfo.PatternFrames > 1) {
                     SpriteAnimation animation = spriteInfo.Animation;
 
-                    w.Write(Convert.ToByte(animation.AnimationMode));
-                    w.Write(animation.LoopCount);
+                    byte animationMode = (byte)spriteInfo.Animation.AnimationMode;
+                    int loopCount = (int)spriteInfo.Animation.LoopCount;
+
+                    // infinite animation does not use loop count
+                    if (animationMode == (byte)ANIMATION_LOOP_TYPE.Infinite) {
+                        loopCount = 0;
+                    }
+
+                    w.Write(Convert.ToByte(animationMode));
+                    w.Write(loopCount);
                     w.Write((byte)animation.DefaultStartPhase);
 
                     for (int k = 0; k < animation.SpritePhase.Count; k++) {
