@@ -359,11 +359,11 @@ namespace Assets_Editor
             }
         }
 
-        private void ObjectMenuChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void ObjectMenuChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateShowList(ObjectMenu.SelectedIndex);
         }
-        private void ObjListView_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+        private void ObjListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             VirtualizingStackPanel panel = Utils.FindVisualChild<VirtualizingStackPanel>(ObjListView);
             if (ObjListView.Items.Count > 0 && panel != null)
@@ -488,17 +488,20 @@ namespace Assets_Editor
         {
             isObjectLoaded = false;
             A_SprGroups.Value = CurrentObjectAppearance.FrameGroup.Count;
+
+            var spriteInfo = CurrentObjectAppearance.FrameGroup[group].SpriteInfo;
+            var animation = spriteInfo.Animation;
             try
             {
-                A_SprLayers.Value = (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Layers;
-                A_SprPaternX.Value = (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.PatternWidth;
-                A_SprPaternY.Value = (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.PatternHeight;
-                A_SprPaternZ.Value = (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.PatternDepth;
-                A_SprAnimation.Value = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation != null ? (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.SpritePhase.Count : 1;
+                A_SprLayers.Value = (int)spriteInfo.Layers;
+                A_SprPaternX.Value = (int)spriteInfo.PatternWidth;
+                A_SprPaternY.Value = (int)spriteInfo.PatternHeight;
+                A_SprPaternZ.Value = (int)spriteInfo.PatternDepth;
+                A_SprAnimation.Value = animation != null ? (int)animation.SpritePhase.Count : 1;
             }
             catch (Exception)
             {
-                MainWindow.Log("Invalid appearance properties for id " + CurrentObjectAppearance.Id + ", crash prevented.");
+                MainWindow.Log("Invalid appearance properties for id " + CurrentObjectAppearance.Id + ".");
             }
             CurrentSprDir = 2;
             ButtonProgressAssist.SetIsIndicatorVisible(SprUpArrow, false);
@@ -510,37 +513,42 @@ namespace Assets_Editor
 
             try
             {
-                AnimationTab.IsEnabled = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation != null;
-                SpriteFrameAnimationTab.IsEnabled = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation != null;
+                AnimationTab.IsEnabled = animation != null;
+                SpriteFrameAnimationTab.IsEnabled = animation != null;
 
                 if (A_SprAnimation.Value > 1)
                 {
-                    SprDefaultPhase.Value = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasDefaultStartPhase ? (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.DefaultStartPhase : 0;
-                    SprRandomPhase.IsChecked = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasRandomStartPhase ? CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.RandomStartPhase : false;
-                    SprSynchronized.IsChecked = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasSynchronized ? CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.Synchronized : false;
-                    if (CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasLoopType)
+                    SprDefaultPhase.Value = animation.HasDefaultStartPhase ? (int)animation.DefaultStartPhase : 0;
+                    SprRandomPhase.IsChecked = animation.HasRandomStartPhase ? animation.RandomStartPhase : false;
+                    SprSynchronized.IsChecked = animation.HasSynchronized ? animation.Synchronized : false;
+                    if (animation.HasLoopType)
                     {
-                        if (CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.LoopType == ANIMATION_LOOP_TYPE.Pingpong)
+                        if (animation.LoopType == ANIMATION_LOOP_TYPE.Pingpong)
                             SprLoopType.SelectedIndex = 0;
-                        else if (CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.LoopType == ANIMATION_LOOP_TYPE.Infinite)
+                        else if (animation.LoopType == ANIMATION_LOOP_TYPE.Infinite)
                             SprLoopType.SelectedIndex = 1;
-                        else if (CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.LoopType == ANIMATION_LOOP_TYPE.Counted)
+                        else if (animation.LoopType == ANIMATION_LOOP_TYPE.Counted)
                             SprLoopType.SelectedIndex = 2;
                         else
                             SprLoopType.SelectedIndex = -1;
                     }
-                    SprLoopCount.Value = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.HasLoopCount ? (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.Animation.LoopCount : 0;
+                    else
+                    {
+                        // no loop type on this item, clear the selection
+                        SprLoopType.SelectedIndex = -1;
+                    }
 
+                    SprLoopCount.Value = animation.HasLoopCount ? (int)animation.LoopCount : 0;
                 }
 
 
-                A_SprOpaque.IsChecked = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.IsOpaque;
-                A_SprBounding.Value = CurrentObjectAppearance.FrameGroup[group].SpriteInfo.HasBoundingSquare ? (int)CurrentObjectAppearance.FrameGroup[group].SpriteInfo.BoundingSquare : 0;
+                A_SprOpaque.IsChecked = spriteInfo.IsOpaque;
+                A_SprBounding.Value = spriteInfo.HasBoundingSquare ? (int)spriteInfo.BoundingSquare : 0;
 
-                if (CurrentObjectAppearance.FrameGroup[group].SpriteInfo.BoundingBoxPerDirection != null)
+                if (spriteInfo.BoundingBoxPerDirection != null)
                 {
                     BoundingBoxList.Clear();
-                    foreach (var box in CurrentObjectAppearance.FrameGroup[group].SpriteInfo.BoundingBoxPerDirection)
+                    foreach (var box in spriteInfo.BoundingBoxPerDirection)
                         BoundingBoxList.Add(new Box() { X = box.X, Y = box.Y, Width = box.Width, Height = box.Height });
                     BoxPerDirection.ItemsSource = null;
                     BoxPerDirection.ItemsSource = BoundingBoxList;
@@ -549,7 +557,7 @@ namespace Assets_Editor
             }
             catch (Exception)
             {
-                MainWindow.Log("Invalid appearance properties for id " + CurrentObjectAppearance.Id + ", crash prevented.");
+                MainWindow.Log("Invalid appearance properties for id " + CurrentObjectAppearance.Id + ".");
             }
             SprGroupType.Content = SprGroupSlider.Value == 0 ? "Idle" : "Walking";
             isObjectLoaded = true;
@@ -572,64 +580,66 @@ namespace Assets_Editor
 
         private void LoadCurrentObjectAppearances()
         {
-            if (CurrentObjectAppearance.Flags == null)
+            var flags = CurrentObjectAppearance.Flags;
+
+            if (flags == null)
             {
-                CurrentObjectAppearance.Flags = new();
+                flags = new();
                 MainWindow.Log("Missing flags for appearance id " + CurrentObjectAppearance.Id);
             }
             A_FlagId.Value = (int)CurrentObjectAppearance.Id;
-            A_FlagGround.IsChecked = CurrentObjectAppearance.Flags.Bank != null;
-            A_FlagGroundSpeed.Value = (CurrentObjectAppearance.Flags.Bank != null && CurrentObjectAppearance.Flags.Bank.HasWaypoints) ? (int)CurrentObjectAppearance.Flags.Bank.Waypoints : 0;
-            A_FlagClip.IsChecked = CurrentObjectAppearance.Flags.Clip;
-            A_FlagBottom.IsChecked = CurrentObjectAppearance.Flags.Bottom;
-            A_FlagTop.IsChecked = CurrentObjectAppearance.Flags.Top;
-            A_FlagContainer.IsChecked = CurrentObjectAppearance.Flags.Container;
-            A_FlagCumulative.IsChecked = CurrentObjectAppearance.Flags.Cumulative;
-            A_FlagUsable.IsChecked = CurrentObjectAppearance.Flags.Usable;
-            A_FlagForceuse.IsChecked = CurrentObjectAppearance.Flags.Forceuse;
-            A_FlagMultiuse.IsChecked = CurrentObjectAppearance.Flags.Multiuse;
-            A_FlagWrite.IsChecked = CurrentObjectAppearance.Flags.Write != null;
-            A_FlagMaxTextLength.Value = (CurrentObjectAppearance.Flags.Write != null && CurrentObjectAppearance.Flags.Write.HasMaxTextLength) ? (int)CurrentObjectAppearance.Flags.Write.MaxTextLength : 0;
-            A_FlagWriteOnce.IsChecked = CurrentObjectAppearance.Flags.WriteOnce != null;
-            A_FlagMaxTextLengthOnce.Value = (CurrentObjectAppearance.Flags.WriteOnce != null && CurrentObjectAppearance.Flags.WriteOnce.HasMaxTextLengthOnce) ? (int)CurrentObjectAppearance.Flags.WriteOnce.MaxTextLengthOnce : 0;
-            A_FlagLiquidpool.IsChecked = CurrentObjectAppearance.Flags.HasLiquidpool;
-            A_FlagUnpass.IsChecked = CurrentObjectAppearance.Flags.HasUnpass;
-            A_FlagUnmove.IsChecked = CurrentObjectAppearance.Flags.HasUnmove;
-            A_FlagUnsight.IsChecked = CurrentObjectAppearance.Flags.HasUnsight;
-            A_FlagAvoid.IsChecked = CurrentObjectAppearance.Flags.HasAvoid;
-            A_FlagNoMoveAnimation.IsChecked = CurrentObjectAppearance.Flags.HasNoMovementAnimation;
-            A_FlagTake.IsChecked = CurrentObjectAppearance.Flags.HasTake;
-            A_FlagLiquidcontainer.IsChecked = CurrentObjectAppearance.Flags.HasLiquidcontainer;
-            A_FlagHang.IsChecked = CurrentObjectAppearance.Flags.HasHang;
-            A_FlagHook.IsChecked = CurrentObjectAppearance.Flags.Hook != null;
-            A_FlagHookType.SelectedIndex = (CurrentObjectAppearance.Flags.Hook != null && CurrentObjectAppearance.Flags.Hook.HasDirection) ? (int)CurrentObjectAppearance.Flags.Hook.Direction - 1 : -1;
-            A_FlagRotate.IsChecked = CurrentObjectAppearance.Flags.HasRotate;
-            A_FlagLight.IsChecked = CurrentObjectAppearance.Flags.Light != null;
-            A_FlagLightBrightness.Value = (CurrentObjectAppearance.Flags.Light != null && CurrentObjectAppearance.Flags.Light.HasBrightness) ? (int)CurrentObjectAppearance.Flags.Light.Brightness : 0;
-            A_FlagLightColor.Value = (CurrentObjectAppearance.Flags.Light != null && CurrentObjectAppearance.Flags.Light.HasColor) ? (int)CurrentObjectAppearance.Flags.Light.Color : 0;
-            A_FlagDontHide.IsChecked = CurrentObjectAppearance.Flags.HasDontHide;
-            A_FlagTranslucent.IsChecked = CurrentObjectAppearance.Flags.HasTranslucent;
-            A_FlagShift.IsChecked = CurrentObjectAppearance.Flags.Shift != null;
-            A_FlagShiftX.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasX) ? (int)CurrentObjectAppearance.Flags.Shift.X : 0;
-            A_FlagShiftY.Value = (CurrentObjectAppearance.Flags.Shift != null && CurrentObjectAppearance.Flags.Shift.HasY) ? (int)CurrentObjectAppearance.Flags.Shift.Y : 0;
-            A_FlagHeight.IsChecked = CurrentObjectAppearance.Flags.Height != null;
-            A_FlagElevation.Value = (CurrentObjectAppearance.Flags.Height != null && CurrentObjectAppearance.Flags.Height.HasElevation) ? (int)CurrentObjectAppearance.Flags.Height.Elevation : 0;
-            A_FlagLyingObject.IsChecked = CurrentObjectAppearance.Flags.HasLyingObject;
-            A_FlagAnimateAlways.IsChecked = CurrentObjectAppearance.Flags.HasAnimateAlways;
-            A_FlagAutomap.IsChecked = CurrentObjectAppearance.Flags.Automap != null;
-            A_FlagAutomapColor.Value = (CurrentObjectAppearance.Flags.Automap != null && CurrentObjectAppearance.Flags.Automap.HasColor) ? (int)CurrentObjectAppearance.Flags.Automap.Color : 0;
-            A_FlagLenshelp.IsChecked = CurrentObjectAppearance.Flags.Lenshelp != null;
-            A_FlagLenshelpId.SelectedIndex = (CurrentObjectAppearance.Flags.Lenshelp != null && CurrentObjectAppearance.Flags.Lenshelp.HasId) ? (int)CurrentObjectAppearance.Flags.Lenshelp.Id - 1100 : -1;
-            A_FlagFullGround.IsChecked = CurrentObjectAppearance.Flags.HasFullbank;
-            A_FlagIgnoreLook.IsChecked = CurrentObjectAppearance.Flags.HasIgnoreLook;
-            A_FlagClothes.IsChecked = (CurrentObjectAppearance.Flags.Clothes != null && CurrentObjectAppearance.Flags.Clothes.HasSlot) ? true : false;
-            A_FlagClothesSlot.SelectedIndex = (CurrentObjectAppearance.Flags.Clothes != null && CurrentObjectAppearance.Flags.Clothes.HasSlot) ? (int)CurrentObjectAppearance.Flags.Clothes.Slot : -1;
-            A_FlagDefaultAction.IsChecked = CurrentObjectAppearance.Flags.DefaultAction != null;
-            A_FlagDefaultActionType.SelectedIndex = (CurrentObjectAppearance.Flags.DefaultAction != null && CurrentObjectAppearance.Flags.DefaultAction.HasAction) ? (int)CurrentObjectAppearance.Flags.DefaultAction.Action : -1;
-            A_FlagMarket.IsChecked = CurrentObjectAppearance.Flags.Market != null;
-            A_FlagMarketCategory.SelectedIndex = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasCategory) ? (int)CurrentObjectAppearance.Flags.Market.Category - 1 : -1;
-            A_FlagMarketTrade.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasTradeAsObjectId) ? (int)CurrentObjectAppearance.Flags.Market.TradeAsObjectId : 0;
-            A_FlagMarketShow.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasShowAsObjectId) ? (int)CurrentObjectAppearance.Flags.Market.ShowAsObjectId : 0;
+            A_FlagGround.IsChecked = flags.Bank != null;
+            A_FlagGroundSpeed.Value = (flags.Bank != null && flags.Bank.HasWaypoints) ? (int)flags.Bank.Waypoints : 0;
+            A_FlagClip.IsChecked = flags.Clip;
+            A_FlagBottom.IsChecked = flags.Bottom;
+            A_FlagTop.IsChecked = flags.Top;
+            A_FlagContainer.IsChecked = flags.Container;
+            A_FlagCumulative.IsChecked = flags.Cumulative;
+            A_FlagUsable.IsChecked = flags.Usable;
+            A_FlagForceuse.IsChecked = flags.Forceuse;
+            A_FlagMultiuse.IsChecked = flags.Multiuse;
+            A_FlagWrite.IsChecked = flags.Write != null;
+            A_FlagMaxTextLength.Value = (flags.Write != null && flags.Write.HasMaxTextLength) ? (int)flags.Write.MaxTextLength : 0;
+            A_FlagWriteOnce.IsChecked = flags.WriteOnce != null;
+            A_FlagMaxTextLengthOnce.Value = (flags.WriteOnce != null && flags.WriteOnce.HasMaxTextLengthOnce) ? (int)flags.WriteOnce.MaxTextLengthOnce : 0;
+            A_FlagLiquidpool.IsChecked = flags.HasLiquidpool;
+            A_FlagUnpass.IsChecked = flags.HasUnpass;
+            A_FlagUnmove.IsChecked = flags.HasUnmove;
+            A_FlagUnsight.IsChecked = flags.HasUnsight;
+            A_FlagAvoid.IsChecked = flags.HasAvoid;
+            A_FlagNoMoveAnimation.IsChecked = flags.HasNoMovementAnimation;
+            A_FlagTake.IsChecked = flags.HasTake;
+            A_FlagLiquidcontainer.IsChecked = flags.HasLiquidcontainer;
+            A_FlagHang.IsChecked = flags.HasHang;
+            A_FlagHook.IsChecked = flags.Hook != null;
+            A_FlagHookType.SelectedIndex = (flags.Hook != null && flags.Hook.HasDirection) ? (int)flags.Hook.Direction - 1 : -1;
+            A_FlagRotate.IsChecked = flags.HasRotate;
+            A_FlagLight.IsChecked = flags.Light != null;
+            A_FlagLightBrightness.Value = (flags.Light != null && flags.Light.HasBrightness) ? (int)flags.Light.Brightness : 0;
+            A_FlagLightColor.Value = (flags.Light != null && flags.Light.HasColor) ? (int)flags.Light.Color : 0;
+            A_FlagDontHide.IsChecked = flags.HasDontHide;
+            A_FlagTranslucent.IsChecked = flags.HasTranslucent;
+            A_FlagShift.IsChecked = flags.Shift != null;
+            A_FlagShiftX.Value = (flags.Shift != null && flags.Shift.HasX) ? (int)flags.Shift.X : 0;
+            A_FlagShiftY.Value = (flags.Shift != null && flags.Shift.HasY) ? (int)flags.Shift.Y : 0;
+            A_FlagHeight.IsChecked = flags.Height != null;
+            A_FlagElevation.Value = (flags.Height != null && flags.Height.HasElevation) ? (int)flags.Height.Elevation : 0;
+            A_FlagLyingObject.IsChecked = flags.HasLyingObject;
+            A_FlagAnimateAlways.IsChecked = flags.HasAnimateAlways;
+            A_FlagAutomap.IsChecked = flags.Automap != null;
+            A_FlagAutomapColor.Value = (flags.Automap != null && flags.Automap.HasColor) ? (int)flags.Automap.Color : 0;
+            A_FlagLenshelp.IsChecked = flags.Lenshelp != null;
+            A_FlagLenshelpId.SelectedIndex = (flags.Lenshelp != null && flags.Lenshelp.HasId) ? (int)flags.Lenshelp.Id - 1100 : -1;
+            A_FlagFullGround.IsChecked = flags.HasFullbank;
+            A_FlagIgnoreLook.IsChecked = flags.HasIgnoreLook;
+            A_FlagClothes.IsChecked = (flags.Clothes != null && flags.Clothes.HasSlot) ? true : false;
+            A_FlagClothesSlot.SelectedIndex = (flags.Clothes != null && flags.Clothes.HasSlot) ? (int)flags.Clothes.Slot : -1;
+            A_FlagDefaultAction.IsChecked = flags.DefaultAction != null;
+            A_FlagDefaultActionType.SelectedIndex = (flags.DefaultAction != null && flags.DefaultAction.HasAction) ? (int)flags.DefaultAction.Action : -1;
+            A_FlagMarket.IsChecked = flags.Market != null;
+            A_FlagMarketCategory.SelectedIndex = (flags.Market != null && flags.Market.HasCategory) ? (int)flags.Market.Category - 1 : -1;
+            A_FlagMarketTrade.Value = (flags.Market != null && flags.Market.HasTradeAsObjectId) ? (int)flags.Market.TradeAsObjectId : 0;
+            A_FlagMarketShow.Value = (flags.Market != null && flags.Market.HasShowAsObjectId) ? (int)flags.Market.ShowAsObjectId : 0;
             A_FlagProfessionAny.IsChecked = false;
             A_FlagProfessionNone.IsChecked = false;
             A_FlagProfessionKnight.IsChecked = false;
@@ -637,9 +647,9 @@ namespace Assets_Editor
             A_FlagProfessionSorcerer.IsChecked = false;
             A_FlagProfessionDruid.IsChecked = false;
             A_FlagProfessionPromoted.IsChecked = false;
-            if (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.RestrictToVocation.Count > 0)
+            if (flags.Market != null && flags.Market.RestrictToVocation.Count > 0)
             {
-                foreach (var profession in CurrentObjectAppearance.Flags.Market.RestrictToVocation)
+                foreach (var profession in flags.Market.RestrictToVocation)
                 {
                     if (profession == VOCATION.Any)
                         A_FlagProfessionAny.IsChecked = true;
@@ -657,48 +667,48 @@ namespace Assets_Editor
                         A_FlagProfessionPromoted.IsChecked = true;
                 }
             }
-            A_FlagMarketlevel.Value = (CurrentObjectAppearance.Flags.Market != null && CurrentObjectAppearance.Flags.Market.HasMinimumLevel) ? (int)CurrentObjectAppearance.Flags.Market.MinimumLevel : 0;
+            A_FlagMarketlevel.Value = (flags.Market != null && flags.Market.HasMinimumLevel) ? (int)flags.Market.MinimumLevel : 0;
             A_FlagName.Text = CurrentObjectAppearance.HasName ? CurrentObjectAppearance.Name : null;
             A_FlagDescription.Text = CurrentObjectAppearance.HasDescription ? CurrentObjectAppearance.Description : null;
-            A_FlagWrap.IsChecked = CurrentObjectAppearance.Flags.HasWrap;
-            A_FlagUnwrap.IsChecked = CurrentObjectAppearance.Flags.HasUnwrap;
-            A_FlagDecoItemKit.IsChecked = CurrentObjectAppearance.Flags.HasDecoItemKit;
-            A_FlagTopeffect.IsChecked = CurrentObjectAppearance.Flags.HasTop;
-            A_FlagChangedToExpire.IsChecked = CurrentObjectAppearance.Flags.Changedtoexpire != null;
-            A_FlagChangedToExpireId.Value = (CurrentObjectAppearance.Flags.Changedtoexpire != null && CurrentObjectAppearance.Flags.Changedtoexpire.HasFormerObjectTypeid) ? (int)CurrentObjectAppearance.Flags.Changedtoexpire.FormerObjectTypeid : 0;
-            A_FlagCorpse.IsChecked = CurrentObjectAppearance.Flags.Corpse;
-            A_FlagCyclopedia.IsChecked = CurrentObjectAppearance.Flags.Cyclopediaitem != null;
-            A_FlagCyclopediaItem.Value = (CurrentObjectAppearance.Flags.Cyclopediaitem != null && CurrentObjectAppearance.Flags.Cyclopediaitem.HasCyclopediaType) ? (int)CurrentObjectAppearance.Flags.Cyclopediaitem.CyclopediaType : 0;
-            A_FlagAmmo.IsChecked = CurrentObjectAppearance.Flags.HasAmmo;
-            A_FlagShowOffSocket.IsChecked = CurrentObjectAppearance.Flags.ShowOffSocket;
-            A_FlagReportable.IsChecked = CurrentObjectAppearance.Flags.Reportable;
-            A_FlagReverseAddonEast.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsEast;
-            A_FlagReverseAddonWest.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsWest;
-            A_FlagReverseAddonNorth.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsNorth;
-            A_FlagReverseAddonSouth.IsChecked = CurrentObjectAppearance.Flags.ReverseAddonsSouth;
-            A_FlagWearOut.IsChecked = CurrentObjectAppearance.Flags.Wearout;
-            A_FlagClockExpire.IsChecked = CurrentObjectAppearance.Flags.Clockexpire;
-            A_FlagExpire.IsChecked = CurrentObjectAppearance.Flags.Expire;
-            A_FlagExpireStop.IsChecked = CurrentObjectAppearance.Flags.Expirestop;
-            A_FlagUpgradeClassification.IsChecked = CurrentObjectAppearance.Flags.Upgradeclassification != null;
-            A_FlagUpgradeClassificationAmount.Value = (CurrentObjectAppearance.Flags.Upgradeclassification != null && CurrentObjectAppearance.Flags.Upgradeclassification.HasUpgradeClassification) ? (int)CurrentObjectAppearance.Flags.Upgradeclassification.UpgradeClassification : 0;
+            A_FlagWrap.IsChecked = flags.HasWrap;
+            A_FlagUnwrap.IsChecked = flags.HasUnwrap;
+            A_FlagDecoItemKit.IsChecked = flags.HasDecoItemKit;
+            A_FlagTopeffect.IsChecked = flags.HasTop;
+            A_FlagChangedToExpire.IsChecked = flags.Changedtoexpire != null;
+            A_FlagChangedToExpireId.Value = (flags.Changedtoexpire != null && flags.Changedtoexpire.HasFormerObjectTypeid) ? (int)flags.Changedtoexpire.FormerObjectTypeid : 0;
+            A_FlagCorpse.IsChecked = flags.Corpse;
+            A_FlagCyclopedia.IsChecked = flags.Cyclopediaitem != null;
+            A_FlagCyclopediaItem.Value = (flags.Cyclopediaitem != null && flags.Cyclopediaitem.HasCyclopediaType) ? (int)flags.Cyclopediaitem.CyclopediaType : 0;
+            A_FlagAmmo.IsChecked = flags.HasAmmo;
+            A_FlagShowOffSocket.IsChecked = flags.ShowOffSocket;
+            A_FlagReportable.IsChecked = flags.Reportable;
+            A_FlagReverseAddonEast.IsChecked = flags.ReverseAddonsEast;
+            A_FlagReverseAddonWest.IsChecked = flags.ReverseAddonsWest;
+            A_FlagReverseAddonNorth.IsChecked = flags.ReverseAddonsNorth;
+            A_FlagReverseAddonSouth.IsChecked = flags.ReverseAddonsSouth;
+            A_FlagWearOut.IsChecked = flags.Wearout;
+            A_FlagClockExpire.IsChecked = flags.Clockexpire;
+            A_FlagExpire.IsChecked = flags.Expire;
+            A_FlagExpireStop.IsChecked = flags.Expirestop;
+            A_FlagUpgradeClassification.IsChecked = flags.Upgradeclassification != null;
+            A_FlagUpgradeClassificationAmount.Value = (flags.Upgradeclassification != null && flags.Upgradeclassification.HasUpgradeClassification) ? (int)flags.Upgradeclassification.UpgradeClassification : 0;
 
-            A_FlagSkillWheelGem.IsChecked = CurrentObjectAppearance.Flags.SkillwheelGem != null;
-            A_FlagGemQualityId.Value = (CurrentObjectAppearance.Flags.SkillwheelGem != null && CurrentObjectAppearance.Flags.SkillwheelGem.HasGemQualityId) ? (int)CurrentObjectAppearance.Flags.SkillwheelGem.GemQualityId : 0;
-            A_FlagGemVocationId.Value = (CurrentObjectAppearance.Flags.SkillwheelGem != null && CurrentObjectAppearance.Flags.SkillwheelGem.HasVocationId) ? (int)CurrentObjectAppearance.Flags.SkillwheelGem.VocationId : 0;
+            A_FlagSkillWheelGem.IsChecked = flags.SkillwheelGem != null;
+            A_FlagGemQualityId.Value = (flags.SkillwheelGem != null && flags.SkillwheelGem.HasGemQualityId) ? (int)flags.SkillwheelGem.GemQualityId : 0;
+            A_FlagGemVocationId.Value = (flags.SkillwheelGem != null && flags.SkillwheelGem.HasVocationId) ? (int)flags.SkillwheelGem.VocationId : 0;
 
-            A_FlagDualWielding.IsChecked = CurrentObjectAppearance.Flags.HasDualWielding;
-            A_FlagMinimumLevel.Value = CurrentObjectAppearance.Flags.HasMinimumLevel ? (int)CurrentObjectAppearance.Flags.MinimumLevel : 0;
+            A_FlagDualWielding.IsChecked = flags.HasDualWielding;
+            A_FlagMinimumLevel.Value = flags.HasMinimumLevel ? (int)flags.MinimumLevel : 0;
 
-            A_FlagImbueable.IsChecked = CurrentObjectAppearance.Flags.Imbueable != null;
-            A_FlagImbueableSlotCount.Value = (CurrentObjectAppearance.Flags.Imbueable != null && CurrentObjectAppearance.Flags.Imbueable.HasSlotCount) ? (int)CurrentObjectAppearance.Flags.Imbueable.SlotCount : 0;
+            A_FlagImbueable.IsChecked = flags.Imbueable != null;
+            A_FlagImbueableSlotCount.Value = (flags.Imbueable != null && flags.Imbueable.HasSlotCount) ? (int)flags.Imbueable.SlotCount : 0;
 
-            A_FlagProficiency.IsChecked = CurrentObjectAppearance.Flags.Proficiency != null;
-            A_FlagProficiencyId.Value = (CurrentObjectAppearance.Flags.Proficiency != null && CurrentObjectAppearance.Flags.Proficiency.HasProficiencyId) ? (int)CurrentObjectAppearance.Flags.Proficiency.ProficiencyId : 0;
+            A_FlagProficiency.IsChecked = flags.Proficiency != null;
+            A_FlagProficiencyId.Value = (flags.Proficiency != null && flags.Proficiency.HasProficiencyId) ? (int)flags.Proficiency.ProficiencyId : 0;
 
-            A_FlagWeaponType.SelectedIndex = CurrentObjectAppearance.Flags.HasWeaponType ? (int)CurrentObjectAppearance.Flags.WeaponType : 0;
+            A_FlagWeaponType.SelectedIndex = flags.HasWeaponType ? (int)flags.WeaponType : 0;
 
-            if (CurrentObjectAppearance.Flags.RestrictToVocation != null)
+            if (flags.RestrictToVocation != null)
             {
                 A_FlagRestrictVocAny.IsChecked = false;
                 A_FlagRestrictVocNone.IsChecked = false;
@@ -707,7 +717,7 @@ namespace Assets_Editor
                 A_FlagRestrictVocSorcerer.IsChecked = false;
                 A_FlagRestrictVocDruid.IsChecked = false;
                 A_FlagRestrictVocPromoted.IsChecked = false;
-                foreach (var profession in CurrentObjectAppearance.Flags.RestrictToVocation)
+                foreach (var profession in flags.RestrictToVocation)
                 {
                     if (profession == VOCATION.Any)
                         A_FlagRestrictVocAny.IsChecked = true;
@@ -728,10 +738,10 @@ namespace Assets_Editor
 
             NpcDataList.Clear();
 
-            if (CurrentObjectAppearance.Flags.Npcsaledata.Count > 0)
+            if (flags.Npcsaledata.Count > 0)
             {
                 A_FlagNPC.IsChecked = true;
-                foreach (var npcdata in CurrentObjectAppearance.Flags.Npcsaledata)
+                foreach (var npcdata in flags.Npcsaledata)
                     NpcDataList.Add(npcdata);
             }
             else
@@ -740,8 +750,8 @@ namespace Assets_Editor
             A_FlagNPCData.ItemsSource = null;
             A_FlagNPCData.ItemsSource = NpcDataList;
             A_FullInfo.Text = CurrentObjectAppearance.ToString();
-            A_FlagTransparency.IsChecked = CurrentObjectAppearance.Flags.Transparencylevel != null;
-            A_FlagTransparencyLevel.Value = (CurrentObjectAppearance.Flags.Transparencylevel != null && CurrentObjectAppearance.Flags.Transparencylevel.HasLevel) ? (int)CurrentObjectAppearance.Flags.Transparencylevel.Level : 0;
+            A_FlagTransparency.IsChecked = flags.Transparencylevel != null;
+            A_FlagTransparencyLevel.Value = (flags.Transparencylevel != null && flags.Transparencylevel.HasLevel) ? (int)flags.Transparencylevel.Level : 0;
         }
         private void A_FlagLightColorPickerChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
@@ -821,10 +831,11 @@ namespace Assets_Editor
             try
             {
                 FrameGroup frameGroup = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value];
+                var spriteInfo = frameGroup.SpriteInfo;
                 if (frameGroup.SpriteInfo.Animation != null)
                 {
-                    SprPhaseMin.Value = (int)frameGroup.SpriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMin;
-                    SprPhaseMax.Value = (int)frameGroup.SpriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMax;
+                    SprPhaseMin.Value = (int)spriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMin;
+                    SprPhaseMax.Value = (int)spriteInfo.Animation.SpritePhase[(int)SprFramesSlider.Value].DurationMax;
                 }
 
                 SpriteViewerGrid.Children.Clear();
@@ -834,22 +845,24 @@ namespace Assets_Editor
                 int gridHeight = 1;
                 if (ObjectMenu.SelectedIndex != 0)
                 {
-                    gridWidth = (int)frameGroup.SpriteInfo.PatternHeight;
-                    gridHeight = (int)frameGroup.SpriteInfo.PatternWidth;
+                    gridWidth = (int)spriteInfo.PatternHeight;
+                    gridHeight = (int)spriteInfo.PatternWidth;
                 }
-                int imgWidth = (int)Utils.ResizeForUI(MainWindow.getSpriteStream((int)frameGroup.SpriteInfo.SpriteId[0])).Width;
-                int imgHeight = (int)Utils.ResizeForUI(MainWindow.getSpriteStream((int)frameGroup.SpriteInfo.SpriteId[0])).Height;
+                int imgWidth = (int)Utils.ResizeForUI(MainWindow.getSpriteStream((int)spriteInfo.SpriteId[0])).Width;
+                int imgHeight = (int)Utils.ResizeForUI(MainWindow.getSpriteStream((int)spriteInfo.SpriteId[0])).Height;
 
                 for (int i = 0; i < gridWidth; i++)
                 {
-                    RowDefinition rowDef = new RowDefinition();
-                    rowDef.Height = new GridLength(imgHeight);
+                    RowDefinition rowDef = new() {
+                        Height = new(imgHeight)
+                    };
                     SpriteViewerGrid.RowDefinitions.Add(rowDef);
                 }
                 for (int i = 0; i < gridHeight; i++)
                 {
-                    ColumnDefinition colDef = new ColumnDefinition();
-                    colDef.Width = new GridLength(imgWidth);
+                    ColumnDefinition colDef = new() {
+                        Width = new(imgWidth)
+                    };
                     SpriteViewerGrid.ColumnDefinitions.Add(colDef);
                 }
 
@@ -857,24 +870,24 @@ namespace Assets_Editor
                 {
                     if ((bool)SprBlendLayers.IsChecked == false)
                     {
-                        int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.Layers - 1 : 0;
-                        int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
-                        int addon = frameGroup.SpriteInfo.PatternWidth > 1 ? (int)SprAddonSlider.Value : 0;
-                        int index = GetSpriteIndex(frameGroup, layer, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), addon, mount, (int)SprFramesSlider.Value);
-                        int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
+                        int layer = SprBlendLayer.IsChecked == true ? (int)spriteInfo.Layers - 1 : 0;
+                        int mount = SprMount.IsChecked == true ? (int)spriteInfo.PatternDepth - 1 : 0;
+                        int addon = spriteInfo.PatternWidth > 1 ? (int)SprAddonSlider.Value : 0;
+                        int index = GetSpriteIndex(frameGroup, layer, (int)Math.Min(CurrentSprDir, spriteInfo.PatternWidth - 1), addon, mount, (int)SprFramesSlider.Value);
+                        int spriteId = (int)spriteInfo.SpriteId[index];
                         SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.ResizeForUI(MainWindow.getSpriteStream(spriteId)), 1, spriteId, index);
                     }
                     else
                     {
-                        int baseIndex = GetSpriteIndex(frameGroup, 0, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), 0, 0, (int)SprFramesSlider.Value);
-                        int baseSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseIndex];
-                        System.Drawing.Bitmap baseBitmap = new System.Drawing.Bitmap(MainWindow.getSpriteStream(baseSpriteId));
+                        int baseIndex = GetSpriteIndex(frameGroup, 0, (int)Math.Min(CurrentSprDir, spriteInfo.PatternWidth - 1), 0, 0, (int)SprFramesSlider.Value);
+                        int baseSpriteId = (int)spriteInfo.SpriteId[baseIndex];
+                        System.Drawing.Bitmap baseBitmap = new(MainWindow.getSpriteStream(baseSpriteId));
 
-                        if (frameGroup.SpriteInfo.Layers > 1)
+                        if (spriteInfo.Layers > 1)
                         {
-                            int baseLayerIndex = GetSpriteIndex(frameGroup, 1, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), 0, 0, (int)SprFramesSlider.Value);
-                            int baseLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[baseLayerIndex];
-                            System.Drawing.Bitmap baseLayerBitmap = new System.Drawing.Bitmap(MainWindow.getSpriteStream(baseLayerSpriteId));
+                            int baseLayerIndex = GetSpriteIndex(frameGroup, 1, (int)Math.Min(CurrentSprDir, spriteInfo.PatternWidth - 1), 0, 0, (int)SprFramesSlider.Value);
+                            int baseLayerSpriteId = (int)spriteInfo.SpriteId[baseLayerIndex];
+                            System.Drawing.Bitmap baseLayerBitmap = new(MainWindow.getSpriteStream(baseLayerSpriteId));
 
                             Utils.ColorizeOutfit(
                                 baseLayerBitmap,
@@ -893,13 +906,13 @@ namespace Assets_Editor
                             {
                                 for (int x = 1; x <= (int)SprAddonSlider.Maximum; x++)
                                 {
-                                    int addonIndex = GetSpriteIndex(frameGroup, 0, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), x, 0, (int)SprFramesSlider.Value);
-                                    int addonSpriteId = (int)frameGroup.SpriteInfo.SpriteId[addonIndex];
-                                    System.Drawing.Bitmap addonBitmap = new System.Drawing.Bitmap(MainWindow.getSpriteStream(addonSpriteId));
+                                    int addonIndex = GetSpriteIndex(frameGroup, 0, (int)Math.Min(CurrentSprDir, spriteInfo.PatternWidth - 1), x, 0, (int)SprFramesSlider.Value);
+                                    int addonSpriteId = (int)spriteInfo.SpriteId[addonIndex];
+                                    System.Drawing.Bitmap addonBitmap = new(MainWindow.getSpriteStream(addonSpriteId));
 
-                                    int addonLayerIndex = GetSpriteIndex(frameGroup, 1, (int)Math.Min(CurrentSprDir, frameGroup.SpriteInfo.PatternWidth - 1), x, 0, (int)SprFramesSlider.Value);
-                                    int addonLayerSpriteId = (int)frameGroup.SpriteInfo.SpriteId[addonLayerIndex];
-                                    System.Drawing.Bitmap addonLayerBitmap = new System.Drawing.Bitmap(MainWindow.getSpriteStream(addonLayerSpriteId));
+                                    int addonLayerIndex = GetSpriteIndex(frameGroup, 1, (int)Math.Min(CurrentSprDir, spriteInfo.PatternWidth - 1), x, 0, (int)SprFramesSlider.Value);
+                                    int addonLayerSpriteId = (int)spriteInfo.SpriteId[addonLayerIndex];
+                                    System.Drawing.Bitmap addonLayerBitmap = new(MainWindow.getSpriteStream(addonLayerSpriteId));
 
                                     Utils.ColorizeOutfit(
                                         addonLayerBitmap,
@@ -926,14 +939,14 @@ namespace Assets_Editor
                 else
                 {
                     int counter = 1;
-                    int layer = SprBlendLayer.IsChecked == true ? (int)frameGroup.SpriteInfo.Layers - 1 : 0;
-                    int mount = SprMount.IsChecked == true ? (int)frameGroup.SpriteInfo.PatternDepth - 1 : 0;
-                    for (int ph = 0; ph < frameGroup.SpriteInfo.PatternHeight; ph++)
+                    int layer = SprBlendLayer.IsChecked == true ? (int)spriteInfo.Layers - 1 : 0;
+                    int mount = SprMount.IsChecked == true ? (int)spriteInfo.PatternDepth - 1 : 0;
+                    for (int ph = 0; ph < spriteInfo.PatternHeight; ph++)
                     {
-                        for (int pw = 0; pw < frameGroup.SpriteInfo.PatternWidth; pw++)
+                        for (int pw = 0; pw < spriteInfo.PatternWidth; pw++)
                         {
                             int index = GetSpriteIndex(frameGroup, layer, pw, ph, mount, (int)SprFramesSlider.Value);
-                            int spriteId = (int)frameGroup.SpriteInfo.SpriteId[index];
+                            int spriteId = (int)spriteInfo.SpriteId[index];
                             SetImageInGrid(SpriteViewerGrid, gridWidth, gridHeight, Utils.ResizeForUI(MainWindow.getSpriteStream(spriteId)), counter, spriteId, index);
                             counter++;
                         }
@@ -978,9 +991,10 @@ namespace Assets_Editor
             }
             if (existingImage == null)
             {
-                existingImage = new Image();
-                existingImage.Width = image.Width;
-                existingImage.Height = image.Height;
+                existingImage = new() {
+                    Width = image.Width,
+                    Height = image.Height
+                };
                 AllowDrop = true;
                 Grid.SetRow(existingImage, row);
                 Grid.SetColumn(existingImage, col);
@@ -1098,7 +1112,7 @@ namespace Assets_Editor
         }
 
 
-        private void Img_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Img_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Image img = e.Source as Image;
             SprListView.SelectedIndex = int.Parse((string)img.ToolTip);
@@ -1128,9 +1142,10 @@ namespace Assets_Editor
 
             if (BoundingBoxList.Count > 0)
             {
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Clear();
+                var spriteInfo = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo;
+                spriteInfo.BoundingBoxPerDirection.Clear();
                 foreach (var box in BoundingBoxList)
-                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Add(new Box() { X = box.X, Y = box.Y, Width = box.Width, Height = box.Height });
+                    spriteInfo.BoundingBoxPerDirection.Add(new Box() { X = box.X, Y = box.Y, Width = box.Width, Height = box.Height });
             }
         }
         private void FixSpritesCount()
@@ -1234,6 +1249,8 @@ namespace Assets_Editor
 
         private void ObjectSave_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            var flags = CurrentObjectAppearance.Flags;
+
             BoxPerDirection.CommitEdit(DataGridEditingUnit.Cell, true);
             BoxPerDirection.CommitEdit(DataGridEditingUnit.Row, true);
             if (!string.IsNullOrWhiteSpace(A_FlagName.Text))
@@ -1244,435 +1261,435 @@ namespace Assets_Editor
 
             if ((bool)A_FlagGround.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Bank = new AppearanceFlagBank
+                flags.Bank = new AppearanceFlagBank
                 {
                     Waypoints = (uint)A_FlagGroundSpeed.Value
                 };
             }
             else
-                CurrentObjectAppearance.Flags.Bank = null;
+                flags.Bank = null;
 
             if ((bool)A_FlagClip.IsChecked)
-                CurrentObjectAppearance.Flags.Clip = true;
-            else if (CurrentObjectAppearance.Flags.HasClip)
-                CurrentObjectAppearance.Flags.ClearClip();
+                flags.Clip = true;
+            else if (flags.HasClip)
+                flags.ClearClip();
 
             if ((bool)A_FlagBottom.IsChecked)
-                CurrentObjectAppearance.Flags.Bottom = true;
-            else if (CurrentObjectAppearance.Flags.HasBottom)
-                CurrentObjectAppearance.Flags.ClearBottom();
+                flags.Bottom = true;
+            else if (flags.HasBottom)
+                flags.ClearBottom();
 
             if ((bool)A_FlagTop.IsChecked)
-                CurrentObjectAppearance.Flags.Top = true;
-            else if (CurrentObjectAppearance.Flags.HasTop)
-                CurrentObjectAppearance.Flags.ClearTop();
+                flags.Top = true;
+            else if (flags.HasTop)
+                flags.ClearTop();
 
             if ((bool)A_FlagContainer.IsChecked)
-                CurrentObjectAppearance.Flags.Container = true;
-            else if (CurrentObjectAppearance.Flags.HasContainer)
-                CurrentObjectAppearance.Flags.ClearContainer();
+                flags.Container = true;
+            else if (flags.HasContainer)
+                flags.ClearContainer();
 
             if ((bool)A_FlagCumulative.IsChecked)
-                CurrentObjectAppearance.Flags.Cumulative = true;
-            else if (CurrentObjectAppearance.Flags.HasCumulative)
-                CurrentObjectAppearance.Flags.ClearCumulative();
+                flags.Cumulative = true;
+            else if (flags.HasCumulative)
+                flags.ClearCumulative();
 
             if ((bool)A_FlagUsable.IsChecked)
-                CurrentObjectAppearance.Flags.Usable = true;
-            else if (CurrentObjectAppearance.Flags.HasUsable)
-                CurrentObjectAppearance.Flags.ClearUsable();
+                flags.Usable = true;
+            else if (flags.HasUsable)
+                flags.ClearUsable();
 
             if ((bool)A_FlagForceuse.IsChecked)
-                CurrentObjectAppearance.Flags.Forceuse = true;
-            else if (CurrentObjectAppearance.Flags.HasForceuse)
-                CurrentObjectAppearance.Flags.ClearForceuse();
+                flags.Forceuse = true;
+            else if (flags.HasForceuse)
+                flags.ClearForceuse();
 
             if ((bool)A_FlagMultiuse.IsChecked)
-                CurrentObjectAppearance.Flags.Multiuse = true;
-            else if (CurrentObjectAppearance.Flags.HasMultiuse)
-                CurrentObjectAppearance.Flags.ClearMultiuse();
+                flags.Multiuse = true;
+            else if (flags.HasMultiuse)
+                flags.ClearMultiuse();
 
             if ((bool)A_FlagWrite.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Write = new AppearanceFlagWrite
+                flags.Write = new AppearanceFlagWrite
                 {
                     MaxTextLength = (uint)A_FlagMaxTextLength.Value
                 };
             }
             else
-                CurrentObjectAppearance.Flags.Write = null;
+                flags.Write = null;
 
             if ((bool)A_FlagWriteOnce.IsChecked)
             {
-                CurrentObjectAppearance.Flags.WriteOnce = new AppearanceFlagWriteOnce
+                flags.WriteOnce = new AppearanceFlagWriteOnce
                 {
                     MaxTextLengthOnce = (uint)A_FlagMaxTextLengthOnce.Value
                 };
             }
-            else CurrentObjectAppearance.Flags.WriteOnce = null;
+            else flags.WriteOnce = null;
 
             if ((bool)A_FlagShowOffSocket.IsChecked)
-                CurrentObjectAppearance.Flags.ShowOffSocket = true;
+                flags.ShowOffSocket = true;
             else
-                CurrentObjectAppearance.Flags.ClearShowOffSocket();
+                flags.ClearShowOffSocket();
 
             if ((bool)A_FlagReportable.IsChecked)
-                CurrentObjectAppearance.Flags.Reportable = true;
+                flags.Reportable = true;
             else
-                CurrentObjectAppearance.Flags.ClearReportable();
+                flags.ClearReportable();
 
             if ((bool)A_FlagReverseAddonEast.IsChecked)
-                CurrentObjectAppearance.Flags.ReverseAddonsEast = true;
+                flags.ReverseAddonsEast = true;
             else
-                CurrentObjectAppearance.Flags.ClearReverseAddonsEast();
+                flags.ClearReverseAddonsEast();
 
             if ((bool)A_FlagReverseAddonWest.IsChecked)
-                CurrentObjectAppearance.Flags.ReverseAddonsWest = true;
+                flags.ReverseAddonsWest = true;
             else
-                CurrentObjectAppearance.Flags.ClearReverseAddonsWest();
+                flags.ClearReverseAddonsWest();
 
             if ((bool)A_FlagReverseAddonNorth.IsChecked)
-                CurrentObjectAppearance.Flags.ReverseAddonsNorth = true;
+                flags.ReverseAddonsNorth = true;
             else
-                CurrentObjectAppearance.Flags.ClearReverseAddonsNorth();
+                flags.ClearReverseAddonsNorth();
 
             if ((bool)A_FlagReverseAddonSouth.IsChecked)
-                CurrentObjectAppearance.Flags.ReverseAddonsSouth = true;
+                flags.ReverseAddonsSouth = true;
             else
-                CurrentObjectAppearance.Flags.ClearReverseAddonsSouth();
+                flags.ClearReverseAddonsSouth();
 
             if ((bool)A_FlagWearOut.IsChecked)
-                CurrentObjectAppearance.Flags.Wearout = true;
+                flags.Wearout = true;
             else
-                CurrentObjectAppearance.Flags.ClearWearout();
+                flags.ClearWearout();
 
             if ((bool)A_FlagClockExpire.IsChecked)
-                CurrentObjectAppearance.Flags.Clockexpire = true;
+                flags.Clockexpire = true;
             else
-                CurrentObjectAppearance.Flags.ClearClockexpire();
+                flags.ClearClockexpire();
 
             if ((bool)A_FlagExpire.IsChecked)
-                CurrentObjectAppearance.Flags.Expire = true;
+                flags.Expire = true;
             else
-                CurrentObjectAppearance.Flags.ClearExpire();
+                flags.ClearExpire();
 
             if ((bool)A_FlagExpireStop.IsChecked)
-                CurrentObjectAppearance.Flags.Expirestop = true;
+                flags.Expirestop = true;
             else
-                CurrentObjectAppearance.Flags.ClearExpirestop();
+                flags.ClearExpirestop();
 
             if ((bool)A_FlagUpgradeClassification.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Upgradeclassification = new AppearanceFlagUpgradeClassification
+                flags.Upgradeclassification = new AppearanceFlagUpgradeClassification
                 {
                     UpgradeClassification = (uint)A_FlagUpgradeClassificationAmount.Value
                 };
             }
 
-            else CurrentObjectAppearance.Flags.Upgradeclassification = null;
+            else flags.Upgradeclassification = null;
 
             if ((bool)A_FlagLiquidpool.IsChecked)
-                CurrentObjectAppearance.Flags.Liquidpool = true;
-            else if (CurrentObjectAppearance.Flags.HasLiquidpool)
-                CurrentObjectAppearance.Flags.ClearLiquidpool();
+                flags.Liquidpool = true;
+            else if (flags.HasLiquidpool)
+                flags.ClearLiquidpool();
 
             if ((bool)A_FlagUnpass.IsChecked)
-                CurrentObjectAppearance.Flags.Unpass = true;
-            else if (CurrentObjectAppearance.Flags.HasUnpass)
-                CurrentObjectAppearance.Flags.ClearUnpass();
+                flags.Unpass = true;
+            else if (flags.HasUnpass)
+                flags.ClearUnpass();
 
             if ((bool)A_FlagUnmove.IsChecked)
-                CurrentObjectAppearance.Flags.Unmove = true;
-            else if (CurrentObjectAppearance.Flags.HasUnmove)
-                CurrentObjectAppearance.Flags.ClearUnmove();
+                flags.Unmove = true;
+            else if (flags.HasUnmove)
+                flags.ClearUnmove();
 
             if ((bool)A_FlagUnsight.IsChecked)
-                CurrentObjectAppearance.Flags.Unsight = true;
-            else if (CurrentObjectAppearance.Flags.HasUnsight)
-                CurrentObjectAppearance.Flags.ClearUnsight();
+                flags.Unsight = true;
+            else if (flags.HasUnsight)
+                flags.ClearUnsight();
 
             if ((bool)A_FlagAvoid.IsChecked)
-                CurrentObjectAppearance.Flags.Avoid = true;
-            else if (CurrentObjectAppearance.Flags.HasAvoid)
-                CurrentObjectAppearance.Flags.ClearAvoid();
+                flags.Avoid = true;
+            else if (flags.HasAvoid)
+                flags.ClearAvoid();
 
             if ((bool)A_FlagNoMoveAnimation.IsChecked)
-                CurrentObjectAppearance.Flags.NoMovementAnimation = true;
+                flags.NoMovementAnimation = true;
 
-            else if (CurrentObjectAppearance.Flags.HasNoMovementAnimation)
-                CurrentObjectAppearance.Flags.ClearNoMovementAnimation();
+            else if (flags.HasNoMovementAnimation)
+                flags.ClearNoMovementAnimation();
 
             if ((bool)A_FlagTake.IsChecked)
-                CurrentObjectAppearance.Flags.Take = true;
-            else if (CurrentObjectAppearance.Flags.HasTake)
-                CurrentObjectAppearance.Flags.ClearTake();
+                flags.Take = true;
+            else if (flags.HasTake)
+                flags.ClearTake();
 
             if ((bool)A_FlagLiquidcontainer.IsChecked)
-                CurrentObjectAppearance.Flags.Liquidcontainer = true;
-            else if (CurrentObjectAppearance.Flags.HasLiquidcontainer)
-                CurrentObjectAppearance.Flags.ClearLiquidcontainer();
+                flags.Liquidcontainer = true;
+            else if (flags.HasLiquidcontainer)
+                flags.ClearLiquidcontainer();
 
             if ((bool)A_FlagHang.IsChecked)
-                CurrentObjectAppearance.Flags.Hang = true;
-            else if (CurrentObjectAppearance.Flags.HasHang)
-                CurrentObjectAppearance.Flags.ClearHang();
+                flags.Hang = true;
+            else if (flags.HasHang)
+                flags.ClearHang();
 
             if ((bool)A_FlagHook.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Hook = new AppearanceFlagHook
+                flags.Hook = new AppearanceFlagHook
                 {
                     Direction = (HOOK_TYPE)(A_FlagHookType.SelectedIndex + 1)
                 };
             }
-            else CurrentObjectAppearance.Flags.Hook = null;
+            else flags.Hook = null;
 
             if ((bool)A_FlagRotate.IsChecked)
-                CurrentObjectAppearance.Flags.Rotate = true;
-            else if (CurrentObjectAppearance.Flags.HasRotate)
-                CurrentObjectAppearance.Flags.ClearRotate();
+                flags.Rotate = true;
+            else if (flags.HasRotate)
+                flags.ClearRotate();
 
             if ((bool)A_FlagLight.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Light = new AppearanceFlagLight
+                flags.Light = new AppearanceFlagLight
                 {
                     Brightness = (uint)A_FlagLightBrightness.Value,
                     Color = (uint)A_FlagLightColor.Value
                 };
             }
             else
-                CurrentObjectAppearance.Flags.Light = null;
+                flags.Light = null;
 
 
             if ((bool)A_FlagDontHide.IsChecked)
-                CurrentObjectAppearance.Flags.DontHide = true;
-            else if (CurrentObjectAppearance.Flags.HasDontHide)
-                CurrentObjectAppearance.Flags.ClearDontHide();
+                flags.DontHide = true;
+            else if (flags.HasDontHide)
+                flags.ClearDontHide();
 
             if ((bool)A_FlagTranslucent.IsChecked)
-                CurrentObjectAppearance.Flags.Translucent = true;
-            else if (CurrentObjectAppearance.Flags.HasTranslucent)
-                CurrentObjectAppearance.Flags.ClearTranslucent();
+                flags.Translucent = true;
+            else if (flags.HasTranslucent)
+                flags.ClearTranslucent();
 
             if ((bool)A_FlagShift.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Shift = new AppearanceFlagShift
+                flags.Shift = new AppearanceFlagShift
                 {
                     X = (int)A_FlagShiftX.Value,
                     Y = (int)A_FlagShiftY.Value
                 };
             }
             else
-                CurrentObjectAppearance.Flags.Shift = null;
+                flags.Shift = null;
 
             if ((bool)A_FlagHeight.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Height = new AppearanceFlagHeight
+                flags.Height = new AppearanceFlagHeight
                 {
                     Elevation = (uint)A_FlagElevation.Value,
                 };
             }
-            else CurrentObjectAppearance.Flags.Height = null;
+            else flags.Height = null;
 
             if ((bool)A_FlagLyingObject.IsChecked)
-                CurrentObjectAppearance.Flags.LyingObject = true;
-            else if (CurrentObjectAppearance.Flags.HasLyingObject)
-                CurrentObjectAppearance.Flags.ClearLyingObject();
+                flags.LyingObject = true;
+            else if (flags.HasLyingObject)
+                flags.ClearLyingObject();
 
             if ((bool)A_FlagAnimateAlways.IsChecked)
-                CurrentObjectAppearance.Flags.AnimateAlways = true;
-            else if (CurrentObjectAppearance.Flags.HasAnimateAlways)
-                CurrentObjectAppearance.Flags.ClearAnimateAlways();
+                flags.AnimateAlways = true;
+            else if (flags.HasAnimateAlways)
+                flags.ClearAnimateAlways();
 
             if ((bool)A_FlagAutomap.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Automap = new AppearanceFlagAutomap
+                flags.Automap = new AppearanceFlagAutomap
                 {
                     Color = (uint)A_FlagAutomapColor.Value,
                 };
             }
-            else CurrentObjectAppearance.Flags.Automap = null;
+            else flags.Automap = null;
 
             if ((bool)A_FlagLenshelp.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Lenshelp = new AppearanceFlagLenshelp
+                flags.Lenshelp = new AppearanceFlagLenshelp
                 {
                     Id = (uint)A_FlagLenshelpId.SelectedIndex + 1100
                 };
             }
-            else CurrentObjectAppearance.Flags.Lenshelp = null;
+            else flags.Lenshelp = null;
 
             if ((bool)A_FlagFullGround.IsChecked)
-                CurrentObjectAppearance.Flags.Fullbank = true;
-            else if (CurrentObjectAppearance.Flags.HasFullbank)
-                CurrentObjectAppearance.Flags.ClearFullbank();
+                flags.Fullbank = true;
+            else if (flags.HasFullbank)
+                flags.ClearFullbank();
 
             if ((bool)A_FlagIgnoreLook.IsChecked)
-                CurrentObjectAppearance.Flags.IgnoreLook = true;
-            else if (CurrentObjectAppearance.Flags.HasIgnoreLook)
-                CurrentObjectAppearance.Flags.ClearIgnoreLook();
+                flags.IgnoreLook = true;
+            else if (flags.HasIgnoreLook)
+                flags.ClearIgnoreLook();
 
             if ((bool)A_FlagClothes.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Clothes = new AppearanceFlagClothes
+                flags.Clothes = new AppearanceFlagClothes
                 {
                     Slot = (uint)A_FlagClothesSlot.SelectedIndex
                 };
             }
-            else CurrentObjectAppearance.Flags.Clothes = null;
+            else flags.Clothes = null;
 
             if ((bool)A_FlagDefaultAction.IsChecked)
             {
-                CurrentObjectAppearance.Flags.DefaultAction = new AppearanceFlagDefaultAction
+                flags.DefaultAction = new AppearanceFlagDefaultAction
                 {
                     Action = (PLAYER_ACTION)A_FlagDefaultActionType.SelectedIndex
                 };
             }
-            else CurrentObjectAppearance.Flags.DefaultAction = null;
+            else flags.DefaultAction = null;
 
             if ((bool)A_FlagMarket.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Market = new AppearanceFlagMarket
+                flags.Market = new AppearanceFlagMarket
                 {
                     Category = (ITEM_CATEGORY)(A_FlagMarketCategory.SelectedIndex + 1),
                     TradeAsObjectId = (uint)A_FlagMarketTrade.Value,
                     ShowAsObjectId = (uint)A_FlagMarketShow.Value,
                     MinimumLevel = (uint)A_FlagMarketlevel.Value,
                 };
-                CurrentObjectAppearance.Flags.Market.RestrictToVocation.Clear();
-                if ((bool)A_FlagProfessionAny.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Any);
-                if ((bool)A_FlagProfessionNone.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.None);
-                if ((bool)A_FlagProfessionKnight.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Knight);
-                if ((bool)A_FlagProfessionPaladin.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Paladin);
-                if ((bool)A_FlagProfessionSorcerer.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Sorcerer);
-                if ((bool)A_FlagProfessionDruid.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Druid);
-                if ((bool)A_FlagProfessionPromoted.IsChecked) CurrentObjectAppearance.Flags.Market.RestrictToVocation.Add(VOCATION.Promoted);
+                flags.Market.RestrictToVocation.Clear();
+                if ((bool)A_FlagProfessionAny.IsChecked) flags.Market.RestrictToVocation.Add(VOCATION.Any);
+                if ((bool)A_FlagProfessionNone.IsChecked) flags.Market.RestrictToVocation.Add(VOCATION.None);
+                if ((bool)A_FlagProfessionKnight.IsChecked) flags.Market.RestrictToVocation.Add(VOCATION.Knight);
+                if ((bool)A_FlagProfessionPaladin.IsChecked) flags.Market.RestrictToVocation.Add(VOCATION.Paladin);
+                if ((bool)A_FlagProfessionSorcerer.IsChecked) flags.Market.RestrictToVocation.Add(VOCATION.Sorcerer);
+                if ((bool)A_FlagProfessionDruid.IsChecked) flags.Market.RestrictToVocation.Add(VOCATION.Druid);
+                if ((bool)A_FlagProfessionPromoted.IsChecked) flags.Market.RestrictToVocation.Add(VOCATION.Promoted);
             }
             else
-                CurrentObjectAppearance.Flags.Market = null;
+                flags.Market = null;
 
             if ((bool)A_FlagWrap.IsChecked)
-                CurrentObjectAppearance.Flags.Wrap = true;
-            else if (CurrentObjectAppearance.Flags.HasWrap)
-                CurrentObjectAppearance.Flags.ClearWrap();
+                flags.Wrap = true;
+            else if (flags.HasWrap)
+                flags.ClearWrap();
 
             if ((bool)A_FlagUnwrap.IsChecked)
-                CurrentObjectAppearance.Flags.Unwrap = true;
-            else if (CurrentObjectAppearance.Flags.HasUnwrap)
-                CurrentObjectAppearance.Flags.ClearUnwrap();
+                flags.Unwrap = true;
+            else if (flags.HasUnwrap)
+                flags.ClearUnwrap();
 
             if ((bool)A_FlagDecoItemKit.IsChecked)
-                CurrentObjectAppearance.Flags.DecoItemKit = true;
-            else if (CurrentObjectAppearance.Flags.HasDecoItemKit)
-                CurrentObjectAppearance.Flags.ClearDecoItemKit();
+                flags.DecoItemKit = true;
+            else if (flags.HasDecoItemKit)
+                flags.ClearDecoItemKit();
 
             if ((bool)A_FlagTopeffect.IsChecked)
-                CurrentObjectAppearance.Flags.Topeffect = true;
-            else if (CurrentObjectAppearance.Flags.HasTopeffect)
-                CurrentObjectAppearance.Flags.ClearTopeffect();
+                flags.Topeffect = true;
+            else if (flags.HasTopeffect)
+                flags.ClearTopeffect();
 
             if ((bool)A_FlagChangedToExpire.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Changedtoexpire = new AppearanceFlagChangedToExpire
+                flags.Changedtoexpire = new AppearanceFlagChangedToExpire
                 {
                     FormerObjectTypeid = (uint)A_FlagChangedToExpireId.Value
                 };
             }
-            else CurrentObjectAppearance.Flags.Changedtoexpire = null;
+            else flags.Changedtoexpire = null;
 
             if ((bool)A_FlagCorpse.IsChecked)
-                CurrentObjectAppearance.Flags.Corpse = true;
-            else if (CurrentObjectAppearance.Flags.HasCorpse)
-                CurrentObjectAppearance.Flags.ClearCorpse();
+                flags.Corpse = true;
+            else if (flags.HasCorpse)
+                flags.ClearCorpse();
 
             if ((bool)A_FlagPlayerCorpse.IsChecked)
-                CurrentObjectAppearance.Flags.PlayerCorpse = true;
-            else if (CurrentObjectAppearance.Flags.HasPlayerCorpse)
-                CurrentObjectAppearance.Flags.ClearPlayerCorpse();
+                flags.PlayerCorpse = true;
+            else if (flags.HasPlayerCorpse)
+                flags.ClearPlayerCorpse();
 
             if ((bool)A_FlagCyclopedia.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Cyclopediaitem = new AppearanceFlagCyclopedia
+                flags.Cyclopediaitem = new AppearanceFlagCyclopedia
                 {
                     CyclopediaType = (uint)A_FlagCyclopediaItem.Value
                 };
             }
-            else CurrentObjectAppearance.Flags.Cyclopediaitem = null;
+            else flags.Cyclopediaitem = null;
 
             if ((bool)A_FlagAmmo.IsChecked)
-                CurrentObjectAppearance.Flags.Ammo = true;
-            else if (CurrentObjectAppearance.Flags.HasAmmo)
-                CurrentObjectAppearance.Flags.ClearAmmo();
+                flags.Ammo = true;
+            else if (flags.HasAmmo)
+                flags.ClearAmmo();
 
-            CurrentObjectAppearance.Flags.Npcsaledata.Clear();
+            flags.Npcsaledata.Clear();
             if ((bool)A_FlagNPC.IsChecked)
             {
                 foreach (var npcdata in NpcDataList)
                 {
-                    CurrentObjectAppearance.Flags.Npcsaledata.Add(npcdata);
+                    flags.Npcsaledata.Add(npcdata);
                 }
             }
 
             if ((bool)A_FlagTransparency.IsChecked)
             {
-                CurrentObjectAppearance.Flags.Transparencylevel = new AppearanceFlagTransparencyLevel
+                flags.Transparencylevel = new AppearanceFlagTransparencyLevel
                 {
                     Level = (uint)A_FlagTransparencyLevel.Value
                 };
             }
             else
-                CurrentObjectAppearance.Flags.Transparencylevel = null;
+                flags.Transparencylevel = null;
 
             if ((bool)A_FlagSkillWheelGem.IsChecked)
             {
-                CurrentObjectAppearance.Flags.SkillwheelGem = new AppearanceFlagSkillWheelGem
+                flags.SkillwheelGem = new AppearanceFlagSkillWheelGem
                 {
                     GemQualityId = (uint)A_FlagGemQualityId.Value,
                     VocationId = (uint)A_FlagGemVocationId.Value
                 };
             }
             else
-                CurrentObjectAppearance.Flags.SkillwheelGem = null;
+                flags.SkillwheelGem = null;
 
             if ((bool)A_FlagDualWielding.IsChecked)
-                CurrentObjectAppearance.Flags.DualWielding = true;
-            else if (CurrentObjectAppearance.Flags.HasDualWielding)
-                CurrentObjectAppearance.Flags.ClearDualWielding();
+                flags.DualWielding = true;
+            else if (flags.HasDualWielding)
+                flags.ClearDualWielding();
 
             if ((bool)A_FlagImbueable.IsChecked)
-                CurrentObjectAppearance.Flags.Imbueable = new AppearanceFlagImbueable
+                flags.Imbueable = new AppearanceFlagImbueable
                 {
                     SlotCount = (uint)A_FlagImbueableSlotCount.Value
                 };
             else
-                CurrentObjectAppearance.Flags.Imbueable = null;
+                flags.Imbueable = null;
 
             if ((bool)A_FlagProficiency.IsChecked)
-                CurrentObjectAppearance.Flags.Proficiency = new AppearanceFlagProficiency
+                flags.Proficiency = new AppearanceFlagProficiency
                 {
                     ProficiencyId = (uint)A_FlagProficiencyId.Value
                 };
             else
-                CurrentObjectAppearance.Flags.Proficiency = null;
+                flags.Proficiency = null;
 
             if (A_FlagMinimumLevel.Value > 0)
-                CurrentObjectAppearance.Flags.MinimumLevel = (uint)A_FlagMinimumLevel.Value;
-            else if (CurrentObjectAppearance.Flags.HasMinimumLevel)
-                CurrentObjectAppearance.Flags.ClearMinimumLevel();
+                flags.MinimumLevel = (uint)A_FlagMinimumLevel.Value;
+            else if (flags.HasMinimumLevel)
+                flags.ClearMinimumLevel();
 
             if (A_FlagWeaponType.SelectedIndex > 0)
-                CurrentObjectAppearance.Flags.WeaponType = (WEAPON_TYPE)A_FlagWeaponType.SelectedIndex;
-            else if (CurrentObjectAppearance.Flags.HasWeaponType)
-                CurrentObjectAppearance.Flags.ClearWeaponType();
+                flags.WeaponType = (WEAPON_TYPE)A_FlagWeaponType.SelectedIndex;
+            else if (flags.HasWeaponType)
+                flags.ClearWeaponType();
 
-            CurrentObjectAppearance.Flags.RestrictToVocation.Clear();
-            if ((bool)A_FlagRestrictVocAny.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Any);
-            if ((bool)A_FlagRestrictVocNone.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.None);
-            if ((bool)A_FlagRestrictVocKnight.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Knight);
-            if ((bool)A_FlagRestrictVocPaladin.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Paladin);
-            if ((bool)A_FlagRestrictVocSorcerer.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Sorcerer);
-            if ((bool)A_FlagRestrictVocDruid.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Druid);
-            if ((bool)A_FlagRestrictVocMonk.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Druid);
-            if ((bool)A_FlagRestrictVocPromoted.IsChecked) CurrentObjectAppearance.Flags.RestrictToVocation.Add(VOCATION.Promoted);
+            flags.RestrictToVocation.Clear();
+            if ((bool)A_FlagRestrictVocAny.IsChecked) flags.RestrictToVocation.Add(VOCATION.Any);
+            if ((bool)A_FlagRestrictVocNone.IsChecked) flags.RestrictToVocation.Add(VOCATION.None);
+            if ((bool)A_FlagRestrictVocKnight.IsChecked) flags.RestrictToVocation.Add(VOCATION.Knight);
+            if ((bool)A_FlagRestrictVocPaladin.IsChecked) flags.RestrictToVocation.Add(VOCATION.Paladin);
+            if ((bool)A_FlagRestrictVocSorcerer.IsChecked) flags.RestrictToVocation.Add(VOCATION.Sorcerer);
+            if ((bool)A_FlagRestrictVocDruid.IsChecked) flags.RestrictToVocation.Add(VOCATION.Druid);
+            if ((bool)A_FlagRestrictVocMonk.IsChecked) flags.RestrictToVocation.Add(VOCATION.Druid);
+            if ((bool)A_FlagRestrictVocPromoted.IsChecked) flags.RestrictToVocation.Add(VOCATION.Promoted);
 
 
             Appearance oldAppearance = null;
@@ -1790,14 +1807,12 @@ namespace Assets_Editor
 
         private void SprPhaseMin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMin = (uint)SprPhaseMin.Value;
+            GetCurrentAnimation()?.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMin = (uint)(SprPhaseMin.Value ?? 100);
         }
 
         private void SprPhaseMax_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMax = (uint)SprPhaseMax.Value;
+            GetCurrentAnimation()?.SpritePhase[(int)(SprFramesSlider.Value / SprFramesSlider.TickFrequency)].DurationMax = (uint)(SprPhaseMax.Value ?? 100);
         }
 
 
@@ -1845,7 +1860,7 @@ namespace Assets_Editor
         }
         public List<System.Drawing.Bitmap> SplitImage(System.Drawing.Bitmap originalImage)
         {
-            List<System.Drawing.Bitmap> splitImages = new List<System.Drawing.Bitmap>();
+            List<System.Drawing.Bitmap> splitImages = [];
 
             int rows = originalImage.Height / 32;
             int cols = originalImage.Width / 32;
@@ -1887,25 +1902,27 @@ namespace Assets_Editor
         }
         private Appearance CreateBlankObject(uint id, APPEARANCE_TYPE type)
         {
-            Appearance newObject = new Appearance();
+            Appearance newObject = new() {
+                Flags = new()
+            };
 
-            newObject.Flags = new AppearanceFlags();
+            FrameGroup frameGroup = new() {
+                SpriteInfo = new(),
+                FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle
+            };
 
-            FrameGroup frameGroup = new FrameGroup();
-            frameGroup.SpriteInfo = new SpriteInfo();
-            frameGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
+            var spriteInfo = frameGroup.SpriteInfo;
+            spriteInfo.PatternWidth = 1;
+            spriteInfo.PatternHeight = 1;
+            spriteInfo.PatternSize = 32;
 
-            frameGroup.SpriteInfo.PatternWidth = 1;
-            frameGroup.SpriteInfo.PatternHeight = 1;
-            frameGroup.SpriteInfo.PatternSize = 32;
+            spriteInfo.PatternLayers = 1;
+            spriteInfo.PatternX = 1;
+            spriteInfo.PatternY = 1;
+            spriteInfo.PatternZ = 1;
+            spriteInfo.PatternFrames = 1;
 
-            frameGroup.SpriteInfo.PatternLayers = 1;
-            frameGroup.SpriteInfo.PatternX = 1;
-            frameGroup.SpriteInfo.PatternY = 1;
-            frameGroup.SpriteInfo.PatternZ = 1;
-            frameGroup.SpriteInfo.PatternFrames = 1;
-
-            frameGroup.SpriteInfo.SpriteId.Add(0);
+            spriteInfo.SpriteId.Add(0);
 
             newObject.FrameGroup.Add(frameGroup);
 
@@ -1914,6 +1931,7 @@ namespace Assets_Editor
 
             return newObject;
         }
+
         public int GetSheetType(uint sprId)
         {
             foreach (MainWindow.Catalog sheet in MainWindow.catalog)
@@ -1924,14 +1942,17 @@ namespace Assets_Editor
 
             return 0;
         }
+
         private void UpdateAppearanceObject(Appearance appearance, ConcurrentDictionary<string, uint> offset)
         {
             for (int i = 0; i < appearance.FrameGroup.Count; i++)
             {
+                var spriteInfo = appearance.FrameGroup[i].SpriteInfo;
+
                 uint Width = 1;
                 uint Height = 1;
                 uint ExactSize = 32;
-                int sliceType = GetSheetType(appearance.FrameGroup[i].SpriteInfo.SpriteId[0]);
+                int sliceType = GetSheetType(spriteInfo.SpriteId[0]);
                 if (sliceType == 1)
                 {
                     Width = 1;
@@ -1951,77 +1972,77 @@ namespace Assets_Editor
                 {
                     try
                     {
-                        ExactSize = Math.Max(appearance.FrameGroup[i].SpriteInfo.BoundingBoxPerDirection[0].Width, appearance.FrameGroup[i].SpriteInfo.BoundingBoxPerDirection[0].Height);
+                        ExactSize = Math.Max(spriteInfo.BoundingBoxPerDirection[0].Width, spriteInfo.BoundingBoxPerDirection[0].Height);
                     }
                     catch
                     {
-                        MainWindow.Log("Error exporting sprite " + appearance.Id + ", crash prevented.");
+                        MainWindow.Log("Error exporting sprite " + appearance.Id + ".");
                     }
                 }
-                appearance.FrameGroup[i].SpriteInfo.PatternX = appearance.FrameGroup[i].SpriteInfo.PatternWidth;
-                appearance.FrameGroup[i].SpriteInfo.PatternY = appearance.FrameGroup[i].SpriteInfo.PatternHeight;
-                appearance.FrameGroup[i].SpriteInfo.PatternWidth = Width;
-                appearance.FrameGroup[i].SpriteInfo.PatternHeight = Height;
-                appearance.FrameGroup[i].SpriteInfo.PatternSize = ExactSize;
-                appearance.FrameGroup[i].SpriteInfo.PatternLayers = appearance.FrameGroup[i].SpriteInfo.Layers;
-                appearance.FrameGroup[i].SpriteInfo.PatternZ = appearance.FrameGroup[i].SpriteInfo.PatternDepth;
-                if (appearance.FrameGroup[i].SpriteInfo.Animation != null)
-                    appearance.FrameGroup[i].SpriteInfo.PatternFrames = (uint)appearance.FrameGroup[i].SpriteInfo.Animation.SpritePhase.Count;
+                spriteInfo.PatternX = spriteInfo.PatternWidth;
+                spriteInfo.PatternY = spriteInfo.PatternHeight;
+                spriteInfo.PatternWidth = Width;
+                spriteInfo.PatternHeight = Height;
+                spriteInfo.PatternSize = ExactSize;
+                spriteInfo.PatternLayers = spriteInfo.Layers;
+                spriteInfo.PatternZ = spriteInfo.PatternDepth;
+                if (spriteInfo.Animation != null)
+                    spriteInfo.PatternFrames = (uint)spriteInfo.Animation.SpritePhase.Count;
                 else
-                    appearance.FrameGroup[i].SpriteInfo.PatternFrames = 1;
+                    spriteInfo.PatternFrames = 1;
 
-                List<uint> groupSpr = new List<uint>();
+                List<uint> groupSpr = [];
 
                 try
                 {
                     if (sliceType == 0)
                     {
-                        for (int j = 0; j < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; j++)
+                        for (int j = 0; j < spriteInfo.SpriteId.Count; j++)
                         {
-                            string sprName = appearance.FrameGroup[i].SpriteInfo.SpriteId[j].ToString();
+                            string sprName = spriteInfo.SpriteId[j].ToString();
                             groupSpr.Add(offset[sprName + "_0"]);
                         }
-                        appearance.FrameGroup[i].SpriteInfo.SpriteId.Clear();
+                        spriteInfo.SpriteId.Clear();
                         for (int j = 0; j < groupSpr.Count; j++)
                         {
-                            appearance.FrameGroup[i].SpriteInfo.SpriteId.Add(groupSpr[j]);
+                            spriteInfo.SpriteId.Add(groupSpr[j]);
                         }
                     }
                     else if (sliceType == 1 || sliceType == 2)
                     {
-                        for (int j = 0; j < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; j++)
+                        for (int j = 0; j < spriteInfo.SpriteId.Count; j++)
                         {
-                            string sprName = appearance.FrameGroup[i].SpriteInfo.SpriteId[j].ToString();
+                            string sprName = spriteInfo.SpriteId[j].ToString();
                             groupSpr.Add(offset[sprName + "_1"]);
                             groupSpr.Add(offset[sprName + "_0"]);
                         }
-                        appearance.FrameGroup[i].SpriteInfo.SpriteId.Clear();
+                        spriteInfo.SpriteId.Clear();
                         for (int j = 0; j < groupSpr.Count; j++)
                         {
-                            appearance.FrameGroup[i].SpriteInfo.SpriteId.Add(groupSpr[j]);
+                            spriteInfo.SpriteId.Add(groupSpr[j]);
                         }
 
                     }
                     else if (sliceType == 3)
                     {
-                        for (int j = 0; j < appearance.FrameGroup[i].SpriteInfo.SpriteId.Count; j++)
+                        for (int j = 0; j < spriteInfo.SpriteId.Count; j++)
                         {
-                            string sprName = appearance.FrameGroup[i].SpriteInfo.SpriteId[j].ToString();
+                            string sprName = spriteInfo.SpriteId[j].ToString();
                             groupSpr.Add(offset[sprName + "_3"]);
                             groupSpr.Add(offset[sprName + "_2"]);
                             groupSpr.Add(offset[sprName + "_1"]);
                             groupSpr.Add(offset[sprName + "_0"]);
                         }
-                        appearance.FrameGroup[i].SpriteInfo.SpriteId.Clear();
+                        spriteInfo.SpriteId.Clear();
                         for (int j = 0; j < groupSpr.Count; j++)
                         {
-                            appearance.FrameGroup[i].SpriteInfo.SpriteId.Add(groupSpr[j]);
+                            spriteInfo.SpriteId.Add(groupSpr[j]);
                         }
                     }
                 }
                 catch (Exception)
                 {
-                    MainWindow.Log("Error exporting animation for sprite " + appearance.Id + ", crash prevented.");
+                    MainWindow.Log("Error exporting animation for sprite " + appearance.Id + ".");
                 }
             }
         }
@@ -2254,7 +2275,7 @@ namespace Assets_Editor
                             {
                                 if (IsImageFullyTransparent(slices[j]) == false)
                                 {
-                                    MemoryStream ms = new MemoryStream();
+                                    MemoryStream ms = new();
                                     slices[j].Save(ms, System.Drawing.Imaging.ImageFormat.Png);
                                     ms.Position = 0;
                                     SlicedSprList[i].Add(ms);
@@ -2443,24 +2464,26 @@ namespace Assets_Editor
 
         private void NewObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            Appearance newObject = new Appearance();
+            Appearance newObject = new() {
+                Flags = new()
+            };
 
-            newObject.Flags = new AppearanceFlags();
+            FrameGroup frameGroup = new() {
+                SpriteInfo = new()
+            };
 
-            FrameGroup frameGroup = new FrameGroup();
-            frameGroup.SpriteInfo = new SpriteInfo();
-
-            frameGroup.SpriteInfo.Layers = 1;
-            frameGroup.SpriteInfo.PatternWidth = 1;
-            frameGroup.SpriteInfo.PatternHeight = 1;
-            frameGroup.SpriteInfo.PatternDepth = 1;
+            var spriteInfo = frameGroup.SpriteInfo;
+            spriteInfo.Layers = 1;
+            spriteInfo.PatternWidth = 1;
+            spriteInfo.PatternHeight = 1;
+            spriteInfo.PatternDepth = 1;
 
             if (ObjectMenu.SelectedIndex == 0)
                 frameGroup.FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle;
             else
                 frameGroup.FixedFrameGroup = FIXED_FRAME_GROUP.ObjectInitial;
 
-            frameGroup.SpriteInfo.SpriteId.Add(blankSpr);
+            spriteInfo.SpriteId.Add(blankSpr);
             newObject.FrameGroup.Add(frameGroup);
 
             if (ObjectMenu.SelectedIndex == 0)
@@ -2590,53 +2613,54 @@ namespace Assets_Editor
             }
         }
 
+        private SpriteAnimation? GetCurrentAnimation()
+        {
+            return CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation;
+        }
+
         private void SprDefaultPhase_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.DefaultStartPhase = (uint)SprDefaultPhase.Value;
+            GetCurrentAnimation()?.DefaultStartPhase = (uint)(SprDefaultPhase.Value ?? 0);
         }
 
         private void SprLoopCount_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.LoopCount = (uint)SprLoopCount.Value;
-
+            GetCurrentAnimation()?.LoopCount = (uint)(SprLoopCount.Value ?? 0);
         }
 
         private void SprSynchronized_Click(object sender, RoutedEventArgs e)
         {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.Synchronized = (bool)SprSynchronized.IsChecked;
-
+            GetCurrentAnimation()?.Synchronized = SprSynchronized.IsChecked ?? false;
         }
 
         private void SprRandomPhase_Click(object sender, RoutedEventArgs e)
         {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation != null)
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.RandomStartPhase = (bool)SprRandomPhase.IsChecked;
-
+            GetCurrentAnimation()?.RandomStartPhase = SprRandomPhase.IsChecked ?? false;
         }
 
         private void SprLoopType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.HasLoopType)
-            {
-                if (SprLoopType.SelectedIndex == 0)
-                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.LoopType = ANIMATION_LOOP_TYPE.Pingpong;
-                else if (SprLoopType.SelectedIndex == 1)
-                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.LoopType = ANIMATION_LOOP_TYPE.Infinite;
-                else if (SprLoopType.SelectedIndex == 2)
-                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation.LoopType = ANIMATION_LOOP_TYPE.Counted;
+            var animation = GetCurrentAnimation();
+            if (animation == null) {
+                MainWindow.Log($"Unable to assign loop type for object {CurrentObjectAppearance.Id} - animation is null.");
+                return;
             }
+
+            if (SprLoopType.SelectedIndex == 0)
+                animation.LoopType = ANIMATION_LOOP_TYPE.Pingpong;
+            else if (SprLoopType.SelectedIndex == 1)
+                animation.LoopType = ANIMATION_LOOP_TYPE.Infinite;
+            else if (SprLoopType.SelectedIndex == 2)
+                animation.LoopType = ANIMATION_LOOP_TYPE.Counted;
         }
         private void SearchItem_Click(object sender, RoutedEventArgs e)
         {
-            SearchWindow searchWindow = new SearchWindow(this, false);
+            SearchWindow searchWindow = new(this, false);
             searchWindow.Show();
         }
         private void OTBEditor_Click(object sender, RoutedEventArgs e)
         {
-            OTBEditor oTBEditor = new OTBEditor(this, false);
+            OTBEditor oTBEditor = new(this, false);
             oTBEditor.Show();
         }
 
@@ -3551,14 +3575,14 @@ namespace Assets_Editor
 
         private void AddExportObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            List<ShowList> selectedItems = ObjListView.SelectedItems.Cast<ShowList>().ToList();
-            if (selectedItems.Any())
+            List<ShowList> selectedItems = [.. ObjListView.SelectedItems.Cast<ShowList>()];
+            if (selectedItems.Count != 0)
             {
                 ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
 
                 foreach (var item in selectedItems)
                 {
-                    Appearance appearance = new Appearance();
+                    Appearance appearance = new();
                     if (ObjectMenu.SelectedIndex == 0)
                     {
                         appearance = MainWindow.appearances.Outfit.FirstOrDefault(o => o.Id == item.Id).Clone();
@@ -3796,12 +3820,13 @@ namespace Assets_Editor
 
         private void SprApplyForAll_Click(object sender, RoutedEventArgs e)
         {
-            if (CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation == null) return;
+            var animation = GetCurrentAnimation();
+            if (animation == null)
+                return;
 
-            var minDuration = (uint)SprPhaseMin.Value;
-            var maxDuration = (uint)SprPhaseMax.Value;
-            var animationSpritePhases = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo
-                .Animation.SpritePhase;
+            var minDuration = (uint)(SprPhaseMin.Value ?? 100);
+            var maxDuration = (uint)(SprPhaseMax.Value ?? 100);
+            var animationSpritePhases = animation.SpritePhase;
 
             foreach (var spritePhase in animationSpritePhases)
             {
@@ -3856,11 +3881,13 @@ namespace Assets_Editor
 
                         if (catalog != null)
                         {
-                            if (!catalogSpriteIdMap.ContainsKey(catalog))
+                            if (!catalogSpriteIdMap.TryGetValue(catalog, out List<uint>? value))
                             {
-                                catalogSpriteIdMap[catalog] = new List<uint>();
+                                value = [];
+                                catalogSpriteIdMap[catalog] = value;
                             }
-                            catalogSpriteIdMap[catalog].Add(spriteId);
+
+                            value.Add(spriteId);
                         }
                         else
                         {
@@ -3874,7 +3901,7 @@ namespace Assets_Editor
                     MainWindow.Catalog catalog = kvp.Key;
                     List<uint> spriteIds = kvp.Value;
 
-                    CatalogTransparency modification = new CatalogTransparency()
+                    CatalogTransparency modification = new()
                     {
                         Catalog = catalog,
                         SpriteIds = spriteIds,
@@ -3900,7 +3927,7 @@ namespace Assets_Editor
 
                 if (!catalogModifications.ContainsKey(catalog))
                 {
-                    catalogModifications[catalog] = new Dictionary<uint, byte>();
+                    catalogModifications[catalog] = [];
                 }
 
                 foreach (uint spriteId in modification.SpriteIds)
@@ -4025,7 +4052,7 @@ namespace Assets_Editor
             if (bmp.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb)
                 return bmp;
 
-            System.Drawing.Bitmap newBitmap = new System.Drawing.Bitmap(bmp.Width, bmp.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            System.Drawing.Bitmap newBitmap = new(bmp.Width, bmp.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newBitmap))
             {
                 g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height);
@@ -4038,9 +4065,10 @@ namespace Assets_Editor
             if (BoxPerDirection.SelectedItem is Box box)
             {
                 BoundingBoxList.Remove(box);
-                CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Clear();
+                var spriteInfo = CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo;
+                spriteInfo.BoundingBoxPerDirection.Clear();
                 foreach (var boxItem in BoundingBoxList)
-                    CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.BoundingBoxPerDirection.Add(boxItem);
+                    spriteInfo.BoundingBoxPerDirection.Add(boxItem);
             }
         }
 
