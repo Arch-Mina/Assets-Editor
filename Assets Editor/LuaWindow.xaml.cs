@@ -182,6 +182,21 @@ return generateChartData()
         RefreshScriptList();
     }
 
+    // helper to register userdata constructors
+    private void RegisterLuaType<T>(string? luaName = null) where T : new() {
+        // name in Lua (defaults to the class name)
+        luaName ??= typeof(T).Name;
+
+        // 1) Register userdata
+        UserData.RegisterType<T>();
+
+        // 2) Register constructor: Foo()
+        _luaScript!.Globals[luaName] = DynValue.NewCallback((ctx, args) =>
+        {
+            return UserData.Create(new T());
+        });
+    }
+
     private void InitializeLuaEngine() {
         try {
             _luaScript = new Script();
@@ -194,16 +209,18 @@ return generateChartData()
             _luaScript.Globals["print"] = DynValue.NewCallback(PrintToResults);
 
             // make the objects possible to index
-            UserData.RegisterType<Appearance>();
-            UserData.RegisterType<AppearanceFlags>();
-            UserData.RegisterType<AppearanceFlagMarket>();
-            UserData.RegisterType<AppearanceFlagNPC>();
-            UserData.RegisterType<AppearanceFlagCyclopedia>();
-            UserData.RegisterType<FrameGroup>();
-            UserData.RegisterType<SpriteInfo>();
-            UserData.RegisterType<SpriteAnimation>();
-            UserData.RegisterType<SpritePhase>();
-            UserData.RegisterType<Box>();
+            RegisterLuaType<Appearance>();
+            RegisterLuaType<AppearanceFlags>();
+            RegisterLuaType<AppearanceFlagCyclopedia>();
+            RegisterLuaType<AppearanceFlagMarket>();
+            RegisterLuaType<AppearanceFlagNPC>();
+            RegisterLuaType<FrameGroup>();
+            RegisterLuaType<SpriteInfo>();
+            RegisterLuaType<SpriteAnimation>();
+            RegisterLuaType<SpritePhase>();
+            RegisterLuaType<Box>();
+
+            // make it possible to use but without ability to construct
             UserData.RegisterType<LuaThings>();
 
             // access repeated field
@@ -220,9 +237,6 @@ return generateChartData()
             g_things["getItemById"] = DynValue.NewCallback(LuaThings.Lua_getItemById);
             g_things["getEffectById"] = DynValue.NewCallback(LuaThings.Lua_getEffectById);
             g_things["getMissileById"] = DynValue.NewCallback(LuaThings.Lua_getMissileById);
-
-            //UserData.RegisterType<List<Appearance>>();
-            //UserData.RegisterType<KeyValuePair<string, object>>();
 
         } catch (Exception ex) {
             ErrorManager.ShowError($"Failed to initialize Lua engine: {ex.Message}");
