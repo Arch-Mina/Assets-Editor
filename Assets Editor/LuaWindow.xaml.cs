@@ -193,9 +193,12 @@ return generateChartData()
             // Add some utility functions to Lua
             _luaScript.Globals["print"] = DynValue.NewCallback(PrintToResults);
 
-            // g_things
+            // make the objects possible to index
             UserData.RegisterType<Appearance>();
             UserData.RegisterType<AppearanceFlags>();
+            UserData.RegisterType<AppearanceFlagMarket>();
+            UserData.RegisterType<AppearanceFlagNPC>();
+            UserData.RegisterType<AppearanceFlagCyclopedia>();
             UserData.RegisterType<FrameGroup>();
             UserData.RegisterType<SpriteInfo>();
             UserData.RegisterType<SpriteAnimation>();
@@ -203,6 +206,10 @@ return generateChartData()
             UserData.RegisterType<Box>();
             UserData.RegisterType<LuaThings>();
 
+            // access repeated field
+            UserData.RegisterType<List<AppearanceFlagNPC>>();
+
+            // g_things
             Table g_things = new(_luaScript);
             _luaScript.Globals["g_things"] = g_things;
             g_things["getOutfits"] = DynValue.NewCallback(LuaThings.Lua_getOutfits);
