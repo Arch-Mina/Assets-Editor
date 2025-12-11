@@ -1298,29 +1298,6 @@ namespace Assets_Editor
             CompileBox.IsEnabled = true;
         }
 
-        private void WritePresetToOtfi(string otfiPath, PresetSettings preset, string datFile, string sprFile, bool transparency) {
-            // create DatSpr node
-            OTMLNode datspr = OTMLNode.Create("DatSpr", unique: true);
-
-            // bools
-            datspr.AddChild(OTMLNode.Create("extended", preset.Extended.ToString().ToLower()));
-            datspr.AddChild(OTMLNode.Create("transparency", transparency.ToString().ToLower()));
-            datspr.AddChild(OTMLNode.Create("frame-durations", preset.FrameDurations.ToString().ToLower()));
-            datspr.AddChild(OTMLNode.Create("frame-groups", preset.FrameGroups.ToString().ToLower()));
-
-            // spr/dat pair
-            datspr.AddChild(OTMLNode.Create("metadata-file", Path.GetFileName(datFile)));
-            datspr.AddChild(OTMLNode.Create("sprites-file", Path.GetFileName(sprFile)));
-
-            // optional combined name ("assets-name")
-            string? baseName = Path.GetFileNameWithoutExtension(datFile);
-            if (baseName != null) {
-                datspr.AddChild(OTMLNode.Create("assets-name", baseName));
-            }
-
-            File.WriteAllText(otfiPath, datspr.Emit() + "\n");
-        }
-
         private async void CompileClient(object sender, RoutedEventArgs e)
         {
             bool isDatEditable = false;
@@ -1359,7 +1336,7 @@ namespace Assets_Editor
             try {
                 PresetSettings? preset = MainWindow.GetCurrentPreset();
                 if (preset != null) {
-                    WritePresetToOtfi(otfile, preset, datfile, sprfile, (bool)C_Transparent.IsChecked);
+                    Utils.WritePresetToOtfi(otfile, in preset, datfile, sprfile, C_Transparent.IsChecked ?? false);
                 }
             } catch {
                 // ...

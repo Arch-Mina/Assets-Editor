@@ -50,6 +50,14 @@ namespace Assets_Editor
     /// </summary>
     public partial class DatEditor : Window
     {
+        // assets support everything by default
+        // this is used by exporting to legacy spr/dat feature
+        static readonly PresetSettings AssetsPreset = new() {
+            Extended = true,
+            FrameDurations = true,
+            FrameGroups = true,
+        };
+
         public static readonly List<System.Drawing.Size> SpriteSizes = [
             // standard sprite sizes across entire program
             new(32, 32), // 0
@@ -2066,6 +2074,7 @@ namespace Assets_Editor
             {
                 LoadProgress1.Value = percent;
             });
+
             await ExportLegacy(progress);
         }
 
@@ -2245,7 +2254,16 @@ namespace Assets_Editor
             Appearances tmpAppearances = new();
             ConcurrentDictionary<int, List<MemoryStream>> SlicedSprList = [];
             ConcurrentDictionary<string, uint> SpriteOffsetList = [];
+            bool transparent = C_Transparent.IsChecked ?? false;
 
+            string datfile = MainWindow._assetsPath + "Tibia.dat";
+            VersionInfo? legacyEncoder = ObdDecoder.GetDatStructure();
+            if (legacyEncoder == null) {
+                ErrorManager.ShowError("obd structure not defined in appearances.xml!");
+                return;
+            }
+
+            // write DAT
             await Task.Run(() =>
             {
                 int percentageComplete = 0;
@@ -2391,21 +2409,23 @@ namespace Assets_Editor
                     }
                 }
 
-                string datfile = MainWindow._assetsPath + "Tibia.dat";
-                VersionInfo? legacyEncoder = ObdDecoder.GetDatStructure();
-                if (legacyEncoder == null) {
-                    ErrorManager.ShowError("obd structure not defined in appearances.xml!");
-                    return;
-                }
                 LegacyAppearance.WriteLegacyDat(datfile, 0x42A3, tmpAppearances, legacyEncoder.Structure);
-
             });
+
+            // write SPR
             var progress1 = new Progress<int>(percent =>
             {
                 LoadProgress2.Value = percent;
             });
             string sprfile = MainWindow._assetsPath + "Tibia.spr";
-            await Sprite.CompileSpritesAsync(sprfile, tmpSprStorage, false, 0x53159CA9, progress1);
+            await Sprite.CompileSpritesAsync(sprfile, tmpSprStorage, transparent, 0x53159CA9, progress1);
+
+            // write OTFI
+            await Task.Run(() => {
+                string otfile = MainWindow._assetsPath + "Tibia.otfi";
+                Utils.WritePresetToOtfi(otfile, in AssetsPreset, datfile, sprfile, transparent);
+            });
+
             ComppileDialogHost.IsOpen = false;
         }
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
