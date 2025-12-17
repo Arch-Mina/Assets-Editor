@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using MediaColor = System.Windows.Media.Color;
 using DrawingColor = System.Drawing.Color;
 using Appearance = Tibia.Protobuf.Appearances.Appearance;
+using Tibia.Protobuf.Appearances;
 
 namespace Assets_Editor;
 
@@ -462,5 +463,19 @@ public static class Utils
 
         File.WriteAllText(otfiPath, datspr.Emit() + "\n");
     }
-}
 
+    public static void SafeGetLensHelp(System.Windows.Controls.ComboBox dropdown, AppearanceFlagLenshelp? flag) {
+        if (flag == null) {
+            dropdown.SelectedIndex = -1;
+            return;
+        }
+
+        int lensHelpId = flag.HasId ? (int)flag.Id : -1;
+        if (lensHelpId >= 1100) {
+            dropdown.SelectedIndex = lensHelpId - 1100;
+            return;
+        }
+
+        dropdown.SelectedIndex = -1;
+    }
+}

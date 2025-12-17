@@ -516,17 +516,10 @@ namespace Assets_Editor
             A_FlagAnimateAlways.IsChecked = flags.HasAnimateAlways;
             A_FlagAutomap.IsChecked = flags.Automap != null;
             A_FlagAutomapColor.Value = (flags.Automap != null && flags.Automap.HasColor) ? (int)flags.Automap.Color : 0;
-            A_FlagLenshelp.IsChecked = flags.Lenshelp != null;
 
-            // select from dropdown only when the argument has valid value
-            if (flags.Lenshelp != null) {
-                int lensHelpId = flags.Lenshelp.HasId ? (int)flags.Lenshelp.Id : -1;
-                if (lensHelpId >= 1100) {
-                    A_FlagLenshelpId.SelectedIndex = lensHelpId - 1100;
-                } else {
-                    A_FlagLenshelpId.SelectedIndex = -1;
-                }
-            }
+            // safely assign lenshelp value
+            A_FlagLenshelp.IsChecked = flags.Lenshelp != null;
+            Utils.SafeGetLensHelp(A_FlagLenshelpId, flags.Lenshelp);
 
             A_FlagFullGround.IsChecked = flags.HasFullbank;
             A_FlagIgnoreLook.IsChecked = flags.HasIgnoreLook;
