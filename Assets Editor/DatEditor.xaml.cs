@@ -1258,6 +1258,10 @@ namespace Assets_Editor
             }
         }
 
+        private void SprOpaque_Click(object sender, RoutedEventArgs e) {
+            CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo?.IsOpaque = A_SprOpaque.IsChecked ?? false;
+        }
+
         private void ObjectSave_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var flags = CurrentObjectAppearance.Flags;

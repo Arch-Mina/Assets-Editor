@@ -758,7 +758,7 @@
                                             <Label Content="Bounding Square:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
                                             <xctk:IntegerUpDown x:Name="A_SprBounding" Margin="0,0,0,0" Width="110" Minimum="0" Maximum="384" ValueChanged="A_Texture_ValueChanged"/>
                                         </StackPanel>
-                                        <CheckBox x:Name="A_SprOpaque" Content="Is Opaque" HorizontalAlignment="Left" Margin="5,5,0,0"/>
+                                        <CheckBox x:Name="A_SprOpaque" Content="Is Opaque" HorizontalAlignment="Left" Margin="5,5,0,0" Click="SprOpaque_Click"/>
                                     </StackPanel>
                                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Margin="5,25,5,0">
                                         <Label Content="Bounding box per direction"/>
