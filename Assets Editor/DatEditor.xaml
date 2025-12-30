@@ -678,7 +678,7 @@
                                             <StackPanel Orientation="Vertical" x:Name="AnimationTab" HorizontalAlignment="Center" VerticalAlignment="Stretch">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Label Content="Default start Phase:" Width="120"/>
-                                                    <xctk:IntegerUpDown x:Name="SprDefaultPhase" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110" PreviewMouseLeftButtonDown="SprDefaultPhase_PreviewMouseLeftButtonDown"/>
+                                                    <xctk:IntegerUpDown x:Name="SprDefaultPhase" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110" ValueChanged="SprDefaultPhase_ValueChanged"/>
                                                 </StackPanel>
                                                 <CheckBox x:Name="SprRandomPhase" Content="Random Start Phase" Click="SprRandomPhase_Click"/>
                                                 <CheckBox x:Name="SprSynchronized" Content="Synchronized" Click="SprSynchronized_Click"/>

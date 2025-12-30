@@ -2645,7 +2645,7 @@ namespace Assets_Editor
             return CurrentObjectAppearance.FrameGroup[(int)SprGroupSlider.Value].SpriteInfo.Animation;
         }
 
-        private void SprDefaultPhase_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void SprDefaultPhase_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             GetCurrentAnimation()?.DefaultStartPhase = (uint)(SprDefaultPhase.Value ?? 0);
         }
