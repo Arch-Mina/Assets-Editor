@@ -24,7 +24,7 @@
                 <Binding ElementName="CompileToImagesDialogHost" Path="IsOpen"/>
             </MultiBinding>
         </Grid.IsHitTestVisible>
-        <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray" >
+        <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray">
             <materialDesign:DialogHost.DialogContent>
                 <GroupBox x:Name="CompileBox" Header="Export To Legacy" Width="350">
                     <Grid >
@@ -32,16 +32,26 @@
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
                         </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" Grid.Row="0">
-                            <Label Content="Converting Objects"/>
-                            <ProgressBar x:Name="LoadProgress1" Minimum="0" Maximum="100" Value="0" Width="210" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Grid.Row="1">
-                            <Label Content="Converting Sprites"/>
-                            <ProgressBar x:Name="LoadProgress2" Minimum="0" Maximum="100" Value="0" Width="210" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
-                        </StackPanel>
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <CheckBox Grid.Row="0" x:Name="C_Transparent" Content="Transparent" Margin="5,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="210"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="Converting Objects"/>
+                            <ProgressBar Grid.Column="1" x:Name="LoadProgress1" Minimum="0" Maximum="100" Value="0" Width="200" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,10" Height="8" />
+                        </Grid>
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="210"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="Converting Sprites"/>
+                            <ProgressBar Grid.Column="1" x:Name="LoadProgress2" Minimum="0" Maximum="100" Value="0" Width="200" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,10" Height="8" />
+                        </Grid>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button Click="CompileLegacy" Content="Export" Width="100" Margin="0,0,20,0"/>
                             <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
                         </StackPanel>
@@ -668,7 +678,7 @@
                                             <StackPanel Orientation="Vertical" x:Name="AnimationTab" HorizontalAlignment="Center" VerticalAlignment="Stretch">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Label Content="Default start Phase:" Width="120"/>
-                                                    <xctk:IntegerUpDown x:Name="SprDefaultPhase" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110" PreviewMouseLeftButtonDown="SprDefaultPhase_PreviewMouseLeftButtonDown"/>
+                                                    <xctk:IntegerUpDown x:Name="SprDefaultPhase" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110" ValueChanged="SprDefaultPhase_ValueChanged"/>
                                                 </StackPanel>
                                                 <CheckBox x:Name="SprRandomPhase" Content="Random Start Phase" Click="SprRandomPhase_Click"/>
                                                 <CheckBox x:Name="SprSynchronized" Content="Synchronized" Click="SprSynchronized_Click"/>
@@ -748,7 +758,7 @@
                                             <Label Content="Bounding Square:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
                                             <xctk:IntegerUpDown x:Name="A_SprBounding" Margin="0,0,0,0" Width="110" Minimum="0" Maximum="384" ValueChanged="A_Texture_ValueChanged"/>
                                         </StackPanel>
-                                        <CheckBox x:Name="A_SprOpaque" Content="Is Opaque" HorizontalAlignment="Left" Margin="5,5,0,0"/>
+                                        <CheckBox x:Name="A_SprOpaque" Content="Is Opaque" HorizontalAlignment="Left" Margin="5,5,0,0" Click="SprOpaque_Click"/>
                                     </StackPanel>
                                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Margin="5,25,5,0">
                                         <Label Content="Bounding box per direction"/>

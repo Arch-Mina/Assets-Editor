@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using MediaColor = System.Windows.Media.Color;
 using DrawingColor = System.Drawing.Color;
 using Appearance = Tibia.Protobuf.Appearances.Appearance;
+using Tibia.Protobuf.Appearances;
 
 namespace Assets_Editor;
 
@@ -439,5 +440,42 @@ public static class Utils
                 clonedItem.Flags.Cyclopediaitem.CyclopediaType = newId;
         }
     }
-}
 
+    public static void WritePresetToOtfi(string otfiPath, in PresetSettings preset, string datFile, string sprFile, bool transparency) {
+        // create DatSpr node
+        OTMLNode datspr = OTMLNode.Create("DatSpr", unique: true);
+
+        // bools
+        datspr.AddChild(OTMLNode.Create("extended", preset.Extended.ToString().ToLower()));
+        datspr.AddChild(OTMLNode.Create("transparency", transparency.ToString().ToLower()));
+        datspr.AddChild(OTMLNode.Create("frame-durations", preset.FrameDurations.ToString().ToLower()));
+        datspr.AddChild(OTMLNode.Create("frame-groups", preset.FrameGroups.ToString().ToLower()));
+
+        // spr/dat pair
+        datspr.AddChild(OTMLNode.Create("metadata-file", Path.GetFileName(datFile)));
+        datspr.AddChild(OTMLNode.Create("sprites-file", Path.GetFileName(sprFile)));
+
+        // optional combined name ("assets-name")
+        string? baseName = Path.GetFileNameWithoutExtension(datFile);
+        if (baseName != null) {
+            datspr.AddChild(OTMLNode.Create("assets-name", baseName));
+        }
+
+        File.WriteAllText(otfiPath, datspr.Emit() + "\n");
+    }
+
+    public static void SafeGetLensHelp(System.Windows.Controls.ComboBox dropdown, AppearanceFlagLenshelp? flag) {
+        if (flag == null) {
+            dropdown.SelectedIndex = -1;
+            return;
+        }
+
+        int lensHelpId = flag.HasId ? (int)flag.Id : -1;
+        if (lensHelpId >= 1100) {
+            dropdown.SelectedIndex = lensHelpId - 1100;
+            return;
+        }
+
+        dropdown.SelectedIndex = -1;
+    }
+}

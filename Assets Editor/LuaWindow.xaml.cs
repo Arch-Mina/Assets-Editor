@@ -27,6 +27,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 using Tibia.Protobuf.Appearances;
+using ProtoCollections = Google.Protobuf.Collections;
 
 namespace Assets_Editor;
 
@@ -220,11 +221,17 @@ return generateChartData()
             RegisterLuaType<SpritePhase>();
             RegisterLuaType<Box>();
 
+            // support protobuf methods inside Lua
+            RegisterLuaType<ProtoCollections.RepeatedField<uint>>();
+            RegisterLuaType<ProtoCollections.RepeatedField<FrameGroup>>();
+            RegisterLuaType<ProtoCollections.RepeatedField<SpritePhase>>();
+
             // make it possible to use but without ability to construct
             UserData.RegisterType<LuaThings>();
 
             // access repeated field
             UserData.RegisterType<List<AppearanceFlagNPC>>();
+            UserData.RegisterType<List<uint>>();
 
             // g_things
             Table g_things = new(_luaScript);
