@@ -211,7 +211,28 @@ namespace Assets_Editor
         public DatEditor()
         {
             InitializeComponent();
+            
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Copy,
+                (s, e) => CopyObjectFlags(null, null)));
 
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Paste,
+                (s, e) => PasteObjectFlags(null, null)));
+
+            var duplicateCommand = new RoutedCommand();
+            CommandBindings.Add(new CommandBinding(duplicateCommand,
+                (s, e) => ObjectClone_PreviewMouseLeftButtonDown(null, null)));
+
+            InputBindings.Add(new KeyBinding(duplicateCommand, Key.D, ModifierKeys.Control));
+
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Save,
+                (s, e) => ObjectSave_PreviewMouseLeftButtonDown(null, null)));
+            
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.New,
+                (s, e) => NewObject_PreviewMouseLeftButtonDown(null, null)));
+            
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Delete,
+                (s, e) => DeleteObject_PreviewMouseLeftButtonDown(null, null)));
+            
             // set current theme
             DarkModeToggle.IsChecked = MainWindow.IsDarkModeSet();
 
@@ -793,6 +814,21 @@ namespace Assets_Editor
         {
             A_FlagMarketProfession.SelectedIndex = -1;
         }
+        private void A_FlagMarket_Checked(object sender, RoutedEventArgs e)
+        {
+            if (CurrentObjectAppearance != null)
+            {
+                A_FlagMarketTrade.Value = (int)CurrentObjectAppearance.Id;
+                A_FlagMarketShow.Value = (int)CurrentObjectAppearance.Id;
+            }
+        }
+        private void A_FlagCyclopedia_Checked(object sender, RoutedEventArgs e)
+        {
+            if (CurrentObjectAppearance != null)
+            {
+                A_FlagCyclopediaItem.Value = (int)CurrentObjectAppearance.Id;
+            }
+        }
         private void Randomize_Click(object sender, RoutedEventArgs e)
         {
             Random rnd = new Random();
@@ -828,7 +864,6 @@ namespace Assets_Editor
                 ClipboardManager.CopyText(xml, "xml", StatusBar);
             });
         }
-
         private void SprFramesSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (isUpdatingFrame)
