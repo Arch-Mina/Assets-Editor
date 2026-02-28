@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assets_Editor
@@ -18,11 +14,11 @@ namespace Assets_Editor
 
         public Sprite()
         {
-            this.ID = 0;
-            this.Size = 0;
-            this.CompressedPixels = null;
-            this.Transparent = false;
-            this.MemoryStream = new MemoryStream();
+            ID = 0;
+            Size = 0;
+            CompressedPixels = null;
+            Transparent = false;
+            MemoryStream = new MemoryStream();
         }
 
         public const byte DefaultSize = 32;
@@ -37,11 +33,11 @@ namespace Assets_Editor
 
         private static byte[] BlankRGBSprite = new byte[RGBPixelsDataSize];
         private static byte[] BlankARGBSprite = new byte[ARGBPixelsDataSize];
-        private static readonly Rectangle Rect = new Rectangle(0, 0, DefaultSize, DefaultSize);
+        private static readonly Rectangle Rect = new(0, 0, DefaultSize, DefaultSize);
 
         public byte[] GetPixels()
         {
-            if (this.CompressedPixels == null || this.CompressedPixels.Length != this.Size)
+            if (CompressedPixels == null || CompressedPixels.Length != Size)
             {
                 return BlankARGBSprite;
             }
@@ -51,14 +47,14 @@ namespace Assets_Editor
             int pos = 0;
             int transparentPixels = 0;
             int coloredPixels = 0;
-            int length = this.CompressedPixels.Length;
-            byte bitPerPixel = (byte)(this.Transparent ? 4 : 3);
+            int length = CompressedPixels.Length;
+            byte bitPerPixel = (byte)(Transparent ? 4 : 3);
             byte[] pixels = new byte[ARGBPixelsDataSize];
 
             for (read = 0; read < length; read += 4 + (bitPerPixel * coloredPixels))
             {
-                transparentPixels = this.CompressedPixels[pos++] | this.CompressedPixels[pos++] << 8;
-                coloredPixels = this.CompressedPixels[pos++] | this.CompressedPixels[pos++] << 8;
+                transparentPixels = CompressedPixels[pos++] | CompressedPixels[pos++] << 8;
+                coloredPixels = CompressedPixels[pos++] | CompressedPixels[pos++] << 8;
 
                 if (write + (transparentPixels * 4) <= pixels.Length)
                 {
@@ -75,14 +71,14 @@ namespace Assets_Editor
                     // Log an error message or handle the issue as appropriate
                 }
 
-                if (write + (coloredPixels * 4) <= pixels.Length && pos + (coloredPixels * (this.Transparent ? 4 : 3)) <= this.CompressedPixels.Length)
+                if (write + (coloredPixels * 4) <= pixels.Length && pos + (coloredPixels * (Transparent ? 4 : 3)) <= CompressedPixels.Length)
                 {
                     for (int i = 0; i < coloredPixels; i++)
                     {
-                        byte red = this.CompressedPixels[pos++];
-                        byte green = this.CompressedPixels[pos++];
-                        byte blue = this.CompressedPixels[pos++];
-                        byte alpha = this.Transparent ? this.CompressedPixels[pos++] : (byte)0xFF;
+                        byte red = CompressedPixels[pos++];
+                        byte green = CompressedPixels[pos++];
+                        byte blue = CompressedPixels[pos++];
+                        byte alpha = Transparent ? CompressedPixels[pos++] : (byte)0xFF;
 
                         pixels[write++] = blue;
                         pixels[write++] = green;
@@ -111,7 +107,7 @@ namespace Assets_Editor
         public Bitmap GetBitmap()
         {
             Bitmap bitmap = new Bitmap(DefaultSize, DefaultSize, PixelFormat.Format32bppArgb);
-            byte[] pixels = this.GetPixels();
+            byte[] pixels = GetPixels();
 
             if (pixels != null)
             {
@@ -163,7 +159,7 @@ namespace Assets_Editor
 
             byte[] compressedPixels;
 
-            using (BinaryWriter writer = new BinaryWriter(new MemoryStream()))
+            using (BinaryWriter writer = new(new MemoryStream()))
             {
                 int read = 0;
                 int alphaCount = 0;
@@ -443,7 +439,7 @@ namespace Assets_Editor
             return pixels;
         }
 
-        public static async Task CompileSpritesAsync(string file, SpriteStorage spriteStorage, bool transparency, uint version, IProgress<int> progress)
+        public static async Task CompileSpritesAsync(string file, SpriteStorage spriteStorage, bool transparency, uint signature, IProgress<int> progress, bool extended = true)
         {
             await Task.Run(() =>
             {
@@ -451,79 +447,69 @@ namespace Assets_Editor
                 int currentPercentage = 0;
                 int FullProgress = spriteStorage.SprLists.Count;
                 string tempFile = file + ".tmp";
-                using (BinaryWriter writer = new BinaryWriter(new FileStream(tempFile, FileMode.Create)))
-                {
-                    uint count = (uint)spriteStorage.SprLists.Count - 1; ;
+                using BinaryWriter writer = new(new FileStream(tempFile, FileMode.Create));
+                uint totalPics = (uint)spriteStorage.SprLists.Count - 1; ;
 
-                    writer.Write(version);
+                
+                writer.Write(signature);
 
-                    writer.Write(count);
+                if (extended) {
+                    writer.Write(totalPics);
+                } else {
+                    writer.Write(Convert.ToUInt16(totalPics));
+                }
 
-                    byte headSize = 8;
-                    int addressPosition = headSize;
-                    int address = (int)((count * 4) + headSize);
-                    byte[] bytes = null;
+                byte headSize = extended ? (byte)8 : (byte)6;
+                int addressPosition = headSize;
+                int address = (int)((totalPics * 4) + headSize);
+                byte[] bytes = null;
 
-                    for (uint id = 1; id <= count; id++)
-                    {
+                for (uint id = 1; id <= totalPics; id++) {
 
-                        writer.Seek(addressPosition, SeekOrigin.Begin);
+                    writer.Seek(addressPosition, SeekOrigin.Begin);
 
-                        bytes = CompressBitmap(new Bitmap(spriteStorage.getSpriteStream((uint)id)), transparency);
+                    bytes = CompressBitmap(new Bitmap(spriteStorage.getSpriteStream((uint)id)), transparency);
 
-                        if (bytes.Length > 0)
-                        {
-                            // write address
-                            writer.Write((uint)address);
-                            writer.Seek(address, SeekOrigin.Begin);
+                    if (bytes.Length > 0) {
+                        // write address
+                        writer.Write((uint)address);
+                        writer.Seek(address, SeekOrigin.Begin);
 
-                            // write colorkey
-                            writer.Write((byte)0xFF); // red
-                            writer.Write((byte)0x00); // blue
-                            writer.Write((byte)0xFF); // green
+                        // write colorkey
+                        writer.Write((byte)0xFF); // red
+                        writer.Write((byte)0x00); // blue
+                        writer.Write((byte)0xFF); // green
 
-                            // write sprite data size
-                            writer.Write((short)bytes.Length);
+                        // write sprite data size
+                        writer.Write((short)bytes.Length);
 
-                            if (bytes.Length > 0)
-                            {
-                                writer.Write(bytes);
-                            }
+                        if (bytes.Length > 0) {
+                            writer.Write(bytes);
                         }
-                        else
-                        {
-                            writer.Write((uint)0);
-                            writer.Seek(address, SeekOrigin.Begin);
-                        }
-                        address = (int)writer.BaseStream.Position;
-                        addressPosition += 4;
-
-                        percentageComplete = (int)(id * 100 / FullProgress);
-                        if (percentageComplete > currentPercentage)
-                        {
-                            progress?.Report(percentageComplete);
-                            currentPercentage = percentageComplete;
-                        }
+                    } else {
+                        writer.Write((uint)0);
+                        writer.Seek(address, SeekOrigin.Begin);
                     }
+                    address = (int)writer.BaseStream.Position;
+                    addressPosition += 4;
 
-                    writer.Close();
-                    File.Move(tempFile, file, overwrite: true);
-                    if (File.Exists(tempFile))
-                    {
-                        try
-                        {
-                            File.Delete(tempFile);
-                        }
-                        catch
-                        {
-                        }
+                    percentageComplete = (int)(id * 100 / FullProgress);
+                    if (percentageComplete > currentPercentage) {
+                        progress?.Report(percentageComplete);
+                        currentPercentage = percentageComplete;
                     }
                 }
 
-
+                writer.Close();
+                File.Move(tempFile, file, overwrite: true);
+                if (File.Exists(tempFile)) {
+                    try {
+                        File.Delete(tempFile);
+                    } catch {
+                    }
+                }
             });
         }
-
     }
 
     public class SpriteStorage
@@ -531,6 +517,7 @@ namespace Assets_Editor
         public string SprPath { get; set; }
         public uint Signature;
         public bool Transparency;
+        public IProgress<int>? ProgressListener { get; set; }
         public Dictionary<uint, Sprite> Sprites { get; set; }
         public ConcurrentDictionary<int, MemoryStream> SprLists { get; set; }
 
@@ -550,26 +537,28 @@ namespace Assets_Editor
             Sprites[0] = blankSpr;
             SprLists[0] = blankSpr.MemoryStream;
         }
-        public SpriteStorage(string path, bool transparency, IProgress<int> reportProgress = null)
+        public SpriteStorage(string path, bool transparency, IProgress<int>? progressListener = null)
         {
             SprPath = path;
-            Sprites = new Dictionary<uint, Sprite>();
-            SprLists = new ConcurrentDictionary<int, MemoryStream>();
+            Sprites = [];
+            SprLists = [];
             Transparency = transparency;
-
+            ProgressListener = progressListener;
+        }
+        public void LoadSprites() {
             Sprite.CreateBlankSprite();
-            using FileStream fileStream = new FileStream(path, FileMode.Open);
-            using BinaryReader reader = new BinaryReader(fileStream);
+            using FileStream fileStream = new(SprPath, FileMode.Open, FileAccess.Read);
+            using BinaryReader reader = new(fileStream);
 
             Signature = reader.ReadUInt32();
 
-            uint totalPics = reader.ReadUInt32();
+            bool isExtended = MainWindow.GetCurrentPreset()?.Extended ?? false;
+            uint totalPics = isExtended ? reader.ReadUInt32() : reader.ReadUInt16();
 
-            List<(uint Index, uint Id)> spriteIndexes = new List<(uint Index, uint Id)>(Convert.ToInt32(totalPics));
-            Sprite blankSpr = new Sprite
-            {
+            List<(uint Index, uint Id)> spriteIndexes = new(Convert.ToInt32(totalPics));
+            Sprite blankSpr = new() {
                 ID = 0,
-                CompressedPixels = Array.Empty<byte>(),
+                CompressedPixels = [],
             };
             using Bitmap _bmp = blankSpr.GetBitmap();
             _bmp.Save(blankSpr.MemoryStream, ImageFormat.Png);
@@ -577,19 +566,16 @@ namespace Assets_Editor
             Sprites[0] = blankSpr;
             SprLists[0] = blankSpr.MemoryStream;
             int lastReportedProgress = -1;
-            for (uint i = 0; i < totalPics; ++i)
-            {
-                Sprite sprite = new Sprite
-                {
+            for (uint i = 0; i < totalPics; ++i) {
+                Sprite sprite = new() {
                     ID = i + 1,
                     Transparent = Transparency
                 };
                 Sprites[sprite.ID] = sprite;
                 SprLists[(int)sprite.ID] = sprite.MemoryStream;
                 int progress = (int)(i * 100 / totalPics);
-                if (progress != lastReportedProgress && reportProgress != null)
-                {
-                    reportProgress.Report(progress);
+                if (progress != lastReportedProgress && ProgressListener != null) {
+                    ProgressListener.Report(progress);
                     lastReportedProgress = progress;
                 }
             }
@@ -602,17 +588,17 @@ namespace Assets_Editor
                 return SprLists[(int)id];
             }
 
+            bool isExtended = MainWindow.GetCurrentPreset()?.Extended ?? false;
+
             Sprite sprite = Sprites[id];
-            using (FileStream fileStream = new FileStream(SprPath, FileMode.Open, FileAccess.Read))
+            using (FileStream fileStream = new(SprPath, FileMode.Open, FileAccess.Read))
             {
-                using (BinaryReader reader = new BinaryReader(fileStream))
-                {
-                    reader.BaseStream.Seek(8 + (id - 1) * 4, SeekOrigin.Begin);
-                    uint index = reader.ReadUInt32() + 3;
-                    reader.BaseStream.Seek(index, SeekOrigin.Begin);
-                    sprite.Size = reader.ReadUInt16();
-                    sprite.CompressedPixels = reader.ReadBytes((ushort)sprite.Size);
-                }
+                using BinaryReader reader = new(fileStream);
+                reader.BaseStream.Seek((isExtended ? 8 : 6) + (id - 1) * 4, SeekOrigin.Begin);
+                uint index = reader.ReadUInt32() + 3;
+                reader.BaseStream.Seek(index, SeekOrigin.Begin);
+                sprite.Size = reader.ReadUInt16();
+                sprite.CompressedPixels = reader.ReadBytes((ushort)sprite.Size);
             }
 
             using (Bitmap bmp = sprite.GetBitmap())

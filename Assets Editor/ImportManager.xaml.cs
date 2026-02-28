@@ -31,13 +31,13 @@ namespace Assets_Editor
             this.Closed += ImportManager_Closed;
         }
         private Appearances ImportAppearances;
-        private Dictionary<uint, Sprite> sprites = new Dictionary<uint, Sprite>();
-        private List<ShowList> AllSprList = new List<ShowList>();
-        private ConcurrentDictionary<int, MemoryStream> SprLists = new ConcurrentDictionary<int, MemoryStream>();
-        private ObservableCollection<ShowList> ThingsOutfit = new ObservableCollection<ShowList>();
-        private ObservableCollection<ShowList> ThingsItem = new ObservableCollection<ShowList>();
-        private ObservableCollection<ShowList> ThingsEffect = new ObservableCollection<ShowList>();
-        private ObservableCollection<ShowList> ThingsMissile = new ObservableCollection<ShowList>();
+        private Dictionary<uint, Sprite> sprites = [];
+        private List<ShowList> AllSprList = [];
+        private ConcurrentDictionary<int, MemoryStream> SprLists = [];
+        private ObservableCollection<ShowList> ThingsOutfit = [];
+        private ObservableCollection<ShowList> ThingsItem = [];
+        private ObservableCollection<ShowList> ThingsEffect = [];
+        private ObservableCollection<ShowList> ThingsMissile = [];
         private static SpriteStorage MainSprStorage;
         private void ImportManager_Closed(object sender, EventArgs e)
         {
@@ -63,7 +63,9 @@ namespace Assets_Editor
         }
         private async Task LoadImportClient()
         {
-            System.Windows.Forms.FolderBrowserDialog _assets = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.FolderBrowserDialog _assets = new() {
+                ClientGuid = Globals.GUID_ImportManager1
+            };
             if (_assets.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 string _assetsPath = _assets.SelectedPath;
@@ -81,8 +83,8 @@ namespace Assets_Editor
 
                         string _datPath = String.Format("{0}{1}", _assetsPath, "Tibia.dat");
                         string _sprPath = String.Format("{0}{1}", _assetsPath, "Tibia.spr");
-                        LegacyAppearance Dat = new LegacyAppearance();
-                        Dat.ReadLegacyDat(_datPath);
+                        LegacyAppearance Dat = new();
+                        Dat.ReadLegacyDat(_datPath, MainWindow.GetCurrentLoadedVersion());
                         ImportAppearances = Dat.Appearances;
 
                         bool transparency = false;
@@ -92,6 +94,7 @@ namespace Assets_Editor
                         });
 
                         MainSprStorage = new SpriteStorage(_sprPath, transparency, progressReporter);
+                        MainSprStorage.LoadSprites();
                         SprLists = MainSprStorage.SprLists;
                         sprites = MainSprStorage.Sprites;
                         for (uint i = 0; i < sprites.Count; i++)
@@ -157,13 +160,13 @@ namespace Assets_Editor
                     if (i >= offset && i < Math.Min(offset + 20, ObjListView.Items.Count))
                     {
                         if (ObjectMenu.SelectedIndex == 0)
-                            ThingsOutfit[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Outfit[i], MainSprStorage));
+                            ThingsOutfit[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Outfit[i], MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 1)
-                            ThingsItem[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Object[i], MainSprStorage));
+                            ThingsItem[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Object[i], MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 2)
-                            ThingsEffect[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Effect[i], MainSprStorage));
+                            ThingsEffect[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Effect[i], MainSprStorage));
                         else if (ObjectMenu.SelectedIndex == 3)
-                            ThingsMissile[i].Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(ImportAppearances.Missile[i], MainSprStorage));
+                            ThingsMissile[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Missile[i], MainSprStorage));
                     }
                     else
                     {
@@ -219,7 +222,7 @@ namespace Assets_Editor
                 for (int i = 0; i < SprListView.Items.Count; i++)
                 {
                     if (i >= offset && i < Math.Min(offset + 20, SprListView.Items.Count) && SprLists.ContainsKey(i))
-                        AllSprList[i].Image = Utils.BitmapToBitmapImage(MainSprStorage.getSpriteStream((uint)i));
+                        AllSprList[i].Image = Utils.ResizeForUI(MainSprStorage.getSpriteStream((uint)i));
                     else
                         AllSprList[i].Image = null;
                 }
@@ -401,12 +404,14 @@ namespace Assets_Editor
 
         private void ImportObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "OBD Files (*.obd)|*.obd";
+            OpenFileDialog openFileDialog = new() {
+                Filter = "OBD Files (*.obd)|*.obd",
+                ClientGuid = Globals.GUID_ImportManager2
+            };
             if (openFileDialog.ShowDialog() == true)
             {
                 string selectedFilePath = openFileDialog.FileName;
-                ConcurrentDictionary<int, MemoryStream> objectSprList = new ConcurrentDictionary<int, MemoryStream>();
+                ConcurrentDictionary<int, MemoryStream> objectSprList = [];
                 Appearance appearance = ObdDecoder.Load(selectedFilePath, ref objectSprList);
                 if (appearance != null)
                 {
@@ -516,7 +521,7 @@ namespace Assets_Editor
                             ShowList item = (ShowList)_editor.ObjListView.SelectedItem;
                             _editor.AnimateSelectedListItem(item);
                         }else
-                            _editor.StatusBar.MessageQueue.Enqueue($"You can only replace objects of the same type.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+                            _editor.StatusBar.MessageQueue?.Enqueue($"You can only replace objects of the same type.", null, null, null, false, true, TimeSpan.FromSeconds(2));
                     }
                 }
             }

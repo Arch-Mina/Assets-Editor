@@ -1,0 +1,7 @@
+image: Visual Studio 2022
+
+before_build:
+  - dotnet restore "Assets Editor/Assets Editor.sln"
+
+build_script:
+  - dotnet build "Assets Editor/Assets Editor.sln" --configuration Release

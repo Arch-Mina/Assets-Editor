@@ -8,6 +8,8 @@ Assets Editor is an open-source tool designed for modifying and managing client 
 ![Sheet Editor](/Assets%20Editor/Resources/4.PNG)
 ![Import and Export](/Assets%20Editor/Resources/5.gif)
 ![Dark Mode](/Assets%20Editor/Resources/6.PNG)
+![Lua Graphs](/Assets%20Editor/Resources/7.PNG)
+![Lua Scripting](/Assets%20Editor/Resources/8.PNG)
 
 ### Features
 
@@ -20,10 +22,16 @@ Assets Editor is an open-source tool designed for modifying and managing client 
 - **New Search Window**
 - **OTB Editor for Tibia 10.98**
 - **Import Manager for Tibia 10.98**
+- **Export to spr/dat**
+- **Export to outfit/item images**
+- **Large spritesheets**
+- **Transparent items in spritesheets**
+- **Lua support**
 
 #### Prerequisites
 
-- [.NET Framework 6.0]
+- [.NET 8 Runtime] (release 2.0)
+- [.NET 10 Runtime] (main branch)
 
 #### Usage
 - Download the latest release from the [Releases](https://github.com/Arch-Mina/Assets-Editor/releases) page.

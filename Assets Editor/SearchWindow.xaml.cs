@@ -48,11 +48,11 @@ namespace Assets_Editor
                     {
                         ShowList item = (ShowList)ItemListView.Items[i];
                         if (MainWindow.LegacyClient)
-                            item.Image = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(MainWindow.appearances.Object[(int)item.Id - 100], MainWindow.MainSprStorage));
+                            item.Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(MainWindow.appearances.Object[(int)item.Id - 100], MainWindow.MainSprStorage));
                         else
                         {
                             Appearance obj = MainWindow.appearances.Object.FirstOrDefault(o => o.Id == item.Id);
-                            item.Image = Utils.BitmapToBitmapImage(MainWindow.getSpriteStream((int)obj.FrameGroup[0].SpriteInfo.SpriteId[0]));
+                            item.Image = Utils.ResizeForUI(MainWindow.getSpriteStream((int)obj.FrameGroup[0].SpriteInfo.SpriteId[0]));
                         }
                     }
                     else
@@ -203,6 +203,9 @@ namespace Assets_Editor
                 if (A_FlagTopeffect.IsChecked == true && item.Flags.HasTop != true)
                     continue;
 
+                if (A_FlagWearout.IsChecked == true && item.Flags.HasWearout != true)
+                    continue;
+
                 if (A_FlagAnimated.IsChecked == true && item.FrameGroup[0].SpriteInfo.PatternFrames == 1)
                     continue;
 
@@ -215,6 +218,8 @@ namespace Assets_Editor
                     if (item.Flags.Market == null || item.Flags.Market.Category.ToString() != selectedMarketCategory)
                         continue;
                 }
+                if (A_FlagWingsOffset.IsChecked == true && (item.Flags.WingsOffset == null))
+                    continue;
 
                 ItemListView.Items.Add(new ShowList() { Id = item.Id});
             }

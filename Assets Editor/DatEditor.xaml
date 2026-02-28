@@ -7,15 +7,24 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="DatEditor" Height="860" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}" Loaded="Window_Loaded"
+        Title="DatEditor" Height="880" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}" Loaded="Window_Loaded"
         Style="{StaticResource MaterialDesignWindow}">
     <Window.Resources>
         <local:ArithmeticConverter x:Key="ArithmeticConverter" />
         <local:NullableColorToBrushConverter x:Key="NullableColorToBrushConverter" />
         <local:BooleanInverter x:Key="BooleanInverter"/>
+        <local:BooleanOrInverterConverter x:Key="BooleanOrInverterConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
-    <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch" IsHitTestVisible="{Binding ElementName=ComppileDialogHost, Path=IsOpen, Mode=OneWay, Converter={StaticResource BooleanInverter}}">
-        <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray" >
+    <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+        <Grid.IsHitTestVisible>
+            <MultiBinding Converter="{StaticResource BooleanOrInverterConverter}">
+                <!-- If either dialog is open, background must NOT be clickable -->
+                <Binding ElementName="ComppileDialogHost" Path="IsOpen"/>
+                <Binding ElementName="CompileToImagesDialogHost" Path="IsOpen"/>
+            </MultiBinding>
+        </Grid.IsHitTestVisible>
+        <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray">
             <materialDesign:DialogHost.DialogContent>
                 <GroupBox x:Name="CompileBox" Header="Export To Legacy" Width="350">
                     <Grid >
@@ -23,16 +32,26 @@
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
                         </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" Grid.Row="0">
-                            <Label Content="Converting Objects"/>
-                            <ProgressBar x:Name="LoadProgress1" Minimum="0" Maximum="100" Value="0" Width="210" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Grid.Row="1">
-                            <Label Content="Converting Sprites"/>
-                            <ProgressBar x:Name="LoadProgress2" Minimum="0" Maximum="100" Value="0" Width="210" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
-                        </StackPanel>
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <CheckBox Grid.Row="0" x:Name="C_Transparent" Content="Transparent" Margin="5,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="210"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="Converting Objects"/>
+                            <ProgressBar Grid.Column="1" x:Name="LoadProgress1" Minimum="0" Maximum="100" Value="0" Width="200" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,10" Height="8" />
+                        </Grid>
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="210"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="Converting Sprites"/>
+                            <ProgressBar Grid.Column="1" x:Name="LoadProgress2" Minimum="0" Maximum="100" Value="0" Width="200" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,10" Height="8" />
+                        </Grid>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button Click="CompileLegacy" Content="Export" Width="100" Margin="0,0,20,0"/>
                             <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
                         </StackPanel>
@@ -40,6 +59,78 @@
                 </GroupBox>
             </materialDesign:DialogHost.DialogContent>
         </materialDesign:DialogHost>
+
+        <materialDesign:DialogHost Grid.Row="1" x:Name="CompileToImagesDialogHost" OverlayBackground="Gray" >
+            <materialDesign:DialogHost.DialogContent>
+                <GroupBox x:Name="CompileToImagesBox" Header="Export As Images" Width="500">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="160"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Grid.Row="0">
+                            <Label Content="Converting Objects"/>
+                            <ProgressBar x:Name="ImgExportProgress" Minimum="0" Maximum="100" Value="0" Width="210" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,10" Height="8" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Margin="5,5">
+                                <CheckBox x:Name="ExportItemsCheckBox" Content="Items" Margin="5,0"/>
+                                <TextBlock x:Name="ExportItemsProgressText" Text="0/0" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <StackPanel Orientation="Horizontal" Margin="5,0">
+                                    <Label Content="Min ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportItemsMinId" Width="80" Minimum="100" Margin="5,0"/>
+                                    <Label Content="Max ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportItemsMaxId" Width="80" Minimum="100" Margin="5,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="5,5">
+                                <CheckBox x:Name="ExportOutfitsCheckBox" Content="Outfits" Margin="5,0"/>
+                                <TextBlock x:Name="ExportOutfitsProgressText" Text="0/0" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <StackPanel Orientation="Horizontal" Margin="5,0">
+                                    <Label Content="Min ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportOutfitsMinId" Width="80" Minimum="1" Margin="5,0"/>
+                                    <Label Content="Max ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportOutfitsMaxId" Width="80" Minimum="1" Margin="5,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="5,5">
+                                <CheckBox x:Name="ExportEffectsCheckBox" Content="Effects" Margin="5,0"/>
+                                <TextBlock x:Name="ExportEffectsProgressText" Text="0/0" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <StackPanel Orientation="Horizontal" Margin="5,0">
+                                    <Label Content="Min ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportEffectsMinId" Width="80" Minimum="1" Margin="5,0"/>
+                                    <Label Content="Max ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportEffectsMaxId" Width="80" Minimum="1" Margin="5,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="5,5">
+                                <CheckBox x:Name="ExportMissilesCheckBox" Content="Missiles" Margin="5,0"/>
+                                <TextBlock x:Name="ExportMissilesProgressText" Text="0/0" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <StackPanel Orientation="Horizontal" Margin="5,0">
+                                    <Label Content="Min ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportMissilesMinId" Width="80" Minimum="1" Margin="5,0"/>
+                                    <Label Content="Max ID:" VerticalAlignment="Center" Margin="5,0"/>
+                                    <xctk:IntegerUpDown x:Name="ExportMissilesMaxId" Width="80" Minimum="1" Margin="5,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
+                            <Label Content="Export Directory:" VerticalAlignment="Center" Margin="5,0"/>
+                            <TextBox x:Name="ExportImageDirectoryTextBox" Width="200" Margin="5,0"/>
+                            <Button Content="Browse" Click="ExportAsImageDirectoryPicker_Click" Margin="5,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Click="CompileAsImages" Content="Export" Width="100" Margin="0,0,20,0"/>
+                            <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+            </materialDesign:DialogHost.DialogContent>
+        </materialDesign:DialogHost>
+
         <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -72,6 +163,13 @@
                                         <Setter Property="Visibility" Value="Collapsed" />
                                     </Style>
                                 </GridView.ColumnHeaderContainerStyle>
+                                <GridViewColumn Header="Exported" Width="20">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Ellipse Width="7" Height="7" Fill="Blue" ToolTip="Export List" Visibility="{Binding Exported, Converter={StaticResource BoolToVis}, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
                                 <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="60"/>
                                 <GridViewColumn Header="Sprite" Width="90">
                                     <GridViewColumn.CellTemplate>
@@ -142,7 +240,17 @@
                                     <materialDesign:PackIcon Kind="ContentSaveCogOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
+                            <MenuItem Header="Import AEC/OBD" Click="ImportItems_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="Download" />
+                                </MenuItem.Icon>
+                            </MenuItem>
                             <MenuItem Header="Export to legacy" Click="CompileLegacy_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="FileDocumentArrowRight" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Export as images" Click="CompileToImages_Click">
                                 <MenuItem.Icon>
                                     <materialDesign:PackIcon Kind="FileDocumentArrowRight" />
                                 </MenuItem.Icon>
@@ -162,6 +270,13 @@
                             <MenuItem Header="Logger" Click="ShowLogger">
                                 <MenuItem.Icon>
                                     <materialDesign:PackIcon Kind="MathLog" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="_Tools">
+                            <MenuItem Header="Lua Script Editor" Click="OpenLuaWindow_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="Code"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                         </MenuItem>
@@ -239,7 +354,7 @@
                                             <Label Content="Brightness:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                             <xctk:IntegerUpDown x:Name="A_FlagLightBrightness" Margin="0,0,0,0" Width="50" Minimum="0" Maximum="10"/>
                                             <Label Content="Color:" Width="35" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                            <xctk:ColorPicker x:Name="A_FlagLightColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" Width="30" SelectedColorChanged="A_FlagLightColorPickerChanged"/>
+                                            <xctk:ColorPicker x:Name="A_FlagLightColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" MaxDropDownWidth="510" ShowTabHeaders="False" Width="30" SelectedColorChanged="A_FlagLightColorPickerChanged"/>
                                             <xctk:IntegerUpDown x:Name="A_FlagLightColor" Margin="15,0,0,0" Width="50" Minimum="0" Maximum="215" ValueChanged="A_FlagLightColor_ValueChanged"/>
                                         </StackPanel>
                                         <CheckBox x:Name="A_FlagDontHide" Content="Dont Hide" Margin="0,5,0,0"/>
@@ -267,7 +382,7 @@
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="22" Margin="0,5,0,0">
                                             <CheckBox x:Name="A_FlagAutomap" Content="Auto Map" Width="160" Margin="0,-1,0,5" Padding="4,0,0,0"/>
                                             <Label Content="Color:" Width="60" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                            <xctk:ColorPicker x:Name="A_FlagAutomapColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" Width="30" SelectedColorChanged="A_FlagAutomapColorPickerChanged"/>
+                                            <xctk:ColorPicker x:Name="A_FlagAutomapColorPicker" VerticalAlignment="Top" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" MaxDropDownWidth="510" Width="30" SelectedColorChanged="A_FlagAutomapColorPickerChanged"/>
                                             <xctk:IntegerUpDown x:Name="A_FlagAutomapColor" Margin="10,0,0,0" Width="50" Minimum="0" Maximum="215" ValueChanged="A_FlagAutomapColor_ValueChanged"/>
                                         </StackPanel>
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
@@ -349,6 +464,7 @@
                                                 <ComboBoxItem Content="CreatureProducts"/>
                                                 <ComboBoxItem Content="Quiver"/>
                                                 <ComboBoxItem Content="SoulCores"/>
+                                                <ComboBoxItem Content="FistWeapons"/>
                                             </ComboBox>
                                         </StackPanel>
                                         <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20">
@@ -409,8 +525,63 @@
                                             <xctk:IntegerUpDown x:Name="A_FlagCyclopediaItem" Margin="0,0,0,0" Width="80"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                            <CheckBox x:Name="A_FlagNPC" Content="Npc Sale Data" Margin="0,5,0,0" Width="150"/>
-                                            <CheckBox x:Name="A_FlagAmmo" Content="Ammo" Margin="0,5,0,0" Width="150"/>
+                                            <CheckBox x:Name="A_FlagNPC" Content="Npc Sale Data" Margin="0,0,0,0" Width="150"/>
+                                            <CheckBox x:Name="A_FlagAmmo" Content="Ammo" Margin="0,0,0,0" Width="150"/>
+                                        </StackPanel>
+                                        <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                            <CheckBox x:Name="A_FlagSkillWheelGem" Content="WheelGem" Width="90" Margin="0,0,0,0" Padding="4,0,0,0"/>
+                                            <Label Content="Quality Id:" Width="60" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagGemQualityId" Margin="0,0,0,0" Width="60" Minimum="0"/>
+                                            <Label Content="Voc Id:" Width="40" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagGemVocationId" Margin="0,0,0,0" Width="60" Minimum="0"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <CheckBox x:Name="A_FlagDualWielding" Content="Dual Wielding" Margin="0,0,0,0" Width="150"/>
+                                        </StackPanel>
+                                        <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                            <CheckBox x:Name="A_FlagImbueable" Content="Imbueable" Width="165" Margin="0,-1,0,0" Padding="4,0,0,0"/>
+                                            <Label Content="Slot Count:" Width="75" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagImbueableSlotCount" Margin="0,0,0,0" Width="80" Minimum="0"/>
+                                        </StackPanel>
+                                        <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                            <CheckBox x:Name="A_FlagProficiency" Content="Proficiency" Width="165" Margin="0,-1,0,0" Padding="4,0,0,0"/>
+                                            <Label Content="Proficiency Id:" Width="85" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagProficiencyId" Margin="0,0,0,0" Width="70" Minimum="0"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <Label Content="Minimum Level:" Width="110" Padding="0,0,0,0" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <xctk:IntegerUpDown x:Name="A_FlagMinimumLevel" Margin="0,0,0,0" Width="100" Minimum="0"/>
+                                        </StackPanel>
+                                        <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,5,0,0">
+                                            <Label Content="Weapon Type:" Width="110" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <ComboBox x:Name="A_FlagWeaponType" Width="100" BorderThickness="1,1,1,1" SelectedIndex="-1" Padding="6,1,5,3">
+                                                <ComboBoxItem Content="No Weapon"/>
+                                                <ComboBoxItem Content="Sword"/>
+                                                <ComboBoxItem Content="Axe"/>
+                                                <ComboBoxItem Content="Club"/>
+                                                <ComboBoxItem Content="Fist"/>
+                                                <ComboBoxItem Content="Bow"/>
+                                                <ComboBoxItem Content="CrossBow"/>
+                                                <ComboBoxItem Content="Wand/Rod"/>
+                                                <ComboBoxItem Content="Throw"/>
+                                            </ComboBox>
+                                        </StackPanel>
+                                        <StackPanel Width="320" Orientation="Horizontal" HorizontalAlignment="Left" Height="40" Margin="0,5,0,0">
+                                            <Label Content="Restrict Vocation:" Width="110" Padding="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <ComboBox x:Name="A_FlagRestrictVocation" Width="100" BorderThickness="1,1,1,1" SelectedIndex="0" Height="40" Padding="6,1,5,3" IsReadOnly="True">
+                                                <ComboBoxItem>
+                                                    <StackPanel Orientation="Vertical">
+                                                        <CheckBox x:Name="A_FlagRestrictVocAny" Content="Any"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocNone" Content="None"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocKnight" Content="Knight"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocPaladin" Content="Paladin"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocSorcerer" Content="Sorcerer"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocDruid" Content="Druid"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocMonk" Content="Monk"/>
+                                                        <CheckBox x:Name="A_FlagRestrictVocPromoted" Content="Promoted"/>
+                                                    </StackPanel>
+                                                </ComboBoxItem>
+                                            </ComboBox>
                                         </StackPanel>
                                         <DataGrid x:Name="A_FlagNPCData" Height="153" HorizontalAlignment="Left" Margin="0,5,0,0" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="true" CanUserResizeRows="False" FontSize="11">
                                             <DataGrid.ColumnHeaderStyle>
@@ -437,9 +608,26 @@
                             <ScrollViewer>
                                 <WrapPanel Orientation="Horizontal" MaxWidth="700">
                                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="321" Margin="5,0,5,0">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                                            <Label Content="Zoom:" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <Slider x:Name="ZoomSlider"
+                                                    Minimum="0.5"
+                                                    Maximum="4"
+                                                    Value="1"
+                                                    TickFrequency="0.1"
+                                                    IsSnapToTickEnabled="True"
+                                                    Width="150"
+                                                    Margin="5"
+                                                    VerticalAlignment="Center"
+                                            />
+                                            <Button Margin="10,0,0,0" Content="Reset" Click="ResetZoom_Click" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                         <Grid Margin="20,20,0,0" Width="265" Height="265" HorizontalAlignment="Left" VerticalAlignment="Top">
                                             <Border BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#FF4F4F4F" Background="{Binding SelectedColor, ElementName=SprBackgroundPicker, Converter={StaticResource NullableColorToBrushConverter} }">
                                                 <Grid x:Name="SpriteViewerGrid" ShowGridLines="false" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Grid.LayoutTransform>
+                                                        <ScaleTransform ScaleX="{Binding Value, ElementName=ZoomSlider}" ScaleY="{Binding Value, ElementName=ZoomSlider}"/>
+                                                    </Grid.LayoutTransform>
                                                     <Grid.RowDefinitions>
                                                         <RowDefinition Height="32"/>
                                                     </Grid.RowDefinitions>
@@ -461,6 +649,18 @@
                                                 <materialDesign:PackIcon Kind="ArrowLeftDropCircle" HorizontalAlignment="Center" ToolTip="Modify"/>
                                             </Button>
                                         </Grid>
+                                        <StackPanel Orientation="Horizontal" Margin="0 10 0 0" HorizontalAlignment="Center">
+                                            <ToggleButton x:Name="SprBlendLayers" Style="{StaticResource MaterialDesignFlatPrimaryToggleButton}" Width="35" Height="35" ToolTip="Blend Layers" Margin="0 -5 5 0" Checked="SprOutfitChanged" Unchecked="SprOutfitChanged">
+                                                <materialDesign:PackIcon Width="20" Height="20" Kind="LinkVariant" />
+                                            </ToggleButton>
+                                            <CheckBox x:Name="SprFullAddons" materialDesign:CheckBoxAssist.CheckBoxSize="30" ToolTip="Show Full Addons" Margin="0 0 5 0" Checked="SprOutfitChanged" Unchecked="SprOutfitChanged"/>
+                                            <xctk:ColorPicker x:Name="SprLayerHeadPicker" VerticalAlignment="Center" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" MaxDropDownWidth="420" SelectedColor="Gray" Width="23" SelectedColorChanged="SprLayerPicker_SelectedColorChanged"/>
+                                            <xctk:ColorPicker x:Name="SprLayerBodyPicker" VerticalAlignment="Center" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" MaxDropDownWidth="420" SelectedColor="Gray" Width="23" SelectedColorChanged="SprLayerPicker_SelectedColorChanged"/>
+                                            <xctk:ColorPicker x:Name="SprLayerLegsPicker" VerticalAlignment="Center" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" MaxDropDownWidth="420" SelectedColor="Gray" Width="23" SelectedColorChanged="SprLayerPicker_SelectedColorChanged"/>
+                                            <xctk:ColorPicker x:Name="SprLayerFeetPicker" VerticalAlignment="Center" DisplayColorTooltip="False" ShowDropDownButton="False" ShowStandardColors="False" ShowTabHeaders="False" MaxDropDownWidth="420" SelectedColor="Gray" Width="23" SelectedColorChanged="SprLayerPicker_SelectedColorChanged"/>
+                                            <Button Content="R" ToolTip="Randomize" VerticalAlignment="Center" Width="40" Height="25" Margin="5 0 0 0" Click="Randomize_Click"/>
+                                            <Button ToolTip="Copy Xml" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon ContentCopy}" Width="35" Height="30" VerticalAlignment="Center" Margin="5 0 0 0" Click="OutfitXml"/>
+                                        </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                                             <Label x:Name="SprFramesSliderCounter" HorizontalAlignment="Left"
                                                    Margin="20,0,0,0" VerticalAlignment="Top"
@@ -471,14 +671,14 @@
                                                     Margin="35,5,0,0" SmallChange="1" VerticalAlignment="Top"
                                                     HorizontalAlignment="Left" />
                                         </StackPanel>
-                                        <xctk:ColorPicker x:Name="SprBackgroundPicker" VerticalAlignment="Top" AdvancedTabHeader="False" ShowTabHeaders="False" SelectedColor="Gray" Width="200" Margin="0,15,0,10"/>
+                                        <xctk:ColorPicker x:Name="SprBackgroundPicker" VerticalAlignment="Top" AdvancedTabHeader="False" ShowTabHeaders="False" SelectedColor="Gray" Width="200" Margin="0,15,0,10" ColorMode ="ColorCanvas"/>
                                     </StackPanel>
                                     <StackPanel Width="320" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                                         <GroupBox x:Name="SpriteAnimationGroup" Header="Sprite Animation" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320">
                                             <StackPanel Orientation="Vertical" x:Name="AnimationTab" HorizontalAlignment="Center" VerticalAlignment="Stretch">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Label Content="Default start Phase:" Width="120"/>
-                                                    <xctk:IntegerUpDown x:Name="SprDefaultPhase" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110" PreviewMouseLeftButtonDown="SprDefaultPhase_PreviewMouseLeftButtonDown"/>
+                                                    <xctk:IntegerUpDown x:Name="SprDefaultPhase" Minimum="0" Maximum="1000" HorizontalAlignment="Left" Width="110" ValueChanged="SprDefaultPhase_ValueChanged"/>
                                                 </StackPanel>
                                                 <CheckBox x:Name="SprRandomPhase" Content="Random Start Phase" Click="SprRandomPhase_Click"/>
                                                 <CheckBox x:Name="SprSynchronized" Content="Synchronized" Click="SprSynchronized_Click"/>
@@ -556,13 +756,18 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="20" Margin="0,10,0,0">
                                             <Label Content="Bounding Square:" Width="120" Padding="0,0,0,0" Margin="10,0,0,0" HorizontalAlignment="Left"/>
-                                            <xctk:IntegerUpDown x:Name="A_SprBounding" Margin="0,0,0,0" Width="110" Minimum="0" Maximum="64" ValueChanged="A_Texture_ValueChanged"/>
+                                            <xctk:IntegerUpDown x:Name="A_SprBounding" Margin="0,0,0,0" Width="110" Minimum="0" Maximum="384" ValueChanged="A_Texture_ValueChanged"/>
                                         </StackPanel>
-                                        <CheckBox x:Name="A_SprOpaque" Content="Is Opaque" HorizontalAlignment="Left" Margin="5,5,0,0"/>
+                                        <CheckBox x:Name="A_SprOpaque" Content="Is Opaque" HorizontalAlignment="Left" Margin="5,5,0,0" Click="SprOpaque_Click"/>
                                     </StackPanel>
                                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="320" Margin="5,25,5,0">
                                         <Label Content="Bounding box per direction"/>
-                                        <DataGrid x:Name="BoxPerDirection" Height="200" HorizontalAlignment="Left" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" RowEditEnding="BoxPerDirection_RowEditEnding" CanUserSortColumns="False">
+                                        <DataGrid x:Name="BoxPerDirection" Height="200" HorizontalAlignment="Left" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" RowEditEnding="BoxPerDirection_RowEditEnding" CanUserSortColumns="False" CanUserDeleteRows="False">
+                                            <DataGrid.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Delete Row" Click="BoxPerDirection_Delete"/>
+                                                </ContextMenu>
+                                            </DataGrid.ContextMenu>
                                             <DataGrid.ColumnHeaderStyle>
                                                 <Style TargetType="DataGridColumnHeader">
                                                     <Setter Property="FontSize" Value="10"/>
