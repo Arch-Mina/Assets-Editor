@@ -1,4 +1,4 @@
-﻿using Google.Protobuf;
+using Google.Protobuf;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -62,7 +62,7 @@ namespace Assets_Editor
             // standard sprite sizes across entire program
             new(32, 32), // 0
             new(32, 64), // 1
-            new(64, 32), // 2 
+            new(64, 32), // 2
             new(64, 64), // 3
 
             // warning: requires client editing
@@ -2132,6 +2132,13 @@ namespace Assets_Editor
             ExportOutfitsMaxId.Value = (int)maxOutfits;
             ExportEffectsMaxId.Value = (int)maxEffects;
             ExportMissilesMaxId.Value = (int)maxMissiles;
+        }
+
+        private void ExportNpcs_Click(object sender, RoutedEventArgs e)
+        {
+            var exportWindow = new NpcExportWindow();
+            exportWindow.Owner = this;
+            exportWindow.ShowDialog();
         }
 
         private async void CompileAsImages(object sender, RoutedEventArgs e)
