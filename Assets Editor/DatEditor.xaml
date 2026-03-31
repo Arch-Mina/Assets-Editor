@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Assets_Editor" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" 
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+        xmlns:local="clr-namespace:Assets_Editor" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="DatEditor" Height="880" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}" Loaded="Window_Loaded"
@@ -255,7 +255,12 @@
                                     <materialDesign:PackIcon Kind="FileDocumentArrowRight" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <!-- 
+                            <MenuItem Header="Export NPC Item List" Click="ExportNpcs_Click">
+                                <MenuItem.Icon>
+                                    <materialDesign:PackIcon Kind="AccountArrowRight" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <!--
                         <MenuItem Header="OTB Editor" Click="OTBEditor_Click">
                             <MenuItem.Icon>
                                 <materialDesign:PackIcon Kind="CookieEdit" />
