@@ -73,8 +73,13 @@ namespace Assets_Editor
         {
             ItemListView.Items.Clear();
 
+            string searchName = SearchNameTextBox.Text.Trim().ToLowerInvariant();
+
             foreach (Appearance item in MainWindow.appearances.Object)
             {
+
+                if (!string.IsNullOrEmpty(searchName) && (item.Name == null || !item.Name.ToLowerInvariant().Contains(searchName)))
+                    continue;
 
                 if (A_FlagGround.IsChecked == true && (item.Flags.Bank == null))
                     continue;
@@ -202,7 +207,7 @@ namespace Assets_Editor
                 if (A_FlagWingsOffset.IsChecked == true && (item.Flags.WingsOffset == null))
                     continue;
 
-                ItemListView.Items.Add(new ShowList() { Id = item.Id});
+                ItemListView.Items.Add(new ShowList() { Id = item.Id, Name = item.Name });
             }
         }
     }
