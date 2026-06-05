@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -24,11 +24,191 @@ namespace Assets_Editor
     public partial class ImportManager : Window
     {
         private LegacyDatEditor _editor;
+        private int _lastObjListViewOffset = -1;
+        private int _lastObjListViewMaxVisible = -1;
+        private System.Windows.Threading.DispatcherTimer _objListViewScrollThrottleTimer = new();
+        private int _pendingObjListViewOffset = -1;
+        private int _pendingObjListViewMaxVisible = -1;
+        private Dictionary<(int, int), Appearance> _appearanceCache = new();
+        private int _cachedObjectMenuIndex = -1;
+        
+        private int _lastSprListViewOffset = -1;
+        private int _lastSprListViewMaxVisible = -1;
+        private System.Windows.Threading.DispatcherTimer _sprListViewScrollThrottleTimer = new();
+        private int _pendingSprListViewOffset = -1;
+        private int _pendingSprListViewMaxVisible = -1;
+        
         public ImportManager(LegacyDatEditor editor)
         {
             InitializeComponent();
+            InitializeScrollOptimization();
             _editor = editor;
             this.Closed += ImportManager_Closed;
+        }
+        
+                private void ProcessObjListViewScroll(int offset, int maxVisible)
+                {
+                    int itemCount = ObjListView.Items.Count;
+                    if (itemCount == 0)
+                        return;
+
+                    int maxOffset = Math.Min(offset + maxVisible, itemCount);
+                    int previousMaxOffset = Math.Min(_lastObjListViewOffset + maxVisible, itemCount);
+
+                    if (_lastObjListViewOffset == -1)
+                    {
+                        for (int i = offset; i < maxOffset; i++)
+                        {
+                            UpdateObjListViewItem(i);
+                        }
+                    }
+                    else if (offset != _lastObjListViewOffset)
+                    {
+                        for (int i = Math.Max(_lastObjListViewOffset, 0); i < offset && i < itemCount; i++)
+                        {
+                            ClearObjListViewItem(i);
+                        }
+                
+                        for (int i = maxOffset; i < previousMaxOffset && i < itemCount; i++)
+                        {
+                            ClearObjListViewItem(i);
+                        }
+                
+                        for (int i = offset; i < maxOffset; i++)
+                        {
+                            UpdateObjListViewItem(i);
+                        }
+                    }
+
+                    _lastObjListViewOffset = offset;
+                    _lastObjListViewMaxVisible = maxVisible;
+                }
+        
+                private void UpdateObjListViewItem(int itemIndex)
+                {
+                    if (itemIndex < 0 || itemIndex >= ObjListView.Items.Count)
+                        return;
+                
+                    try
+                    {
+                        if (ObjectMenu.SelectedIndex == 0)
+                            ThingsOutfit[itemIndex].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Outfit[itemIndex], MainSprStorage));
+                        else if (ObjectMenu.SelectedIndex == 1)
+                            ThingsItem[itemIndex].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Object[itemIndex], MainSprStorage));
+                        else if (ObjectMenu.SelectedIndex == 2)
+                            ThingsEffect[itemIndex].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Effect[itemIndex], MainSprStorage));
+                        else if (ObjectMenu.SelectedIndex == 3)
+                            ThingsMissile[itemIndex].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Missile[itemIndex], MainSprStorage));
+                    }
+                    catch (Exception)
+                    {
+                        ClearObjListViewItem(itemIndex);
+                    }
+                }
+        
+                private void ClearObjListViewItem(int itemIndex)
+                {
+                    if (itemIndex < 0 || itemIndex >= ObjListView.Items.Count)
+                        return;
+                
+                    if (ObjectMenu.SelectedIndex == 0)
+                        ThingsOutfit[itemIndex].Image = null;
+                    else if (ObjectMenu.SelectedIndex == 1)
+                        ThingsItem[itemIndex].Image = null;
+                    else if (ObjectMenu.SelectedIndex == 2)
+                        ThingsEffect[itemIndex].Image = null;
+                    else if (ObjectMenu.SelectedIndex == 3)
+                        ThingsMissile[itemIndex].Image = null;
+                }
+        
+                private void ProcessSprListViewScroll(int offset, int maxVisible)
+                {
+                    int itemCount = SprListView.Items.Count;
+                    if (itemCount == 0)
+                        return;
+
+                    int maxOffset = Math.Min(offset + maxVisible, itemCount);
+                    int previousMaxOffset = Math.Min(_lastSprListViewOffset + maxVisible, itemCount);
+
+                    if (_lastSprListViewOffset == -1)
+                    {
+                        for (int i = offset; i < maxOffset; i++)
+                        {
+                            UpdateSprListViewItem(i);
+                        }
+                    }
+                    else if (offset != _lastSprListViewOffset)
+                    {
+                        for (int i = Math.Max(_lastSprListViewOffset, 0); i < offset && i < itemCount; i++)
+                        {
+                            AllSprList[i].Image = null;
+                        }
+                
+                        for (int i = maxOffset; i < previousMaxOffset && i < itemCount; i++)
+                        {
+                            AllSprList[i].Image = null;
+                        }
+                
+                        for (int i = offset; i < maxOffset; i++)
+                        {
+                            UpdateSprListViewItem(i);
+                        }
+                    }
+
+                    _lastSprListViewOffset = offset;
+                    _lastSprListViewMaxVisible = maxVisible;
+                }
+        
+                private void UpdateSprListViewItem(int itemIndex)
+                {
+                    if (itemIndex < 0 || itemIndex >= AllSprList.Count)
+                        return;
+                
+                    if (!SprLists.ContainsKey(itemIndex))
+                    {
+                        AllSprList[itemIndex].Image = null;
+                        return;
+                    }
+            
+                    try
+                    {
+                        AllSprList[itemIndex].Image = Utils.ResizeForUI(MainSprStorage.getSpriteStream((uint)itemIndex));
+                    }
+                    catch (Exception)
+                    {
+                        AllSprList[itemIndex].Image = null;
+                    }
+                }
+        
+        private void InitializeScrollOptimization()
+        {
+            _objListViewScrollThrottleTimer.Interval = TimeSpan.FromMilliseconds(50);
+            _objListViewScrollThrottleTimer.Tick += ObjListViewScrollThrottle_Tick;
+            
+            _sprListViewScrollThrottleTimer.Interval = TimeSpan.FromMilliseconds(50);
+            _sprListViewScrollThrottleTimer.Tick += SprListViewScrollThrottle_Tick;
+        }
+        
+        private void ObjListViewScrollThrottle_Tick(object? sender, EventArgs e)
+        {
+            _objListViewScrollThrottleTimer.Stop();
+            
+            if (_pendingObjListViewOffset != _lastObjListViewOffset || 
+                _pendingObjListViewMaxVisible != _lastObjListViewMaxVisible)
+            {
+                ProcessObjListViewScroll(_pendingObjListViewOffset, _pendingObjListViewMaxVisible);
+            }
+        }
+        
+        private void SprListViewScrollThrottle_Tick(object? sender, EventArgs e)
+        {
+            _sprListViewScrollThrottleTimer.Stop();
+            
+            if (_pendingSprListViewOffset != _lastSprListViewOffset || 
+                _pendingSprListViewMaxVisible != _lastSprListViewMaxVisible)
+            {
+                ProcessSprListViewScroll(_pendingSprListViewOffset, _pendingSprListViewMaxVisible);
+            }
         }
         private Appearances ImportAppearances;
         private Dictionary<uint, Sprite> sprites = [];
@@ -155,30 +335,20 @@ namespace Assets_Editor
             if (ObjListView.Items.Count > 0 && panel != null)
             {
                 int offset = (int)panel.VerticalOffset;
-                for (int i = 0; i < ObjListView.Items.Count; i++)
+                int maxVisible = 20;
+                
+                if (ObjectMenu.SelectedIndex != _cachedObjectMenuIndex)
                 {
-                    if (i >= offset && i < Math.Min(offset + 20, ObjListView.Items.Count))
-                    {
-                        if (ObjectMenu.SelectedIndex == 0)
-                            ThingsOutfit[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Outfit[i], MainSprStorage));
-                        else if (ObjectMenu.SelectedIndex == 1)
-                            ThingsItem[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Object[i], MainSprStorage));
-                        else if (ObjectMenu.SelectedIndex == 2)
-                            ThingsEffect[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Effect[i], MainSprStorage));
-                        else if (ObjectMenu.SelectedIndex == 3)
-                            ThingsMissile[i].Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(ImportAppearances.Missile[i], MainSprStorage));
-                    }
-                    else
-                    {
-                        if (ObjectMenu.SelectedIndex == 0)
-                            ThingsOutfit[i].Image = null;
-                        else if (ObjectMenu.SelectedIndex == 1)
-                            ThingsItem[i].Image = null;
-                        else if (ObjectMenu.SelectedIndex == 2)
-                            ThingsEffect[i].Image = null;
-                        else if (ObjectMenu.SelectedIndex == 3)
-                            ThingsMissile[i].Image = null;
-                    }
+                    _appearanceCache.Clear();
+                    _cachedObjectMenuIndex = ObjectMenu.SelectedIndex;
+                }
+                
+                _pendingObjListViewOffset = offset;
+                _pendingObjListViewMaxVisible = maxVisible;
+                
+                if (!_objListViewScrollThrottleTimer.IsEnabled)
+                {
+                    _objListViewScrollThrottleTimer.Start();
                 }
             }
         }
@@ -219,12 +389,14 @@ namespace Assets_Editor
             if (SprListView.Items.Count > 0 && panel != null)
             {
                 int offset = (int)panel.VerticalOffset;
-                for (int i = 0; i < SprListView.Items.Count; i++)
+                int maxVisible = 20;
+                
+                _pendingSprListViewOffset = offset;
+                _pendingSprListViewMaxVisible = maxVisible;
+                
+                if (!_sprListViewScrollThrottleTimer.IsEnabled)
                 {
-                    if (i >= offset && i < Math.Min(offset + 20, SprListView.Items.Count) && SprLists.ContainsKey(i))
-                        AllSprList[i].Image = Utils.ResizeForUI(MainSprStorage.getSpriteStream((uint)i));
-                    else
-                        AllSprList[i].Image = null;
+                    _sprListViewScrollThrottleTimer.Start();
                 }
             }
         }
@@ -528,3 +700,4 @@ namespace Assets_Editor
         }
     }
 }
+        

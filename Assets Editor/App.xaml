@@ -3,14 +3,469 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Assets_Editor"
              StartupUri="MainWindow.xaml"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme BaseTheme="Inherit" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
+                <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="Cyan" SecondaryColor="Lime" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <Color x:Key="AppBackgroundColor">#0B1220</Color>
+            <Color x:Key="AppSurfaceColor">#121C30</Color>
+            <Color x:Key="AppSurfaceRaisedColor">#1A2942</Color>
+            <Color x:Key="AppSurfaceHoverColor">#243857</Color>
+            <Color x:Key="AppBorderColor">#2C3F5F</Color>
+            <Color x:Key="AppAccentColor">#2DD4BF</Color>
+            <Color x:Key="AppTextColor">#E6EEF7</Color>
+            <Color x:Key="AppMutedTextColor">#9FB3CC</Color>
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource AppBackgroundColor}" />
+            <SolidColorBrush x:Key="AppSurfaceBrush" Color="{StaticResource AppSurfaceColor}" />
+            <SolidColorBrush x:Key="AppSurfaceRaisedBrush" Color="{StaticResource AppSurfaceRaisedColor}" />
+            <SolidColorBrush x:Key="AppSurfaceHoverBrush" Color="{StaticResource AppSurfaceHoverColor}" />
+            <SolidColorBrush x:Key="AppBorderBrush" Color="{StaticResource AppBorderColor}" />
+            <SolidColorBrush x:Key="AppAccentBrush" Color="{StaticResource AppAccentColor}" />
+            <SolidColorBrush x:Key="AppTextBrush" Color="{StaticResource AppTextColor}" />
+            <SolidColorBrush x:Key="AppMutedTextBrush" Color="{StaticResource AppMutedTextColor}" />
+            <LinearGradientBrush x:Key="AppWindowBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#090E1A" Offset="0" />
+                <GradientStop Color="#101A2E" Offset="0.5" />
+                <GradientStop Color="#0D1626" Offset="1" />
+            </LinearGradientBrush>
+
+            <Style TargetType="Window" BasedOn="{StaticResource MaterialDesignWindow}">
+                <Setter Property="Background" Value="{StaticResource AppWindowBackgroundBrush}" />
+                <Setter Property="FontFamily" Value="Bahnschrift" />
+                <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+                <Setter Property="FlowDirection" Value="LeftToRight" />
+            </Style>
+
+            <Style x:Key="EditorPanelBorder" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+            </Style>
+
+            <Style x:Key="EditorSectionTitle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubtitle1TextBlock}">
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Margin" Value="0,0,0,12" />
+            </Style>
+
+            <Style x:Key="EditorToolbarBorder" TargetType="Border" BasedOn="{StaticResource EditorPanelBorder}">
+                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="Background" Value="{StaticResource AppSurfaceRaisedBrush}" />
+            </Style>
+
+            <Style x:Key="ToolPanelBorder" TargetType="Border" BasedOn="{StaticResource EditorPanelBorder}">
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+            </Style>
+
+            <Style x:Key="ToolPanelHeader" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource AppSurfaceRaisedBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="BorderThickness" Value="0,0,0,1" />
+                <Setter Property="Padding" Value="10,8" />
+            </Style>
+
+            <Style x:Key="ToolPanelTitle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubtitle1TextBlock}">
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="8,0,0,0" />
+            </Style>
+
+            <Style x:Key="ToolIconButton" TargetType="Button" BasedOn="{StaticResource TopBarIconButton}">
+                <Setter Property="Width" Value="32" />
+                <Setter Property="Height" Value="32" />
+            </Style>
+
+            <Style x:Key="ToolActionButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                <Setter Property="Height" Value="30" />
+                <Setter Property="MinWidth" Value="90" />
+                <Setter Property="Margin" Value="0,0,6,0" />
+                <Setter Property="Padding" Value="10,0" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="Background" Value="{StaticResource AppSurfaceRaisedBrush}" />
+            </Style>
+
+            <Style x:Key="ToolPrimaryButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                <Setter Property="Height" Value="30" />
+                <Setter Property="MinWidth" Value="100" />
+                <Setter Property="Margin" Value="0,0,6,0" />
+                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="Foreground" Value="#05171C" />
+                <Setter Property="Background" Value="{StaticResource AppAccentBrush}" />
+            </Style>
+
+            <Style x:Key="ToolListTileItem" TargetType="ListViewItem">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="0,0,0,2" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListViewItem">
+                            <Border x:Name="TileRoot"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="6">
+                                <ContentPresenter />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="TileRoot" Property="Background" Value="{StaticResource AppSurfaceHoverBrush}" />
+                                    <Setter TargetName="TileRoot" Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="TileRoot" Property="Background" Value="#28456A" />
+                                    <Setter TargetName="TileRoot" Property="BorderBrush" Value="{StaticResource AppAccentBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="TopBarIconButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
+                <Setter Property="Width" Value="34" />
+                <Setter Property="Height" Value="34" />
+                <Setter Property="Margin" Value="2" />
+                <Setter Property="Padding" Value="4" />
+                <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="materialDesign:RippleAssist.IsDisabled" Value="True" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{StaticResource AppSurfaceHoverBrush}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="Menu" BasedOn="{StaticResource MaterialDesignMenu}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="0" />
+            </Style>
+
+            <Style TargetType="MenuItem" BasedOn="{StaticResource MaterialDesignMenuItem}">
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Padding" Value="14,8" />
+            </Style>
+
+            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="Background" Value="{StaticResource AppSurfaceRaisedBrush}" />
+            </Style>
+
+            <Style TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignSwitchToggleButton}">
+                <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+            </Style>
+
+            <Style TargetType="Label">
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+            </Style>
+
+            <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+            </Style>
+
+            <Style TargetType="RadioButton" BasedOn="{StaticResource MaterialDesignRadioButton}">
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+            </Style>
+
+            <Style x:Key="AppComboBoxItemStyle" TargetType="ComboBoxItem">
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="TextElement.Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="Padding" Value="10,6" />
+                <Setter Property="MinHeight" Value="30" />
+                <Style.Triggers>
+                    <Trigger Property="IsHighlighted" Value="True">
+                        <Setter Property="Background" Value="{StaticResource AppSurfaceHoverBrush}" />
+                        <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                    </Trigger>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="{StaticResource AppAccentBrush}" />
+                        <Setter Property="Foreground" Value="White" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="ComboBoxItem" BasedOn="{StaticResource AppComboBoxItemStyle}" />
+
+            <Style TargetType="ListBoxItem">
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+                <Setter Property="Padding" Value="10,6" />
+            </Style>
+
+            <Style TargetType="TabControl" BasedOn="{StaticResource MaterialDesignTabControl}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+            </Style>
+
+            <Style TargetType="TabItem" BasedOn="{StaticResource MaterialDesignTabItem}">
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+            </Style>
+
+            <Style TargetType="Popup">
+                <Setter Property="AllowsTransparency" Value="True" />
+            </Style>
+
+            <Style TargetType="ListView">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+            </Style>
+
+            <Style TargetType="GroupBox" BasedOn="{StaticResource MaterialDesignGroupBox}">
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="Padding" Value="10" />
+            </Style>
+
+            <Style x:Key="AppRoundedInputTextBox" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+                <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="CaretBrush" Value="{StaticResource AppAccentBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="SelectionBrush" Value="{StaticResource AppAccentBrush}" />
+                <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="6" />
+                <Setter Property="Padding" Value="8,3" />
+                <Setter Property="MinHeight" Value="30" />
+            </Style>
+
+            <Style TargetType="TextBox" BasedOn="{StaticResource AppRoundedInputTextBox}" />
+
+            <Style x:Key="AppComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
+                <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="TextElement.Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="6" />
+                <Setter Property="Padding" Value="8,3" />
+                <Setter Property="MinHeight" Value="30" />
+                <Setter Property="ItemContainerStyle" Value="{StaticResource AppComboBoxItemStyle}" />
+            </Style>
+
+            <Style TargetType="ComboBox" BasedOn="{StaticResource AppComboBoxStyle}" />
+
+            <Style TargetType="xctk:IntegerUpDown">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="MinHeight" Value="30" />
+                <Setter Property="ButtonSpinnerLocation" Value="Right" />
+                <Setter Property="ShowButtonSpinner" Value="False" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="xctk:IntegerUpDown">
+                            <Border x:Name="FieldBorder"
+                                    Background="{StaticResource AppSurfaceBrush}"
+                                    BorderBrush="{StaticResource AppBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    SnapsToDevicePixels="True">
+                                <Grid>
+                                    <xctk:WatermarkTextBox x:Name="PART_TextBox"
+                                                           BorderThickness="0"
+                                                           Background="Transparent"
+                                                           Foreground="{TemplateBinding Foreground}"
+                                                           Padding="8,3"
+                                                           VerticalContentAlignment="Center"
+                                                           HorizontalContentAlignment="Right" />
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                    <Setter TargetName="FieldBorder" Property="BorderBrush" Value="{StaticResource AppAccentBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="FieldBorder" Property="Opacity" Value="0.7" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="xctk:ButtonSpinner">
+                <Setter Property="Background" Value="{StaticResource AppSurfaceRaisedBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+            </Style>
+
+            <Style x:Key="AppScrollBarPageButtonStyle" TargetType="RepeatButton">
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RepeatButton">
+                            <Border Background="Transparent" />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="AppScrollBarThumbStyle" TargetType="Thumb">
+                <Setter Property="Background" Value="#5A6F8E" />
+                <Setter Property="MinHeight" Value="26" />
+                <Setter Property="MinWidth" Value="10" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Thumb">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="#7A8FAA"
+                                    BorderThickness="1"
+                                    CornerRadius="2"
+                                    Opacity="1" />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="ScrollBar">
+                <Setter Property="Width" Value="12" />
+                <Setter Property="Height" Value="12" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ScrollBar">
+                            <Grid Background="Transparent" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+                                <Border x:Name="TrackBackground"
+                                    Background="#16243A"
+                                    BorderBrush="#324B72"
+                                        BorderThickness="1"
+                                    CornerRadius="2"
+                                        Margin="1" />
+                                <Track x:Name="PART_Track" Margin="1" IsDirectionReversed="True">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton x:Name="PART_DecreaseButton"
+                                                      Style="{StaticResource AppScrollBarPageButtonStyle}"
+                                                      Command="ScrollBar.PageUpCommand" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb x:Name="Thumb" Style="{StaticResource AppScrollBarThumbStyle}" />
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton x:Name="PART_IncreaseButton"
+                                                      Style="{StaticResource AppScrollBarPageButtonStyle}"
+                                                      Command="ScrollBar.PageDownCommand" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Orientation" Value="Horizontal">
+                                    <Setter Property="Width" Value="Auto" />
+                                    <Setter Property="Height" Value="12" />
+                                    <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False" />
+                                    <Setter TargetName="PART_DecreaseButton" Property="Command" Value="ScrollBar.PageLeftCommand" />
+                                    <Setter TargetName="PART_IncreaseButton" Property="Command" Value="ScrollBar.PageRightCommand" />
+                                </Trigger>
+                                <Trigger Property="Orientation" Value="Vertical">
+                                    <Setter Property="Width" Value="12" />
+                                    <Setter Property="Height" Value="Auto" />
+                                    <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="True" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="xctk:ColorPicker">
+                <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="MinHeight" Value="28" />
+            </Style>
+
+            <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="GridLinesVisibility" Value="Horizontal" />
+                <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="VerticalGridLinesBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="HeadersVisibility" Value="Column" />
+                <Setter Property="RowHeaderWidth" Value="0" />
+                <Setter Property="CanUserAddRows" Value="False" />
+                <Setter Property="RowBackground" Value="{StaticResource AppSurfaceBrush}" />
+                <Setter Property="AlternatingRowBackground" Value="{StaticResource AppSurfaceRaisedBrush}" />
+            </Style>
+
+            <Style TargetType="DataGridRow">
+                <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="BorderThickness" Value="0,0,0,1" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="#28456A" />
+                        <Setter Property="Foreground" Value="White" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="DataGridCell">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="8,4" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="#335986" />
+                        <Setter Property="Foreground" Value="White" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="DataGridColumnHeader">
+                <Setter Property="Background" Value="{StaticResource AppSurfaceRaisedBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AppTextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="BorderThickness" Value="0,0,1,1" />
+                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+            </Style>
+
+            <Style TargetType="ProgressBar" BasedOn="{StaticResource MaterialDesignLinearProgressBar}">
+                <Setter Property="Height" Value="6" />
+            </Style>
+
+            <Style TargetType="Separator">
+                <Setter Property="Background" Value="{StaticResource AppBorderBrush}" />
+                <Setter Property="Margin" Value="4,0" />
+            </Style>
+
+            <Style TargetType="GridSplitter">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="ShowsPreview" Value="True" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

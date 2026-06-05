@@ -61,7 +61,7 @@ namespace Assets_Editor
         {
             writer.BaseStream.Position = 0;
             byte[] bytes = new byte[writer.BaseStream.Length];
-            writer.BaseStream.Read(bytes, 0, (int)writer.BaseStream.Length);
+            writer.BaseStream.ReadExactly(bytes, 0, bytes.Length);
             writer.BaseStream.Position = 0;
             writer.BaseStream.SetLength(0);
 
@@ -72,7 +72,7 @@ namespace Assets_Editor
         {
             writer.BaseStream.Position = 0;
             byte[] bytes = new byte[writer.BaseStream.Length];
-            writer.BaseStream.Read(bytes, 0, (int)writer.BaseStream.Length);
+            writer.BaseStream.ReadExactly(bytes, 0, bytes.Length);
             writer.BaseStream.Position = 0;
             writer.BaseStream.SetLength(0);
 

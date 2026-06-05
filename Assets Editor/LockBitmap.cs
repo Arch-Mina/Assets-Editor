@@ -62,9 +62,9 @@ namespace Efundies
                 // Copy data from pointer to array
                 Marshal.Copy(_iptr, Pixels, 0, Pixels.Length);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -81,9 +81,9 @@ namespace Efundies
                 // Unlock bitmap data
                 _source.UnlockBits(_bitmapData);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 

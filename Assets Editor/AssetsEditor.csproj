@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -6,6 +6,7 @@
     <RootNamespace>Assets_Editor</RootNamespace>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>annotations</Nullable>
     <AssemblyName>Assets Editor</AssemblyName>
     <ApplicationIcon>Walking_000.ico</ApplicationIcon>
     <FileVersion>2.0.0</FileVersion>
@@ -22,7 +23,7 @@
     <PackageReference Include="Google.Protobuf" Version="3.21.4" />
 	<PackageReference Include="Grpc.Tools" Version="2.60.0" PrivateAssets="All" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc2" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.9.1" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.13.1" />
     <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
     <PackageReference Include="MoonSharp" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
