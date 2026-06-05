@@ -17,11 +17,35 @@ namespace Assets_Editor
     {
         private dynamic _editor;
         private bool _legacy = false;
+        private int _lastItemListViewOffset = -1;
+        private int _lastItemListViewMaxVisible = -1;
+        private System.Windows.Threading.DispatcherTimer _itemListViewScrollThrottleTimer = new();
+        private int _pendingItemListViewOffset = -1;
+        private int _pendingItemListViewMaxVisible = -1;
+        
         public OTBEditor(dynamic editor, bool legacy)
         {
             InitializeComponent();
+            InitializeScrollOptimization();
             _editor = editor;
             _legacy = legacy;
+        }
+        
+        private void InitializeScrollOptimization()
+        {
+            _itemListViewScrollThrottleTimer.Interval = TimeSpan.FromMilliseconds(50);
+            _itemListViewScrollThrottleTimer.Tick += ItemListViewScrollThrottle_Tick;
+        }
+        
+        private void ItemListViewScrollThrottle_Tick(object? sender, EventArgs e)
+        {
+            _itemListViewScrollThrottleTimer.Stop();
+            
+            if (_pendingItemListViewOffset != _lastItemListViewOffset || 
+                _pendingItemListViewMaxVisible != _lastItemListViewMaxVisible)
+            {
+                ProcessItemListViewScroll(_pendingItemListViewOffset, _pendingItemListViewMaxVisible);
+            }
         }
         private Dictionary<uint, Appearance> appearanceByClientId = new Dictionary<uint, Appearance>();
         private List<ServerItem> OTBItems = new List<ServerItem>();
@@ -115,34 +139,86 @@ namespace Assets_Editor
             if (ItemListView.Items.Count > 0 && panel != null)
             {
                 int offset = (int)panel.VerticalOffset;
-                for (int i = 0; i < ItemListView.Items.Count; i++)
+                int maxVisible = 20;
+                
+                _pendingItemListViewOffset = offset;
+                _pendingItemListViewMaxVisible = maxVisible;
+                
+                if (!_itemListViewScrollThrottleTimer.IsEnabled)
                 {
-                    if (i >= offset && i < Math.Min(offset + 20, ItemListView.Items.Count))
-                    {
-                        if (_legacy)
-                        {
-                            ShowList item = (ShowList)ItemListView.Items[i];
-                            if (appearanceByClientId.ContainsKey(item.Cid))
-                            {
-                                item.Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(appearanceByClientId[item.Cid], MainWindow.MainSprStorage));
-                            }
-                        }
-                        else
-                        {
-                            ShowList item = (ShowList)ItemListView.Items[i];
-                            if (appearanceByClientId.ContainsKey(item.Cid))
-                            {
-                                item.Image = Utils.ResizeForUI(MainWindow.getSpriteStream((int)appearanceByClientId[item.Cid].FrameGroup[0].SpriteInfo.SpriteId[0]));
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        ShowList item = (ShowList)ItemListView.Items[i];
-                        item.Image = null;
-                    }
+                    _itemListViewScrollThrottleTimer.Start();
                 }
+            }
+        }
+        
+        private void ProcessItemListViewScroll(int offset, int maxVisible)
+        {
+            int itemCount = ItemListView.Items.Count;
+            if (itemCount == 0)
+                return;
+
+            int maxOffset = Math.Min(offset + maxVisible, itemCount);
+            int previousMaxOffset = Math.Min(_lastItemListViewOffset + maxVisible, itemCount);
+
+            if (_lastItemListViewOffset == -1)
+            {
+                for (int i = offset; i < maxOffset; i++)
+                {
+                    UpdateItemListViewItem(i);
+                }
+            }
+            else if (offset != _lastItemListViewOffset)
+            {
+                for (int i = Math.Max(_lastItemListViewOffset, 0); i < offset && i < itemCount; i++)
+                {
+                    ShowList item = (ShowList)ItemListView.Items[i];
+                    item.Image = null;
+                }
+                
+                for (int i = maxOffset; i < previousMaxOffset && i < itemCount; i++)
+                {
+                    ShowList item = (ShowList)ItemListView.Items[i];
+                    item.Image = null;
+                }
+                
+                for (int i = offset; i < maxOffset; i++)
+                {
+                    UpdateItemListViewItem(i);
+                }
+            }
+
+            _lastItemListViewOffset = offset;
+            _lastItemListViewMaxVisible = maxVisible;
+        }
+        
+        private void UpdateItemListViewItem(int itemIndex)
+        {
+            try
+            {
+                ShowList item = (ShowList)ItemListView.Items[itemIndex];
+                if (!appearanceByClientId.ContainsKey(item.Cid))
+                {
+                    item.Image = null;
+                    return;
+                }
+                
+                if (_legacy)
+                {
+                    item.Image = Utils.ResizeForUI(LegacyAppearance.GetObjectImage(appearanceByClientId[item.Cid], MainWindow.MainSprStorage));
+                }
+                else
+                {
+                    var appearance = appearanceByClientId[item.Cid];
+                    if (appearance.FrameGroup.Count > 0)
+                        item.Image = Utils.ResizeForUI(MainWindow.getSpriteStream((int)appearance.FrameGroup[0].SpriteInfo.SpriteId[0]));
+                    else
+                        item.Image = null;
+                }
+            }
+            catch (Exception)
+            {
+                ShowList item = (ShowList)ItemListView.Items[itemIndex];
+                item.Image = null;
             }
         }
 

@@ -1,20 +1,34 @@
-﻿<Window x:Class="Assets_Editor.LogView"
+<Window x:Class="Assets_Editor.LogView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Assets_Editor"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="LogView" Height="450" Width="800">
-    <Grid>
-        <ListView Name="LogListView">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Time" DisplayMemberBinding="{Binding Timestamp}"/>
-                    <GridViewColumn Header="Level" DisplayMemberBinding="{Binding Level}"/>
-                    <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Message}"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-    </Grid>
+        Title="LogView"
+        Height="450"
+        Width="800"
+        Style="{StaticResource MaterialDesignWindow}">
+    <Border Style="{StaticResource EditorPanelBorder}" Padding="12" Margin="12">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                <materialDesign:PackIcon Kind="TextBoxSearchOutline" Width="22" Height="22" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Text="Log View" Style="{StaticResource EditorSectionTitle}" Margin="0" VerticalAlignment="Center"/>
+            </StackPanel>
+            <ListView Grid.Row="1" Name="LogListView">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Time" DisplayMemberBinding="{Binding Timestamp}" Width="150"/>
+                        <GridViewColumn Header="Level" DisplayMemberBinding="{Binding Level}" Width="110"/>
+                        <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Message}" Width="500"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Grid>
+    </Border>
 </Window>

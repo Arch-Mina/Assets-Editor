@@ -1,0 +1,16 @@
+{
+  "DarkMode": false,
+  "LastPresetChoice": 0,
+  "Presets": [
+    {
+      "Name": "Default",
+      "Version": 1,
+      "Extended": true,
+      "Transparent": true,
+      "FrameDurations": true,
+      "FrameGroups": true,
+      "ServerPath": "",
+      "ClientPath": "C:\\Users\\nekir\\AppData\\Local\\Tibia\\packages\\Tibia\\assets"
+    }
+  ]
+}

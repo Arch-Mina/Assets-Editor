@@ -16,7 +16,7 @@ namespace Assets_Editor
 
         private List<ImageSource> images;
         private ImageSource image;
-        private Timer animationTimer;
+        private readonly Timer animationTimer;
         private int currentFrameIndex;
         private const double frameInterval = 100;
         private bool exported;
@@ -65,7 +65,7 @@ namespace Assets_Editor
                 if (image != value)
                 {
                     image = value;
-                    NotifyPropertyChanged(nameof(image));
+                    NotifyPropertyChanged(nameof(Image));
                 }
             }
         }
@@ -77,7 +77,7 @@ namespace Assets_Editor
                 if (exported != value)
                 {
                     exported = value;
-                    NotifyPropertyChanged(nameof(exported));
+                    NotifyPropertyChanged(nameof(Exported));
                 }
             }
         }
@@ -133,7 +133,10 @@ namespace Assets_Editor
             {
                 currentFrameIndex = 0;
                 Image = Images[currentFrameIndex];
-                animationTimer.Start();
+                if (Images.Count > 1)
+                {
+                    animationTimer.Start();
+                }
             }
         }
         public void StopAnimation()

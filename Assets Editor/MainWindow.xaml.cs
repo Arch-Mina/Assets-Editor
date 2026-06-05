@@ -134,6 +134,20 @@ public partial class MainWindow : Window
         System.Windows.Application.Current.Shutdown();
     }
 
+    private void TitleMinimize_Click(object sender, RoutedEventArgs e) {
+        WindowState = System.Windows.WindowState.Minimized;
+    }
+
+    private void TitleMaximize_Click(object sender, RoutedEventArgs e) {
+        WindowState = WindowState == System.Windows.WindowState.Maximized
+            ? System.Windows.WindowState.Normal
+            : System.Windows.WindowState.Maximized;
+    }
+
+    private void TitleClose_Click(object sender, RoutedEventArgs e) {
+        Close();
+    }
+
     public class Catalog
     {
         public Catalog()
@@ -166,7 +180,7 @@ public partial class MainWindow : Window
     public static bool LegacyClient = false;
     public static uint DatSignature { get; set; }
     public static uint SprSignature { get; set; }
-    private static bool Loaded = false;
+    private static bool AssetsLoaded = false;
 
     private static readonly PresetSettings defaultPreset = new() {
         Name = "Default",
@@ -240,8 +254,9 @@ public partial class MainWindow : Window
             LoadDefaultSettings();
         }
 
-        // apply theme
-        DarkModeToggle.IsChecked = SettingsList.DarkMode;
+        // force dark mode only
+        SettingsList.DarkMode = true;
+        SetCurrentTheme(true);
 
         // add settings to presets list
         CreateSettingsChoices();
@@ -569,7 +584,7 @@ public partial class MainWindow : Window
 
         if (LegacyClient == false) {
             LoadSprSheet();
-            Loaded = true;
+            AssetsLoaded = true;
         } else {
             SetLoadingStatus(AssetsLoadingStatus.ASSETS_LOADING_WIP, "Loading dat file ...");
 
@@ -634,7 +649,7 @@ public partial class MainWindow : Window
                 ServerOTB.Read(otbPath);
             }
             
-            Loaded = true;
+            AssetsLoaded = true;
         }
     }
     private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -650,7 +665,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (!Loaded) {
+        if (!AssetsLoaded) {
             LoadAssets.IsEnabled = true;
             return;
         }
@@ -1165,16 +1180,70 @@ public partial class MainWindow : Window
             SettingsList.DarkMode = false;
         }
         palette.SetTheme(theme);
+        ApplyCustomThemePalette(isDarkMode);
         SaveEditorSettings();
+    }
+
+    private static void SetBrushColor(ResourceDictionary resources, string key, System.Windows.Media.Color color)
+    {
+        resources[key] = new SolidColorBrush(color);
+    }
+
+    private static System.Windows.Media.Color ColorFromHex(string hex)
+    {
+        return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+    }
+
+    private static void ApplyCustomThemePalette(bool isDarkMode)
+    {
+        if (System.Windows.Application.Current?.Resources is not ResourceDictionary resources)
+            return;
+
+        if (isDarkMode)
+        {
+            SetBrushColor(resources, "AppBackgroundBrush", ColorFromHex("#0B1220"));
+            SetBrushColor(resources, "AppSurfaceBrush", ColorFromHex("#121C30"));
+            SetBrushColor(resources, "AppSurfaceRaisedBrush", ColorFromHex("#1A2942"));
+            SetBrushColor(resources, "AppSurfaceHoverBrush", ColorFromHex("#243857"));
+            SetBrushColor(resources, "AppBorderBrush", ColorFromHex("#2C3F5F"));
+            SetBrushColor(resources, "AppAccentBrush", ColorFromHex("#2DD4BF"));
+            SetBrushColor(resources, "AppTextBrush", ColorFromHex("#E6EEF7"));
+            SetBrushColor(resources, "AppMutedTextBrush", ColorFromHex("#9FB3CC"));
+
+            resources["AppWindowBackgroundBrush"] = new LinearGradientBrush(
+                new GradientStopCollection {
+                    new GradientStop(ColorFromHex("#090E1A"), 0),
+                    new GradientStop(ColorFromHex("#101A2E"), 0.5),
+                    new GradientStop(ColorFromHex("#0D1626"), 1),
+                },
+                new System.Windows.Point(0, 0),
+                new System.Windows.Point(1, 1));
+        }
+        else
+        {
+            SetBrushColor(resources, "AppBackgroundBrush", ColorFromHex("#EAF1FA"));
+            SetBrushColor(resources, "AppSurfaceBrush", ColorFromHex("#F4F8FF"));
+            SetBrushColor(resources, "AppSurfaceRaisedBrush", ColorFromHex("#FFFFFF"));
+            SetBrushColor(resources, "AppSurfaceHoverBrush", ColorFromHex("#E2ECFA"));
+            SetBrushColor(resources, "AppBorderBrush", ColorFromHex("#BCD0EA"));
+            SetBrushColor(resources, "AppAccentBrush", ColorFromHex("#0EB6CF"));
+            SetBrushColor(resources, "AppTextBrush", ColorFromHex("#10253E"));
+            SetBrushColor(resources, "AppMutedTextBrush", ColorFromHex("#4E6682"));
+
+            resources["AppWindowBackgroundBrush"] = new LinearGradientBrush(
+                new GradientStopCollection {
+                    new GradientStop(ColorFromHex("#F8FBFF"), 0),
+                    new GradientStop(ColorFromHex("#EEF4FC"), 0.5),
+                    new GradientStop(ColorFromHex("#E6EEF8"), 1),
+                },
+                new System.Windows.Point(0, 0),
+                new System.Windows.Point(1, 1));
+        }
     }
 
     public static bool IsDarkModeSet()
     {
         return SettingsList.DarkMode;
-    }
-
-    private void DarkModeToggle_Checked(object sender, RoutedEventArgs e) {
-        SetCurrentTheme(DarkModeToggle.IsChecked ?? false);
     }
 
     private void SetVersionDescription(string text) {
@@ -1204,11 +1273,13 @@ public partial class MainWindow : Window
             // set and show text
             AssetsPathLoadingMessage.Text = text;
             AssetsPathLoadingMessage.Visibility = Visibility.Visible;
+            AssetsPathLoadingMessage.Foreground = (SolidColorBrush)FindResource("AppTextBrush");
 
             // display icon according to status
             if (newStatus == AssetsLoadingStatus.ASSETS_LOADING_WIP) {
                 AssetsPathLoadingIcon.Visibility = Visibility.Visible;
                 AssetsPathBaseIcon.Visibility = Visibility.Collapsed;
+                AssetsPathLoadingMessage.Foreground = (SolidColorBrush)FindResource("AppMutedTextBrush");
             } else {
                 AssetsPathLoadingIcon.Visibility = Visibility.Collapsed;
                 AssetsPathBaseIcon.Visibility = Visibility.Visible;
@@ -1217,14 +1288,17 @@ public partial class MainWindow : Window
                     case AssetsLoadingStatus.ASSETS_LOADING_INFO:
                         AssetsPathBaseIcon.Kind = PackIconKind.Info;
                         AssetsPathBaseIcon.Foreground = new SolidColorBrush(Colors.DeepSkyBlue);
+                        AssetsPathLoadingMessage.Foreground = (SolidColorBrush)FindResource("AppTextBrush");
                         break;
                     case AssetsLoadingStatus.ASSETS_LOADING_WARNING:
                         AssetsPathBaseIcon.Kind = PackIconKind.Alert;
                         AssetsPathBaseIcon.Foreground = new SolidColorBrush(Colors.Yellow);
+                        AssetsPathLoadingMessage.Foreground = new SolidColorBrush(Colors.Khaki);
                         break;
                     case AssetsLoadingStatus.ASSETS_LOADING_ERROR:
                         AssetsPathBaseIcon.Kind = PackIconKind.Error;
                         AssetsPathBaseIcon.Foreground = new SolidColorBrush(Colors.Tomato);
+                        AssetsPathLoadingMessage.Foreground = new SolidColorBrush(Colors.Tomato);
                         break;
                 }
             }

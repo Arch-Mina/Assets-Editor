@@ -168,6 +168,7 @@ public static class Utils
         bitmap.StreamSource = stream;
         bitmap.CacheOption = BitmapCacheOption.OnLoad;
         bitmap.EndInit();
+        bitmap.Freeze();
         return bitmap;
     }
     public static BitmapImage BitmapToBitmapImage(System.Drawing.Bitmap bitmap)
@@ -297,10 +298,11 @@ public static class Utils
 
         double scale = GetDpiScale();
 
+        stream.Seek(0, SeekOrigin.Begin);
         using Bitmap original = new(stream);
         int newWidth = (int)(original.Width * scale);
         int newHeight = (int)(original.Height * scale);
-        Bitmap resized = new(newWidth, newHeight);
+        using Bitmap resized = new(newWidth, newHeight);
 
         using (var g = Graphics.FromImage(resized)) {
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
@@ -308,15 +310,17 @@ public static class Utils
             g.DrawImage(original, 0, 0, newWidth, newHeight);
         }
 
-        var ms = new MemoryStream();
-        resized.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-        ms.Seek(0, SeekOrigin.Begin);
-
         var bitmap = new BitmapImage();
-        bitmap.BeginInit();
-        bitmap.StreamSource = ms;
-        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-        bitmap.EndInit();
+        using (var ms = new MemoryStream()) {
+            resized.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+            ms.Seek(0, SeekOrigin.Begin);
+
+            bitmap.BeginInit();
+            bitmap.StreamSource = ms;
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+        }
+        bitmap.Freeze();
         return bitmap;
     }
 

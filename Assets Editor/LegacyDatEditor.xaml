@@ -15,7 +15,7 @@
         <local:BooleanInverter x:Key="BooleanInverter"/>
     </Window.Resources>
     <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch" IsHitTestVisible="{Binding ElementName=ComppileDialogHost, Path=IsOpen, Mode=OneWay, Converter={StaticResource BooleanInverter}}">
-        <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray" >
+        <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="#99000000" >
             <materialDesign:DialogHost.DialogContent>
                 <GroupBox x:Name="CompileBox" Header="Compile Client" Width="300">
                     <Grid >
@@ -45,7 +45,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Border Grid.Row="0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Stretch" HorizontalAlignment="Left" Margin="10,5,0,10" Width="240">
+            <Border Grid.Row="0" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource MaterialDesignDivider}" VerticalAlignment="Stretch" HorizontalAlignment="Left" Margin="10,5,0,10" Width="240">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="45"/>
@@ -53,13 +53,13 @@
                         <RowDefinition Height="40"/>
                         <RowDefinition Height="75"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Grid.Row="0" x:Name="ObjectMenu" Style="{StaticResource MaterialDesignFilledComboBox}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" SelectionChanged="ObjectMenuChanged" SelectedIndex="0" Width="240" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,-15,0,0" Focusable="False" SnapsToDevicePixels="True" FlowDirection="LeftToRight" Height="50" Background="{DynamicResource PrimaryHueMidBrush}" BorderThickness="0,0,0,0" >
+                    <ComboBox Grid.Row="0" x:Name="ObjectMenu" Style="{StaticResource MaterialDesignFilledComboBox}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" SelectionChanged="ObjectMenuChanged" SelectedIndex="0" Width="240" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,-15,0,0" Focusable="False" SnapsToDevicePixels="True" FlowDirection="LeftToRight" Height="50" Background="{DynamicResource MaterialDesignLightSeparatorBackground}" BorderThickness="0,0,0,0" >
                         <ComboBoxItem Content="Outfits"/>
                         <ComboBoxItem Content="Items"/>
                         <ComboBoxItem Content="Effects"/>
                         <ComboBoxItem Content="Missiles"/>
                     </ComboBox>
-                    <ListView Grid.Row="1" x:Name="ObjListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Extended"  ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="ObjListView_ScrollChanged" SelectionChanged="ObjListView_SelectionChanged" SelectedIndex="0" Margin="0,5,0,0" PreviewMouseRightButtonDown="ObjListView_PreviewMouseRightButtonDown" AllowDrop="True" Drop="ObjListView_Drop" DragLeave="ObjListView_DragLeave" DragOver="ObjListView_DragOver">
+                    <ListView Grid.Row="1" x:Name="ObjListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.CacheLength="2" VirtualizingPanel.CacheLengthUnit="Item" ScrollViewer.CanContentScroll="True" VirtualizingPanel.ScrollUnit="Item" SelectionMode="Extended"  ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="ObjListView_ScrollChanged" SelectionChanged="ObjListView_SelectionChanged" SelectedIndex="0" Margin="0,5,0,0" PreviewMouseRightButtonDown="ObjListView_PreviewMouseRightButtonDown" AllowDrop="True" Drop="ObjListView_Drop" DragLeave="ObjListView_DragLeave" DragOver="ObjListView_DragOver">
                         <ListView.View>
                             <GridView AllowsColumnReorder="False">
                                 <GridView.ColumnHeaderContainerStyle>
@@ -80,7 +80,7 @@
                         </ListView.View>
                     </ListView>
                     <xctk:IntegerUpDown Grid.Row="2" x:Name="ObjListViewSelectedIndex" Background="{DynamicResource MaterialDesignLightSeparatorBackground}" ParsingNumberStyle="Integer" ValueChanged="ObjListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False" Margin="0,5,0,0"/>
-                    <Border Grid.Row="3" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="-1,5,-1,-1">
+                    <Border Grid.Row="3" BorderThickness="1" BorderBrush="{DynamicResource MaterialDesignDivider}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="-1,5,-1,-1">
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Button x:Name="ObjectSave" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon ContentSave}" Width="35" Height="35" ToolTip="Save Changes" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ObjectSave_PreviewMouseLeftButtonDown"/>
@@ -414,7 +414,7 @@
                                             <Button Margin="10,0,0,0" Content="Reset" Click="ResetZoom_Click" VerticalAlignment="Center"/>
                                         </StackPanel>
                                         <Grid Margin="20,20,0,0" Width="265" Height="265" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                            <Border BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#FF4F4F4F" Background="{Binding SelectedColor, ElementName=SprBackgroundPicker, Converter={StaticResource NullableColorToBrushConverter} }">
+                                            <Border BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{DynamicResource MaterialDesignDivider}" Background="{Binding SelectedColor, ElementName=SprBackgroundPicker, Converter={StaticResource NullableColorToBrushConverter} }">
                                                 <Grid>
                                                     <Grid x:Name="SpriteViewerGrid" ShowGridLines="false" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                         <Grid.LayoutTransform>
@@ -547,7 +547,7 @@
                         </GroupBox>
                     </TabItem>
                 </TabControl>
-                <Border Grid.Row="2" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,0,0,10">
+                <Border Grid.Row="2" BorderThickness="1" BorderBrush="{DynamicResource MaterialDesignDivider}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,0,0,10">
                     <materialDesign:Snackbar  x:Name="StatusBar" MessageQueue="{materialDesign:MessageQueue}" IsActive="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="0,-20,0,0" />
                 </Border>
             </Grid>
@@ -566,7 +566,7 @@
                         <RowDefinition Height="30"/>
                         <RowDefinition Height="40"/>
                     </Grid.RowDefinitions>
-                    <ListView Grid.Row="0" Grid.Column="0" Margin="0,5,0,0" x:Name="SprListView" HorizontalAlignment="Center" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="SprListView_ScrollChanged" MouseMove="SprListView_DragSpr" SelectedIndex="0" Width="207">
+                    <ListView Grid.Row="0" Grid.Column="0" Margin="0,5,0,0" x:Name="SprListView" HorizontalAlignment="Center" VerticalAlignment="Stretch" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.CacheLength="2" VirtualizingPanel.CacheLengthUnit="Item" ScrollViewer.CanContentScroll="True" VirtualizingPanel.ScrollUnit="Item" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.ScrollChanged="SprListView_ScrollChanged" MouseMove="SprListView_DragSpr" SelectedIndex="0" Width="207">
                         <ListView.View>
                             <GridView AllowsColumnReorder="False">
                                 <GridView.ColumnHeaderContainerStyle>
@@ -587,7 +587,7 @@
                         </ListView.View>
                     </ListView>
                     <xctk:IntegerUpDown Grid.Row="1" Grid.Column="0" x:Name="SprListViewSelectedIndex" Background="{DynamicResource MaterialDesignLightSeparatorBackground}" ParsingNumberStyle="Integer" Value="{Binding ElementName=SprListView, Path=SelectedIndex, Mode=TwoWay}" ValueChanged="SprListViewSelectedIndex_ValueChanged" Minimum="0" Focusable="False"/>
-                    <Border Grid.Row="2" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,5,0,5">
+                    <Border Grid.Row="2" Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource MaterialDesignDivider}" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,5,0,5">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button x:Name="SpriteExport" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Export Sprite" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="SpriteExport_PreviewMouseLeftButtonDown" VerticalAlignment="Center">
                                 <materialDesign:PackIcon Kind="FileExport" Width="25" Height="25"/>
@@ -608,3 +608,5 @@
         </Grid>
     </Grid>
 </Window>
+
+
