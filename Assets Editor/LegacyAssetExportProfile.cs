@@ -21,6 +21,7 @@ namespace Assets_Editor
         public required bool IncludeEnhancedAnimations { get; init; }
         public required bool IncludeFrameGroups { get; init; }
         public required bool IncludeModernFlags { get; init; }
+        public required int LegacyOutfitAnimationFrames { get; init; }
     }
 
     public static class LegacyAssetExportProfiles
@@ -39,6 +40,7 @@ namespace Assets_Editor
                 IncludeEnhancedAnimations = false,
                 IncludeFrameGroups = false,
                 IncludeModernFlags = false,
+                LegacyOutfitAnimationFrames = 3,
             },
             new LegacyAssetExportProfile
             {
@@ -52,6 +54,7 @@ namespace Assets_Editor
                 IncludeEnhancedAnimations = false,
                 IncludeFrameGroups = false,
                 IncludeModernFlags = false,
+                LegacyOutfitAnimationFrames = 3,
             },
             new LegacyAssetExportProfile
             {
@@ -65,6 +68,7 @@ namespace Assets_Editor
                 IncludeEnhancedAnimations = true,
                 IncludeFrameGroups = true,
                 IncludeModernFlags = true,
+                LegacyOutfitAnimationFrames = 0,
             },
         ];
 

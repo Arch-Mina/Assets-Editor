@@ -245,6 +245,7 @@ namespace Assets_Editor
                 IncludeEnhancedAnimations = true,
                 IncludeFrameGroups = true,
                 IncludeModernFlags = true,
+                LegacyOutfitAnimationFrames = 0,
             }, appearances);
         }
 
@@ -430,10 +431,10 @@ namespace Assets_Editor
             }
 
             w.Write((byte)AppearanceFlag860.Default);
-            WriteSpriteInfo860(w, SelectLegacyFrameGroup(item).SpriteInfo, profile);
+            WriteSpriteInfo860(w, SelectLegacyFrameGroup860(item, profile).SpriteInfo, profile);
         }
 
-        private static FrameGroup SelectLegacyFrameGroup(Appearance item)
+        private static FrameGroup SelectLegacyFrameGroup860(Appearance item, LegacyAssetExportProfile profile)
         {
             if (item.FrameGroup.Count == 0)
             {
@@ -458,14 +459,146 @@ namespace Assets_Editor
 
             if (item.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
             {
+                var mergedGroup = TryCreateLegacy860OutfitGroup(item, profile);
+                if (mergedGroup != null)
+                {
+                    return mergedGroup;
+                }
+
                 var movingGroup = item.FrameGroup.FirstOrDefault(group => group.FixedFrameGroup == FIXED_FRAME_GROUP.OutfitMoving);
                 if (movingGroup != null)
                 {
-                    return movingGroup;
+                    return LimitLegacy860OutfitFrameCount(movingGroup, profile);
                 }
             }
 
             return item.FrameGroup[0];
+        }
+
+        private static FrameGroup TryCreateLegacy860OutfitGroup(Appearance item, LegacyAssetExportProfile profile)
+        {
+            var idleGroup = item.FrameGroup.FirstOrDefault(group => group.FixedFrameGroup == FIXED_FRAME_GROUP.OutfitIdle) ?? item.FrameGroup[0];
+            var movingGroup = item.FrameGroup.FirstOrDefault(group => group.FixedFrameGroup == FIXED_FRAME_GROUP.OutfitMoving);
+            if (movingGroup?.SpriteInfo == null || idleGroup?.SpriteInfo == null)
+            {
+                return null;
+            }
+
+            var idleInfo = idleGroup.SpriteInfo;
+            var movingInfo = movingGroup.SpriteInfo;
+            if (!CanMergeLegacy860OutfitGroups(idleInfo, movingInfo))
+            {
+                return null;
+            }
+
+            var frameSpriteCount = GetLegacyFrameSpriteCount(movingInfo);
+            if (frameSpriteCount == 0)
+            {
+                return null;
+            }
+
+            var movingFrames = Math.Max(1, (int)Math.Min(byte.MaxValue, movingInfo.PatternFrames));
+            var frameCount = profile.LegacyOutfitAnimationFrames > 0
+                ? Math.Clamp(profile.LegacyOutfitAnimationFrames, 1, byte.MaxValue)
+                : 1 + Math.Min(movingFrames, byte.MaxValue - 1);
+            var movingFramesToWrite = Math.Max(0, frameCount - 1);
+
+            var spriteInfo = movingInfo.Clone();
+            spriteInfo.Animation = null;
+            spriteInfo.PatternFrames = (uint)frameCount;
+            spriteInfo.SpriteId.Clear();
+
+            AddLegacyFrameSprites(spriteInfo.SpriteId, idleInfo, 0, frameSpriteCount);
+            for (var frame = 0; frame < movingFramesToWrite; frame++)
+            {
+                AddLegacyFrameSprites(spriteInfo.SpriteId, movingInfo, GetSampledMovingFrame(frame, movingFramesToWrite, movingFrames), frameSpriteCount);
+            }
+
+            return new FrameGroup
+            {
+                FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle,
+                SpriteInfo = spriteInfo,
+            };
+        }
+
+        private static int GetSampledMovingFrame(int targetFrame, int targetFrameCount, int sourceFrameCount)
+        {
+            if (targetFrameCount <= 1 || sourceFrameCount <= 1)
+            {
+                return 0;
+            }
+
+            return Math.Min(sourceFrameCount - 1, targetFrame * sourceFrameCount / targetFrameCount);
+        }
+
+        private static FrameGroup LimitLegacy860OutfitFrameCount(FrameGroup frameGroup, LegacyAssetExportProfile profile)
+        {
+            if (profile.LegacyOutfitAnimationFrames <= 0 || frameGroup.SpriteInfo == null)
+            {
+                return frameGroup;
+            }
+
+            var spriteInfo = frameGroup.SpriteInfo;
+            var sourceFrames = Math.Max(1, (int)Math.Min(byte.MaxValue, spriteInfo.PatternFrames));
+            var frameCount = Math.Clamp(profile.LegacyOutfitAnimationFrames, 1, byte.MaxValue);
+            if (sourceFrames <= frameCount)
+            {
+                return frameGroup;
+            }
+
+            var frameSpriteCount = GetLegacyFrameSpriteCount(spriteInfo);
+            if (frameSpriteCount == 0)
+            {
+                return frameGroup;
+            }
+
+            var limitedInfo = spriteInfo.Clone();
+            limitedInfo.Animation = null;
+            limitedInfo.PatternFrames = (uint)frameCount;
+            limitedInfo.SpriteId.Clear();
+
+            for (var frame = 0; frame < frameCount; frame++)
+            {
+                AddLegacyFrameSprites(limitedInfo.SpriteId, spriteInfo, GetSampledMovingFrame(frame, frameCount, sourceFrames), frameSpriteCount);
+            }
+
+            return new FrameGroup
+            {
+                FixedFrameGroup = frameGroup.FixedFrameGroup,
+                SpriteInfo = limitedInfo,
+            };
+        }
+
+        private static bool CanMergeLegacy860OutfitGroups(SpriteInfo idleInfo, SpriteInfo movingInfo)
+        {
+            return idleInfo.PatternWidth == movingInfo.PatternWidth
+                && idleInfo.PatternHeight == movingInfo.PatternHeight
+                && idleInfo.PatternLayers == movingInfo.PatternLayers
+                && idleInfo.PatternX == movingInfo.PatternX
+                && idleInfo.PatternY == movingInfo.PatternY
+                && idleInfo.PatternZ == movingInfo.PatternZ;
+        }
+
+        private static int GetLegacyFrameSpriteCount(SpriteInfo spriteInfo)
+        {
+            return (int)(Math.Max(1, (int)spriteInfo.PatternWidth)
+                * Math.Max(1, (int)spriteInfo.PatternHeight)
+                * Math.Max(1, (int)spriteInfo.PatternLayers)
+                * Math.Max(1, (int)spriteInfo.PatternX)
+                * Math.Max(1, (int)spriteInfo.PatternY)
+                * Math.Max(1, (int)spriteInfo.PatternZ));
+        }
+
+        private static void AddLegacyFrameSprites(Google.Protobuf.Collections.RepeatedField<uint> target, SpriteInfo source, int frame, int frameSpriteCount)
+        {
+            var sourceFrames = Math.Max(1, (int)source.PatternFrames);
+            var selectedFrame = Math.Min(Math.Max(frame, 0), sourceFrames - 1);
+            var offset = selectedFrame * frameSpriteCount;
+            for (var index = 0; index < frameSpriteCount; index++)
+            {
+                var sourceIndex = offset + index;
+                target.Add(sourceIndex < source.SpriteId.Count ? source.SpriteId[sourceIndex] : 0);
+            }
         }
 
         private static void WriteSpriteInfo860(BinaryWriter w, SpriteInfo spriteInfo, LegacyAssetExportProfile profile)
