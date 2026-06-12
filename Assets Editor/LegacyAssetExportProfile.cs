@@ -13,6 +13,7 @@ namespace Assets_Editor
     {
         public required string Id { get; init; }
         public required string DisplayName { get; init; }
+        public required string Description { get; init; }
         public required LegacyDatLayout DatLayout { get; init; }
         public required uint DatSignature { get; init; }
         public required uint SprSignature { get; init; }
@@ -32,6 +33,7 @@ namespace Assets_Editor
             {
                 Id = "cip860-extended",
                 DisplayName = "CipSoft 8.60 extended",
+                Description = "8.60 dat layout with extended uint32 sprite ids; does not write modern dat flags such as Clothes/attr 32.",
                 DatLayout = LegacyDatLayout.Tibia860,
                 DatSignature = 0x4C2C7993,
                 SprSignature = 0x4C220594,
@@ -46,6 +48,7 @@ namespace Assets_Editor
             {
                 Id = "canary860-extended",
                 DisplayName = "Canary 8.60 extended",
+                Description = "Alias profile for Canary's CipSoft 8.60 extended client contract.",
                 DatLayout = LegacyDatLayout.Tibia860,
                 DatSignature = 0x4C2C7993,
                 SprSignature = 0x4C220594,
@@ -60,6 +63,7 @@ namespace Assets_Editor
             {
                 Id = "legacy1098",
                 DisplayName = "Legacy 10.98 compatible",
+                Description = "10.98-compatible spr/dat export with modern legacy flags enabled.",
                 DatLayout = LegacyDatLayout.Tibia1098,
                 DatSignature = 0x000042A3,
                 SprSignature = 0x53159CA9,

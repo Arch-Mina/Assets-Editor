@@ -128,6 +128,7 @@ namespace Assets_Editor
             foreach (var profile in LegacyAssetExportProfiles.All)
             {
                 Console.WriteLine($"{profile.Id}: {profile.DisplayName}");
+                Console.WriteLine($"  {profile.Description}");
             }
         }
 
@@ -136,6 +137,11 @@ namespace Assets_Editor
             Console.WriteLine("Usage:");
             Console.WriteLine("  Assets Editor.exe --list-profiles");
             Console.WriteLine("  Assets Editor.exe export-legacy --profile cip860-extended --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]");
+            Console.WriteLine();
+            Console.WriteLine("Profile notes:");
+            Console.WriteLine("  cip860-extended keeps the CipSoft 8.60 dat object layout and writes extended uint32 sprite ids.");
+            Console.WriteLine("  It intentionally does not write modern dat flags such as Clothes/attr 32, Market, DefaultAction, Wrap, or TopEffect.");
+            Console.WriteLine("  Outfit colors still come from the game protocol lookHead/lookBody/lookLegs/lookFeet/lookAddons fields and the classic outfit sprite layout.");
         }
 
         private sealed class InlineProgress<T> : IProgress<T>

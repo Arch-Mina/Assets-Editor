@@ -36,6 +36,23 @@ Assets Editor is an open-source tool designed for modifying and managing client 
 #### Usage
 - Download the latest release from the [Releases](https://github.com/Arch-Mina/Assets-Editor/releases) page.
 
+### Legacy export profiles
+
+The command line exporter can generate legacy `.dat/.spr` pairs:
+
+```powershell
+& ".\Assets Editor.exe" export-legacy --profile cip860-extended --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]
+```
+
+`cip860-extended` is intentionally a CipSoft 8.60 object layout with selected extensions, not a modern OTClient dat layout:
+
+- Writes classic 8.60 dat attributes only.
+- Does not write modern dat flags such as `Clothes`/attr 32, `Market`, `DefaultAction`, `Wrap`, or `TopEffect`.
+- Writes extended `uint32` sprite ids for clients patched to read the extended `.spr`.
+- Keeps the classic outfit layout. Outfit colors come from the game protocol fields `lookHead`, `lookBody`, `lookLegs`, `lookFeet`, and `lookAddons`, not from the modern `Clothes` dat flag.
+
+This matters because the CipSoft 8.60 parser aborts on unknown modern dat attributes. A file that includes `Clothes`/attr 32 is not a valid `cip860-extended` export unless the client binary is separately patched to understand that flag.
+
 :sparkles: **Supporting the Project**
 
 If you find this project useful and want to show your appreciation or support, you're welcome to do so through [PayPal](https://paypal.me/SpiderOT?country.x=EG&locale.x=en_US). Your support is entirely optional but greatly appreciated :heart:.
