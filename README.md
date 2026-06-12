@@ -53,6 +53,13 @@ The command line exporter can generate legacy `.dat/.spr` pairs:
 
 This matters because the CipSoft 8.60 parser aborts on unknown modern dat attributes. A file that includes `Clothes`/attr 32 is not a valid `cip860-extended` export unless the client binary is separately patched to understand that flag.
 
+`client11-15x` targets the extended client 11 executable used with 15.x assets:
+
+- Writes the 10/11 dat layout with modern legacy flags enabled.
+- Uses signature `0x00004A10` for `.dat` and `0x59E48E02` for `.spr`.
+- Writes extended `uint32` sprite ids.
+- Caps Market names at 29 characters. This client fails to open `Tibia.dat` when a Market name is 30 characters or longer, so the exporter truncates the name before serialization.
+
 :sparkles: **Supporting the Project**
 
 If you find this project useful and want to show your appreciation or support, you're welcome to do so through [PayPal](https://paypal.me/SpiderOT?country.x=EG&locale.x=en_US). Your support is entirely optional but greatly appreciated :heart:.

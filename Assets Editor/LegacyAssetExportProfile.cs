@@ -23,6 +23,7 @@ namespace Assets_Editor
         public required bool IncludeFrameGroups { get; init; }
         public required bool IncludeModernFlags { get; init; }
         public required int LegacyOutfitAnimationFrames { get; init; }
+        public int MaxMarketNameLength { get; init; }
     }
 
     public static class LegacyAssetExportProfiles
@@ -74,6 +75,22 @@ namespace Assets_Editor
                 IncludeModernFlags = true,
                 LegacyOutfitAnimationFrames = 0,
             },
+            new LegacyAssetExportProfile
+            {
+                Id = "client11-15x",
+                DisplayName = "Client 11 15.x compatible",
+                Description = "10/11-compatible export for the extended client 11 executable; caps Market names at 29 characters.",
+                DatLayout = LegacyDatLayout.Tibia1098,
+                DatSignature = 0x00004A10,
+                SprSignature = 0x59E48E02,
+                Transparency = false,
+                SpriteIdsU32 = true,
+                IncludeEnhancedAnimations = true,
+                IncludeFrameGroups = true,
+                IncludeModernFlags = true,
+                LegacyOutfitAnimationFrames = 0,
+                MaxMarketNameLength = 29,
+            },
         ];
 
         public static IReadOnlyList<LegacyAssetExportProfile> All => Profiles;
@@ -97,6 +114,12 @@ namespace Assets_Editor
             if (string.Equals(id, "1098", StringComparison.OrdinalIgnoreCase))
             {
                 return Get("legacy1098");
+            }
+
+            if (string.Equals(id, "client11", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(id, "client-11", StringComparison.OrdinalIgnoreCase))
+            {
+                return Get("client11-15x");
             }
 
             throw new ArgumentException($"Unknown export profile '{id}'. Use --list-profiles to see valid profiles.");

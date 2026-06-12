@@ -129,6 +129,10 @@ namespace Assets_Editor
             {
                 Console.WriteLine($"{profile.Id}: {profile.DisplayName}");
                 Console.WriteLine($"  {profile.Description}");
+                if (profile.MaxMarketNameLength > 0)
+                {
+                    Console.WriteLine($"  Market names are capped at {profile.MaxMarketNameLength} characters.");
+                }
             }
         }
 
@@ -142,6 +146,7 @@ namespace Assets_Editor
             Console.WriteLine("  cip860-extended keeps the CipSoft 8.60 dat object layout and writes extended uint32 sprite ids.");
             Console.WriteLine("  It intentionally does not write modern dat flags such as Clothes/attr 32, Market, DefaultAction, Wrap, or TopEffect.");
             Console.WriteLine("  Outfit colors still come from the game protocol lookHead/lookBody/lookLegs/lookFeet/lookAddons fields and the classic outfit sprite layout.");
+            Console.WriteLine("  client11-15x keeps the 10/11 dat layout and caps Market names at 29 characters because that executable fails to open longer Market names.");
         }
 
         private sealed class InlineProgress<T> : IProgress<T>

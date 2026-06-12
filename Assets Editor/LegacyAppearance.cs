@@ -237,6 +237,7 @@ namespace Assets_Editor
             {
                 Id = "legacy1098-custom",
                 DisplayName = "Legacy 10.98 compatible",
+                Description = "Legacy 10.98 compatible export with a custom dat signature.",
                 DatLayout = LegacyDatLayout.Tibia1098,
                 DatSignature = signature,
                 SprSignature = 0,
@@ -295,7 +296,7 @@ namespace Assets_Editor
                 return;
             }
 
-            WriteAppearance1098(w, appearance);
+            WriteAppearance1098(w, appearance, profile);
         }
 
         public static void WriteAppearance860(BinaryWriter w, Appearance item, LegacyAssetExportProfile profile)
@@ -641,6 +642,11 @@ namespace Assets_Editor
 
         public static void WriteAppearance1098(BinaryWriter w, Appearance item)
         {
+            WriteAppearance1098(w, item, null);
+        }
+
+        public static void WriteAppearance1098(BinaryWriter w, Appearance item, LegacyAssetExportProfile? profile)
+        {
             if (item.Flags == null)
             {
                 item.Flags = new();
@@ -793,9 +799,10 @@ namespace Assets_Editor
 
                 w.Write((ushort)item.Flags.Market.TradeAsObjectId);
                 w.Write((ushort)item.Flags.Market.ShowAsObjectId);
-                w.Write((ushort)item.Name.Length);
-                for (UInt16 i = 0; i < item.Name.Length; ++i)
-                    w.Write((char)item.Name[i]);
+                var marketName = GetLegacyMarketName(item, profile);
+                w.Write((ushort)marketName.Length);
+                for (UInt16 i = 0; i < marketName.Length; ++i)
+                    w.Write((char)marketName[i]);
                 w.Write((ushort)item.Flags.Market.Vocation);
                 w.Write((ushort)item.Flags.Market.MinimumLevel);
             }
@@ -865,6 +872,17 @@ namespace Assets_Editor
                         w.Write((uint)0);
                 }
             }
+        }
+
+        private static string GetLegacyMarketName(Appearance item, LegacyAssetExportProfile? profile)
+        {
+            var marketName = item.Name ?? string.Empty;
+            if (profile?.MaxMarketNameLength > 0 && marketName.Length > profile.MaxMarketNameLength)
+            {
+                return marketName[..profile.MaxMarketNameLength];
+            }
+
+            return marketName;
         }
 
         public static int GetSpriteIndex(FrameGroup frameGroup, int width, int height, int layers, int patternX, int patternY, int patternZ, int frames)
