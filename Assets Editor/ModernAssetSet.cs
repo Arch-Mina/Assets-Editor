@@ -11,7 +11,7 @@ using Tibia.Protobuf.Appearances;
 
 namespace Assets_Editor
 {
-    public sealed class ModernAssetSet
+    public sealed class ModernAssetSet : IDisposable
     {
         private readonly object loadLock = new();
         private readonly ConcurrentDictionary<int, MemoryStream> spriteStreams = new();
@@ -110,6 +110,16 @@ namespace Assets_Editor
         public IEnumerable<MainWindow.Catalog> GetSpriteSheets()
         {
             return Catalog.Where(entry => entry.Type == "sprite" && entry.SpriteType >= 0);
+        }
+
+        public void Dispose()
+        {
+            foreach (var stream in spriteStreams.Values)
+            {
+                stream?.Dispose();
+            }
+
+            spriteStreams.Clear();
         }
 
         private void GenerateTileSetImageList(Bitmap bitmap, MainWindow.Catalog sheet)

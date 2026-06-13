@@ -254,30 +254,23 @@ namespace Assets_Editor
         {
             try
             {
-                var datFile = new FileStream(fn, FileMode.Create, FileAccess.Write);
+                using var datFile = new FileStream(fn, FileMode.Create, FileAccess.Write);
                 using (var w = new BinaryWriter(datFile, Encoding.GetEncoding("ISO-8859-1")))
                 {
+                    var objectCount = appearances.Object.Count > 0 ? appearances.Object.Max(item => item.Id) : 99;
+                    var outfitCount = appearances.Outfit.Count > 0 ? appearances.Outfit.Max(item => item.Id) : 0;
+                    var effectCount = appearances.Effect.Count > 0 ? appearances.Effect.Max(item => item.Id) : 0;
+                    var missileCount = appearances.Missile.Count > 0 ? appearances.Missile.Max(item => item.Id) : 0;
+
                     w.Write(profile.DatSignature);
-                    w.Write((ushort)(appearances.Object.Count + 99));
-                    w.Write((ushort)appearances.Outfit.Count);
-                    w.Write((ushort)appearances.Effect.Count);
-                    w.Write((ushort)appearances.Missile.Count);
-                    foreach (Appearance appearance in appearances.Object.OrderBy(item => item.Id))
-                    {
-                        WriteAppearance(w, appearance, profile);
-                    }
-                    foreach (Appearance appearance in appearances.Outfit.OrderBy(item => item.Id))
-                    {
-                        WriteAppearance(w, appearance, profile);
-                    }
-                    foreach (Appearance appearance in appearances.Effect.OrderBy(item => item.Id))
-                    {
-                        WriteAppearance(w, appearance, profile);
-                    }
-                    foreach (Appearance appearance in appearances.Missile.OrderBy(item => item.Id))
-                    {
-                        WriteAppearance(w, appearance, profile);
-                    }
+                    w.Write((ushort)objectCount);
+                    w.Write((ushort)outfitCount);
+                    w.Write((ushort)effectCount);
+                    w.Write((ushort)missileCount);
+                    WriteAppearanceRange(w, appearances.Object, profile, APPEARANCE_TYPE.AppearanceObject, 100, objectCount);
+                    WriteAppearanceRange(w, appearances.Outfit, profile, APPEARANCE_TYPE.AppearanceOutfit, 1, outfitCount);
+                    WriteAppearanceRange(w, appearances.Effect, profile, APPEARANCE_TYPE.AppearanceEffect, 1, effectCount);
+                    WriteAppearanceRange(w, appearances.Missile, profile, APPEARANCE_TYPE.AppearanceMissile, 1, missileCount);
 
                     return true;
                 }
@@ -286,6 +279,53 @@ namespace Assets_Editor
             {
                 return false;
             }
+        }
+
+        private static void WriteAppearanceRange(BinaryWriter w, Google.Protobuf.Collections.RepeatedField<Appearance> appearances, LegacyAssetExportProfile profile, APPEARANCE_TYPE type, uint firstId, uint lastId)
+        {
+            if (lastId < firstId)
+            {
+                return;
+            }
+
+            var byId = appearances.ToDictionary(item => item.Id);
+            for (var id = firstId; id <= lastId; id++)
+            {
+                if (!byId.TryGetValue(id, out var appearance))
+                {
+                    appearance = new Appearance
+                    {
+                        Id = id,
+                        AppearanceType = type,
+                        Flags = new AppearanceFlags(),
+                    };
+                    appearance.FrameGroup.Add(CreateBlankFrameGroup());
+                }
+
+                appearance.AppearanceType = type;
+                WriteAppearance(w, appearance, profile);
+            }
+        }
+
+        private static FrameGroup CreateBlankFrameGroup()
+        {
+            var frameGroup = new FrameGroup
+            {
+                FixedFrameGroup = FIXED_FRAME_GROUP.OutfitIdle,
+                SpriteInfo = new SpriteInfo
+                {
+                    PatternWidth = 1,
+                    PatternHeight = 1,
+                    PatternSize = 32,
+                    PatternLayers = 1,
+                    PatternX = 1,
+                    PatternY = 1,
+                    PatternZ = 1,
+                    PatternFrames = 1,
+                },
+            };
+            frameGroup.SpriteInfo.SpriteId.Add(0);
+            return frameGroup;
         }
 
         private static void WriteAppearance(BinaryWriter w, Appearance appearance, LegacyAssetExportProfile profile)
@@ -824,46 +864,58 @@ namespace Assets_Editor
 
             w.Write((byte)0xFF);
 
+            var frameGroups = SelectFrameGroups1098(item, profile);
             if (item.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
-                w.Write((byte)item.FrameGroup.Count);
+                w.Write((byte)frameGroups.Count);
 
-            for (int i = 0; i < item.FrameGroup.Count; i++)
+            for (int i = 0; i < frameGroups.Count; i++)
             {
-                FrameGroup frameGroup = item.FrameGroup[i];
+                FrameGroup frameGroup = frameGroups[i];
 
                 if (item.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
                     w.Write((byte)frameGroup.FixedFrameGroup);
 
                 SpriteInfo spriteInfo = frameGroup.SpriteInfo;
-                byte width = (byte)spriteInfo.PatternWidth;
-                byte height = (byte)spriteInfo.PatternHeight;
+                byte width = ToNonZeroByte(spriteInfo.PatternWidth);
+                byte height = ToNonZeroByte(spriteInfo.PatternHeight);
 
                 w.Write(width);
                 w.Write(height);
 
                 if (width > 1 || height > 1)
-                    w.Write((byte)spriteInfo.PatternSize);
+                    w.Write(ToNonZeroByte(spriteInfo.PatternSize));
 
-                w.Write((byte)spriteInfo.PatternLayers);
-                w.Write((byte)spriteInfo.PatternX);
-                w.Write((byte)spriteInfo.PatternY);
-                w.Write((byte)spriteInfo.PatternZ);
-                w.Write((byte)spriteInfo.PatternFrames);
+                var animation = spriteInfo.Animation;
+                var includeEnhancedAnimations = profile?.IncludeEnhancedAnimations ?? true;
+                var frames = includeEnhancedAnimations && animation?.SpritePhase.Count > 0
+                    ? Math.Max(1, Math.Min(byte.MaxValue, animation.SpritePhase.Count))
+                    : Math.Max(1, Math.Min(byte.MaxValue, (int)spriteInfo.PatternFrames));
 
-                if (spriteInfo.PatternFrames > 1)
+                byte layers = ToNonZeroByte(spriteInfo.PatternLayers);
+                byte patternX = ToNonZeroByte(spriteInfo.PatternX);
+                byte patternY = ToNonZeroByte(spriteInfo.PatternY);
+                byte patternZ = ToNonZeroByte(spriteInfo.PatternZ);
+
+                w.Write(layers);
+                w.Write(patternX);
+                w.Write(patternY);
+                w.Write(patternZ);
+                w.Write((byte)frames);
+
+                if (includeEnhancedAnimations && frames > 1 && animation != null)
                 {
-                    w.Write(Convert.ToByte(spriteInfo.Animation.AnimationMode));
-                    w.Write(spriteInfo.Animation.LoopCount);
-                    w.Write((byte)spriteInfo.Animation.DefaultStartPhase);
+                    w.Write(Convert.ToByte(animation.AnimationMode));
+                    w.Write(animation.LoopCount);
+                    w.Write((byte)animation.DefaultStartPhase);
 
-                    for (int k = 0; k < spriteInfo.Animation.SpritePhase.Count; k++)
+                    for (int k = 0; k < frames; k++)
                     {
-                        w.Write(spriteInfo.Animation.SpritePhase[k].DurationMin);
-                        w.Write(spriteInfo.Animation.SpritePhase[k].DurationMax);
+                        w.Write(animation.SpritePhase[k].DurationMin);
+                        w.Write(animation.SpritePhase[k].DurationMax);
                     }
                 }
 
-                uint numSprites = spriteInfo.PatternWidth * spriteInfo.PatternHeight * spriteInfo.PatternLayers * spriteInfo.PatternX * spriteInfo.PatternY * spriteInfo.PatternZ * spriteInfo.PatternFrames;
+                uint numSprites = (uint)width * height * layers * patternX * patternY * patternZ * (uint)frames;
                 for (var x = 0; x < numSprites; x++)
                 {
                     if (x < spriteInfo.SpriteId.Count)
@@ -872,6 +924,26 @@ namespace Assets_Editor
                         w.Write((uint)0);
                 }
             }
+        }
+
+        private static System.Collections.Generic.IReadOnlyList<FrameGroup> SelectFrameGroups1098(Appearance item, LegacyAssetExportProfile? profile)
+        {
+            if (item.FrameGroup.Count == 0)
+            {
+                return [CreateBlankFrameGroup()];
+            }
+
+            if (item.AppearanceType != APPEARANCE_TYPE.AppearanceOutfit || profile?.IncludeFrameGroups == false)
+            {
+                return [item.FrameGroup[0]];
+            }
+
+            return item.FrameGroup.Take(byte.MaxValue).ToArray();
+        }
+
+        private static byte ToNonZeroByte(uint value)
+        {
+            return (byte)Math.Max(1, Math.Min(byte.MaxValue, value));
         }
 
         private static string GetLegacyMarketName(Appearance item, LegacyAssetExportProfile? profile)

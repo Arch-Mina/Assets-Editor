@@ -36,12 +36,13 @@ Assets Editor is an open-source tool designed for modifying and managing client 
 #### Usage
 - Download the latest release from the [Releases](https://github.com/Arch-Mina/Assets-Editor/releases) page.
 
-### Legacy export profiles
+#### Legacy export profiles
 
 The command line exporter can generate legacy `.dat/.spr` pairs:
 
 ```powershell
 & ".\Assets Editor.exe" export-legacy --profile cip860-extended --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]
+& ".\Assets Editor.exe" validate-legacy --profile client11-15x --dat <client-path>\Tibia.dat [--spr <client-path>\Tibia.spr]
 ```
 
 `cip860-extended` is intentionally a CipSoft 8.60 object layout with selected extensions, not a modern OTClient dat layout:
@@ -59,6 +60,8 @@ This matters because the CipSoft 8.60 parser aborts on unknown modern dat attrib
 - Uses signature `0x00004A10` for `.dat` and `0x59E48E02` for `.spr`.
 - Writes extended `uint32` sprite ids.
 - Caps Market names at 29 characters. This client fails to open `Tibia.dat` when a Market name is 30 characters or longer, so the exporter truncates the name before serialization.
+
+The exporter validates the generated `.dat` before writing the `.spr`. The validator checks the selected profile contract, parser alignment, Market name limits, frame group data, animation phase data, and sprite id references. Use `validate-legacy` on shared files before opening them in the CipSoft client; a validator error is safer than a client access violation on startup.
 
 :sparkles: **Supporting the Project**
 

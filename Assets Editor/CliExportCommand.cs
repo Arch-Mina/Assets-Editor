@@ -12,6 +12,7 @@ namespace Assets_Editor
         {
             return args.Length > 0 &&
                 (string.Equals(args[0], "export-legacy", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(args[0], "validate-legacy", StringComparison.OrdinalIgnoreCase) ||
                  string.Equals(args[0], "--list-profiles", StringComparison.OrdinalIgnoreCase) ||
                  string.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase) ||
                  string.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase));
@@ -32,6 +33,31 @@ namespace Assets_Editor
                 if (string.Equals(args[0], "--list-profiles", StringComparison.OrdinalIgnoreCase))
                 {
                     PrintProfiles();
+                    return 0;
+                }
+
+                if (string.Equals(args[0], "validate-legacy", StringComparison.OrdinalIgnoreCase))
+                {
+                    var validateValues = ParseOptions(args);
+                    var validateProfile = LegacyAssetExportProfiles.Get(GetValue(validateValues, "profile"));
+                    var datPath = GetValue(validateValues, "dat");
+                    validateValues.TryGetValue("spr", out var sprPath);
+                    if (!string.IsNullOrWhiteSpace(sprPath))
+                    {
+                        LegacyDatValidator.ValidateFiles(datPath, sprPath, validateProfile);
+                    }
+                    else
+                    {
+                        LegacyDatValidator.ValidateExport(datPath, validateProfile, uint.MaxValue);
+                    }
+
+                    Console.WriteLine($"validated profile={validateProfile.Id}");
+                    Console.WriteLine($"dat={Path.GetFullPath(datPath)}");
+                    if (!string.IsNullOrWhiteSpace(sprPath))
+                    {
+                        Console.WriteLine($"spr={Path.GetFullPath(sprPath)}");
+                    }
+
                     return 0;
                 }
 
@@ -141,6 +167,7 @@ namespace Assets_Editor
             Console.WriteLine("Usage:");
             Console.WriteLine("  Assets Editor.exe --list-profiles");
             Console.WriteLine("  Assets Editor.exe export-legacy --profile cip860-extended --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]");
+            Console.WriteLine("  Assets Editor.exe validate-legacy --profile client11-15x --dat <Tibia.dat> [--spr <Tibia.spr>]");
             Console.WriteLine();
             Console.WriteLine("Profile notes:");
             Console.WriteLine("  cip860-extended keeps the CipSoft 8.60 dat object layout and writes extended uint32 sprite ids.");

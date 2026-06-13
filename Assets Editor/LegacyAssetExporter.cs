@@ -41,7 +41,7 @@ namespace Assets_Editor
             var backups = PrepareOutputFiles(options, datPath, sprPath);
 
             log?.Report($"Loading modern assets from '{options.InputPath}'");
-            var assets = ModernAssetSet.Load(options.InputPath);
+            using var assets = ModernAssetSet.Load(options.InputPath);
             var spriteStorage = new SpriteStorage();
             var spriteOffsets = new ConcurrentDictionary<string, uint>();
 
@@ -53,6 +53,7 @@ namespace Assets_Editor
 
             log?.Report($"Writing {options.Profile.DisplayName} dat");
             LegacyAppearance.WriteLegacyDat(datPath, options.Profile, legacyAppearances);
+            LegacyDatValidator.ValidateExport(datPath, options.Profile, (uint)Math.Max(0, spriteStorage.SprLists.Count - 1));
 
             log?.Report($"Writing {options.Profile.DisplayName} spr");
             await Sprite.CompileSpritesAsync(sprPath, spriteStorage, options.Profile.Transparency, options.Profile.SprSignature, sprCompileProgress);
@@ -139,10 +140,10 @@ namespace Assets_Editor
 
         private static void BuildLegacyAppearances(ModernAssetSet assets, Appearances appearances, ConcurrentDictionary<string, uint> spriteOffsets, LegacyAssetExportProfile profile, IProgress<string> log)
         {
-            var objectCount = appearances.Object.Count > 0 ? appearances.Object[^1].Id : 99;
-            var outfitCount = appearances.Outfit.Count > 0 ? appearances.Outfit[^1].Id : 0;
-            var effectCount = appearances.Effect.Count > 0 ? appearances.Effect[^1].Id : 0;
-            var missileCount = appearances.Missile.Count > 0 ? appearances.Missile[^1].Id : 0;
+            var objectCount = appearances.Object.Count > 0 ? appearances.Object.Max(item => item.Id) : 99;
+            var outfitCount = appearances.Outfit.Count > 0 ? appearances.Outfit.Max(item => item.Id) : 0;
+            var effectCount = appearances.Effect.Count > 0 ? appearances.Effect.Max(item => item.Id) : 0;
+            var missileCount = appearances.Missile.Count > 0 ? appearances.Missile.Max(item => item.Id) : 0;
 
             for (uint id = 100; id <= objectCount; id++)
             {
@@ -370,29 +371,22 @@ namespace Assets_Editor
             foreach (var spriteId in spriteInfo.SpriteId)
             {
                 var spriteName = spriteId.ToString();
-                try
+                switch (sliceType)
                 {
-                    if (sliceType == 0)
-                    {
-                        remappedSprites.Add(spriteOffsets[$"{spriteName}_0"]);
-                    }
-                    else if (sliceType == 1 || sliceType == 2)
-                    {
-                        remappedSprites.Add(spriteOffsets[$"{spriteName}_1"]);
-                        remappedSprites.Add(spriteOffsets[$"{spriteName}_0"]);
-                    }
-                    else if (sliceType == 3)
-                    {
-                        remappedSprites.Add(spriteOffsets[$"{spriteName}_3"]);
-                        remappedSprites.Add(spriteOffsets[$"{spriteName}_2"]);
-                        remappedSprites.Add(spriteOffsets[$"{spriteName}_1"]);
-                        remappedSprites.Add(spriteOffsets[$"{spriteName}_0"]);
-                    }
-                }
-                catch (KeyNotFoundException)
-                {
-                    log?.Report($"Missing sliced sprite offset for appearance {appearanceId}, sprite {spriteId}; using blank sprite.");
-                    remappedSprites.Add(0);
+                    case 1:
+                    case 2:
+                        AddSpriteOffset(remappedSprites, spriteOffsets, $"{spriteName}_1", appearanceId, spriteId, log);
+                        AddSpriteOffset(remappedSprites, spriteOffsets, $"{spriteName}_0", appearanceId, spriteId, log);
+                        break;
+                    case 3:
+                        AddSpriteOffset(remappedSprites, spriteOffsets, $"{spriteName}_3", appearanceId, spriteId, log);
+                        AddSpriteOffset(remappedSprites, spriteOffsets, $"{spriteName}_2", appearanceId, spriteId, log);
+                        AddSpriteOffset(remappedSprites, spriteOffsets, $"{spriteName}_1", appearanceId, spriteId, log);
+                        AddSpriteOffset(remappedSprites, spriteOffsets, $"{spriteName}_0", appearanceId, spriteId, log);
+                        break;
+                    default:
+                        AddSpriteOffset(remappedSprites, spriteOffsets, $"{spriteName}_0", appearanceId, spriteId, log);
+                        break;
                 }
             }
 
@@ -401,6 +395,18 @@ namespace Assets_Editor
             {
                 spriteInfo.SpriteId.Add(spriteId);
             }
+        }
+
+        private static void AddSpriteOffset(List<uint> remappedSprites, ConcurrentDictionary<string, uint> spriteOffsets, string spriteKey, uint appearanceId, uint sourceSpriteId, IProgress<string> log)
+        {
+            if (spriteOffsets.TryGetValue(spriteKey, out var remappedSpriteId))
+            {
+                remappedSprites.Add(remappedSpriteId);
+                return;
+            }
+
+            log?.Report($"Missing sliced sprite offset for appearance {appearanceId}, sprite {sourceSpriteId}, slice {spriteKey}; using blank sprite.");
+            remappedSprites.Add(0);
         }
     }
 }
