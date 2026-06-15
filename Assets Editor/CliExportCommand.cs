@@ -83,6 +83,7 @@ namespace Assets_Editor
                     Profile = profile,
                     Overwrite = values.ContainsKey("overwrite"),
                     Backup = !values.ContainsKey("no-backup"),
+                    ExportItemFlagOtml = !values.ContainsKey("no-item-flag-otml"),
                 };
 
                 var exporter = new LegacyAssetExporter();
@@ -95,6 +96,11 @@ namespace Assets_Editor
                 Console.WriteLine($"exported profile={result.Profile.Id}");
                 Console.WriteLine($"dat={result.DatPath}");
                 Console.WriteLine($"spr={result.SprPath}");
+                if (!string.IsNullOrWhiteSpace(result.ItemFlagOtmlPath))
+                {
+                    Console.WriteLine($"itemFlag={result.ItemFlagOtmlPath}");
+                    Console.WriteLine($"itemFlagItems={result.ItemFlagOtmlItems}");
+                }
                 foreach (var backup in result.Backups)
                 {
                     Console.WriteLine($"backup={backup}");
@@ -122,7 +128,7 @@ namespace Assets_Editor
                 }
 
                 var key = arg[2..];
-                if (key is "overwrite" or "no-backup" or "list-profiles")
+                if (key is "overwrite" or "no-backup" or "list-profiles" or "no-item-flag-otml")
                 {
                     values[key] = null;
                     continue;
@@ -166,8 +172,8 @@ namespace Assets_Editor
         {
             Console.WriteLine("Usage:");
             Console.WriteLine("  Assets Editor.exe --list-profiles");
-            Console.WriteLine("  Assets Editor.exe export-legacy --profile cip860-extended --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]");
-            Console.WriteLine("  Assets Editor.exe export-legacy --profile client11-15x --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]");
+            Console.WriteLine("  Assets Editor.exe export-legacy --profile cip860-extended --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup] [--no-item-flag-otml]");
+            Console.WriteLine("  Assets Editor.exe export-legacy --profile client11-15x --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup] [--no-item-flag-otml]");
             Console.WriteLine("  Assets Editor.exe validate-legacy --profile client11-15x --dat <Tibia.dat> [--spr <Tibia.spr>]");
             Console.WriteLine();
             Console.WriteLine("Profile notes:");

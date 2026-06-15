@@ -2394,6 +2394,11 @@ namespace Assets_Editor
                     MainWindow.Log($"Created backup '{backup}'");
                 }
 
+                if (!string.IsNullOrWhiteSpace(result.ItemFlagOtmlPath))
+                {
+                    MainWindow.Log($"Created item flag sidecar '{result.ItemFlagOtmlPath}' ({result.ItemFlagOtmlItems} item(s))");
+                }
+
                 ComppileDialogHost.IsOpen = false;
             }
             catch (Exception exception)

@@ -18,6 +18,7 @@ namespace Assets_Editor
         public required LegacyAssetExportProfile Profile { get; init; }
         public bool Overwrite { get; init; }
         public bool Backup { get; init; } = true;
+        public bool ExportItemFlagOtml { get; init; } = true;
     }
 
     public sealed class LegacyAssetExportResult
@@ -25,6 +26,8 @@ namespace Assets_Editor
         public required string DatPath { get; init; }
         public required string SprPath { get; init; }
         public required LegacyAssetExportProfile Profile { get; init; }
+        public string ItemFlagOtmlPath { get; init; }
+        public int ItemFlagOtmlItems { get; init; }
         public IReadOnlyList<string> Backups { get; init; } = [];
     }
 
@@ -38,7 +41,14 @@ namespace Assets_Editor
 
             var datPath = Path.Combine(outputPath, "Tibia.dat");
             var sprPath = Path.Combine(outputPath, "Tibia.spr");
-            var backups = PrepareOutputFiles(options, datPath, sprPath);
+            var itemFlagOtmlPath = Path.Combine(outputPath, LegacyItemFlagOtmlExporter.FileName);
+            var outputFiles = new List<string> { datPath, sprPath };
+            if (options.ExportItemFlagOtml)
+            {
+                outputFiles.Add(itemFlagOtmlPath);
+            }
+
+            var backups = PrepareOutputFiles(options, outputFiles.ToArray());
 
             log?.Report($"Loading modern assets from '{options.InputPath}'");
             using var assets = ModernAssetSet.Load(options.InputPath);
@@ -58,11 +68,20 @@ namespace Assets_Editor
             log?.Report($"Writing {options.Profile.DisplayName} spr");
             await Sprite.CompileSpritesAsync(sprPath, spriteStorage, options.Profile.Transparency, options.Profile.SprSignature, sprCompileProgress);
 
+            var itemFlagOtmlItems = 0;
+            if (options.ExportItemFlagOtml)
+            {
+                log?.Report($"Writing item flag sidecar '{itemFlagOtmlPath}'");
+                itemFlagOtmlItems = LegacyItemFlagOtmlExporter.Write(itemFlagOtmlPath, assets.Appearances, options.Profile);
+            }
+
             return new LegacyAssetExportResult
             {
                 DatPath = datPath,
                 SprPath = sprPath,
                 Profile = options.Profile,
+                ItemFlagOtmlPath = options.ExportItemFlagOtml ? itemFlagOtmlPath : null,
+                ItemFlagOtmlItems = itemFlagOtmlItems,
                 Backups = backups,
             };
         }
