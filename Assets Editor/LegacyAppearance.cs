@@ -693,6 +693,8 @@ namespace Assets_Editor
                 MainWindow.Log("Export to 1098: missing flags for client id " + item.Id);
             }
 
+            var includeModernFlags = profile?.IncludeModernFlags ?? true;
+
             if (item.Flags.Bank != null)
             {
                 w.Write((byte)AppearanceFlag1098.Ground);
@@ -822,13 +824,13 @@ namespace Assets_Editor
             if (item.Flags.IgnoreLook)
                 w.Write((byte)AppearanceFlag1098.Lookthrough);
 
-            if (item.Flags.Clothes != null)
+            if (includeModernFlags && item.Flags.Clothes != null)
             {
                 w.Write((byte)AppearanceFlag1098.Clothes);
                 w.Write((ushort)item.Flags.Clothes.Slot);
             }
 
-            if (item.Flags.Market != null)
+            if (includeModernFlags && item.Flags.Market != null)
             {
                 w.Write((byte)AppearanceFlag1098.Market);
 
@@ -847,19 +849,19 @@ namespace Assets_Editor
                 w.Write((ushort)item.Flags.Market.MinimumLevel);
             }
 
-            if (item.Flags.DefaultAction != null)
+            if (includeModernFlags && item.Flags.DefaultAction != null)
             {
                 w.Write((byte)AppearanceFlag1098.DefaultAction);
                 w.Write((ushort)item.Flags.DefaultAction.Action);
             }
 
-            if (item.Flags.Wrap)
+            if (includeModernFlags && item.Flags.Wrap)
                 w.Write((byte)AppearanceFlag1098.Wrappable);
 
-            if (item.Flags.Unwrap)
+            if (includeModernFlags && item.Flags.Unwrap)
                 w.Write((byte)AppearanceFlag1098.UnWrappable);
 
-            if (item.Flags.Topeffect)
+            if (includeModernFlags && item.Flags.Topeffect)
                 w.Write((byte)AppearanceFlag1098.TopEffect);
 
             w.Write((byte)0xFF);
