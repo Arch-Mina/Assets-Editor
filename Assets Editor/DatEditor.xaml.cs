@@ -216,6 +216,7 @@ namespace Assets_Editor
             C_LegacyProfile.SelectedValuePath = nameof(LegacyAssetExportProfile.Id);
             C_LegacyProfile.SelectedItem = LegacyAssetExportProfiles.Get("cip860-extended");
             UpdateLegacyProfileDescription();
+            UpdateLegacyOutputPathState();
 
             // set current theme
             DarkModeToggle.IsChecked = MainWindow.IsDarkModeSet();
@@ -2079,16 +2080,85 @@ namespace Assets_Editor
             LoadProgress1.Value = 0;
             LoadProgress2.Value = 0;
             UpdateLegacyProfileDescription();
+            UpdateLegacyOutputPathState();
         }
 
         private void LegacyProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateLegacyProfileDescription();
+            UpdateLegacyOutputPathState();
+        }
+
+        private void LegacyOutputMode_Changed(object sender, RoutedEventArgs e)
+        {
+            UpdateLegacyOutputPathState();
+        }
+
+        private void LegacyOutputPathPicker_Click(object sender, RoutedEventArgs e)
+        {
+            using FolderBrowserDialog dialog = new()
+            {
+                ClientGuid = Globals.GUID_DatEditor5
+            };
+            dialog.Description = "Select the directory to export Tibia.dat and Tibia.spr.";
+            dialog.ShowNewFolderButton = true;
+
+            string currentOutputPath = (C_LegacyOutputPath.Text ?? string.Empty).Trim();
+            if (!string.IsNullOrWhiteSpace(currentOutputPath) && Directory.Exists(currentOutputPath))
+            {
+                dialog.SelectedPath = currentOutputPath;
+            }
+            else if (Directory.Exists(AppContext.BaseDirectory))
+            {
+                dialog.SelectedPath = AppContext.BaseDirectory;
+            }
+
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                C_LegacyCustomOutput.IsChecked = true;
+                C_LegacyOutputPath.Text = dialog.SelectedPath;
+            }
         }
 
         private LegacyAssetExportProfile GetSelectedLegacyProfile()
         {
             return C_LegacyProfile.SelectedItem as LegacyAssetExportProfile ?? LegacyAssetExportProfiles.Get("cip860-extended");
+        }
+
+        private string GetLegacyOutputPath()
+        {
+            string outputPath = C_LegacyCustomOutput.IsChecked == true
+                ? (C_LegacyOutputPath.Text ?? string.Empty).Trim()
+                : GetDefaultLegacyOutputPath();
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                throw new InvalidOperationException("Select the directory to export Tibia.dat and Tibia.spr.");
+            }
+
+            return Path.GetFullPath(outputPath);
+        }
+
+        private string GetDefaultLegacyOutputPath()
+        {
+            var profile = GetSelectedLegacyProfile();
+            return Path.Combine(AppContext.BaseDirectory, "legacy-exports", profile.Id);
+        }
+
+        private void UpdateLegacyOutputPathState()
+        {
+            if (C_LegacyOutputPath == null || C_LegacyBrowseOutputPath == null || C_LegacyCustomOutput == null)
+            {
+                return;
+            }
+
+            bool customOutput = C_LegacyCustomOutput.IsChecked == true;
+            C_LegacyOutputPath.IsReadOnly = !customOutput;
+            C_LegacyBrowseOutputPath.IsEnabled = customOutput;
+
+            if (!customOutput)
+            {
+                C_LegacyOutputPath.Text = GetDefaultLegacyOutputPath();
+            }
         }
 
         private void UpdateLegacyProfileDescription()
@@ -2292,17 +2362,19 @@ namespace Assets_Editor
             try
             {
                 var profile = GetSelectedLegacyProfile();
+                var outputPath = GetLegacyOutputPath();
                 var exporter = new LegacyAssetExporter();
                 var sprProgress = new Progress<int>(percent =>
                 {
                     LoadProgress2.Value = percent;
                 });
+                MainWindow.Log($"Exporting legacy assets to '{outputPath}'");
 
                 var result = await exporter.ExportAsync(
                     new LegacyAssetExportOptions
                     {
                         InputPath = MainWindow._assetsPath,
-                        OutputPath = MainWindow._assetsPath,
+                        OutputPath = outputPath,
                         Profile = profile,
                         Overwrite = true,
                         Backup = true,
@@ -2313,7 +2385,7 @@ namespace Assets_Editor
 
                 await Task.Run(() =>
                 {
-                    string otfile = Path.Combine(MainWindow._assetsPath, "Tibia.otfi");
+                    string otfile = Path.Combine(outputPath, "Tibia.otfi");
                     Utils.WritePresetToOtfi(otfile, in AssetsPreset, result.DatPath, result.SprPath, result.Profile.Transparency);
                 });
 

@@ -26,9 +26,11 @@
         </Grid.IsHitTestVisible>
         <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray">
             <materialDesign:DialogHost.DialogContent>
-                <GroupBox x:Name="CompileBox" Header="Export To Legacy" Width="460">
+                <GroupBox x:Name="CompileBox" Header="Export To Legacy" Width="620">
                     <Grid >
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="70"/>
                             <RowDefinition Height="40"/>
@@ -43,8 +45,29 @@
                             <Label Grid.Column="0" Content="Profile" VerticalAlignment="Center"/>
                             <ComboBox Grid.Column="1" x:Name="C_LegacyProfile" Margin="5" SelectionChanged="LegacyProfile_SelectionChanged"/>
                         </Grid>
-                        <TextBlock Grid.Row="1" x:Name="C_LegacyProfileDescription" Margin="8,0" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="Output" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <RadioButton x:Name="C_LegacyDefaultOutput" Content="Program folder" IsChecked="True" Checked="LegacyOutputMode_Changed" Margin="5,0,20,0"/>
+                                <RadioButton x:Name="C_LegacyCustomOutput" Content="Choose folder" Checked="LegacyOutputMode_Changed" Margin="5,0"/>
+                            </StackPanel>
+                        </Grid>
                         <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="85"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="Path" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1" x:Name="C_LegacyOutputPath" Margin="5" VerticalContentAlignment="Center"/>
+                            <Button Grid.Column="2" x:Name="C_LegacyBrowseOutputPath" Content="Browse" Click="LegacyOutputPathPicker_Click" Margin="5" Width="75"/>
+                        </Grid>
+                        <TextBlock Grid.Row="3" x:Name="C_LegacyProfileDescription" Margin="8,0" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        <Grid Grid.Row="4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="210"/>
@@ -52,7 +75,7 @@
                             <Label Grid.Column="0" Content="Converting Objects"/>
                             <ProgressBar Grid.Column="1" x:Name="LoadProgress1" Minimum="0" Maximum="100" Value="0" Width="200" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,10" Height="8" />
                         </Grid>
-                        <Grid Grid.Row="3">
+                        <Grid Grid.Row="5">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="210"/>
@@ -60,7 +83,7 @@
                             <Label Grid.Column="0" Content="Converting Sprites"/>
                             <ProgressBar Grid.Column="1" x:Name="LoadProgress2" Minimum="0" Maximum="100" Value="0" Width="200" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,5,10" Height="8" />
                         </Grid>
-                        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button Click="CompileLegacy" Content="Export" Width="100" Margin="0,0,20,0"/>
                             <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Content="Cancel" Width="100"/>
                         </StackPanel>

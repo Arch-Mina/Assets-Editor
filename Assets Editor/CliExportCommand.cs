@@ -167,6 +167,7 @@ namespace Assets_Editor
             Console.WriteLine("Usage:");
             Console.WriteLine("  Assets Editor.exe --list-profiles");
             Console.WriteLine("  Assets Editor.exe export-legacy --profile cip860-extended --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]");
+            Console.WriteLine("  Assets Editor.exe export-legacy --profile client11-15x --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]");
             Console.WriteLine("  Assets Editor.exe validate-legacy --profile client11-15x --dat <Tibia.dat> [--spr <Tibia.spr>]");
             Console.WriteLine();
             Console.WriteLine("Profile notes:");

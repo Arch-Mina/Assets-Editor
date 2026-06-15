@@ -14,6 +14,7 @@ public class Globals {
     public static readonly Guid GUID_DatEditor2 = new("4FC8F7A5-4840-4840-A68B-26DFD955D224"); // export sprite as bitmap
     public static readonly Guid GUID_DatEditor3 = new("1A5860A3-5722-4FFC-B6F2-FCE4E9FE255F"); // import aec/obd
     public static readonly Guid GUID_DatEditor4 = new("5788DE66-9141-4995-9550-118FCFE88609"); // export as aec
+    public static readonly Guid GUID_DatEditor5 = new("F5835C7B-53CB-4D56-9C1F-55F2C12DF981"); // legacy export client path
 
     public static readonly Guid GUID_LegacyDatEditor1 = new("AB8D0A9E-F28F-4C63-8F76-EE41552BE4BB"); // export sprite as bitmap
     public static readonly Guid GUID_LegacyDatEditor2 = new("9BA45B21-456E-469C-9F15-1045455F348F"); // import sprite from bitmap

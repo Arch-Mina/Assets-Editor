@@ -42,8 +42,11 @@ The command line exporter can generate legacy `.dat/.spr` pairs:
 
 ```powershell
 & ".\Assets Editor.exe" export-legacy --profile cip860-extended --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]
+& ".\Assets Editor.exe" export-legacy --profile client11-15x --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]
 & ".\Assets Editor.exe" validate-legacy --profile client11-15x --dat <client-path>\Tibia.dat [--spr <client-path>\Tibia.spr]
 ```
+
+The UI legacy exporter uses the same profiles. By default it writes to `legacy-exports\<profile>` under the application folder, and the dialog also has a custom output option when you want to export directly to another directory.
 
 `cip860-extended` is intentionally a CipSoft 8.60 object layout with selected extensions, not a modern OTClient dat layout:
 
