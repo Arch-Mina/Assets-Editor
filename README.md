@@ -41,12 +41,40 @@ Assets Editor is an open-source tool designed for modifying and managing client 
 The command line exporter can generate legacy `.dat/.spr` pairs:
 
 ```powershell
-& ".\Assets Editor.exe" export-legacy --profile cip860-extended --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]
-& ".\Assets Editor.exe" export-legacy --profile client11-15x --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup]
+& ".\Assets Editor.exe" export-legacy --profile cip860-extended --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup] [--no-item-flag-otml]
+& ".\Assets Editor.exe" export-legacy --profile client11-15x --input <assets-or-bin-path> --output <client-path> [--overwrite] [--no-backup] [--no-item-flag-otml]
 & ".\Assets Editor.exe" validate-legacy --profile client11-15x --dat <client-path>\Tibia.dat [--spr <client-path>\Tibia.spr]
 ```
 
 The UI legacy exporter uses the same profiles. By default it writes to `legacy-exports\<profile>` under the application folder, and the dialog also has a custom output option when you want to export directly to another directory.
+
+Legacy export also writes an `itemFlag.otml` sidecar next to `Tibia.dat` and `Tibia.spr` by default. This file preserves protobuf item flags that are not represented by the selected legacy `.dat` contract. Pass `--no-item-flag-otml` to skip it. Existing `itemFlag.otml` files follow the same `--overwrite` and `--no-backup` behavior as the generated `.dat/.spr` files.
+
+`itemFlag.otml` is an overlay for compatible OTClient forks. It does not affect clients unless they explicitly load it after the legacy things files, for example with `g_things.loadOtml("things/{version}/itemFlag.otml")`, and extend `ThingType::unserializeOtml()` to apply the supported tags.
+
+Example sidecar:
+
+```otml
+items
+  3046
+    duration: true
+
+  3047
+    classification: 1
+
+  3051
+    duration: true
+    cloth: ring
+    decoKit: true
+
+  2222
+    proficiency: 2
+    restrictVocation
+      - knight
+      - paladin
+```
+
+The sidecar may include tags such as `charges`, `duration`, `classification`, `decoKit`, `proficiency`, `skillWheelGem`, `imbueSlots`, `dualWielding`, `minimumLevel`, `weaponType`, and `restrictVocation`. For `cip860-extended`, it may also carry modern tags intentionally omitted from the 8.60 `.dat`, such as `cloth`, `defaultAction`, `wrap`, `unwrap`, and `topEffect`.
 
 `cip860-extended` is intentionally a CipSoft 8.60 object layout with selected extensions, not a modern OTClient dat layout:
 
