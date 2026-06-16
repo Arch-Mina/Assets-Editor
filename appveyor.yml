@@ -1,5 +1,13 @@
 image: Visual Studio 2022
 
+install:
+  - ps: |
+      $ErrorActionPreference = "Stop"
+      $dotnetInstall = Join-Path $env:TEMP "dotnet-install.ps1"
+      Invoke-WebRequest "https://dot.net/v1/dotnet-install.ps1" -OutFile $dotnetInstall
+      & $dotnetInstall -Channel 10.0 -Quality ga -InstallDir "$env:ProgramFiles\dotnet"
+      dotnet --list-sdks
+
 before_build:
   - dotnet restore "Assets Editor/Assets Editor.sln"
 
