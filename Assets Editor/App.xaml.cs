@@ -11,8 +11,18 @@ public partial class App : System.Windows.Application {
         if (CliExportCommand.IsCli(e.Args))
         {
             ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown;
-            var exitCode = CliExportCommand.RunAsync(e.Args).GetAwaiter().GetResult();
-            Shutdown(exitCode);
+            var synchronizationContext = System.Threading.SynchronizationContext.Current;
+            try
+            {
+                System.Threading.SynchronizationContext.SetSynchronizationContext(null);
+                var exitCode = CliExportCommand.RunAsync(e.Args).GetAwaiter().GetResult();
+                Shutdown(exitCode);
+            }
+            finally
+            {
+                System.Threading.SynchronizationContext.SetSynchronizationContext(synchronizationContext);
+            }
+
             return;
         }
 
