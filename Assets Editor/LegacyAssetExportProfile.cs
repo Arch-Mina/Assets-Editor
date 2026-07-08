@@ -1,0 +1,128 @@
+using System;
+using System.Collections.Generic;
+
+namespace Assets_Editor
+{
+    public enum LegacyDatLayout
+    {
+        Tibia860,
+        Tibia1098,
+    }
+
+    public sealed class LegacyAssetExportProfile
+    {
+        public required string Id { get; init; }
+        public required string DisplayName { get; init; }
+        public required string Description { get; init; }
+        public required LegacyDatLayout DatLayout { get; init; }
+        public required uint DatSignature { get; init; }
+        public required uint SprSignature { get; init; }
+        public required bool Transparency { get; init; }
+        public required bool SpriteIdsU32 { get; init; }
+        public required bool IncludeEnhancedAnimations { get; init; }
+        public required bool IncludeFrameGroups { get; init; }
+        public required bool IncludeModernFlags { get; init; }
+        public required int LegacyOutfitAnimationFrames { get; init; }
+        public int MaxMarketNameLength { get; init; }
+    }
+
+    public static class LegacyAssetExportProfiles
+    {
+        private static readonly LegacyAssetExportProfile[] Profiles =
+        [
+            new LegacyAssetExportProfile
+            {
+                Id = "cip860-extended",
+                DisplayName = "CipSoft 8.60 extended",
+                Description = "8.60 dat layout with extended uint32 sprite ids; does not write modern dat flags such as Clothes/attr 32.",
+                DatLayout = LegacyDatLayout.Tibia860,
+                DatSignature = 0x4C2C7993,
+                SprSignature = 0x4C220594,
+                Transparency = false,
+                SpriteIdsU32 = true,
+                IncludeEnhancedAnimations = false,
+                IncludeFrameGroups = false,
+                IncludeModernFlags = false,
+                LegacyOutfitAnimationFrames = 3,
+            },
+            new LegacyAssetExportProfile
+            {
+                Id = "canary860-extended",
+                DisplayName = "Canary 8.60 extended",
+                Description = "Alias profile for Canary's CipSoft 8.60 extended client contract.",
+                DatLayout = LegacyDatLayout.Tibia860,
+                DatSignature = 0x4C2C7993,
+                SprSignature = 0x4C220594,
+                Transparency = false,
+                SpriteIdsU32 = true,
+                IncludeEnhancedAnimations = false,
+                IncludeFrameGroups = false,
+                IncludeModernFlags = false,
+                LegacyOutfitAnimationFrames = 3,
+            },
+            new LegacyAssetExportProfile
+            {
+                Id = "legacy1098",
+                DisplayName = "Legacy 10.98 compatible",
+                Description = "10.98-compatible spr/dat export with modern legacy flags enabled.",
+                DatLayout = LegacyDatLayout.Tibia1098,
+                DatSignature = 0x000042A3,
+                SprSignature = 0x53159CA9,
+                Transparency = false,
+                SpriteIdsU32 = true,
+                IncludeEnhancedAnimations = true,
+                IncludeFrameGroups = true,
+                IncludeModernFlags = true,
+                LegacyOutfitAnimationFrames = 0,
+            },
+            new LegacyAssetExportProfile
+            {
+                Id = "client11-15x",
+                DisplayName = "Client 11 15.x compatible",
+                Description = "10/11-compatible export for the extended client 11 executable; caps Market names at 29 characters.",
+                DatLayout = LegacyDatLayout.Tibia1098,
+                DatSignature = 0x00004A10,
+                SprSignature = 0x59E48E02,
+                Transparency = false,
+                SpriteIdsU32 = true,
+                IncludeEnhancedAnimations = true,
+                IncludeFrameGroups = true,
+                IncludeModernFlags = true,
+                LegacyOutfitAnimationFrames = 0,
+                MaxMarketNameLength = 29,
+            },
+        ];
+
+        public static IReadOnlyList<LegacyAssetExportProfile> All => Profiles;
+
+        public static LegacyAssetExportProfile Get(string id)
+        {
+            foreach (var profile in Profiles)
+            {
+                if (string.Equals(profile.Id, id, StringComparison.OrdinalIgnoreCase))
+                {
+                    return profile;
+                }
+            }
+
+            if (string.Equals(id, "860", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(id, "cip860", StringComparison.OrdinalIgnoreCase))
+            {
+                return Get("cip860-extended");
+            }
+
+            if (string.Equals(id, "1098", StringComparison.OrdinalIgnoreCase))
+            {
+                return Get("legacy1098");
+            }
+
+            if (string.Equals(id, "client11", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(id, "client-11", StringComparison.OrdinalIgnoreCase))
+            {
+                return Get("client11-15x");
+            }
+
+            throw new ArgumentException($"Unknown export profile '{id}'. Use --list-profiles to see valid profiles.");
+        }
+    }
+}

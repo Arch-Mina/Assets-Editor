@@ -36,6 +36,10 @@ Assets Editor is an open-source tool designed for modifying and managing client 
 #### Usage
 - Download the latest release from the [Releases](https://github.com/Arch-Mina/Assets-Editor/releases) page.
 
+#### Legacy export
+
+Assets Editor can export modern assets to legacy `.dat/.spr` profiles for 8.60 and 11/15.x clients. See the [legacy export guide](docs/legacy-export.md) for CLI commands, UI output behavior, profile contracts, validation, and `itemFlag.otml` sidecar details.
+
 :sparkles: **Supporting the Project**
 
 If you find this project useful and want to show your appreciation or support, you're welcome to do so through [PayPal](https://paypal.me/SpiderOT?country.x=EG&locale.x=en_US). Your support is entirely optional but greatly appreciated :heart:.

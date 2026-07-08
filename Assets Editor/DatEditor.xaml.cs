@@ -211,6 +211,12 @@ namespace Assets_Editor
         public DatEditor()
         {
             InitializeComponent();
+            C_LegacyProfile.ItemsSource = LegacyAssetExportProfiles.All;
+            C_LegacyProfile.DisplayMemberPath = nameof(LegacyAssetExportProfile.DisplayName);
+            C_LegacyProfile.SelectedValuePath = nameof(LegacyAssetExportProfile.Id);
+            C_LegacyProfile.SelectedItem = LegacyAssetExportProfiles.Get("cip860-extended");
+            UpdateLegacyProfileDescription();
+            UpdateLegacyOutputPathState();
 
             // set current theme
             DarkModeToggle.IsChecked = MainWindow.IsDarkModeSet();
@@ -2073,6 +2079,99 @@ namespace Assets_Editor
             CompileBox.IsEnabled = true;
             LoadProgress1.Value = 0;
             LoadProgress2.Value = 0;
+            UpdateLegacyProfileDescription();
+            UpdateLegacyOutputPathState();
+        }
+
+        private void LegacyProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateLegacyProfileDescription();
+            UpdateLegacyOutputPathState();
+        }
+
+        private void LegacyOutputMode_Changed(object sender, RoutedEventArgs e)
+        {
+            UpdateLegacyOutputPathState();
+        }
+
+        private void LegacyOutputPathPicker_Click(object sender, RoutedEventArgs e)
+        {
+            using FolderBrowserDialog dialog = new()
+            {
+                ClientGuid = Globals.GUID_DatEditor5
+            };
+            dialog.Description = "Select the directory to export Tibia.dat and Tibia.spr.";
+            dialog.ShowNewFolderButton = true;
+
+            string currentOutputPath = (C_LegacyOutputPath.Text ?? string.Empty).Trim();
+            if (!string.IsNullOrWhiteSpace(currentOutputPath) && Directory.Exists(currentOutputPath))
+            {
+                dialog.SelectedPath = currentOutputPath;
+            }
+            else if (Directory.Exists(AppContext.BaseDirectory))
+            {
+                dialog.SelectedPath = AppContext.BaseDirectory;
+            }
+
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                C_LegacyCustomOutput.IsChecked = true;
+                C_LegacyOutputPath.Text = dialog.SelectedPath;
+            }
+        }
+
+        private LegacyAssetExportProfile GetSelectedLegacyProfile()
+        {
+            return C_LegacyProfile.SelectedItem as LegacyAssetExportProfile ?? LegacyAssetExportProfiles.Get("cip860-extended");
+        }
+
+        private string GetLegacyOutputPath()
+        {
+            string outputPath = C_LegacyCustomOutput.IsChecked == true
+                ? (C_LegacyOutputPath.Text ?? string.Empty).Trim()
+                : GetDefaultLegacyOutputPath();
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                throw new InvalidOperationException("Select the directory to export Tibia.dat and Tibia.spr.");
+            }
+
+            return Path.GetFullPath(outputPath);
+        }
+
+        private string GetDefaultLegacyOutputPath()
+        {
+            var profile = GetSelectedLegacyProfile();
+            return Path.Combine(AppContext.BaseDirectory, "legacy-exports", profile.Id);
+        }
+
+        private void UpdateLegacyOutputPathState()
+        {
+            if (C_LegacyOutputPath == null || C_LegacyBrowseOutputPath == null || C_LegacyCustomOutput == null)
+            {
+                return;
+            }
+
+            bool customOutput = C_LegacyCustomOutput.IsChecked == true;
+            C_LegacyOutputPath.IsReadOnly = !customOutput;
+            C_LegacyBrowseOutputPath.IsEnabled = customOutput;
+
+            if (!customOutput)
+            {
+                C_LegacyOutputPath.Text = GetDefaultLegacyOutputPath();
+            }
+        }
+
+        private void UpdateLegacyProfileDescription()
+        {
+            if (C_LegacyProfileDescription == null)
+            {
+                return;
+            }
+
+            var profile = GetSelectedLegacyProfile();
+            C_LegacyProfileDescription.Text = profile.MaxMarketNameLength > 0
+                ? $"{profile.Description} Market names are capped at {profile.MaxMarketNameLength} characters."
+                : profile.Description;
         }
 
         private async void CompileLegacy(object sender, RoutedEventArgs e)
@@ -2257,184 +2356,62 @@ namespace Assets_Editor
         private async Task ExportLegacy(IProgress<int> progress)
         {
             CompileBox.IsEnabled = false;
-            SpriteStorage tmpSprStorage = new();
-            Appearances tmpAppearances = new();
-            ConcurrentDictionary<int, List<MemoryStream>> SlicedSprList = [];
-            ConcurrentDictionary<string, uint> SpriteOffsetList = [];
-            bool transparent = C_Transparent.IsChecked ?? false;
+            LoadProgress1.Value = 0;
+            LoadProgress2.Value = 0;
 
-            string datfile = MainWindow._assetsPath + "Tibia.dat";
-            VersionInfo? legacyEncoder = ObdDecoder.GetDatStructure();
-            if (legacyEncoder == null) {
-                ErrorManager.ShowError("obd structure not defined in appearances.xml!");
-                return;
-            }
-
-            // write DAT
-            await Task.Run(() =>
+            try
             {
-                int percentageComplete = 0;
-                int currentPercentage = 0;
-                int FullProgress = MainWindow.catalog.Count;
-                var options = new ParallelOptions()
+                var profile = GetSelectedLegacyProfile();
+                var outputPath = GetLegacyOutputPath();
+                var exporter = new LegacyAssetExporter();
+                var sprProgress = new Progress<int>(percent =>
                 {
-                    MaxDegreeOfParallelism = Environment.ProcessorCount
-                };
-                int progressCount = 0;
-                Parallel.ForEach(MainWindow.catalog, options, (sheet, state) =>
-                {
-                    if (sheet.Type == "sprite")
-                    {
-                        string lzma = String.Format("{0}{1}", MainWindow._assetsPath, sheet.File);
-                        if (File.Exists(lzma) == false)
-                        {
-                            Debug.WriteLine("File Doesn't exists: " + sheet.File);
-                            return;
-                        }
-                        for (int i = sheet.FirstSpriteid; i <= sheet.LastSpriteid; i++)
-                        {
-                            System.Drawing.Bitmap bitmap = new(MainWindow.getSpriteStream(i));
-                            List<System.Drawing.Bitmap> slices = SplitImage(bitmap);
-                            SlicedSprList[i] = [];
-                            for (int j = 0; j < slices.Count; j++)
-                            {
-                                if (IsImageFullyTransparent(slices[j]) == false)
-                                {
-                                    MemoryStream ms = new();
-                                    slices[j].Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                                    ms.Position = 0;
-                                    SlicedSprList[i].Add(ms);
-                                }
-                                else
-                                {
-                                    SlicedSprList[i].Add(null);
-                                }
+                    LoadProgress2.Value = percent;
+                });
+                MainWindow.Log($"Exporting legacy assets to '{outputPath}'");
 
-                            }
-                        }
-                        progressCount++;
-                        percentageComplete = (int)(progressCount * 100 / FullProgress);
-                        if (percentageComplete > currentPercentage)
-                        {
-                            progress?.Report(percentageComplete);
-                            currentPercentage = percentageComplete;
-                        }
-                    }
+                var result = await exporter.ExportAsync(
+                    new LegacyAssetExportOptions
+                    {
+                        InputPath = MainWindow._assetsPath,
+                        OutputPath = outputPath,
+                        Profile = profile,
+                        Overwrite = true,
+                        Backup = true,
+                    },
+                    new Progress<string>(message => MainWindow.Log(message)),
+                    progress,
+                    sprProgress);
+
+                await Task.Run(() =>
+                {
+                    string otfile = Path.Combine(outputPath, "Tibia.otfi");
+                    Utils.WritePresetToOtfi(otfile, in AssetsPreset, result.DatPath, result.SprPath, result.Profile.Transparency);
                 });
 
-                uint count = 1;
-                foreach (int key in SlicedSprList.Keys)
+                foreach (var backup in result.Backups)
                 {
-                    List<MemoryStream> memoryStreams = SlicedSprList[key];
-                    int streamCounter = 0;
-                    foreach (MemoryStream stream in memoryStreams)
-                    {
-                        string sprName = key.ToString() + "_" + streamCounter.ToString();
-                        if (stream == null)
-                        {
-                            SpriteOffsetList[sprName] = 0;
-                        }
-                        else
-                        {
-                            tmpSprStorage.SprLists[(int)count] = stream;
-                            SpriteOffsetList[sprName] = count;
-                            count++;
-                        }
-                        streamCounter++;
-                    }
+                    MainWindow.Log($"Created backup '{backup}'");
                 }
 
-
-                tmpAppearances = MainWindow.appearances.Clone();
-
-                uint ObjectCount = tmpAppearances.Object.Max(a => a.Id);
-                uint OutfitCount = tmpAppearances.Outfit.Max(a => a.Id);
-                uint EffectCount = tmpAppearances.Effect.Max(a => a.Id);
-                uint MissileCount = tmpAppearances.Missile.Max(a => a.Id);
-                for (uint i = 100; i <= ObjectCount; i++)
+                if (!string.IsNullOrWhiteSpace(result.ItemFlagOtmlPath))
                 {
-                    Appearance appearance = tmpAppearances.Object.FirstOrDefault(a => a.Id == i);
-                    if (appearance == null)
-                    {
-                        Appearance newObject = CreateBlankObject(i, APPEARANCE_TYPE.AppearanceObject);
-                        tmpAppearances.Object.Add(newObject);
-                    }
-                    else
-                    {
-                        appearance.AppearanceType = APPEARANCE_TYPE.AppearanceObject;
-                        if (appearance.Flags.Hook != null)
-                        {
-                            if (appearance.Flags.Hook.Direction == HOOK_TYPE.South)
-                                appearance.Flags.HookSouth = true;
-
-                            if (appearance.Flags.Hook.Direction == HOOK_TYPE.East)
-                                appearance.Flags.HookEast = true;
-                        }
-                        UpdateAppearanceObject(appearance, SpriteOffsetList);
-                    }
-                }
-                for (uint i = 1; i <= OutfitCount; i++)
-                {
-                    Appearance appearance = tmpAppearances.Outfit.FirstOrDefault(a => a.Id == i);
-                    if (appearance == null)
-                    {
-                        Appearance newObject = CreateBlankObject(i, APPEARANCE_TYPE.AppearanceOutfit);
-                        tmpAppearances.Outfit.Add(newObject);
-                    }
-                    else
-                    {
-                        appearance.AppearanceType = APPEARANCE_TYPE.AppearanceOutfit;
-                        UpdateAppearanceObject(appearance, SpriteOffsetList);
-                    }
-                }
-                for (uint i = 1; i <= EffectCount; i++)
-                {
-                    Appearance appearance = tmpAppearances.Effect.FirstOrDefault(a => a.Id == i);
-                    if (appearance == null)
-                    {
-                        Appearance newObject = CreateBlankObject(i, APPEARANCE_TYPE.AppearanceEffect);
-                        tmpAppearances.Effect.Add(newObject);
-                    }
-                    else
-                    {
-                        appearance.AppearanceType = APPEARANCE_TYPE.AppearanceEffect;
-                        UpdateAppearanceObject(appearance, SpriteOffsetList);
-                    }
-                }
-                for (uint i = 1; i <= MissileCount; i++)
-                {
-                    Appearance appearance = tmpAppearances.Missile.FirstOrDefault(a => a.Id == i);
-                    if (appearance == null)
-                    {
-                        Appearance newObject = CreateBlankObject(i, APPEARANCE_TYPE.AppearanceMissile);
-                        tmpAppearances.Missile.Add(newObject);
-                    }
-                    else
-                    {
-                        appearance.AppearanceType = APPEARANCE_TYPE.AppearanceMissile;
-                        UpdateAppearanceObject(appearance, SpriteOffsetList);
-                    }
+                    MainWindow.Log($"Created item flag sidecar '{result.ItemFlagOtmlPath}' ({result.ItemFlagOtmlItems} item(s))");
                 }
 
-                LegacyAppearance.WriteLegacyDat(datfile, 0x42A3, tmpAppearances, legacyEncoder.Structure);
-            });
-
-            // write SPR
-            var progress1 = new Progress<int>(percent =>
+                ComppileDialogHost.IsOpen = false;
+            }
+            catch (Exception exception)
             {
-                LoadProgress2.Value = percent;
-            });
-            string sprfile = MainWindow._assetsPath + "Tibia.spr";
-            await Sprite.CompileSpritesAsync(sprfile, tmpSprStorage, transparent, 0x53159CA9, progress1);
-
-            // write OTFI
-            await Task.Run(() => {
-                string otfile = MainWindow._assetsPath + "Tibia.otfi";
-                Utils.WritePresetToOtfi(otfile, in AssetsPreset, datfile, sprfile, transparent);
-            });
-
-            ComppileDialogHost.IsOpen = false;
+                ErrorManager.ShowError(exception.Message);
+                MainWindow.Log(exception.ToString(), "Error");
+            }
+            finally
+            {
+                CompileBox.IsEnabled = true;
+            }
         }
+
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^0-9]+");
