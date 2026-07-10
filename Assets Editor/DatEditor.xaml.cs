@@ -1853,7 +1853,7 @@ namespace Assets_Editor
 
         private void Compile_Click(object sender, RoutedEventArgs e)
         {
-            if (!ValidateUniqueSpriteSheetFiles())
+            if (!ValidateSpriteSheetCatalog())
             {
                 return;
             }
@@ -1862,7 +1862,7 @@ namespace Assets_Editor
             File.Copy(MainWindow._datPath, MainWindow._datPath + "-bak", true);
             ProcessTransparentSheets();
 
-            if (!ValidateUniqueSpriteSheetFiles())
+            if (!ValidateSpriteSheetCatalog())
             {
                 return;
             }
@@ -1885,10 +1885,34 @@ namespace Assets_Editor
             StatusBar.MessageQueue?.Enqueue($"Compiled.", null, null, null, false, true, TimeSpan.FromSeconds(2));
         }
 
-        private static bool ValidateUniqueSpriteSheetFiles()
+        private static bool ValidateSpriteSheetCatalog()
         {
-            var duplicateFiles = MainWindow.catalog
-                .Where(catalog => string.Equals(catalog.Type, "sprite", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(catalog.File))
+            var spriteEntries = MainWindow.catalog
+                .Where(catalog => string.Equals(catalog.Type, "sprite", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            var entriesWithoutFile = spriteEntries
+                .Where(catalog => string.IsNullOrWhiteSpace(catalog.File))
+                .ToList();
+
+            if (entriesWithoutFile.Count > 0)
+            {
+                const int invalidPreviewLimit = 10;
+                string invalidPreview = string.Join(
+                    Environment.NewLine,
+                    entriesWithoutFile
+                        .Take(invalidPreviewLimit)
+                        .Select(catalog => $"Sprite IDs {catalog.FirstSpriteid}-{catalog.LastSpriteid}"));
+                string invalidRemaining = entriesWithoutFile.Count > invalidPreviewLimit
+                    ? $"{Environment.NewLine}... and {entriesWithoutFile.Count - invalidPreviewLimit} more."
+                    : string.Empty;
+                string invalidMessage = $"Compilation stopped because the catalog contains sprite entries without a file name:{Environment.NewLine}{Environment.NewLine}{invalidPreview}{invalidRemaining}";
+
+                MainWindow.Log(invalidMessage);
+                ErrorManager.ShowError(invalidMessage);
+                return false;
+            }
+
+            var duplicateFiles = spriteEntries
                 .GroupBy(catalog => catalog.File, StringComparer.OrdinalIgnoreCase)
                 .Where(group => group.Count() > 1)
                 .Select(group => group.Key)
