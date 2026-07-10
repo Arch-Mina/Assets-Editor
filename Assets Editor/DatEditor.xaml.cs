@@ -1853,9 +1853,20 @@ namespace Assets_Editor
 
         private void Compile_Click(object sender, RoutedEventArgs e)
         {
+            if (!ValidateUniqueSpriteSheetFiles())
+            {
+                return;
+            }
+
             File.Copy(System.IO.Path.Combine(MainWindow._assetsPath, "catalog-content.json"), System.IO.Path.Combine(MainWindow._assetsPath, "catalog-content.json-bak"), true);
             File.Copy(MainWindow._datPath, MainWindow._datPath + "-bak", true);
             ProcessTransparentSheets();
+
+            if (!ValidateUniqueSpriteSheetFiles())
+            {
+                return;
+            }
+
             using (StreamWriter file = File.CreateText(MainWindow._assetsPath + "\\catalog-content.json"))
             {
                 JsonSerializer serializer = new JsonSerializer
@@ -1872,6 +1883,33 @@ namespace Assets_Editor
             MainWindow.appearances.WriteTo(output);
             output.Close();
             StatusBar.MessageQueue?.Enqueue($"Compiled.", null, null, null, false, true, TimeSpan.FromSeconds(2));
+        }
+
+        private static bool ValidateUniqueSpriteSheetFiles()
+        {
+            var duplicateFiles = MainWindow.catalog
+                .Where(catalog => string.Equals(catalog.Type, "sprite", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(catalog.File))
+                .GroupBy(catalog => catalog.File, StringComparer.OrdinalIgnoreCase)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key)
+                .OrderBy(fileName => fileName, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (duplicateFiles.Count == 0)
+            {
+                return true;
+            }
+
+            const int previewLimit = 10;
+            string preview = string.Join(Environment.NewLine, duplicateFiles.Take(previewLimit));
+            string remaining = duplicateFiles.Count > previewLimit
+                ? $"{Environment.NewLine}... and {duplicateFiles.Count - previewLimit} more."
+                : string.Empty;
+            string message = $"Compilation stopped because the catalog contains duplicate spritesheet files:{Environment.NewLine}{Environment.NewLine}{preview}{remaining}";
+
+            MainWindow.Log(message);
+            ErrorManager.ShowError(message);
+            return false;
         }
         public List<System.Drawing.Bitmap> SplitImage(System.Drawing.Bitmap originalImage)
         {
@@ -2703,19 +2741,63 @@ namespace Assets_Editor
             }).ToList();
 
             var catalogs = new List<MainWindow.Catalog>();
+            // The official client indexes spritesheets by file name and throws if a name is registered twice.
+            var reservedSpriteSheetFiles = CreateReservedSpriteSheetFileNames();
             foreach (var size in SpriteSizes)
             {
                 var matchingSprites = spriteInfos.Where(si => si.Size == size).ToList();
                 if (matchingSprites.Count == 0) continue;
 
                 var spriteType = SpriteSizes.IndexOf(size);
-                var spriteSheetResults = ProcessSpriteGroup(matchingSprites, size, outputDirectory, spriteType);
+                var spriteSheetResults = ProcessSpriteGroup(matchingSprites, size, outputDirectory, spriteType, reservedSpriteSheetFiles);
                 catalogs.AddRange(spriteSheetResults);
             }
 
             return catalogs;
         }
-        private List<MainWindow.Catalog> ProcessSpriteGroup(List<ImportSpriteInfo> spriteInfos, System.Drawing.Size spriteSize, string outputDirectory, int spriteType)
+
+        private static HashSet<string> CreateReservedSpriteSheetFileNames()
+        {
+            return new HashSet<string>(
+                MainWindow.catalog
+                    .Where(catalog => string.Equals(catalog.Type, "sprite", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(catalog.File))
+                    .Select(catalog => catalog.File),
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static string ReserveUniqueSpriteSheetFileName(string fileName, HashSet<string> reservedSpriteSheetFiles)
+        {
+            if (reservedSpriteSheetFiles.Add(fileName))
+            {
+                return fileName;
+            }
+
+            const string spriteSheetExtension = ".bmp.lzma";
+            string fileNameStem = fileName.EndsWith(spriteSheetExtension, StringComparison.OrdinalIgnoreCase)
+                ? fileName[..^spriteSheetExtension.Length]
+                : Path.GetFileNameWithoutExtension(fileName);
+            string sourcePath = Path.Combine(MainWindow._assetsPath, fileName);
+            int duplicateIndex = 1;
+
+            while (true)
+            {
+                string candidate = $"{fileNameStem}_{duplicateIndex}{spriteSheetExtension}";
+                string candidatePath = Path.Combine(MainWindow._assetsPath, candidate);
+                duplicateIndex++;
+
+                if (reservedSpriteSheetFiles.Contains(candidate) || File.Exists(candidatePath))
+                {
+                    continue;
+                }
+
+                File.Copy(sourcePath, candidatePath, false);
+                reservedSpriteSheetFiles.Add(candidate);
+                MainWindow.Log($"Spritesheet file name collision for '{fileName}'. Stored the duplicate as '{candidate}'.");
+                return candidate;
+            }
+        }
+
+        private List<MainWindow.Catalog> ProcessSpriteGroup(List<ImportSpriteInfo> spriteInfos, System.Drawing.Size spriteSize, string outputDirectory, int spriteType, HashSet<string> reservedSpriteSheetFiles)
         {
             int spritesPerRow = SprSheetWidth / spriteSize.Width;
             int spritesPerColumn = SprSheetHeight / spriteSize.Height;
@@ -2729,36 +2811,11 @@ namespace Assets_Editor
 
             Action finalizeSheet = () =>
             {
-                string GenerateUniqueFilePath(string path)
-                {
-                    var random = new Random();
-                    string directory = Path.GetDirectoryName(path);
-                    string filenameWithoutExt = Path.GetFileNameWithoutExtension(path);
-                    string extension = Path.GetExtension(path);
-                    string newFilePath;
-
-                    do
-                    {
-                        int randomNumber = random.Next(1000, 9999); // You can choose the range for random numbers
-                        newFilePath = $"{filenameWithoutExt.Substring(0, filenameWithoutExt.Length - 9)}_{randomNumber}.bmp.lzma";
-                    }
-                    while (MainWindow.catalog.Any(catalog => catalog.File.Equals(newFilePath, StringComparison.OrdinalIgnoreCase)));
-
-                    return newFilePath;
-                }
-
                 if (currentSheet != null && graphics != null && currentSpriteIndex > 0) // Make sure the sheet has sprites
                 {
                     string fileName = MainWindow._assetsPath;
                     LZMA.ExportLzmaFile(currentSheet, ref fileName);
-                    bool catalogExists = MainWindow.catalog.Any(catalog => catalog.File.Equals(fileName, StringComparison.OrdinalIgnoreCase));
-
-                    if (catalogExists)
-                    {
-                        string uniqueFilePath = GenerateUniqueFilePath(MainWindow._assetsPath + "\\" + fileName);
-                        File.Copy(MainWindow._assetsPath + "\\" + fileName, MainWindow._assetsPath + "\\" + uniqueFilePath);
-                        fileName = uniqueFilePath;
-                    }
+                    fileName = ReserveUniqueSpriteSheetFileName(fileName, reservedSpriteSheetFiles);
                     catalogs.Add(new MainWindow.Catalog
                     {
                         Type = "sprite",
@@ -3947,6 +4004,7 @@ namespace Assets_Editor
         private void ProcessTransparentSheets()
         {
             Dictionary<MainWindow.Catalog, Dictionary<uint, byte>> catalogModifications = new Dictionary<MainWindow.Catalog, Dictionary<uint, byte>>();
+            var reservedSpriteSheetFiles = CreateReservedSpriteSheetFileNames();
 
             foreach (var modification in transparentSheets)
             {
@@ -3967,6 +4025,7 @@ namespace Assets_Editor
             {
                 MainWindow.Catalog catalog = catalogEntry.Key;
                 Dictionary<uint, byte> spriteAlphaValues = catalogEntry.Value;
+                reservedSpriteSheetFiles.Remove(catalog.File);
 
                 string _sprPath = String.Format("{0}{1}", MainWindow._assetsPath, catalog.File);
 
@@ -3976,9 +4035,9 @@ namespace Assets_Editor
 
                 string dirPath = MainWindow._assetsPath;
                 LZMA.ExportLzmaFile(bmpImage, ref dirPath);
+                dirPath = ReserveUniqueSpriteSheetFileName(dirPath, reservedSpriteSheetFiles);
 
-                MainWindow.Catalog CurrentCatalog = MainWindow.catalog.Find(x => x.File == catalog.File);
-                CurrentCatalog.File = dirPath;
+                catalog.File = dirPath;
 
                 bmpImage.Dispose();
             }
