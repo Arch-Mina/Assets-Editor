@@ -50,6 +50,9 @@
                         <Button x:Name="ExportSheet" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Export Sheet" materialDesign:RippleAssist.IsDisabled="True" PreviewMouseLeftButtonDown="ExportSheet_PreviewMouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center">
                             <materialDesign:PackIcon Kind="ContentSaveMove" Width="25" Height="25"/>
                         </Button>
+                        <Button x:Name="OpenSlicer" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Open Sprite Sheet Slicer" materialDesign:RippleAssist.IsDisabled="True" Click="OpenSlicer_Click" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Scissors" Width="25" Height="25"/>
+                        </Button>
                     </StackPanel>
                 </Border>
                 <materialDesign:Snackbar x:Name="SprStatusBar" MessageQueue="{materialDesign:MessageQueue}" IsActive="False" HorizontalAlignment="Stretch" Margin="10,10,10,0" VerticalAlignment="Top" Height="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="0,-20,0,0" />

@@ -55,6 +55,7 @@ namespace Assets_Editor
         private BitmapSource emptyBitmapSource;
         public static ObservableCollection<ShowList> CustomSheetsList = new ObservableCollection<ShowList>();
         private Catalog CurrentSheet = null;
+        private SpriteSlicerWindow _slicerWindow = null;
         private void CreateNewSheetImg(int sprType, bool modify)
         {
             EmptyTiles = true;
@@ -142,7 +143,7 @@ namespace Assets_Editor
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (files == null) return;
-            
+
                 int targetIndex = (int)targetBorder.Tag;
                 for (int i = 0; i < files.Length; i++)
                 {
@@ -152,6 +153,18 @@ namespace Assets_Editor
                         {
                             ApplyBorderFocus(border);
                         }
+                    }
+                }
+            }
+            else if (e.Data.GetData(typeof(SlicedSpritesDragData)) is SlicedSpritesDragData slicedData)
+            {
+                int targetIndex = (int)targetBorder.Tag;
+                for (int i = 0; i < slicedData.Images.Count; i++)
+                {
+                    if (targetIndex + i < SheetWrap.Children.Count)
+                    {
+                        if (SheetWrap.Children[targetIndex + i] is Border border)
+                            ApplyBorderFocus(border);
                     }
                 }
             }
@@ -224,13 +237,33 @@ namespace Assets_Editor
                 {
                     targetSpriteIndex = (int)border.Tag;
                 }
-                
+
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 MakeFilesAsSprites(files, targetSpriteIndex, e);
-                
+
                 EmptyTiles = false;
                 ClearBorders();
-            } else if (e.Data.GetData(e.Data.GetFormats()[0]) is Border sourceBorder)
+            }
+            else if (e.Data.GetData(typeof(SlicedSpritesDragData)) is SlicedSpritesDragData slicedData)
+            {
+                if (sender is Border targetBorder)
+                {
+                    int startPos = (int)targetBorder.Tag;
+                    List<Image> images = Utils.GetLogicalChildCollection<Image>(SheetWrap);
+                    int placed = 0;
+                    for (int i = 0; i < slicedData.Images.Count && startPos + i < images.Count; i++)
+                    {
+                        images[startPos + i].Source = slicedData.Images[i];
+                        placed++;
+                    }
+                    EmptyTiles = false;
+                    ClearBorders();
+                    if (placed > 0)
+                        slicedData.SourceWindow.RemovePlacedSprites(slicedData.StartIndex, placed);
+                    SprStatusBar.MessageQueue?.Enqueue($"{placed} sprite(s) inserted from position {startPos}.", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                }
+            }
+            else if (e.Data.GetData(e.Data.GetFormats()[0]) is Border sourceBorder)
             {
                 if (sender is Border targetBorder)
                 {
@@ -582,6 +615,20 @@ namespace Assets_Editor
         private void CreateSheet_Click(object sender, RoutedEventArgs e)
         {
             NewSheetDialogHost.IsOpen = true;
+        }
+
+        private void OpenSlicer_Click(object sender, RoutedEventArgs e)
+        {
+            if (_slicerWindow == null || !_slicerWindow.IsLoaded)
+            {
+                _slicerWindow = new SpriteSlicerWindow(SprType);
+                _slicerWindow.Owner = this;
+                _slicerWindow.Show();
+            }
+            else
+            {
+                _slicerWindow.Activate();
+            }
         }
 
         private void SearchSpr_Click(object sender, RoutedEventArgs e)

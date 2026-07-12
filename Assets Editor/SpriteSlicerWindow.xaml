@@ -1,0 +1,148 @@
+<Window x:Class="Assets_Editor.SpriteSlicerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Title="Sprite Sheet Slicer" Height="720" Width="900"
+        Style="{StaticResource MaterialDesignWindow}">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Source import area -->
+        <GroupBox Grid.Row="0" Header="Source Sprite Sheet" Margin="0,0,0,6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="220"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Drop zone / preview with grid overlay canvas -->
+                <Border Grid.Column="0"
+                        x:Name="DropZone"
+                        BorderBrush="#FF673AB7"
+                        BorderThickness="2"
+                        Background="#22673AB7"
+                        MinHeight="200" MaxHeight="340"
+                        AllowDrop="True"
+                        SizeChanged="DropZone_SizeChanged"
+                        DragEnter="DropZone_DragEnter"
+                        DragLeave="DropZone_DragLeave"
+                        Drop="DropZone_Drop"
+                        Margin="0,5,10,5"
+                        ClipToBounds="True">
+                    <!-- ScrollViewer enables panning when zoomed in -->
+                    <ScrollViewer x:Name="PreviewScrollViewer"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto"
+                                  PreviewMouseWheel="PreviewScrollViewer_PreviewMouseWheel"
+                                  PreviewMouseLeftButtonDown="PreviewScrollViewer_PreviewMouseLeftButtonDown"
+                                  PreviewMouseMove="PreviewScrollViewer_PreviewMouseMove"
+                                  PreviewMouseLeftButtonUp="PreviewScrollViewer_PreviewMouseLeftButtonUp"
+                                  PanningMode="None">
+                        <!-- PreviewContainer size is set from code-behind so Stretch=Uniform works inside an unconstrained ScrollViewer -->
+                        <Grid x:Name="PreviewContainer">
+                            <Grid.LayoutTransform>
+                                <ScaleTransform x:Name="PreviewScale" ScaleX="1" ScaleY="1"/>
+                            </Grid.LayoutTransform>
+                            <TextBlock x:Name="DropHint"
+                                       Text="Drop a sprite sheet here, or click Open File"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Foreground="Gray" FontSize="13"/>
+                            <Image x:Name="SourcePreview"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                   Visibility="Collapsed"/>
+                            <!-- Grid lines drawn in code-behind; must sit above the image -->
+                            <Canvas x:Name="GridOverlay" IsHitTestVisible="False" Visibility="Collapsed"/>
+                            <!-- Zoom level badge shown in top-right when zoomed -->
+                            <Border x:Name="ZoomBadge"
+                                    Background="#CC000000" CornerRadius="3"
+                                    Padding="4,1" Margin="4"
+                                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                                    Visibility="Collapsed">
+                                <TextBlock x:Name="ZoomLabel" Text="100%"
+                                           Foreground="White" FontSize="10"/>
+                            </Border>
+                        </Grid>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Settings panel -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="0,5,0,5">
+                    <Button Content="Open File" Click="OpenFile_Click" Margin="0,0,0,12"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"/>
+
+                    <TextBlock Text="Sprite Size:" Margin="0,0,0,3"/>
+                    <ComboBox x:Name="SpriteSizeCombo" Margin="0,0,0,12" SelectedIndex="0"
+                              SelectionChanged="SpriteSizeCombo_SelectionChanged"/>
+
+                    <TextBlock Text="X Offset (pixels):" Margin="0,0,0,3"/>
+                    <xctk:IntegerUpDown x:Name="XOffset" Minimum="0" Maximum="383" Value="0"
+                                        Background="{DynamicResource MaterialDesignLightSeparatorBackground}"
+                                        Margin="0,0,0,12"
+                                        ValueChanged="Offset_ValueChanged"/>
+
+                    <TextBlock Text="Y Offset (pixels):" Margin="0,0,0,3"/>
+                    <xctk:IntegerUpDown x:Name="YOffset" Minimum="0" Maximum="383" Value="0"
+                                        Background="{DynamicResource MaterialDesignLightSeparatorBackground}"
+                                        Margin="0,0,0,16"
+                                        ValueChanged="Offset_ValueChanged"/>
+
+                    <Button Content="Slice" Click="Slice_Click"
+                            Background="#FF673AB7" BorderBrush="#FF673AB7"
+                            Foreground="White"
+                            Style="{StaticResource MaterialDesignRaisedButton}"/>
+
+                    <Button Content="Clear Slices" Click="ClearSlices_Click" Margin="0,8,0,0"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"/>
+
+                    <CheckBox x:Name="HideGridLinesCheck"
+                              Content="Hide grid lines"
+                              Margin="0,12,0,0"
+                              Checked="HideGridLinesCheck_Changed"
+                              Unchecked="HideGridLinesCheck_Changed"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Status bar -->
+        <materialDesign:Snackbar Grid.Row="1"
+                                  x:Name="SlicerStatusBar"
+                                  MessageQueue="{materialDesign:MessageQueue}"
+                                  IsActive="False"
+                                  HorizontalAlignment="Stretch"
+                                  Height="30"
+                                  Padding="0,-20,0,0"
+                                  Margin="0,0,0,4"/>
+
+        <!-- Sliced sprites output -->
+        <GroupBox Grid.Row="2">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Sliced Sprites - " VerticalAlignment="Center"/>
+                    <TextBlock x:Name="SliceCountLabel" Text="0 sprites" VerticalAlignment="Center"/>
+                    <TextBlock Text=" - Drag a tile onto a sheet slot to insert from that position"
+                               VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
+                    <TextBlock Text="   Tile Size:" VerticalAlignment="Center" Margin="10,0,5,0" FontSize="11"/>
+                    <Slider x:Name="TileZoomSlider"
+                            Minimum="0.5" Maximum="4" Value="1" Width="80"
+                            VerticalAlignment="Center" SmallChange="0.25" LargeChange="0.5"
+                            ValueChanged="TileZoomSlider_ValueChanged"/>
+                    <TextBlock x:Name="TileZoomLabel" Text="1.0x"
+                               VerticalAlignment="Center" Margin="4,0,0,0" FontSize="11" Width="30"/>
+                </StackPanel>
+            </GroupBox.Header>
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <WrapPanel x:Name="SlicedSpritesPanel" Background="#FFEAEAEA" Margin="2"/>
+            </ScrollViewer>
+        </GroupBox>
+    </Grid>
+</Window>
